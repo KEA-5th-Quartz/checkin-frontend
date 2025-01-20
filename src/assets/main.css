@@ -57,6 +57,9 @@ body {
   .sidebar-li {
     @apply flex items-center py-[18px] gap-[30px];
   }
+  .sidebar-active {
+    @apply absolute -left-16 w-2 h-full bg-gradient-to-b from-[#7E73FF] to-[#5B4DFF];
+  }
 
   /* 담당자 */
   .manager-header-title {
