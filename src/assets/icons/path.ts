@@ -4,7 +4,7 @@ import { IconPathTypes } from '@/types/icon';
 export const DashboardIcon: IconPathTypes = {
   path: 'M16 2V4H12V2H16ZM6 2V8H2V2H6ZM16 10V16H12V10H16ZM6 14V16H2V14H6ZM18 0H10V6H18V0ZM8 0H0V10H8V0ZM18 8H10V18H18V8ZM8 12H0V18H8V12Z',
   fill: 'white',
-  width: 18,
+  width: 22,
   height: 18,
 };
 
@@ -12,7 +12,7 @@ export const DashboardIcon: IconPathTypes = {
 export const TimelineIcon: IconPathTypes = {
   path: 'M16 1.77632H15V0H13V1.77632H5V0H3V1.77632H2C0.9 1.77632 0 2.57566 0 3.55263V15.9868C0 16.9638 0.9 17.7632 2 17.7632H16C17.1 17.7632 18 16.9638 18 15.9868V3.55263C18 2.57566 17.1 1.77632 16 1.77632ZM16 15.9868H2V7.10526H16V15.9868ZM2 5.32895V3.55263H16V5.32895H2ZM7.56 14.6191L13.49 9.3523L12.43 8.41086L7.56 12.7362L5.45 10.8622L4.39 11.8036L7.56 14.6191Z',
   fill: 'white',
-  width: 18,
+  width: 22,
   height: 18,
 };
 
@@ -25,7 +25,7 @@ export const StatisticIcon: IconPathTypes = {
     'M12 19C12 19.5523 12.4477 20 13 20C13.5523 20 14 19.5523 14 19V5C14 4.44772 13.5523 4 13 4C12.4477 4 12 4.44772 12 5V19Z',
   ],
   fill: '#FEFEFE',
-  width: 14,
+  width: 22,
   height: 20,
 };
 
@@ -45,5 +45,37 @@ export const LogoutIcon: IconPathTypes = {
   path: 'M2.66667 21.3158C1.93333 21.3158 1.30578 21.0841 0.784 20.6207C0.262222 20.1572 0.000888889 19.5995 0 18.9474V2.36842C0 1.71711 0.261333 1.15974 0.784 0.696316C1.30667 0.232895 1.93422 0.000789474 2.66667 0H12V2.36842H2.66667V18.9474H12V21.3158H2.66667ZM17.3333 16.5789L15.5 14.8618L18.9 11.8421H8V9.47368H18.9L15.5 6.45395L17.3333 4.73684L24 10.6579L17.3333 16.5789Z',
   fill: 'white',
   width: 24,
+  height: 22,
+};
+
+// 집 아이콘
+export const HomeIcon: IconPathTypes = {
+  path: 'M6 19h3v-6h6v6h3v-9l-6-4.5L6 10zm-2 2V9l8-6l8 6v12h-7v-6h-2v6zm8-8.75',
+  fill: 'white',
+  width: 22,
+  height: 22,
+};
+
+// 회원 아이콘
+export const MemberIcon: IconPathTypes = {
+  path: 'M5.5 7a3 3 0 1 1 6 0a3 3 0 0 1-6 0m3-5a5 5 0 1 0 0 10a5 5 0 0 0 0-10m7 0h-1v2h1a3 3 0 1 1 0 6h-1v2h1a5 5 0 0 0 0-10M0 19a5 5 0 0 1 5-5h7a5 5 0 0 1 5 5v2h-2v-2a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v2H0zm24 0a5 5 0 0 0-5-5h-1v2h1a3 3 0 0 1 3 3v2h2z',
+  fill: 'white',
+  width: 22,
+  height: 22,
+};
+
+// 카테고리 아이콘
+export const CategoryIcon: IconPathTypes = {
+  path: 'M7 9V7h14v2zm0 4v-2h14v2zm0 4v-2h14v2zM4 9q-.425 0-.712-.288T3 8t.288-.712T4 7t.713.288T5 8t-.288.713T4 9m0 4q-.425 0-.712-.288T3 12t.288-.712T4 11t.713.288T5 12t-.288.713T4 13m0 4q-.425 0-.712-.288T3 16t.288-.712T4 15t.713.288T5 16t-.288.713T4 17',
+  fill: 'white',
+  width: 22,
+  height: 22,
+};
+
+// 생성 아이콘
+export const CreateIcon: IconPathTypes = {
+  path: 'M0 2.5C0 1.11929 1.11929 0 2.5 0H17.5C18.8807 0 20 1.11929 20 2.5V17.5C20 18.8807 18.8807 20 17.5 20H2.5C1.11929 20 0 18.8807 0 17.5V2.5ZM10.5 3.5C11.0523 3.5 11.5 3.94772 11.5 4.5V8.5H15.5C16.0523 8.5 16.5 8.94772 16.5 9.5V10.5C16.5 11.0523 16.0523 11.5 15.5 11.5H11.5V15.5C11.5 16.0523 11.0523 16.5 10.5 16.5H9.5C8.94772 16.5 8.5 16.0523 8.5 15.5V11.5H4.5C3.94772 11.5 3.5 11.0523 3.5 10.5V9.5C3.5 8.94772 3.94772 8.5 4.5 8.5H8.5V4.5C8.5 3.94772 8.94772 3.5 9.5 3.5H10.5Z',
+  fill: 'white',
+  width: 22,
   height: 22,
 };

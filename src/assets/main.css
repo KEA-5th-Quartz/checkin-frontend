@@ -24,7 +24,8 @@ body {
 
   /* 사이드바 */
   .sidebar-nav-container {
-    @apply fixed left-0 right-0 flex flex-col gap-12 w-[15%] h-full bg-blue-0 rounded-r-[49px];
+    @apply fixed left-0 right-0 flex flex-col gap-12 w-72 h-full rounded-r-[49px] 
+    bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
     @apply text-white-0 font-extrabold text-2xl mt-24;
@@ -36,10 +37,10 @@ body {
     @apply font-semibold text-white-0;
   }
   .sidebar-ul {
-    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-6;
+    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-16;
   }
   .sidebar-li {
-    @apply flex items-center py-[18px] gap-2;
+    @apply flex items-center py-[18px] gap-[30px];
   }
 
   /* 담당자 */
