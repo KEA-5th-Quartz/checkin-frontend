@@ -33,6 +33,7 @@ const config: Config = {
           2: '#D7E2FF',
           3: '#3570FF',
           4: '#48C5FF',
+          5: '#D5E2F2',
         },
         white: {
           0: '#FFFFFF',
@@ -44,6 +45,7 @@ const config: Config = {
           1: '#5D5D9D',
           2: '#7E73FF',
           3: '#5B4DFF',
+          4: '#F3F9FF',
         },
         red: {
           0: '#FFCCCC',
