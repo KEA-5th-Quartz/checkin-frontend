@@ -21,4 +21,26 @@ body {
   .flex-center {
     @apply flex justify-center items-center;
   }
+
+  /* 사이드바 */
+  .sidebar-nav-container {
+    @apply fixed left-0 right-0 flex flex-col gap-12 w-[15%] h-full bg-blue-0 rounded-r-[49px];
+  }
+  .sidebar-logo {
+    @apply text-white-0 font-extrabold text-2xl mt-24;
+  }
+  .sidebar-profile {
+    @apply flex flex-col items-center gap-5 w-full;
+  }
+  .sidebar-p {
+    @apply font-semibold text-white-0;
+  }
+  .sidebar-ul {
+    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-6;
+  }
+  .sidebar-li {
+    @apply flex items-center py-[18px] gap-2;
+  }
+
+  /* 담당자 */
 }

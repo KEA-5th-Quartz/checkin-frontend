@@ -10,7 +10,7 @@ export interface IconPathTypes {
   fill: string;
   width: number;
   height: number;
-  options: IconOptions;
+  options?: IconOptions;
 }
 
 export interface IconProps {
@@ -19,7 +19,7 @@ export interface IconProps {
     fill: string;
     width: number;
     height: number;
-    options: {
+    options?: {
       stroke?: string;
       strokeWidth?: number | string;
       strokeLinecap?: 'round' | 'butt' | 'square';
