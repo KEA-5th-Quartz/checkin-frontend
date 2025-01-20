@@ -65,7 +65,7 @@ body {
 
   /* 담당자 헤더 */
   .manager-header-section {
-    @apply flex justify-center gap-14 mt-[70px] w-full;
+    @apply flex justify-center gap-14 mt-[70px] w-full px-2;
   }
   .manager-header-card {
     @apply flex-center gap-6 pr-[70px] border-r;
@@ -89,4 +89,16 @@ body {
   }
 
   /* 대시보드 */
+  .manager-thead {
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium;
+  }
+  .manager-th {
+    @apply text-black-2 font-medium px-4 py-3.5;
+  }
+  .manager-td {
+    @apply text-center px-4 py-3.5 text-sm text-gray-0 border-b border-gray-2 cursor-pointer;
+  }
+  .manager-none-td {
+    @apply manager-td border-none cursor-default;
+  }
 }

@@ -3,6 +3,7 @@ import { ArrowDownIcon, FilterIcon, SearchIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { PageOption } from '@/types/manager';
 import { ref } from 'vue';
+import { onClickOutside } from '@vueuse/core';
 
 const perPageOptions = [
   { id: 1, value: 10, label: '10개' },
@@ -12,6 +13,9 @@ const perPageOptions = [
 
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
+const dropdownRef = ref<HTMLElement | null>(null);
+
+onClickOutside(dropdownRef, () => (isOpen.value = false));
 
 const selectOption = (option: PageOption) => {
   selectedPerPage.value = option;
@@ -29,7 +33,7 @@ const selectOption = (option: PageOption) => {
 
     <!-- 필터 -->
     <div class="flex gap-10">
-      <div class="relative mt-1">
+      <div ref="dropdownRef" class="relative mt-1">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
           <SvgIcon :icon="ArrowDownIcon" />

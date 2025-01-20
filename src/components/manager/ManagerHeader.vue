@@ -67,7 +67,7 @@ import SvgIcon from '../common/SvgIcon.vue';
         <SvgIcon :icon="BookmarkIcon" />
       </div>
       <div>
-        <p class="manager-header-title">오늘 마감</p>
+        <p class="manager-header-title">나의 티켓 수</p>
         <div class="flex items-end">
           <span class="text-black-0 text-2xl pr-2">55 / 187</span>
         </div>
