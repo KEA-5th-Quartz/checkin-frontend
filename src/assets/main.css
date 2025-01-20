@@ -60,6 +60,33 @@ body {
 
   /* 담당자 */
   .manager-header-title {
-    @apply text-gray-1 pb-1.5;
+    @apply text-gray-1 pb-1.5 whitespace-nowrap;
   }
+
+  /* 담당자 헤더 */
+  .manager-header-section {
+    @apply flex justify-center gap-14 mt-[70px] w-full;
+  }
+  .manager-header-card {
+    @apply flex-center gap-6 pr-[70px] border-r;
+  }
+  .manager-header-card-icon {
+    @apply flex-center min-w-[60px] min-h-[60px] bg-primary-5 rounded-full;
+  }
+
+  /* 담당자 검색/필터 */
+  .manager-search-div {
+    @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-2 rounded;
+  }
+  .manager-search-input {
+    @apply w-full bg-none placeholder:text-gray-1 pl-4 py-3 focus:outline-none;
+  }
+  .manager-filter-btn {
+    @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded;
+  }
+  .manager-filter-menu {
+    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded shadow-md;
+  }
+
+  /* 대시보드 */
 }
