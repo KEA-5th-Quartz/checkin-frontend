@@ -1,0 +1,47 @@
+[
+  {
+    "name": "🐛 bug",
+    "color": "d73a4a",
+    "description": "버그가 발생했을 때"
+  },
+  {
+    "name": "✨ feature",
+    "color": "0075ca",
+    "description": "새로운 기능 추가"
+  },
+  {
+    "name": "🎨 ui",
+    "color": "ff77ff",
+    "description": "UI/UX 개선"
+  },
+  {
+    "name": "🔥 critical",
+    "color": "b60205",
+    "description": "긴급한 수정이 필요한 경우"
+  },
+  {
+    "name": "📝 docs",
+    "color": "0075ca",
+    "description": "문서 수정"
+  },
+  {
+    "name": "💫 enhancement",
+    "color": "a2eeef",
+    "description": "기능 개선"
+  },
+  {
+    "name": "❓ question",
+    "color": "d876e3",
+    "description": "더 많은 정보가 필요한 경우"
+  },
+  {
+    "name": "🏃 in progress",
+    "color": "fbca04",
+    "description": "작업 진행 중"
+  },
+  {
+    "name": "🔖 wontfix",
+    "color": "ffffff",
+    "description": "작업하지 않기로 결정"
+  }
+]
