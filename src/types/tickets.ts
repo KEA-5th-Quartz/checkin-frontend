@@ -14,10 +14,10 @@ export interface StatusTicketOption extends BaseTicketOption {
   text: string;
 }
 
-export interface DropdownProps<T extends BaseTicketOption> {
-  options: T[];
-  selectedOption: T;
+export interface DropdownProps {
+  options: BaseTicketOption[];
+  selectedOption: BaseTicketOption;
   label: string;
   hasColor?: boolean;
-  onOptionSelect?: (option: T) => void;
+  onOptionSelect?: (option: BaseTicketOption) => void;
 }

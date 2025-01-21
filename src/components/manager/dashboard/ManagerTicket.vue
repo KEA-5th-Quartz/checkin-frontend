@@ -10,7 +10,7 @@ import { priority, status, firstCategory, secondCategory, managerOptions } from 
 defineProps<{
   ticketId: number;
 }>();
-// 'close'라는 이벤트를 방출할 수 있는 emit 함수 정의
+// close라는 이벤트를 방출할 수 있는 emit 함수를 정의
 const emit = defineEmits<{
   (e: 'close'): void; // void는 이벤트가 데이터를 전달하지 않음을 의미
 }>();
@@ -79,8 +79,8 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 label="중요도"
                 :options="priority"
                 :selected-option="prioritySelected"
-                :onOptionSelect="handlePrioritySelect"
-                @select="(option: StatusTicketOption) => prioritySelected = option"
+                :onOptionSelect="(option) => handlePrioritySelect(option as StatusTicketOption)"
+                @select="(option) => prioritySelected = option as StatusTicketOption"
                 has-color
               />
               <!-- 1차 카테고리 블록 -->
@@ -89,7 +89,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="firstCategory"
                 :selected-option="firstCategorySelected"
                 :onOptionSelect="handleFirstCategorySelect"
-                @select="(option:BaseTicketOption ) => (firstCategorySelected = option)"
+                @select="(option) => (firstCategorySelected = option)"
                 class="mt-[18px]"
               />
               <!-- 요청자 블록 -->
@@ -114,8 +114,8 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 label="진행상태"
                 :options="status"
                 :selected-option="statusSelected"
-                :onOptionSelect="handleStatusSelect"
-                @select="(option:StatusTicketOption) => (statusSelected = option)"
+                :onOptionSelect="(option) => handleStatusSelect(option as StatusTicketOption)"
+                @select="(option) => statusSelected = option as StatusTicketOption"
                 has-color
               />
               <!-- 2차 카테고리 블록 -->
@@ -124,7 +124,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="secondCategory"
                 :selected-option="secondCategorySelected"
                 :onOptionSelect="handleSecondCategorySelect"
-                @select="(option:BaseTicketOption) => (secondCategorySelected = option)"
+                @select="(option) => (secondCategorySelected = option)"
                 class="mt-[18px]"
               />
               <!-- 담당자 블록 -->
@@ -133,7 +133,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="managerOptions"
                 :selected-option="managerSelected"
                 :onOptionSelect="handleManagerSelect"
-                @select="(option:BaseTicketOption) => (managerSelected = option)"
+                @select="(option) => (managerSelected = option)"
                 class="mt-7"
               />
               <!-- 마감 기한 블록 -->
