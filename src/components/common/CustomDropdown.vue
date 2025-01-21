@@ -60,12 +60,12 @@ onUnmounted(() => {
     <button
       @click.stop="toggleDropdown"
       :class="[
-        'w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors duration-200',
-        hasColor ? 'inline-flex items-center gap-2' : 'border border-primary-2 hover:border-primary-4',
+        'w-full flex items-center justify-between px-3  rounded-lg transition-colors duration-200',
+        hasColor ? 'inline-flex items-center gap-2 py-1' : 'border border-primary-2 hover:border-primary-4 py-2',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
     >
-      <span :class="['text-sm', hasColor ? '' : 'text-gray-1']">
+      <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1']">
         {{ selectedOption.label }}
       </span>
       <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />

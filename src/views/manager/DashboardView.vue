@@ -5,7 +5,7 @@ import ManagerBoard from '@/components/manager/ManagerBoard.vue';
 </script>
 
 <template>
-  <article class="max-w-[1600px] mx-auto">
+  <article class="mx-auto">
     <ManagerHeader />
     <ManagerSearchFilter />
     <ManagerBoard />

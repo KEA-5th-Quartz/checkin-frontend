@@ -1,5 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ManagerStatistic from '@/components/manager/ManagerStatistic.vue';
+</script>
 
 <template>
-  <div>담당자 통계</div>
+  <article class="mx-auto">
+    <ManagerStatistic />
+  </article>
 </template>
