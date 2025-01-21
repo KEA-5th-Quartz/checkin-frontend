@@ -2,6 +2,8 @@
 
 ## 프로젝트 소개
 - 카카오엔터프라이즈 5기 기업 실무 프로젝트에서 진행하는 협업 프로젝트입니다.
+- TMS(Ticket Management System)을 개발합니다.
+- 
 
 #### 서비스 배포 주소
 - 
@@ -17,7 +19,7 @@
 |<img src="https://github.com/user-attachments/assets/3ae3d63a-3706-4aa2-9ff0-8db94d661436" width="150px" height="200px" />|<img src="https://github.com/user-attachments/assets/0701bd84-45bc-4391-9b06-16cf6d8d9468" width="150px" height="200px" />|<img src="https://github.com/user-attachments/assets/d0908b15-9ffe-45d2-acc4-7528227d444c" width="150px" height="200px" />|
 |:---:|:---:|:---:|
 |**김현중(PL)**|**박석종**|**박준한**|
-|Frontend Developer|Frontend Developer|Frontend Designer|
+|Frontend Developer|Frontend Developer|Frontend Developer|
 |[GitHub](https://github.com/kimgorok) | [GitHub](https://github.com/PSeokJong) | [GitHub](https://github.com/viola30th)|
 
 ## 🛠️ 기술 스택
