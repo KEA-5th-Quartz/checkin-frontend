@@ -1,48 +1,8 @@
 <script setup lang="ts">
+import PriorityBadge from '../common/Badges/PriorityBadge.vue';
+import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { tableDataTest } from './dashboardTest';
-
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case '생성':
-      return 'bg-gray-4 text-gray-0';
-    case '진행중':
-      return 'bg-primary-2 text-primary-3';
-    case '완료':
-      return 'bg-green-0 text-green-1';
-    default:
-      return '';
-  }
-};
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case '긴급':
-      return {
-        dot: 'bg-red-1',
-        text: 'text-red-1',
-      };
-    case '높음':
-      return {
-        dot: 'bg-orange-1',
-        text: 'text-orange-1',
-      };
-    case '보통':
-      return {
-        dot: 'bg-green-1',
-        text: 'text-green-1',
-      };
-    case '낮음':
-      return {
-        dot: 'bg-green-1',
-        text: 'text-green-1',
-      };
-    default:
-      return {
-        dot: '',
-        text: '',
-      };
-  }
-};
+import ManagerTicket from './ManagerTicket.vue';
 </script>
 
 <template>
@@ -84,9 +44,7 @@ const getPriorityColor = (priority: string) => {
             </p>
           </td>
           <td class="manager-td text-center">
-            <span :class="['px-2 py-1 text-xs font-medium rounded-full', getStatusClass(item.status)]">
-              {{ item.status }}
-            </span>
+            <StatusBadge :status="item.status" size="md" />
           </td>
           <td class="manager-td">
             <div class="flex items-center gap-2 ml-4">
@@ -100,13 +58,7 @@ const getPriorityColor = (priority: string) => {
             </p>
           </td>
           <td class="manager-td pr-6">
-            <div v-if="item.priority" class="flex-center gap-2">
-              <div :class="[`w-2 h-2 rounded-full ${getPriorityColor(item.priority).dot}`]"></div>
-              <span :class="['text-sm', getPriorityColor(item.priority).text]">
-                {{ item.priority }}
-              </span>
-            </div>
-            <div v-else class="text-center">-</div>
+            <PriorityBadge :priority="item.priority" size="md" />
           </td>
         </tr>
         <!-- 빈 행 추가 (10 - 실제 데이터 수) -->
@@ -124,5 +76,7 @@ const getPriorityColor = (priority: string) => {
     </table>
 
     <div>페이지네이션</div>
+
+    <ManagerTicket />
   </section>
 </template>
