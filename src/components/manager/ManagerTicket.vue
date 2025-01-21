@@ -51,8 +51,8 @@ const handleManagerSelect = (option: BaseTicketOption) => {
 
     <div class="mt-6">
       <div class="flex gap-2.5 w-full">
-        <!-- 왼쪽 블록 -->
-        <div class="flex flex-col w-full">
+        <!-- 왼쪽 섹션 -->
+        <section class="flex flex-col w-full">
           <!-- 중요도 블록 -->
           <CustomDropdown
             label="중요도"
@@ -62,18 +62,15 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             @select="(option: StatusTicketOption) => prioritySelected = option"
             has-color
           />
-
           <!-- 1차 카테고리 블록 -->
-          <div class="relative mt-[18px]">
-            <CustomDropdown
-              label="1차 카테고리"
-              :options="firstCategory"
-              :selected-option="firstCategorySelected"
-              :onOptionSelect="handleFirstCategorySelect"
-              @select="(option) => (firstCategorySelected = option)"
-            />
-          </div>
-
+          <CustomDropdown
+            label="1차 카테고리"
+            :options="firstCategory"
+            :selected-option="firstCategorySelected"
+            :onOptionSelect="handleFirstCategorySelect"
+            @select="(option) => (firstCategorySelected = option)"
+            class="mt-[18px]"
+          />
           <!-- 요청자 블록 -->
           <div class="mt-7">
             <p class="text-sm pb-2">요청자</p>
@@ -87,10 +84,10 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <p class="text-sm pb-2">요청 일자</p>
             <p class="text-xs text-blue-1">2025/01/20</p>
           </div>
-        </div>
+        </section>
 
-        <!-- 오른쪽 블록 -->
-        <div class="flex flex-col w-full">
+        <!-- 오른쪽 섹션 -->
+        <section class="flex flex-col w-full">
           <!-- 진행상태 블록 -->
           <CustomDropdown
             label="진행상태"
@@ -123,7 +120,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <p class="text-sm pb-2">마감 기한</p>
             <p class="text-xs text-blue-1">2025/01/20</p>
           </div>
-        </div>
+        </section>
       </div>
 
       <!-- 설명 -->
