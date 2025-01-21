@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full min-h-screen">
     <CommonSidebar />
-    <main class="flex-1 ml-72">
+    <main class="flex-1 ml-48 lg:ml-64">
       <router-view />
     </main>
   </div>

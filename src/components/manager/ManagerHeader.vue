@@ -13,8 +13,8 @@ import SvgIcon from '../common/SvgIcon.vue';
       <div>
         <p class="manager-header-title">오늘 마감</p>
         <div class="flex items-end">
-          <span class="text-black-0 text-2xl pr-2">5</span>
-          <span class="text-black-0">개</span>
+          <span class="manager-header-card-span">5</span>
+          <span>개</span>
         </div>
       </div>
     </div>
@@ -27,8 +27,8 @@ import SvgIcon from '../common/SvgIcon.vue';
       <div>
         <p class="manager-header-title">생성</p>
         <div class="flex items-end">
-          <span class="text-black-0 text-2xl pr-2">6</span>
-          <span class="text-black-0">개</span>
+          <span class="manager-header-card-span">6</span>
+          <span>개</span>
         </div>
       </div>
     </div>
@@ -41,8 +41,8 @@ import SvgIcon from '../common/SvgIcon.vue';
       <div>
         <p class="manager-header-title">진행중</p>
         <div class="flex items-end">
-          <span class="text-black-0 text-2xl pr-2">18</span>
-          <span class="text-black-0">개</span>
+          <span class="manager-header-card-span">18</span>
+          <span>개</span>
         </div>
       </div>
     </div>
@@ -55,8 +55,8 @@ import SvgIcon from '../common/SvgIcon.vue';
       <div>
         <p class="manager-header-title">완료</p>
         <div class="flex items-end">
-          <span class="text-black-0 text-2xl pr-2">5</span>
-          <span class="text-black-0">개</span>
+          <span class="manager-header-card-span">5</span>
+          <span>개</span>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@ import SvgIcon from '../common/SvgIcon.vue';
       <div>
         <p class="manager-header-title">나의 티켓 수</p>
         <div class="flex items-end">
-          <span class="text-black-0 text-2xl pr-2">55 / 187</span>
+          <span class="manager-header-card-span">55 / 187</span>
         </div>
       </div>
     </div>
