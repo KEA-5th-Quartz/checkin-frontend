@@ -11,9 +11,9 @@ body,
 }
 
 body {
-  overflow-x: hidden;
   background-color: #fafafa;
   min-width: 1024px;
+  overflow-x: auto;
 }
 
 /* 스크롤바 숨기기 */
@@ -82,7 +82,7 @@ body {
     @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-2 rounded;
   }
   .manager-search-input {
-    @apply w-full bg-none placeholder:text-gray-1 pl-4 py-3 focus:outline-none;
+    @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
   }
   .manager-filter-btn {
     @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded;

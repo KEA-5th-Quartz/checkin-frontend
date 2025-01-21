@@ -60,7 +60,10 @@ const userNavItems = [
         v-slot="{ isActive, navigate }"
       >
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
-          <div v-if="isActive" class="sidebar-active" />
+          <div
+            class="sidebar-active"
+            :class="{ 'translate-x-0 opacity-100': isActive, '-translate-x-full opacity-0': !isActive }"
+          />
           <SvgIcon :icon="item.icon" />
           {{ item.name }}
         </li>
@@ -100,3 +103,9 @@ const userNavItems = [
     </button>
   </nav>
 </template>
+
+<style scoped>
+.sidebar-active {
+  transition: all 0.6s ease;
+}
+</style>

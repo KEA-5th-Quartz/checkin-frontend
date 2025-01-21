@@ -22,11 +22,12 @@ const handleCloseModal = () => {
       <table class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th text-start w-[25%] pl-6">제목</th>
+            <th class="manager-th w-[5%] pl-6">번호</th>
+            <th class="manager-th text-start w-[25%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
-            <th class="manager-th w-[10%]">2차 카테고리</th>
+            <th class="manager-th w-[7.5%]">2차 카테고리</th>
             <th class="manager-th w-[25%]">설명</th>
-            <th class="manager-th w-[10%]">진행 상태</th>
+            <th class="manager-th w-[7.5%]">진행 상태</th>
             <th class="manager-th w-[10%]">담당자</th>
             <th class="manager-th w-[5%]">마감기한</th>
             <th class="manager-th w-[5%] pr-6">중요도</th>
@@ -35,7 +36,12 @@ const handleCloseModal = () => {
 
         <tbody class="whitespace-nowrap">
           <tr v-for="item in tableDataTest" :key="item.id" class="hover:bg-white-1" @click="handleRowClick(item.id)">
-            <td class="manager-td max-w-0 text-start pl-6">
+            <td class="manager-td max-w-0 pl-6">
+              <p :title="item.id as unknown as string">
+                {{ item.id }}
+              </p>
+            </td>
+            <td class="manager-td max-w-0 text-start">
               <p class="truncate" :title="item.title">
                 {{ item.title }}
               </p>

@@ -34,6 +34,7 @@ const chartOptions = ref({
     },
   },
   grid: {
+    show: false,
     // padding 대신 grid 사용
     padding: {
       top: 0,
@@ -46,6 +47,8 @@ const chartOptions = ref({
     bar: {
       horizontal: true,
       barHeight: '80%',
+      endingShape: 'rounded',
+      borderRadius: 14,
     },
   },
   dataLabels: {
@@ -61,7 +64,8 @@ const chartOptions = ref({
   },
   title: {
     text: '담당자별 티켓 상태',
-    margin: 40, // 제목 여백 추가
+    offsetX: 40,
+    offsetY: 40,
   },
   xaxis: {
     categories: ['김철환', '김현중', '박가현', '박석종', '박준한', '손성민', '임찬호', '조기헌', '최현준'],
@@ -69,6 +73,10 @@ const chartOptions = ref({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    markers: {
+      radius: 12, // 마커의 크기
+      shape: 'circle', // 마커를 원형으로 설정
+    },
   },
   colors: ['#232D64', '#828DCA', '#D7DCF5', '#EBEDF8'],
 });
@@ -76,7 +84,7 @@ const chartOptions = ref({
 
 <template>
   <section class="overflow-x-auto mt-5 p-5 pb-20">
-    <div class="bg-white-0 w-full h-[704px]">
+    <div class="bg-white-0 w-full h-[704px] rounded-[20px] shadow-md">
       <apexchart type="bar" height="500" :options="chartOptions" :series="series" />
     </div>
   </section>
