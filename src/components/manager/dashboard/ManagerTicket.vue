@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
-import SvgIcon from '../common/SvgIcon.vue';
-import StatusBadge from '../common/Badges/StatusBadge.vue';
+import SvgIcon from '../../common/SvgIcon.vue';
+import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import { ref } from 'vue';
-import CustomDropdown from '../common/CustomDropdown.vue';
+import CustomDropdown from '../../common/CustomDropdown.vue';
 import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
-import { priority, status, firstCategory, secondCategory, managerOptions } from './ticketOptionTest';
+import { priority, status, firstCategory, secondCategory, managerOptions } from '../ticketOptionTest';
 
 defineProps<{
   ticketId: number;
@@ -89,7 +89,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="firstCategory"
                 :selected-option="firstCategorySelected"
                 :onOptionSelect="handleFirstCategorySelect"
-                @select="(option) => (firstCategorySelected = option)"
+                @select="(option:BaseTicketOption ) => (firstCategorySelected = option)"
                 class="mt-[18px]"
               />
               <!-- 요청자 블록 -->
@@ -115,7 +115,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="status"
                 :selected-option="statusSelected"
                 :onOptionSelect="handleStatusSelect"
-                @select="(option) => (statusSelected = option)"
+                @select="(option:StatusTicketOption) => (statusSelected = option)"
                 has-color
               />
               <!-- 2차 카테고리 블록 -->
@@ -124,7 +124,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="secondCategory"
                 :selected-option="secondCategorySelected"
                 :onOptionSelect="handleSecondCategorySelect"
-                @select="(option) => (secondCategorySelected = option)"
+                @select="(option:BaseTicketOption) => (secondCategorySelected = option)"
                 class="mt-[18px]"
               />
               <!-- 담당자 블록 -->
@@ -133,7 +133,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :options="managerOptions"
                 :selected-option="managerSelected"
                 :onOptionSelect="handleManagerSelect"
-                @select="(option) => (managerSelected = option)"
+                @select="(option:BaseTicketOption) => (managerSelected = option)"
                 class="mt-7"
               />
               <!-- 마감 기한 블록 -->

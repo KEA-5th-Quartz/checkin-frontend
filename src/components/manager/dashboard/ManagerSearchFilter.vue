@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ArrowDownIcon, FilterIcon, SearchIcon } from '@/assets/icons/path';
-import SvgIcon from '@/components/common/SvgIcon.vue';
-import { PageOption } from '@/types/manager';
+import { ArrowDownIcon, FilterIcon, SearchIcon } from '../../../assets/icons/path';
+import SvgIcon from '../../common/SvgIcon.vue';
+import { PageOption } from '../../../types/manager';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 

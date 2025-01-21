@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import PriorityBadge from '../common/Badges/PriorityBadge.vue';
-import StatusBadge from '../common/Badges/StatusBadge.vue';
-import { tableDataTest } from './dashboardTest';
+import PriorityBadge from '../../common/Badges/PriorityBadge.vue';
+import StatusBadge from '../../common/Badges/StatusBadge.vue';
+import { tableDataTest } from '../dashboardTest';
 import ManagerTicket from './ManagerTicket.vue';
 
 const selectedTicketId = ref<number | null>(null);
