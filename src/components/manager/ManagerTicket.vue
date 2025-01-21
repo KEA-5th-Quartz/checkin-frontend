@@ -5,11 +5,34 @@ import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
-export interface TestTicketOption {
+export interface BaseTicketOption {
   id: number;
   value: string;
   label: string;
 }
+
+export interface TestTicketOption extends BaseTicketOption {
+  bg?: string;
+  text?: string;
+}
+
+export interface StatusTicketOption extends BaseTicketOption {
+  bg: string;
+  text: string;
+}
+
+const priority: StatusTicketOption[] = [
+  { id: 1, value: '긴급', label: '긴급', bg: 'bg-red-0', text: 'text-red-1' },
+  { id: 2, value: '높음', label: '높음', bg: 'bg-orange-0', text: 'text-orange-1' },
+  { id: 3, value: '보통', label: '보통', bg: 'bg-green-0', text: 'text-green-1' },
+  { id: 4, value: '낮음', label: '낮음', bg: 'bg-blue-4', text: 'text-blue-2' },
+];
+
+const status: StatusTicketOption[] = [
+  { id: 1, value: '생성', label: '생성', bg: 'bg-gray-4', text: 'text-gray-0' },
+  { id: 2, value: '진행중', label: '진행중', bg: 'bg-blue-4', text: 'text-blue-2' },
+  { id: 3, value: '완료', label: '완료', bg: 'bg-green-0', text: 'text-green-1' },
+];
 
 const firstCategory = [
   { id: 1, value: 'VM1', label: 'VM1' },
@@ -35,6 +58,16 @@ const managerOptions = [
   { id: 9, value: '최현준', label: '최현준' },
 ];
 
+// 중요도
+const prioritySelected = ref<StatusTicketOption>(priority[0]);
+const isPriorityOpen = ref(false);
+const priorityDropdownRef = ref<HTMLElement | null>(null);
+
+// 진행상태
+const statusSelected = ref<StatusTicketOption>(status[0]);
+const isStatusOpen = ref(false);
+const statusDropdownRef = ref<HTMLElement | null>(null);
+
 // 1차 카테고리
 const firstCategorySelected = ref(firstCategory[0]);
 const isFirstCategoryOpen = ref(false);
@@ -49,6 +82,22 @@ const secondCategoryDropdownRef = ref<HTMLElement | null>(null);
 const managerSelected = ref(managerOptions[0]);
 const isManagerOpen = ref(false);
 const managerDropdownRef = ref<HTMLElement | null>(null);
+
+// 중요도 이벤트
+onClickOutside(priorityDropdownRef, () => (isPriorityOpen.value = false));
+
+const prioritySelectOption = (option: StatusTicketOption) => {
+  prioritySelected.value = option;
+  isPriorityOpen.value = false;
+};
+
+// 진행상태 이벤트
+onClickOutside(statusDropdownRef, () => (isStatusOpen.value = false));
+
+const statusSelectOption = (option: StatusTicketOption) => {
+  statusSelected.value = option;
+  isStatusOpen.value = false;
+};
 
 // 1차 카테고리 이벤트
 onClickOutside(firstCategoryDropdownRef, () => (isFirstCategoryOpen.value = false));
@@ -87,12 +136,37 @@ const managerSelectOption = (option: TestTicketOption) => {
         <!-- 왼쪽 블록 -->
         <div class="flex flex-col w-full">
           <!-- 중요도 블록 -->
-          <div class="flex flex-col gap-3.5">
+          <div ref="priorityDropdownRef" class="flex flex-col gap-3.5 relative">
             <p class="text-sm">중요도</p>
-            <div class="flex items-center gap-1 ml-1.5 bg-red-0 text-red-1 rounded-md pl-3 pr-2 py-1 max-w-fit">
-              긴급 <SvgIcon :icon="ArrowDownIcon" />
+            <button
+              @click="isPriorityOpen = !isPriorityOpen"
+              class="flex items-center gap-1 ml-1.5 cursor-pointer max-w-fit rounded-md"
+              :class="[prioritySelected.bg, prioritySelected.text]"
+            >
+              <div class="rounded-md pl-3 pr-2 py-1 flex items-center gap-1">
+                {{ prioritySelected.label }}
+                <SvgIcon :icon="ArrowDownIcon" />
+              </div>
+            </button>
+
+            <div
+              v-if="isPriorityOpen"
+              class="absolute top-[72px] left-1 w-16 bg-white rounded-xl border border-primary-2 z-10 bg-white-0"
+            >
+              <ul>
+                <li
+                  v-for="option in priority"
+                  :key="option.id"
+                  @click="prioritySelectOption(option)"
+                  class="px-3 py-2 hover:bg-gray-3 cursor-pointer text-xs flex items-center gap-1"
+                  :class="option.text"
+                >
+                  {{ option.label }}
+                </li>
+              </ul>
             </div>
           </div>
+
           <!-- 1차 카테고리 블록 -->
           <div ref="firstCategoryDropdownRef" class="relative mt-[18px]">
             <p class="text-sm pb-1.5">1차 카테고리</p>
@@ -127,7 +201,7 @@ const managerSelectOption = (option: TestTicketOption) => {
             </div>
           </div>
           <!-- 요청 일자 블록 -->
-          <div class="mt-11">
+          <div class="mt-7">
             <p class="text-sm pb-2">요청 일자</p>
             <p class="text-xs text-blue-1">2025/01/20</p>
           </div>
@@ -135,13 +209,38 @@ const managerSelectOption = (option: TestTicketOption) => {
 
         <!-- 오른쪽 블록 -->
         <div class="flex flex-col w-full">
-          <!-- 중요도 블록 -->
-          <div class="flex flex-col gap-3.5">
+          <!-- 진행상태 블록 -->
+          <div ref="statusDropdownRef" class="flex flex-col gap-3.5 relative">
             <p class="text-sm">진행상태</p>
-            <div class="flex items-center gap-1 ml-1.5 bg-blue-4 text-blue-2 rounded-md pl-3 pr-2 py-1 max-w-fit">
-              진행중 <SvgIcon :icon="ArrowDownIcon" />
+            <button
+              @click="isStatusOpen = !isStatusOpen"
+              class="flex items-center gap-1 ml-1.5 cursor-pointer max-w-fit rounded-md"
+              :class="[statusSelected.bg, statusSelected.text]"
+            >
+              <div class="rounded-md pl-3 pr-2 py-1 flex items-center gap-1">
+                {{ statusSelected.label }}
+                <SvgIcon :icon="ArrowDownIcon" />
+              </div>
+            </button>
+
+            <div
+              v-if="isStatusOpen"
+              class="absolute top-[72px] left-1 w-16 bg-white rounded-xl border border-primary-2 z-10 bg-white-0"
+            >
+              <ul>
+                <li
+                  v-for="option in status"
+                  :key="option.id"
+                  @click="statusSelectOption(option)"
+                  class="px-3 py-2 hover:bg-gray-3 cursor-pointer text-xs flex items-center gap-1"
+                  :class="option.text"
+                >
+                  {{ option.label }}
+                </li>
+              </ul>
             </div>
           </div>
+
           <!-- 2차 카테고리 블록 -->
           <div ref="secondCategoryDropdownRef" class="relative mt-[18px]">
             <p class="text-sm pb-1.5">2차 카테고리</p>
@@ -166,6 +265,7 @@ const managerSelectOption = (option: TestTicketOption) => {
               </ul>
             </div>
           </div>
+
           <!-- 담당자 블록 -->
           <div ref="managerDropdownRef" class="relative mt-7">
             <p class="text-sm pb-1.5">담당자</p>
@@ -190,8 +290,9 @@ const managerSelectOption = (option: TestTicketOption) => {
               </ul>
             </div>
           </div>
+
           <!-- 마감 기한 블록 -->
-          <div class="mt-11">
+          <div class="mt-7">
             <p class="text-sm pb-2">마감 기한</p>
             <p class="text-xs text-blue-1">2025/01/20</p>
           </div>
