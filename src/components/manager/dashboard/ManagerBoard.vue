@@ -10,7 +10,6 @@ const selectedTicketId = ref<number | null>(null);
 const handleRowClick = (id: number) => {
   selectedTicketId.value = id;
 };
-
 const handleCloseModal = () => {
   selectedTicketId.value = null;
 };

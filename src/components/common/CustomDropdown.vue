@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import { ArrowDownIcon } from '@/assets/icons/path';
-import { BaseTicketOption, ColorOption, DropdownProps } from '@/types/tickets';
+import { BaseTicketOption, StatusTicketOption, DropdownProps } from '@/types/tickets';
 
 // withDefaults를 사용하여 props의 기본값 설정
 const props = withDefaults(defineProps<DropdownProps>(), {
@@ -40,7 +40,7 @@ const handleSelect = (option: BaseTicketOption) => {
 };
 
 // 타입 가드(주어진 옵션이 ColorOption타입인지 확인)
-const hasColorStyle = (option: BaseTicketOption | null | undefined): option is ColorOption => {
+const hasColorStyle = (option: BaseTicketOption | null | undefined): option is StatusTicketOption => {
   return option != null && 'bg' in option && 'text' in option;
 };
 
