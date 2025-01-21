@@ -1,8 +1,19 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { tableDataTest } from './dashboardTest';
 import ManagerTicket from './ManagerTicket.vue';
+
+const selectedTicketId = ref<number | null>(null);
+
+const handleRowClick = (id: number) => {
+  selectedTicketId.value = id;
+};
+
+const handleCloseModal = () => {
+  selectedTicketId.value = null;
+};
 </script>
 
 <template>
@@ -23,7 +34,7 @@ import ManagerTicket from './ManagerTicket.vue';
         </thead>
 
         <tbody class="whitespace-nowrap">
-          <tr v-for="item in tableDataTest" :key="item.id" class="hover:bg-white-1">
+          <tr v-for="item in tableDataTest" :key="item.id" class="hover:bg-white-1" @click="handleRowClick(item.id)">
             <td class="manager-td max-w-0 text-start pl-6">
               <p class="truncate" :title="item.title">
                 {{ item.title }}
@@ -69,6 +80,6 @@ import ManagerTicket from './ManagerTicket.vue';
 
     <div>페이지네이션</div>
 
-    <ManagerTicket />
+    <ManagerTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
   </section>
 </template>
