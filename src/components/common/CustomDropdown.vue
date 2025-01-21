@@ -1,32 +1,31 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
+import SvgIcon from './SvgIcon.vue';
+import { ArrowDownIcon } from '@/assets/icons/path';
+import { BaseTicketOption } from '@/types/tickets';
 
-export interface BaseOption {
-  id: number;
-  value: string;
-  label: string;
-}
-
-export interface ColorOption extends BaseOption {
+export interface ColorOption extends BaseTicketOption {
   bg: string;
   text: string;
 }
 
 interface Props {
-  options: BaseOption[] | ColorOption[];
-  selectedOption: BaseOption | ColorOption;
+  options: BaseTicketOption[];
+  selectedOption: BaseTicketOption;
   label: string;
   hasColor?: boolean;
-  onOptionSelect?: (option: BaseOption | ColorOption) => void;
+  onOptionSelect?: (option: BaseTicketOption) => void;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   hasColor: false,
   onOptionSelect: undefined,
+  options: () => [],
+  selectedOption: () => ({ id: 0, value: '', label: '' }),
 });
 
 const emit = defineEmits<{
-  (e: 'select', value: BaseOption | ColorOption): void;
+  (e: 'select', value: BaseTicketOption): void;
 }>();
 
 const isOpen = ref(false);
@@ -42,7 +41,7 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
 };
 
-const handleSelect = (option: BaseOption | ColorOption) => {
+const handleSelect = (option: BaseTicketOption) => {
   emit('select', option);
   if (props.onOptionSelect) {
     props.onOptionSelect(option);
@@ -51,8 +50,8 @@ const handleSelect = (option: BaseOption | ColorOption) => {
 };
 
 // 타입 가드
-const hasColorStyle = (option: BaseOption | ColorOption): option is ColorOption => {
-  return 'bg' in option && 'text' in option;
+const hasColorStyle = (option: BaseTicketOption | null | undefined): option is ColorOption => {
+  return option != null && 'bg' in option && 'text' in option;
 };
 
 onMounted(() => {
@@ -70,26 +69,34 @@ onUnmounted(() => {
 
     <button
       @click.stop="toggleDropdown"
-      class="w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors duration-200 border border-gray-200 hover:border-gray-300"
+      :class="[
+        'w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors duration-200',
+        hasColor ? 'inline-flex items-center gap-2' : 'border border-gray-200 hover:border-gray-300',
+        hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
+      ]"
     >
-      <span class="text-sm text-gray-700">{{ selectedOption.label }}</span>
-      <ChevronDownIcon
-        class="w-4 h-4 text-gray-500 transition-transform duration-200"
-        :class="{ 'rotate-180': isOpen }"
+      <span :class="['text-sm', hasColor ? '' : 'text-gray-700']">
+        {{ selectedOption.label }}
+      </span>
+      <SvgIcon
+        :icon="ArrowDownIcon"
+        :class="['w-4 h-4 transition-transform duration-200', isOpen ? 'rotate-180' : '']"
       />
     </button>
 
     <div
       v-if="isOpen"
-      class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
+      class="absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
     >
       <ul class="py-1">
         <li
           v-for="option in options"
           :key="option.id"
           @click="handleSelect(option)"
-          class="px-3 py-2 cursor-pointer text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-          :class="{ 'bg-gray-50': selectedOption.id === option.id }"
+          :class="[
+            ' px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-700 hover:bg-gray-100',
+            selectedOption.id === option.id ? 'bg-gray-50' : '',
+          ]"
         >
           {{ option.label }}
         </li>
