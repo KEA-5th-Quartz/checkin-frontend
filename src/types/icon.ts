@@ -3,6 +3,8 @@ export interface IconOptions {
   strokeWidth?: number;
   strokeLinecap?: 'round' | 'butt' | 'square';
   strokeLinejoin?: 'round' | 'bevel' | 'miter';
+  fillRule?: 'nonzero' | 'evenodd';
+  clipRule?: 'nonzero' | 'evenodd';
 }
 
 export interface IconPathTypes {
@@ -10,7 +12,7 @@ export interface IconPathTypes {
   fill: string;
   width: number;
   height: number;
-  options: IconOptions;
+  options?: IconOptions;
 }
 
 export interface IconProps {
@@ -19,11 +21,13 @@ export interface IconProps {
     fill: string;
     width: number;
     height: number;
-    options: {
+    options?: {
       stroke?: string;
       strokeWidth?: number | string;
       strokeLinecap?: 'round' | 'butt' | 'square';
       strokeLinejoin?: 'round' | 'bevel' | 'miter';
+      fillRule?: 'nonzero' | 'evenodd';
+      clipRule?: 'nonzero' | 'evenodd';
     };
   };
   className?: string;
