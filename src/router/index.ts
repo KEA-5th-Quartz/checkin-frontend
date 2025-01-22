@@ -1,16 +1,27 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
 
 const routes: Array<RouteRecordRaw> = [
+  // 공통
   {
     path: '/',
     name: 'home',
-    component: HomeView,
+    component: () => import('../views/HomeView.vue'),
   },
   {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutView.vue'),
+    path: '/settings',
+    name: 'settings',
+    component: () => import('../views/HomeView.vue'),
+  },
+  // 담당자
+  {
+    path: '/manager/dashboard',
+    name: 'manager-dashboard',
+    component: () => import('../views/manager/DashboardView.vue'),
+  },
+  {
+    path: '/manager/statistics',
+    name: 'manager-statistics',
+    component: () => import('../views/manager/ManagerStatisticsView.vue'),
   },
   {
     path: '/administrator/member-management',

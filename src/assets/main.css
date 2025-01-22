@@ -2,8 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
+#app {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  overflow-x: hidden;
+  background-color: #fafafa;
+  min-width: 1024px;
+  overflow-x: auto;
 }
 
 /* 스크롤바 숨기기 */
@@ -22,26 +32,79 @@ body {
     @apply flex justify-center items-center;
   }
 
+  /* 컨테이너 */
+  .container {
+    @apply w-full px-8;
+  }
+
   /* 사이드바 */
   .sidebar-nav-container {
-    @apply fixed left-0 right-0 flex flex-col gap-12 w-72 h-full rounded-r-[49px] 
+    @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] 
     bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
-    @apply text-white-0 font-extrabold text-2xl mt-24;
+    @apply text-center text-white-0 font-extrabold text-2xl mt-24;
   }
   .sidebar-profile {
-    @apply flex flex-col items-center gap-5 w-full;
+    @apply flex flex-col items-center gap-5 w-full mt-12;
   }
   .sidebar-p {
     @apply font-semibold text-white-0;
   }
   .sidebar-ul {
-    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-16;
+    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-8 lg:pl-16 mt-12;
   }
   .sidebar-li {
     @apply flex items-center py-[18px] gap-[30px];
   }
+  .sidebar-active {
+    @apply absolute -left-8 lg:-left-16 w-2 h-full bg-gradient-to-b from-[#7E73FF] to-[#5B4DFF];
+  }
 
   /* 담당자 */
+  .manager-header-title {
+    @apply text-gray-1 pb-1.5 whitespace-nowrap;
+  }
+
+  /* 담당자 헤더 */
+  .manager-header-section {
+    @apply flex justify-center gap-4 lg:gap-8 mt-12 w-full px-2;
+  }
+  .manager-header-card {
+    @apply flex-center gap-3 lg:gap-6 pr-6 lg:pr-[70px] border-r;
+  }
+  .manager-header-card-icon {
+    @apply flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full;
+  }
+  .manager-header-card-span {
+    @apply text-lg lg:text-xl pr-2;
+  }
+
+  /* 담당자 검색/필터 */
+  .manager-search-div {
+    @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-2 rounded;
+  }
+  .manager-search-input {
+    @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
+  }
+  .manager-filter-btn {
+    @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded;
+  }
+  .manager-filter-menu {
+    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded shadow-md;
+  }
+
+  /* 대시보드 */
+  .manager-thead {
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium;
+  }
+  .manager-th {
+    @apply text-black-2 font-medium px-2 py-3.5;
+  }
+  .manager-td {
+    @apply text-center px-2 py-3.5 text-sm text-gray-0 border-b border-gray-2 cursor-pointer;
+  }
+  .manager-none-td {
+    @apply manager-td border-none cursor-default;
+  }
 }

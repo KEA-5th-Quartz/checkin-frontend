@@ -3,6 +3,8 @@ export interface IconOptions {
   strokeWidth?: number;
   strokeLinecap?: 'round' | 'butt' | 'square';
   strokeLinejoin?: 'round' | 'bevel' | 'miter';
+  fillRule?: 'nonzero' | 'evenodd';
+  clipRule?: 'nonzero' | 'evenodd';
 }
 
 export interface IconPathTypes {
@@ -24,6 +26,8 @@ export interface IconProps {
       strokeWidth?: number | string;
       strokeLinecap?: 'round' | 'butt' | 'square';
       strokeLinejoin?: 'round' | 'bevel' | 'miter';
+      fillRule?: 'nonzero' | 'evenodd';
+      clipRule?: 'nonzero' | 'evenodd';
     };
   };
   className?: string;

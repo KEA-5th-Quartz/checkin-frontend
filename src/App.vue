@@ -1,7 +1,7 @@
 <template>
   <div class="flex w-full min-h-screen">
     <CommonSidebar />
-    <main class="flex-1 ml-72">
+    <main class="flex-1 ml-48 lg:ml-64">
       <router-view />
     </main>
   </div>
@@ -10,12 +10,3 @@
 <script setup lang="ts">
 import CommonSidebar from './components/common/CommonSidebar.vue';
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-}
-</style>
