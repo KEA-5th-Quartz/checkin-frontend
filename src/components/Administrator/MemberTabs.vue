@@ -1,13 +1,12 @@
 <template>
-  <div class="mx-auto w-[75%]">
-    <!-- 탭 UI -->
-    <div class="flex justify-between border-b border-gray-3 mb-4">
+  <div class="mx-auto w-[83%]">
+    <div class="flex justify-around border-b border-gray-2 mb-4">
       <button
         v-for="tab in tabs"
         :key="tab"
         :class="[
-          'px-6 py-2 text-sm font-semibold',
-          currentTab === tab ? 'border-b-2 border-primary-3 text-primary-3' : 'text-gray-0 hover:text-primary-3',
+          'px-12 py-2 text-sm font-semibold',
+          currentTab === tab ? 'border-b-4 border-primary-3 text-primary-3' : 'text-gray-0 hover:text-primary-3',
         ]"
         @click="switchTab(tab)"
       >
@@ -15,9 +14,8 @@
       </button>
     </div>
 
-    <!-- 멤버 리스트 -->
-    <div class="flex flex-wrap justify-between gap-4 mx-2">
-      <MemberCard v-for="member in filteredMembers" :key="member.id" :member="member" class="w-1/5" />
+    <div class="flex flex-wrap justify-between gap-7 mx-20">
+      <MemberCard v-for="member in filteredMembers" :key="member.id" :member="member" class="w-[20%]" />
     </div>
   </div>
 </template>
@@ -28,13 +26,16 @@ import MemberCard from '../../components/Administrator/MemberCard.vue';
 
 // 샘플 멤버 데이터
 const members = ref([
-  { id: 1, name: '홍길동', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 2, name: '홍길동', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 3, name: '홍길동', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 4, name: '홍길동', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 5, name: '홍길동', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 6, name: '김영희', role: '담당자', email: 'test@test.com', profileImage: '/path/to/image2.jpg' },
-  { id: 7, name: '이철수', role: '사용자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
+  { id: 1, name: 'King.js', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
+  { id: 2, name: 'Pixel.Master', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
+  { id: 3, name: 'Dev.Hero', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
+  { id: 4, name: 'Script.Ninja', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
+  { id: 5, name: 'Bug.Hunter', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
+  { id: 6, name: 'Cloud.Rider', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image2.jpg' },
+  { id: 7, name: 'Syntax.Guru', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
+  { id: 8, name: 'Logic.Wizard', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
+  { id: 9, name: 'Logic.Wizard', role: '담당자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
+  { id: 10, name: 'Logic.Wizard', role: '사용자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
 ]);
 
 // 탭 목록
@@ -54,6 +55,4 @@ function switchTab(tab) {
 }
 </script>
 
-<style scoped>
-/* 추가 스타일 필요 시 정의 */
-</style>
+<style scoped></style>
