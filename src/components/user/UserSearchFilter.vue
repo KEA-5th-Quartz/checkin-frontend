@@ -4,9 +4,9 @@ import { SearchIcon, TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
-import { useUserTicketStore } from '@/stores/userTicketStore';
+import { useUserTicketListStore } from '../../stores/userTicketListStore';
 
-const ticketStore = useUserTicketStore();
+const ticketStore = useUserTicketListStore();
 
 const statusOptions = [
   { id: 0, value: 'none', label: '진행 상태' },

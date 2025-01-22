@@ -4,9 +4,9 @@ import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { tableDataTest } from '../manager/dashboardTest';
 import UserTicket from './UserTicket.vue';
-import { useUserTicketStore } from '@/stores/userTicketStore';
+import { useUserTicketListStore } from '@/stores/userTicketListStore';
 
-const ticketStore = useUserTicketStore();
+const ticketStore = useUserTicketListStore();
 console.log(ticketStore);
 
 const selectedTicketId = ref<number | null>(null);

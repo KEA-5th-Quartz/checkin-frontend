@@ -1,24 +1,48 @@
 import { defineStore } from 'pinia';
 
-export const useUserTicketStore = defineStore('user-ticket', {
-  // 함수로 작성하여 각 스토어 인스턴스가 독립적으로 동작하게
+export interface Ticket {
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  manager: string;
+  endDate: string;
+  content: string;
+}
+
+const defaultTicket: Ticket = {
+  title: '',
+  firstCategory: '',
+  secondCategory: '',
+  manager: '',
+  endDate: '',
+  content: '',
+};
+
+export const useTicketStore = defineStore('ticket', {
   state: () => ({
-    isDeleteMode: false, // 초기값
-    selectedTickets: new Set<number>(), // 선택된 티켓들의 ID를 저장하는 set객체
+    ticket: defaultTicket as Ticket,
+    originalTicket: null as Ticket | null, // 원본 데이터 저장용
+    isEditMode: false,
   }),
-  // actions: 상태를 변경할 수 있는 메서드들 정의
+
   actions: {
-    toggleDeleteMode() {
-      this.isDeleteMode = !this.isDeleteMode;
+    setTicket(ticket: Ticket) {
+      this.ticket = { ...ticket };
+      this.originalTicket = { ...ticket }; // 원본 데이터 저장
     },
-    addSelectedTicket(id: number) {
-      this.selectedTickets.add(id); // id를 set에 추가
+
+    updateTicket(updatedTicket: Ticket) {
+      this.ticket = { ...updatedTicket };
     },
-    removeSelectedTicket(id: number) {
-      this.selectedTickets.delete(id); // id를 set에서 제거
+
+    toggleEditMode() {
+      this.isEditMode = !this.isEditMode;
     },
-    clearSelectedTickets() {
-      this.selectedTickets.clear(); // 선택한 모든 id 초기화
+
+    resetToOriginal() {
+      if (this.originalTicket) {
+        this.ticket = { ...this.originalTicket }; // 원본 데이터로 복원
+      }
     },
   },
 });

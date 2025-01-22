@@ -21,4 +21,5 @@ export interface DropdownProps {
   hasColor?: boolean;
   onOptionSelect?: (option: BaseTicketOption) => void;
   isUser?: boolean;
+  isEdit?: boolean;
 }

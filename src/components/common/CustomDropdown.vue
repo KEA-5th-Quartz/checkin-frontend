@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
   isUser: false,
+  isEdit: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -66,6 +67,8 @@ onUnmounted(() => {
           ? 'inline-flex items-center gap-2 py-1'
           : isUser
           ? 'border border-gray-1 py-2'
+          : isEdit
+          ? 'border border-gray-2 py-2 w-full -mt-2 rounded-xl'
           : 'border border-primary-2 hover:border-primary-4 py-2',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
@@ -80,7 +83,7 @@ onUnmounted(() => {
       v-if="isOpen"
       :class="[
         'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar',
-        isUser ? 'border-gray-1' : 'border-primary-2',
+        isUser ? 'border-gray-1' : isEdit ? 'border-gray-3' : 'border-primary-2',
       ]"
     >
       <ul>
