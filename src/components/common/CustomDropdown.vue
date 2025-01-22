@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   onOptionSelect: undefined, // 옵션 선택 시 실행할 콜백 함수
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
+  isUser: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -61,11 +62,17 @@ onUnmounted(() => {
       @click.stop="toggleDropdown"
       :class="[
         'w-full flex items-center justify-between px-3  rounded-lg transition-colors duration-200',
-        hasColor ? 'inline-flex items-center gap-2 py-1' : 'border border-primary-2 hover:border-primary-4 py-2',
+        [
+          hasColor
+            ? 'inline-flex items-center gap-2 py-1'
+            : isUser
+            ? 'border border-gray-1'
+            : 'border border-primary-2 hover:border-primary-4 py-2',
+        ],
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
     >
-      <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1']">
+      <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
         {{ selectedOption.label }}
       </span>
       <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
