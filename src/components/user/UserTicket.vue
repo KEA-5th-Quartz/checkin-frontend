@@ -258,7 +258,13 @@ const handleManagerSelect = (option: BaseTicketOption) => {
               <div class="mt-7">
                 <p class="text-sm pb-2">마감 기한</p>
                 <p v-if="!ticketStore.isEditMode" class="text-xs text-blue-1">{{ ticketStore.ticket.endDate }}</p>
-                <input v-else type="date" class="text-sm text-blue-1" v-model="ticketStore.ticket.endDate" />
+                <input
+                  v-else
+                  type="date"
+                  :min="new Date().toISOString().split('T')[0]"
+                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full p-1"
+                  v-model="ticketStore.ticket.endDate"
+                />
               </div>
             </section>
           </div>
@@ -275,7 +281,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <textarea
               v-else
               v-model="ticketStore.ticket.manager"
-              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words"
+              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
             />
           </div>
 
@@ -373,5 +379,18 @@ const handleManagerSelect = (option: BaseTicketOption) => {
   to {
     transform: translateX(100%);
   }
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+input[type='date'] {
+  position: relative;
+  background-color: white;
 }
 </style>
