@@ -4,6 +4,9 @@ import { SearchIcon, TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
+import { useUserTicketStore } from '@/stores/userTicketStore';
+
+const ticketStore = useUserTicketStore();
 
 const statusOptions = [
   { id: 0, value: 'none', label: '진행 상태' },
@@ -50,10 +53,9 @@ const handleFirstCategorySelect = (option: BaseTicketOption) => {
   firstCategorySelected.value = option;
 };
 
-const isDeleteMode = ref(false);
-
-const toggleDeleteMode = () => {
-  isDeleteMode.value = !isDeleteMode.value;
+const handleCancel = () => {
+  ticketStore.toggleDeleteMode();
+  ticketStore.clearSelectedTickets();
 };
 
 const handleDelete = () => {
@@ -62,7 +64,7 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <section v-if="!isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
+  <section v-if="!ticketStore.isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
     <!-- 검색 -->
     <div class="manager-search-div">
       <input placeholder="티켓 검색..." class="manager-search-input" />
@@ -98,13 +100,13 @@ const handleDelete = () => {
         isUser
       />
 
-      <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="toggleDeleteMode" />
+      <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
     </div>
   </section>
 
   <section v-else class="flex justify-between mx-auto w-[95%] mt-14">
     <div class="flex items-center gap-4 ml-auto">
-      <button @click="toggleDeleteMode" class="px-6 py-2 text-sm border border-gray-1 rounded-lg hover:bg-gray-100">
+      <button @click="handleCancel" class="px-6 py-2 text-sm border border-gray-1 rounded-lg hover:bg-gray-100">
         취소
       </button>
       <button

@@ -28,7 +28,7 @@ const handleCloseModal = () => {
             <th class="manager-th w-[25%]">설명</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
             <th class="manager-th w-[10%]">담당자</th>
-            <th class="manager-th w-[5%]">마감기한</th>
+            <th class="manager-th w-[5%]">마감일</th>
             <th class="manager-th w-[5%] pr-6">중요도</th>
           </tr>
         </thead>
