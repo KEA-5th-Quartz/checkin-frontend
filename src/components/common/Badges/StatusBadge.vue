@@ -27,6 +27,8 @@ const getSizeClass = (size: string) => {
       return 'px-2 py-1 text-xs';
     case 'lg':
       return 'px-3 py-1.5 text-sm';
+    case 'xl':
+      return 'px-5 py-1 font-medium';
     default:
       return 'px-2 py-1 text-xs';
   }

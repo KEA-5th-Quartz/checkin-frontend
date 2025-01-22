@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
-import SvgIcon from '../../common/SvgIcon.vue';
-import StatusBadge from '../../common/Badges/StatusBadge.vue';
+import { ClipIcon, LikeIcon, PencilIcon, SendIcon, XIcon } from '@/assets/icons/path';
+import SvgIcon from '../common/SvgIcon.vue';
 import { ref } from 'vue';
-import CustomDropdown from '../../common/CustomDropdown.vue';
-import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
-import { priority, status, firstCategory, secondCategory, managerOptions } from '../ticketOptionTest';
+import PriorityBadge from '../common/Badges/PriorityBadge.vue';
+import StatusBadge from '../common/Badges/StatusBadge.vue';
 
 defineProps<{
   ticketId: number;
 }>();
-// close라는 이벤트를 방출할 수 있는 emit 함수를 정의
+
 const emit = defineEmits<{
-  (e: 'close'): void; // void는 이벤트가 데이터를 전달하지 않음을 의미
+  (e: 'close'): void;
 }>();
-// drawer의 표시 여부를 제어하는 반응형 변수
 const show = ref(true);
 
 const handleClose = () => {
@@ -22,36 +19,6 @@ const handleClose = () => {
   setTimeout(() => {
     emit('close');
   }, 300);
-};
-
-const prioritySelected = ref<StatusTicketOption>(priority[0]);
-const handlePrioritySelect = (option: StatusTicketOption) => {
-  console.log('중요도 변경:', option.label);
-  prioritySelected.value = option;
-};
-
-const statusSelected = ref<StatusTicketOption>(status[0]);
-const handleStatusSelect = (option: StatusTicketOption) => {
-  console.log('상태 변경:', option.label);
-  statusSelected.value = option;
-};
-
-const firstCategorySelected = ref(firstCategory[0]);
-const handleFirstCategorySelect = (option: BaseTicketOption) => {
-  console.log('1차 카테고리 변경:', option.label);
-  firstCategorySelected.value = option;
-};
-
-const secondCategorySelected = ref(secondCategory[0]);
-const handleSecondCategorySelect = (option: BaseTicketOption) => {
-  console.log('2차 카테고리 변경:', option.label);
-  secondCategorySelected.value = option;
-};
-
-const managerSelected = ref(managerOptions[0]);
-const handleManagerSelect = (option: BaseTicketOption) => {
-  console.log('담당자 변경:', option.label);
-  managerSelected.value = option;
 };
 </script>
 
@@ -66,7 +33,10 @@ const handleManagerSelect = (option: BaseTicketOption) => {
         <!-- 헤더 -->
         <div class="flex items-center justify-between w-full">
           <p class="text-2xl">SSH 접속 확인</p>
-          <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
+          <div class="flex items-center gap-8">
+            <SvgIcon :icon="PencilIcon" class="cursor-pointer" @click="console.log('수정')" />
+            <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
+          </div>
         </div>
 
         <!-- 컨텐츠 -->
@@ -75,27 +45,22 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <!-- 왼쪽 섹션 -->
             <section class="flex flex-col w-full">
               <!-- 중요도 블록 -->
-              <CustomDropdown
-                label="중요도"
-                :options="priority"
-                :selected-option="prioritySelected"
-                :onOptionSelect="(option) => handlePrioritySelect(option as StatusTicketOption)"
-                @select="(option) => prioritySelected = option as StatusTicketOption"
-                has-color
-              />
+              <div class="flex flex-col items-start">
+                <p class="text-sm pb-2">중요도</p>
+                <div class="py-1">
+                  <PriorityBadge />
+                </div>
+              </div>
+
               <!-- 1차 카테고리 블록 -->
-              <CustomDropdown
-                label="1차 카테고리"
-                :options="firstCategory"
-                :selected-option="firstCategorySelected"
-                :onOptionSelect="handleFirstCategorySelect"
-                @select="(option) => (firstCategorySelected = option)"
-                class="mt-[18px]"
-              />
+              <div class="flex flex-col mt-7">
+                <p class="text-sm pb-2">1차 카테고리</p>
+                <div class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm">VM</div>
+              </div>
               <!-- 요청자 블록 -->
-              <div class="mt-7">
+              <div class="flex flex-col mt-7">
                 <p class="text-sm pb-2">요청자</p>
-                <div class="manager-filter-btn w-full rounded-xl border-primary-2 justify-start gap-2">
+                <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">King.kim</p>
                 </div>
@@ -110,32 +75,24 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <!-- 오른쪽 섹션 -->
             <section class="flex flex-col w-full">
               <!-- 진행상태 블록 -->
-              <CustomDropdown
-                label="진행상태"
-                :options="status"
-                :selected-option="statusSelected"
-                :onOptionSelect="(option) => handleStatusSelect(option as StatusTicketOption)"
-                @select="(option) => statusSelected = option as StatusTicketOption"
-                has-color
-              />
+              <div class="flex flex-col items-start">
+                <p class="text-sm pb-2">진행상태</p>
+                <StatusBadge status="생성" size="xl" />
+              </div>
+
               <!-- 2차 카테고리 블록 -->
-              <CustomDropdown
-                label="2차 카테고리"
-                :options="secondCategory"
-                :selected-option="secondCategorySelected"
-                :onOptionSelect="handleSecondCategorySelect"
-                @select="(option) => (secondCategorySelected = option)"
-                class="mt-[18px]"
-              />
+              <div class="flex flex-col mt-7">
+                <p class="text-sm pb-2">2차 카테고리</p>
+                <div class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm">VM</div>
+              </div>
               <!-- 담당자 블록 -->
-              <CustomDropdown
-                label="담당자"
-                :options="managerOptions"
-                :selected-option="managerSelected"
-                :onOptionSelect="handleManagerSelect"
-                @select="(option) => (managerSelected = option)"
-                class="mt-7"
-              />
+              <div class="flex flex-col mt-7">
+                <p class="text-sm pb-2">담당자</p>
+                <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
+                  <div class="w-5 h-5 bg-green-500 rounded-full" />
+                  <p class="text-xs text-gray-1">King.kim</p>
+                </div>
+              </div>
               <!-- 마감 기한 블록 -->
               <div class="mt-7">
                 <p class="text-sm pb-2">마감 기한</p>
@@ -147,12 +104,12 @@ const handleManagerSelect = (option: BaseTicketOption) => {
           <!-- 설명 -->
           <div class="mt-11">
             <p class="font-semibold mb-3">설명</p>
-            <div class="min-h-32 border-y border-y-primary-2 px-2 py-6">
-              <p class="text-sm text-gray-1">Github Repo가 접속이 되지 않습니다.</p>
+            <div class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar">
+              <p class="text-sm text-gray-1 break-words">Github Repo가 접속이 되지 않습니다.</p>
             </div>
           </div>
 
-          <!-- 첨부파일 -->
+          <!-- 첨부 파일 -->
           <div class="mt-6">
             <div
               class="bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-sm"
@@ -161,7 +118,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             </div>
           </div>
 
-          <!-- 댓글 창 -->
+          <!-- 댓글 -->
           <div class="flex flex-col gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4">
             <!-- 로그 -->
             <div class="flex items-center gap-5">

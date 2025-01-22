@@ -1,7 +1,18 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { tableDataTest } from '../manager/dashboardTest';
+import UserTicket from './UserTicket.vue';
+
+const selectedTicketId = ref<number | null>(null);
+
+const handleRowClick = (id: number) => {
+  selectedTicketId.value = id;
+};
+const handleCloseModal = () => {
+  selectedTicketId.value = null;
+};
 </script>
 
 <template>
@@ -23,7 +34,7 @@ import { tableDataTest } from '../manager/dashboardTest';
         </thead>
 
         <tbody class="whitespace-nowrap">
-          <tr v-for="item in tableDataTest" :key="item.id" class="hover:bg-white-1">
+          <tr v-for="item in tableDataTest" :key="item.id" class="hover:bg-white-1" @click="handleRowClick(item.id)">
             <td class="manager-td max-w-0 pl-6">
               <p :title="item.id as unknown as string">
                 {{ item.id }}
@@ -67,11 +78,12 @@ import { tableDataTest } from '../manager/dashboardTest';
               <PriorityBadge :priority="item.priority" size="md" />
             </td>
           </tr>
-          <!-- 빈 행 추가 (10 - 실제 데이터 수) -->
         </tbody>
       </table>
     </div>
 
     <div>페이지네이션</div>
+
+    <UserTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
   </section>
 </template>

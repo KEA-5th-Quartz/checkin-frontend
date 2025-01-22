@@ -61,14 +61,12 @@ onUnmounted(() => {
     <button
       @click.stop="toggleDropdown"
       :class="[
-        'w-full flex items-center justify-between px-3  rounded-lg transition-colors duration-200',
-        [
-          hasColor
-            ? 'inline-flex items-center gap-2 py-1'
-            : isUser
-            ? 'border border-gray-1'
-            : 'border border-primary-2 hover:border-primary-4 py-2',
-        ],
+        'min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200',
+        hasColor
+          ? 'inline-flex items-center gap-2 py-1'
+          : isUser
+          ? 'border border-gray-1 py-2'
+          : 'border border-primary-2 hover:border-primary-4 py-2',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
     >
@@ -80,7 +78,10 @@ onUnmounted(() => {
 
     <div
       v-if="isOpen"
-      class="absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border border-primary-2 max-h-60 overflow-y-auto"
+      :class="[
+        'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto',
+        isUser ? 'border-gray-1' : 'border-primary-2',
+      ]"
     >
       <ul>
         <li
@@ -88,7 +89,7 @@ onUnmounted(() => {
           :key="option.id"
           @click="handleSelect(option)"
           :class="[
-            'px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3',
+            'px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap',
             selectedOption.id === option.id ? 'bg-gray-50' : '',
           ]"
         >

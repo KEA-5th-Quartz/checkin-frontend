@@ -78,7 +78,6 @@ const handleCloseModal = () => {
               <PriorityBadge :priority="item.priority" size="md" />
             </td>
           </tr>
-          <!-- 빈 행 추가 (10 - 실제 데이터 수) -->
         </tbody>
       </table>
     </div>

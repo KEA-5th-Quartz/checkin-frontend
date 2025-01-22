@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { SearchIcon } from '../../assets/icons/path';
+import { SearchIcon, TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
@@ -60,7 +60,7 @@ const handleFirstCategorySelect = (option: BaseTicketOption) => {
     </div>
 
     <!-- 필터 -->
-    <div class="flex gap-10">
+    <div class="flex items-center gap-10">
       <CustomDropdown
         label=""
         :options="statusOptions"
@@ -87,6 +87,8 @@ const handleFirstCategorySelect = (option: BaseTicketOption) => {
         @select="(option) => (firstCategorySelected = option)"
         isUser
       />
+
+      <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" />
     </div>
   </section>
 </template>

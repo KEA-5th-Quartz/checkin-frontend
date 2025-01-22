@@ -1,6 +1,6 @@
 export interface StatusBadgeProps {
   status: '생성' | '진행중' | '완료';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   class?: string;
 }
 

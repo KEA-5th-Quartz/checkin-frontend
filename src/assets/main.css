@@ -82,7 +82,7 @@ body {
 
   /* 담당자 검색/필터 */
   .manager-search-div {
-    @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-2 rounded;
+    @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-1 rounded;
   }
   .manager-search-input {
     @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
