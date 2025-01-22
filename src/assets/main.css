@@ -43,7 +43,7 @@ body {
     bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
-    @apply text-center text-white-0 font-extrabold text-2xl mt-24;
+    @apply text-center text-white-0 font-extrabold text-2xl mt-12;
   }
   .sidebar-profile {
     @apply flex flex-col items-center gap-5 w-full mt-12;

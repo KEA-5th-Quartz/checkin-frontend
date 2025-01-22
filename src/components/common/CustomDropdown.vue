@@ -79,7 +79,7 @@ onUnmounted(() => {
     <div
       v-if="isOpen"
       :class="[
-        'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto',
+        'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar',
         isUser ? 'border-gray-1' : 'border-primary-2',
       ]"
     >
