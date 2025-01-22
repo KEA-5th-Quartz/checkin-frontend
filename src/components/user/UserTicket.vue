@@ -29,7 +29,7 @@ let ticketDefaultTest = {
   title: 'SSH 접속 확인',
   firstCategory: 'VM1',
   secondCategory: '생성',
-  manager: 'King.kim',
+  manager: '김현중',
   endDate: '2025-02-22',
   content: 'Github Repo가 접속이 되지 않습니다.',
 };
@@ -53,72 +53,29 @@ const startEdit = () => {
   ticketStore.toggleEditMode();
 };
 
-const firstCategorySelected = computed({
-  get: () => {
-    // store의 현재 값과 매칭되는 option을 찾음
-    return firstCategory.find((option) => option.label === ticketStore.ticket?.firstCategory) || firstCategory[0];
-  },
-  set: (newValue: BaseTicketOption) => {
-    if (ticketStore.ticket) {
-      ticketStore.updateTicket({
-        ...ticketStore.ticket,
-        firstCategory: newValue.label,
-      });
-    }
-  },
-});
-
-const handleFirstCategorySelect = (option: BaseTicketOption) => {
-  if (ticketStore.ticket) {
-    ticketStore.updateTicket({
-      ...ticketStore.ticket,
-      firstCategory: option.label,
-    });
-  }
+const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof ticketStore.ticket) => {
+  return computed({
+    get: () => options.find((option) => option.label === ticketStore.ticket?.[field]) || options[0],
+    set: (newValue: BaseTicketOption) => {
+      if (ticketStore.ticket) {
+        ticketStore.updateTicket({
+          ...ticketStore.ticket,
+          [field]: newValue.label,
+        });
+      }
+    },
+  });
 };
 
-const secondCategorySelected = computed({
-  get: () => {
-    return secondCategory.find((option) => option.label === ticketStore.ticket?.secondCategory) || secondCategory[0];
-  },
-  set: (newValue: BaseTicketOption) => {
-    if (ticketStore.ticket) {
-      ticketStore.updateTicket({
-        ...ticketStore.ticket,
-        secondCategory: newValue.label,
-      });
-    }
-  },
-});
+const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
+const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
+const managerSelected = createComputedProperty(managerOptions, 'manager');
 
-const handleSecondCategorySelect = (option: BaseTicketOption) => {
+const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: BaseTicketOption) => {
   if (ticketStore.ticket) {
     ticketStore.updateTicket({
       ...ticketStore.ticket,
-      secondCategory: option.label,
-    });
-  }
-};
-
-const managerSelected = computed({
-  get: () => {
-    return managerOptions.find((option) => option.label === ticketStore.ticket?.manager) || managerOptions[0];
-  },
-  set: (newValue: BaseTicketOption) => {
-    if (ticketStore.ticket) {
-      ticketStore.updateTicket({
-        ...ticketStore.ticket,
-        manager: newValue.label,
-      });
-    }
-  },
-});
-
-const handleManagerSelect = (option: BaseTicketOption) => {
-  if (ticketStore.ticket) {
-    ticketStore.updateTicket({
-      ...ticketStore.ticket,
-      manager: option.label,
+      [field]: option.label,
     });
   }
 };
@@ -187,7 +144,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label=""
                   :options="firstCategory"
                   :selected-option="firstCategorySelected"
-                  :onOptionSelect="handleFirstCategorySelect"
+                  :onOptionSelect="handleOptionSelect('firstCategory')"
                   @select="(option: BaseTicketOption) => (firstCategorySelected = option)"
                   isEdit
                 />
@@ -229,7 +186,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label=""
                   :options="secondCategory"
                   :selected-option="secondCategorySelected"
-                  :onOptionSelect="handleSecondCategorySelect"
+                  :onOptionSelect="handleOptionSelect('secondCategory')"
                   @select="(option: BaseTicketOption) => (secondCategorySelected = option)"
                   isEdit
                 />
@@ -249,7 +206,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label=""
                   :options="managerOptions"
                   :selected-option="managerSelected"
-                  :onOptionSelect="handleManagerSelect"
+                  :onOptionSelect="handleOptionSelect('manager')"
                   @select="(option: BaseTicketOption)=> (managerSelected = option)"
                   isEdit
                 />
@@ -262,7 +219,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
-                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full p-1"
+                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
                   v-model="ticketStore.ticket.endDate"
                 />
               </div>
@@ -276,13 +233,17 @@ const handleManagerSelect = (option: BaseTicketOption) => {
               v-if="!ticketStore.isEditMode"
               class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
             >
-              <p class="text-sm text-gray-1 break-words">{{ ticketStore.ticket.manager }}</p>
+              <p class="text-sm text-gray-1 break-words">{{ ticketStore.ticket.content }}</p>
             </div>
-            <textarea
-              v-else
-              v-model="ticketStore.ticket.manager"
-              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
-            />
+            <div v-else>
+              <textarea
+                v-model="ticketStore.ticket.content"
+                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
+              />
+              <div class="flex w-full justify-end pr-2 cursor-pointer">
+                <SvgIcon :icon="ClipIcon" />
+              </div>
+            </div>
           </div>
 
           <!-- 첨부 파일 -->
