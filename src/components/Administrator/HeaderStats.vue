@@ -1,56 +1,53 @@
 <template>
-  <div class="max-w-4xl mx-auto flex justify-between items-center bg-white-0 p-4 pt-8">
+  <section class="flex justify-center gap-5 lg:gap-[80px] mt-12 w-full px-2">
     <!-- 관리자 -->
-    <div class="flex items-center gap-2">
-      <SvgIcon
-        :icon="{
-          width: 24,
-          height: 24,
-          path: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
-          fill: '#3570FF', // primary.3
-        }"
-      />
+    <div class="flex-center gap-3 lg:gap-6 pr-20 lg:pr-[120px] border-r">
+      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+        <SvgIcon :icon="AdminIcon" />
+      </div>
       <div>
-        <p class="text-lg font-semibold text-gray-0">관리자</p>
-        <p class="text-xl font-bold text-black-0">{{ adminCount }}명</p>
+        <p class="text-gray-1 pb-1.5 whitespace-nowrap">관리자</p>
+        <div class="flex items-end">
+          <p class="text-lg lg:text-xl pr-2">{{ adminCount }}</p>
+          <p class="text-black-0">명</p>
+        </div>
       </div>
     </div>
 
     <!-- 담당자 -->
-    <div class="flex items-center gap-2">
-      <SvgIcon
-        :icon="{
-          width: 24,
-          height: 24,
-          path: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
-          fill: '#48C5FF', // primary.4
-        }"
-      />
+    <div class="flex-center gap-3 lg:gap-6 px-20 lg:px-[70px]">
+      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+        <SvgIcon :icon="ManagerIcon" />
+      </div>
       <div>
-        <p class="text-lg font-semibold text-gray-0">담당자</p>
-        <p class="text-xl font-bold text-black-0">{{ managerCount }}명</p>
+        <p class="text-gray-1 pb-1.5 whitespace-nowrap">담당자</p>
+        <div class="flex items-end">
+          <p class="text-lg lg:text-xl pr-2">{{ managerCount }}</p>
+          <p class="text-black-0">명</p>
+        </div>
       </div>
     </div>
 
     <!-- 사용자 -->
-    <div class="flex items-center gap-2">
-      <SvgIcon
-        :icon="{
-          width: 24,
-          height: 24,
-          path: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
-          fill: '#45D934', // green.1
-        }"
-      />
+    <div class="flex-center gap-3 lg:gap-6 pl-20 lg:pl-[120px] border-l">
+      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+        <SvgIcon :icon="UserIcon" />
+      </div>
       <div>
-        <p class="text-lg font-semibold text-gray-0">사용자</p>
-        <p class="text-xl font-bold text-black-0">{{ userCount }}명</p>
+        <p class="text-gray-1 pb-1.5 whitespace-nowrap">사용자</p>
+        <div class="flex items-end">
+          <p class="text-lg lg:text-xl pr-2">{{ userCount }}</p>
+          <p class="text-black-0">명</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- </div> -->
 </template>
 
 <script setup lang="ts">
+import { AdminIcon, ManagerIcon, UserIcon } from '@/assets/icons/path';
 import SvgIcon from '../../components/common/SvgIcon.vue';
 
 const props = defineProps({

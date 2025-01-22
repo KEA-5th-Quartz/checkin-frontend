@@ -24,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/manager/ManagerStatisticsView.vue'),
   },
   {
-    path: '/administrator/member-management',
+    path: '/administrator/memberManagement',
     name: 'MemberManagement',
     component: () => import('../views/Administrator/MemberManagement.vue'),
   },
