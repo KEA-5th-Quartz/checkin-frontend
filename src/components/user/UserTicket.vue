@@ -141,7 +141,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             class="w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none"
           />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
-            <SvgIcon :icon="PencilIcon" class="cursor-pointer" @click="startEdit" />
+            <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
           <div v-else class="flex items-center gap-4">
