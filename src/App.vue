@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div class="flex w-full min-h-screen">
     <CommonSidebar />
-
-    <router-view />
+    <main class="flex-1 ml-72">
+      <router-view />
+    </main>
   </div>
 </template>
 
