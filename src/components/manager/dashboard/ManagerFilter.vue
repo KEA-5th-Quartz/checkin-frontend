@@ -5,16 +5,16 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['closeFilter']);
 const modalRef = ref<HTMLElement | null>(null);
 
 onClickOutside(modalRef, () => {
-  emit('close');
+  emit('closeFilter');
 });
 </script>
 
 <template>
-  <div ref="modalRef" class="bg-white-0 rounded-lg w-[300px] shadow-md pb-4">
+  <div ref="modalRef" class="bg-white-0 rounded-lg w-[300px] h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar">
     <div class="py-4 px-8 bg-primary-0 text-white-1 font-bold">필터</div>
 
     <section class="flex flex-col gap-3 py-6 px-7 text-sm">

@@ -57,19 +57,14 @@ const selectOption = (
         </div>
       </div>
 
+      <!-- 필터링 아이콘 -->
       <div class="relative flex items-center">
-        <button ref="filterButtonRef" @click="isFilterOpen = true" class="text-gray-0 flex items-center gap-2">
+        <button @click.stop="isFilterOpen = !isFilterOpen" class="text-gray-0 flex items-center gap-2">
           <SvgIcon :icon="FilterIcon" />
           필터
         </button>
         <!-- 필터 모달 -->
-        <FilterModal
-          v-if="isFilterOpen"
-          :filter-active="isFilterOpen"
-          :button-ref="filterButtonRef"
-          @close="isFilterOpen = false"
-          class="absolute top-12 right-0"
-        />
+        <FilterModal v-if="isFilterOpen" @close-filter="isFilterOpen = false" class="absolute top-12 right-0" />
       </div>
     </div>
   </section>
