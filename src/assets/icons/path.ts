@@ -1,4 +1,4 @@
-import { IconPathTypes } from '@/types/icon';
+import { IconPathTypes } from '@/types/common/icon';
 
 // 대시보드 아이콘
 export const DashboardIcon: IconPathTypes = {

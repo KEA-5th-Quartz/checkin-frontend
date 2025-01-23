@@ -220,12 +220,12 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               v-if="!ticketStore.isEditMode"
               class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
             >
-              <p class="text-sm text-gray-1 break-words">{{ ticketStore.ticket.content }}</p>
+              <p class="text-sm text-gray-1">{{ ticketStore.ticket.content }}</p>
             </div>
             <div v-else>
               <textarea
                 v-model="ticketStore.ticket.content"
-                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
+                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 focus:outline-none"
               />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
                 <SvgIcon :icon="ClipIcon" />

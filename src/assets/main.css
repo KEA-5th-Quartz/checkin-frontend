@@ -14,6 +14,7 @@ body {
   background-color: #fafafa;
   min-width: 1024px;
   overflow-x: auto;
+  overflow-wrap: break-word;
 }
 
 /* 스크롤바 숨기기 */
