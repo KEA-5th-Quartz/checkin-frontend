@@ -23,10 +23,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'manager-statistics',
     component: () => import('../views/manager/ManagerStatisticsView.vue'),
   },
+  // 관리자
   {
     path: '/administrator/memberManagement',
     name: 'MemberManagement',
     component: () => import('../views/Administrator/MemberManagement.vue'),
+  },
+  {
+    path: '/administrator/CategoryManagement',
+    name: 'CategoryManagement',
+    component: () => import('../views/Administrator/CategoryManagement.vue'),
   },
 ];
 

@@ -27,7 +27,7 @@
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { SearchIcon } from '@/assets/icons/path';
 import { ref } from 'vue';
-import AddMemberModal from '@/components/Administrator/AddMemberModal.vue';
+import AddMemberModal from '@/components/Administrator/MemberManagement/AddMemberModal.vue';
 
 // 검색어 상태
 const searchText = ref('');

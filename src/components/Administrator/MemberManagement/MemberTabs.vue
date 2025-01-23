@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import MemberCard from '../../components/Administrator/MemberCard.vue';
+import MemberCard from '../../../components/Administrator/MemberManagement/MemberCard.vue';
 
 // 샘플 멤버 데이터
 const members = ref([

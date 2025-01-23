@@ -7,9 +7,9 @@
 </template>
 
 <script setup lang="ts">
-import HeaderStats from '../../components/Administrator/HeaderStats.vue';
-import SearchAndActions from '../../components/Administrator/SearchAndActions.vue';
-import MemberTabs from '../../components/Administrator/MemberTabs.vue';
+import HeaderStats from '../../components/Administrator/MemberManagement/HeaderStats.vue';
+import SearchAndActions from '../../components/Administrator/MemberManagement/SearchAndActions.vue';
+import MemberTabs from '../../components/Administrator/MemberManagement/MemberTabs.vue';
 </script>
 
 <style scoped></style>

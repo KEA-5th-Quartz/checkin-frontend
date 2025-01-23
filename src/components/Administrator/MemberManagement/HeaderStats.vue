@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
 import { AdminIcon, ManagerIcon, UserIcon } from '@/assets/icons/path';
-import SvgIcon from '../../components/common/SvgIcon.vue';
+import SvgIcon from '../../../components/common/SvgIcon.vue';
 
 const props = defineProps({
   adminCount: {
