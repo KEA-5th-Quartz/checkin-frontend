@@ -30,8 +30,8 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/user/TicketView.vue'),
   },
   {
-    path: '/user/templatelists',
-    name: 'user-templatelists',
+    path: '/user/templates',
+    name: 'user-templates',
     component: () => import('../views/user/TemplateLists.vue'),
   },
   {
