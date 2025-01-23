@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative">
+  <div class="max-h-fit flex flex-col items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative">
     <div class="flex justify-end w-full">
       <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
     </div>

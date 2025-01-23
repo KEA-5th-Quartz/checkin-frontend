@@ -14,15 +14,22 @@
       </button>
     </div>
 
-    <div class="flex flex-wrap justify-between gap-7 mx-20">
+    <div class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
       <MemberCard v-for="member in filteredMembers" :key="member.id" :member="member" class="w-[20%]" />
     </div>
+    <CustomPagination
+      :itemsPerPage="itemsPerPage"
+      :currentPage="currentPage"
+      :totalPages="totalPages"
+      @pageChange="handlePageChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import MemberCard from '../../../components/Administrator/MemberManagement/MemberCard.vue';
+import CustomPagination from '@/components/common/CustomPagination.vue';
 
 // 샘플 멤버 데이터
 const members = ref([
@@ -53,6 +60,17 @@ const filteredMembers = computed(() => {
 function switchTab(tab) {
   currentTab.value = tab;
 }
+
+// 페이지 상태 관리
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const totalPages = 20;
+// 페이지 변경 핸들러
+const handlePageChange = (page: number) => {
+  console.log(`페이지 변경: ${page}, 한 페이지에 표시할 데이터 수: ${itemsPerPage}`);
+  console.log('추후 api에 현재 페이지와 한 페이지에 표시할 데이터 수 담아서 호출? ');
+  currentPage.value = page; // 현재 페이지 업데이트
+};
 </script>
 
 <style scoped></style>
