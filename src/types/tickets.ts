@@ -20,4 +20,6 @@ export interface DropdownProps {
   label: string;
   hasColor?: boolean;
   onOptionSelect?: (option: BaseTicketOption) => void;
+  isUser?: boolean;
+  isEdit?: boolean;
 }

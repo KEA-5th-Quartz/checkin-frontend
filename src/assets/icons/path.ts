@@ -208,3 +208,17 @@ export const SendIcon: IconPathTypes = {
     strokeLinejoin: 'round',
   },
 };
+
+// 쓰레기통 아이콘
+export const TrashcanIcon: IconPathTypes = {
+  path: 'M1 5H16M6.625 9V15M10.375 9V15M1.9375 5L2.875 17C2.875 17.5304 3.07254 18.0391 3.42417 18.4142C3.77581 18.7893 4.25272 19 4.75 19H12.25C12.7473 19 13.2242 18.7893 13.5758 18.4142C13.9275 18.0391 14.125 17.5304 14.125 17L15.0625 5M5.6875 5V2C5.6875 1.73478 5.78627 1.48043 5.96209 1.29289C6.1379 1.10536 6.37636 1 6.625 1H10.375C10.6236 1 10.8621 1.10536 11.0379 1.29289C11.2137 1.48043 11.3125 1.73478 11.3125 2V5',
+  fill: 'none',
+  width: 17,
+  height: 20,
+  options: {
+    stroke: '#51525B',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+};

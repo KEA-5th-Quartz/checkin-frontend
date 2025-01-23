@@ -1,7 +1,7 @@
 // 개수 필터링
 export interface PageOption {
   id: number;
-  value: number;
+  value: number | string;
   label: string;
 }
 
