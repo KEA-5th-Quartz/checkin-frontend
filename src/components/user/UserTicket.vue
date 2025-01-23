@@ -8,6 +8,7 @@ import { useTicketStore } from '@/stores/userTicketStore';
 import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
+import '@/assets/slideAnimation.css';
 
 defineProps<{
   ticketId: number;
@@ -304,30 +305,6 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 </template>
 
 <style scoped>
-.drawer-enter {
-  animation: slideIn 0.3s forwards;
-}
-.drawer-leave {
-  animation: slideOut 0.3s forwards;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
 input[type='date']::-webkit-calendar-picker-indicator {
   position: absolute;
   width: 100%;
