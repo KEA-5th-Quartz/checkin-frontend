@@ -29,7 +29,7 @@ const handleMainClick = () => {
 
 <template>
   <CommonOverlay @click="onCancelClick">
-    <div class="fixed flex flex-col bg-white-1 w-96 p-6 shadow-md rounded-xl">
+    <div class="dialog-container fixed flex flex-col bg-white-1 w-96 p-6 shadow-lg rounded-xl">
       <p class="font-bold">{{ title }}</p>
 
       <input
@@ -60,3 +60,21 @@ const handleMainClick = () => {
     </div>
   </CommonOverlay>
 </template>
+
+<style scoped>
+.dialog-container {
+  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+</style>

@@ -144,6 +144,7 @@ const handleDelete = () => {
 
   <CommonDialog
     v-if="dialogState.open"
+    :isWarn="dialogState.isWarn"
     :title="dialogState.title"
     :cancelText="dialogState.cancelText"
     :mainText="dialogState.mainText"
