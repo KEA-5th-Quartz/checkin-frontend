@@ -5,7 +5,7 @@ import { computed, onMounted, ref } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { useTicketStore } from '@/stores/userTicketStore';
-import { firstCategory, managerOptions, secondCategory } from '../manager/ticketOptionTest';
+import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
 
@@ -29,8 +29,7 @@ let ticketDefaultTest = {
   title: 'SSH 접속 확인',
   firstCategory: 'VM1',
   secondCategory: '생성',
-  manager: '김현중',
-  endDate: '2025-02-22',
+  due_date: '2025-02-22',
   content: 'Github Repo가 접속이 되지 않습니다.',
 };
 
@@ -69,7 +68,6 @@ const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof
 
 const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
 const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
-const managerSelected = createComputedProperty(managerOptions, 'manager');
 
 const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: BaseTicketOption) => {
   if (ticketStore.ticket) {
@@ -199,28 +197,19 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                   class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2"
                 >
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">{{ ticketStore.ticket.manager }}</p>
+                  <p class="text-xs text-gray-1">king.kim</p>
                 </div>
-                <CustomDropdown
-                  v-else
-                  label=""
-                  :options="managerOptions"
-                  :selected-option="managerSelected"
-                  :onOptionSelect="handleOptionSelect('manager')"
-                  @select="(option: BaseTicketOption)=> (managerSelected = option)"
-                  isEdit
-                />
               </div>
               <!-- 마감 기한 블록 -->
               <div class="mt-7">
                 <p class="text-sm pb-2">마감 기한</p>
-                <p v-if="!ticketStore.isEditMode" class="text-xs text-blue-1">{{ ticketStore.ticket.endDate }}</p>
+                <p v-if="!ticketStore.isEditMode" class="text-xs text-blue-1">{{ ticketStore.ticket.due_date }}</p>
                 <input
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
                   class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
-                  v-model="ticketStore.ticket.endDate"
+                  v-model="ticketStore.ticket.due_date"
                 />
               </div>
             </section>

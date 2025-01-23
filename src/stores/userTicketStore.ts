@@ -4,8 +4,7 @@ export interface Ticket {
   title: string;
   firstCategory: string;
   secondCategory: string;
-  manager: string;
-  endDate: string;
+  due_date: string;
   content: string;
 }
 
@@ -13,8 +12,7 @@ const defaultTicket: Ticket = {
   title: '',
   firstCategory: '',
   secondCategory: '',
-  manager: '',
-  endDate: '',
+  due_date: '',
   content: '',
 };
 
