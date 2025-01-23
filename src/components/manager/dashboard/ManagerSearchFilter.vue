@@ -2,7 +2,6 @@
 import { ArrowDownIcon, FilterIcon, SearchIcon } from '../../../assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
 import FilterModal from '../dashboard/ManagerFilter.vue';
-import { PageOption } from '../../../types/manager';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
@@ -20,7 +19,9 @@ const filterButtonRef = ref<HTMLElement | null>(null);
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
-const selectOption = (option: PageOption) => {
+const selectOption = (
+  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
+) => {
   selectedPerPage.value = option;
   isOpen.value = false;
 };
@@ -60,15 +61,15 @@ const selectOption = (option: PageOption) => {
         <button ref="filterButtonRef" @click="isFilterOpen = true" class="text-gray-0 flex items-center gap-2">
           <SvgIcon :icon="FilterIcon" />
           필터
-          <!-- 필터 모달 -->
-          <FilterModal
-            v-if="isFilterOpen"
-            :filter-active="isFilterOpen"
-            :button-ref="filterButtonRef"
-            @close="isFilterOpen = false"
-            class="absolute top-12 right-0"
-          />
         </button>
+        <!-- 필터 모달 -->
+        <FilterModal
+          v-if="isFilterOpen"
+          :filter-active="isFilterOpen"
+          :button-ref="filterButtonRef"
+          @close="isFilterOpen = false"
+          class="absolute top-12 right-0"
+        />
       </div>
     </div>
   </section>

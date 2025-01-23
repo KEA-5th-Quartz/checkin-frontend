@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import { CalendarIcon, ExclamationMarkIcon, MemberIcon, PersonIcon } from '@/assets/icons/path';
+import { CalendarIcon, ExclamationMarkIcon, PersonIcon } from '@/assets/icons/path';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
-import { ref, onMounted, watch, nextTick } from 'vue';
-
-const props = defineProps<{
-  filterActive: boolean;
-  buttonRef: HTMLElement | null;
-}>();
+import { ref } from 'vue';
 
 const emit = defineEmits(['close']);
 const modalRef = ref<HTMLElement | null>(null);
@@ -27,12 +22,10 @@ onClickOutside(modalRef, () => {
         <SvgIcon :icon="PersonIcon" class="p-0.5 bg-gray-2 opacity-75 rounded-full" />
         <p>나에게 할당</p>
       </div>
-
       <div class="flex items-center gap-1">
         <SvgIcon :icon="CalendarIcon" />
         <p>이번 주에 기한</p>
       </div>
-
       <div class="flex items-center gap-1">
         <SvgIcon :icon="ExclamationMarkIcon" />
         <p>할당되지 않음</p>
@@ -40,22 +33,20 @@ onClickOutside(modalRef, () => {
     </section>
 
     <!-- 담당자 -->
-    <div class="flex flex-col px-7 pb-5">
+    <section class="flex flex-col px-7 pb-5">
       <p class="border-b-2 border-gray-0 max-w-fit pr-4">담당자</p>
-      <div class="flex flex-wrap gap-2 pt-2">
-        <div v-for="i in 13" :key="i" class="w-7 h-7 rounded-full bg-purple-500" />
-      </div>
-    </div>
+      <div class="pt-2"></div>
+    </section>
 
     <!-- 상태 -->
-    <div class="flex flex-col px-7">
+    <section class="flex flex-col px-7">
       <p class="border-b-2 border-gray-0 max-w-fit pr-4">상태</p>
       <div class="flex justify-center gap-2 pt-3.5">
         <StatusBadge status="생성" size="lg" class="cursor-pointer" />
         <StatusBadge status="진행중" size="lg" class="cursor-pointer" />
         <StatusBadge status="완료" size="lg" class="cursor-pointer" />
       </div>
-    </div>
+    </section>
 
     <!-- 우선순위 -->
     <section class="flex flex-col px-7 pt-10">
