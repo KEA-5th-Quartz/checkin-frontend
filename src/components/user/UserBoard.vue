@@ -7,7 +7,6 @@ import UserTicket from './UserTicket.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 
 const ticketStore = useUserTicketListStore();
-console.log(ticketStore);
 
 const selectedTicketId = ref<number | null>(null);
 
@@ -23,10 +22,8 @@ const handleCheckboxClick = (event: Event, id: number) => {
   event.stopPropagation();
 
   if (ticketStore.selectedTickets.has(id)) {
-    console.log(`체크 해제된 티켓 ID: ${id}`);
     ticketStore.removeSelectedTicket(id);
   } else {
-    console.log(`체크된 티켓 ID: ${id}`);
     ticketStore.addSelectedTicket(id);
   }
   // 현재 선택된 모든 티켓 출력
