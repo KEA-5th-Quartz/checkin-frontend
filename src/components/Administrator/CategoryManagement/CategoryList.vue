@@ -11,7 +11,11 @@
           @click="selectPrimaryCategory(category)"
         >
           <span>{{ category.name }}</span>
-          <CategoryDropdown />
+          <CategoryDropdown
+            :category="category"
+            @edit="handleEditPrimaryCategory"
+            @delete="handleDeletePrimaryCategory"
+          />
         </li>
       </ul>
     </div>
@@ -26,11 +30,21 @@
           class="flex justify-between items-center p-3 border rounded-md cursor-pointer hover:bg-gray-3"
         >
           <span>{{ category.name }}</span>
-          <CategoryDropdown />
+          <CategoryDropdown
+            :category="category"
+            @edit="handleEditSecondaryCategory"
+            @delete="handleDeleteSecondaryCategory"
+          />
         </li>
       </ul>
       <p v-else class="text-gray-0">해당 2차 카테고리가 없습니다.</p>
     </div>
+    <EditCategoryModal
+      :isOpen="isEditModalOpen"
+      :category="selectedCategory"
+      @close="closeEditModal"
+      @submit="submitEditCategory"
+    />
   </div>
 </template>
 
@@ -38,9 +52,12 @@
 import { ref, computed } from 'vue';
 import { primaryCategories, SecondaryCategories } from '../CategoryTest';
 import CategoryDropdown from './CategoryDropdown.vue';
+import EditCategoryModal from './EditCategoryModal.vue';
 
 // 선택된 1차 카테고리 상태
 const selectedPrimaryCategory = ref(null);
+const isEditModalOpen = ref(false);
+const selectedCategory = ref(null);
 
 // 2차 카테고리 필터링 로직
 const filteredSecondaryCategories = computed(() => {
@@ -53,13 +70,34 @@ function selectPrimaryCategory(category) {
   selectedPrimaryCategory.value = category;
 }
 
-// 수정 이벤트 핸들러
-function handleEdit(category) {
-  console.log('수정할 카테고리:', category);
+// 수정 모달 열기
+function handleEditPrimaryCategory(category) {
+  selectedCategory.value = category;
+  isEditModalOpen.value = true;
 }
 
-// 삭제 이벤트 핸들러
-function handleDelete(category) {
-  console.log('삭제할 카테고리:', category);
+function handleEditSecondaryCategory(category) {
+  selectedCategory.value = category;
+  isEditModalOpen.value = true;
+}
+
+// 수정 모달 닫기
+function closeEditModal() {
+  isEditModalOpen.value = false;
+  selectedCategory.value = null;
+}
+
+// 수정 제출
+function submitEditCategory(updatedCategory) {
+  console.log('수정된 카테고리:', updatedCategory);
+  closeEditModal();
+}
+
+function handleDeletePrimaryCategory(category) {
+  console.log('1차 카테고리 삭제:', category);
+}
+
+function handleDeleteSecondaryCategory(category) {
+  console.log('2차 카테고리 삭제:', category);
 }
 </script>

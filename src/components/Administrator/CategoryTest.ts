@@ -3,6 +3,13 @@ export const primaryCategories = [
   { id: 2, name: 'VM' },
   { id: 3, name: 'NFS' },
   { id: 4, name: 'DNS' },
+  { id: 5, name: 'SSL' },
+  { id: 6, name: 'LB' },
+  { id: 7, name: '프로젝트 사용자' },
+  { id: 8, name: 'KE' },
+  { id: 9, name: 'CR' },
+  { id: 10, name: '솔루션' },
+  { id: 11, name: '기타' },
 ];
 
 export const SecondaryCategories = [
