@@ -192,10 +192,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <!-- 담당자 블록 -->
               <div class="flex flex-col mt-7">
                 <p class="text-sm pb-2">담당자</p>
-                <div
-                  v-if="!ticketStore.isEditMode"
-                  class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2"
-                >
+                <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">king.kim</p>
                 </div>
