@@ -25,6 +25,11 @@ const routes: Array<RouteRecordRaw> = [
   },
   // 사용자
   {
+    path: '/user/tickets',
+    name: 'user-tickets',
+    component: () => import('../views/user/TicketView.vue'),
+  },
+  {
     path: '/user/templatelists',
     name: 'user-templatelists',
     component: () => import('../views/user/TemplateLists.vue'),

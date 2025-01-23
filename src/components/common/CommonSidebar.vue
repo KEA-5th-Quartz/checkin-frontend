@@ -14,7 +14,7 @@ import {
 } from '@/assets/icons/path';
 
 type Role = 'manager' | 'admin' | 'user';
-const role = ref<Role>('user'); // ref를 사용하여 반응형 상태로 선언
+const role = ref<Role>('manager'); // ref를 사용하여 반응형 상태로 선언
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
