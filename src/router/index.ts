@@ -34,6 +34,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'CategoryManagement',
     component: () => import('../views/Administrator/CategoryManagement.vue'),
   },
+  // 사용자
+  {
+    path: '/user/tickets',
+    name: 'user-tickets',
+    component: () => import('../views/user/TicketView.vue'),
+  },
 ];
 
 const router = createRouter({

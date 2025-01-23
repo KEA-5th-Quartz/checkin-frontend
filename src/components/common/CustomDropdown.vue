@@ -10,6 +10,8 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   onOptionSelect: undefined, // 옵션 선택 시 실행할 콜백 함수
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
+  isUser: false,
+  isEdit: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -60,12 +62,18 @@ onUnmounted(() => {
     <button
       @click.stop="toggleDropdown"
       :class="[
-        'w-full flex items-center justify-between px-3  rounded-lg transition-colors duration-200',
-        hasColor ? 'inline-flex items-center gap-2 py-1' : 'border border-primary-2 hover:border-primary-4 py-2',
+        'min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200',
+        hasColor
+          ? 'inline-flex items-center gap-2 py-1'
+          : isUser
+          ? 'border border-gray-1 py-2'
+          : isEdit
+          ? 'border border-gray-2 py-2 w-full -mt-2 rounded-xl'
+          : 'border border-primary-2 hover:border-primary-4 py-2',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
     >
-      <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1']">
+      <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
         {{ selectedOption.label }}
       </span>
       <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
@@ -73,7 +81,10 @@ onUnmounted(() => {
 
     <div
       v-if="isOpen"
-      class="absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border border-primary-2 max-h-60 overflow-y-auto"
+      :class="[
+        'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar',
+        isUser ? 'border-gray-1' : isEdit ? 'border-gray-3' : 'border-primary-2',
+      ]"
     >
       <ul>
         <li
@@ -81,7 +92,7 @@ onUnmounted(() => {
           :key="option.id"
           @click="handleSelect(option)"
           :class="[
-            'px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3',
+            'px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap',
             selectedOption.id === option.id ? 'bg-gray-50' : '',
           ]"
         >

@@ -58,7 +58,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
 <template>
   <Teleport to="body">
     <div v-if="ticketId" class="fixed inset-0 z-10">
-      <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="handleClose" />
+      <div class="fixed inset-0 transition-opacity" @click="handleClose" />
       <div
         class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
         :class="{ 'drawer-enter': show, 'drawer-leave': !show }"
