@@ -80,12 +80,73 @@ const chartOptions = ref({
   },
   colors: ['#232D64', '#828DCA', '#D7DCF5', '#EBEDF8'],
 });
+
+const chartOptions2 = ref({
+  chart: {
+    type: 'bar',
+    height: 550,
+    stacked: true,
+    toolbar: {
+      show: false,
+    },
+  },
+  grid: {
+    show: false,
+    // padding 대신 grid 사용
+    padding: {
+      top: 0,
+      right: 40,
+      bottom: 0,
+      left: 40,
+    },
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      barHeight: '80%',
+      endingShape: 'rounded',
+      borderRadius: 14,
+    },
+  },
+  dataLabels: {
+    enabled: true,
+    style: {
+      fontSize: '13px',
+    },
+    offsetX: 0,
+  },
+  stroke: {
+    width: 0,
+    colors: ['#fff'],
+  },
+  title: {
+    text: '담당자별 티켓 상태',
+    offsetX: 40,
+    offsetY: 40,
+  },
+  xaxis: {
+    categories: ['김철환', '김현중', '박가현', '박석종', '박준한', '손성민', '임찬호', '조기헌', '최현준'],
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'right',
+    markers: {
+      radius: 12, // 마커의 크기
+      shape: 'circle', // 마커를 원형으로 설정
+    },
+  },
+  colors: ['#232D64', '#828DCA', '#D7DCF5', '#EBEDF8'],
+});
 </script>
 
 <template>
   <section class="overflow-x-auto mt-5 p-5 pb-20">
-    <div class="bg-white-0 w-full h-[704px] rounded-[20px] shadow-md">
+    <div class="bg-white-0 w-full rounded-[20px] shadow-md">
       <apexchart type="bar" height="500" :options="chartOptions" :series="series" />
+    </div>
+
+    <div class="bg-white-0 w-full rounded-[20px] shadow-md">
+      <apexchart type="bar" height="500" :options="chartOptions2" :series="series" />
     </div>
   </section>
 </template>

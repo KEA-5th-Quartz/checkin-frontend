@@ -23,6 +23,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'manager-statistics',
     component: () => import('../views/manager/ManagerStatisticsView.vue'),
   },
+  // 사용자
+  {
+    path: '/user/tickets',
+    name: 'user-tickets',
+    component: () => import('../views/user/TicketView.vue'),
+  },
 ];
 
 const router = createRouter({
