@@ -56,18 +56,20 @@ const selectOption = (option: PageOption) => {
         </div>
       </div>
 
-      <button ref="filterButtonRef" @click="isFilterOpen = true" class="text-gray-0 flex items-center gap-2">
-        <SvgIcon :icon="FilterIcon" />
-        필터
-      </button>
+      <div class="relative flex items-center">
+        <button ref="filterButtonRef" @click="isFilterOpen = true" class="text-gray-0 flex items-center gap-2">
+          <SvgIcon :icon="FilterIcon" />
+          필터
+          <!-- 필터 모달 -->
+          <FilterModal
+            v-if="isFilterOpen"
+            :filter-active="isFilterOpen"
+            :button-ref="filterButtonRef"
+            @close="isFilterOpen = false"
+            class="absolute top-12 right-0"
+          />
+        </button>
+      </div>
     </div>
-
-    <!-- 필터 모달 -->
-    <FilterModal
-      v-if="isFilterOpen"
-      :filter-active="isFilterOpen"
-      :button-ref="filterButtonRef"
-      @close="isFilterOpen = false"
-    />
   </section>
 </template>
