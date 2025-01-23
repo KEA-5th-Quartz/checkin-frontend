@@ -36,6 +36,8 @@ const userNavItems = [
   { name: '요청 티켓', icon: CategoryIcon, path: '/tickets/requested' },
   { name: '티켓 템플릿', icon: CategoryIcon, path: '/tickets/templates' },
   { name: '티켓 생성', icon: CreateIcon, path: '/tickets/create' },
+  { name: '새 요청 티켓', icon: CategoryIcon, path: '/tickets/requested' },
+  { name: '새 티켓 템플릿', icon: CategoryIcon, path: '/tickets/templates' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
 </script>
