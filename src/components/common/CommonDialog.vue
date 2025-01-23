@@ -28,7 +28,7 @@ const handleMainClick = () => {
 </script>
 
 <template>
-  <CommonOverlay @click="onCalcelClick">
+  <CommonOverlay @click="onCancelClick">
     <div class="fixed flex flex-col bg-white-1 w-96 p-6 shadow-md rounded-xl">
       <p class="font-bold">{{ title }}</p>
 
@@ -42,7 +42,7 @@ const handleMainClick = () => {
       <div class="flex w-full gap-6 mt-6">
         <button
           v-if="!isOneBtn"
-          @click="onCalcelClick"
+          @click="onCancelClick"
           class="w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80 bg-gray-2"
         >
           {{ cancelText }}

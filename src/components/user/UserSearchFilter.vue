@@ -5,6 +5,8 @@ import SvgIcon from '../common/SvgIcon.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
 import { useUserTicketListStore } from '../../stores/userTicketListStore';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '../common/CommonDialog.vue';
 
 const ticketStore = useUserTicketListStore();
 
@@ -58,8 +60,30 @@ const handleCancel = () => {
   ticketStore.clearSelectedTickets();
 };
 
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
 const handleDelete = () => {
-  console.log('삭제 확인 모달 등장');
+  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
+  const selectedTicketIds = Array.from(ticketStore.selectedTickets);
+  const ticketCount = selectedTicketIds.length;
+
+  dialogState.value = {
+    open: true,
+    isWarn: true,
+    title: `${ticketCount}개의 티켓을 삭제하시겠습니까?`,
+    cancelText: '취소',
+    onCancelClick: () => {
+      dialogState.value = { ...initialDialog };
+    },
+    mainText: '삭제',
+    onMainClick: () => {
+      console.log('삭제하는 id 배열: ', selectedTicketIds);
+
+      ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
+      ticketStore.toggleDeleteMode(); // 삭제 모드 종료
+      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+    },
+  };
 };
 </script>
 
@@ -117,4 +141,13 @@ const handleDelete = () => {
       </button>
     </div>
   </section>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :title="dialogState.title"
+    :cancelText="dialogState.cancelText"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onCancelClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>
