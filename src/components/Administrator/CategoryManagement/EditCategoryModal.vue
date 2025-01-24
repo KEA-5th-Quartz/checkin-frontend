@@ -1,12 +1,11 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center bg-black-0 bg-opacity-50 z-50">
-    <div class="bg-white-0 p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
+  <div v-if="isOpen" class="fixed inset-0 flex-center bg-black-0 bg-opacity-50 z-50" @click="closeModal">
+    <div class="bg-white-0 p-6 rounded-lg shadow-lg w-[90%] max-w-lg" @click.stop>
       <!-- 모달 헤더 -->
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-semibold text-black-0">카테고리 수정</h3>
         <button @click="closeModal" class="text-gray-0 hover:text-black-0 text-lg">✕</button>
       </div>
-
       <!-- 모달 본문 -->
       <div>
         <label class="block text-sm font-medium text-gray-0 mb-2">카테고리 이름</label>
@@ -16,8 +15,8 @@
           class="w-full border-b border-gray-2 focus:outline-none focus:border-primary-3 px-2 py-1"
           placeholder="카테고리 이름을 입력하세요"
         />
+        <p v-if="errorMessage" class="text-sm text-red-500 mt-1">{{ errorMessage }}</p>
       </div>
-
       <!-- 모달 푸터 -->
       <div class="flex justify-end mt-6">
         <button @click="closeModal" class="px-4 py-2 mr-3 bg-gray-2 text-black-0 rounded-md hover:opacity-80">
@@ -48,6 +47,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'submit']);
 
 const updatedName = ref('');
+const errorMessage = ref('');
 
 // 모달이 열릴 때마다 updatedName을 업데이트
 watch(
@@ -58,13 +58,22 @@ watch(
   { immediate: true },
 );
 
+function resetState() {
+  errorMessage.value = '';
+}
+
 // 모달 닫기
 function closeModal() {
   emit('close');
+  resetState();
 }
 
 // 수정된 이름 제출
 function submitEdit() {
+  if (!updatedName.value.trim()) {
+    errorMessage.value = '카테고리 이름을 입력해주세요.';
+    return;
+  }
   emit('submit', { ...props.category, name: updatedName.value });
   closeModal();
 }

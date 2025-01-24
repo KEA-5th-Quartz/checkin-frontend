@@ -3,6 +3,8 @@
     <!-- 1차 카테고리 -->
     <div class="w-[48%]">
       <h3 class="text-lg font-bold mb-4">1차 카테고리</h3>
+      <div class="border-b border-2 border-primary-0 mb-3"></div>
+      <CategoryAddButton buttonText="+ 1차 카테고리 추가하기" @addCategory="handleAddPrimaryCategory" />
       <ul class="space-y-2">
         <li
           v-for="category in primaryCategories"
@@ -23,6 +25,8 @@
     <!-- 2차 카테고리 -->
     <div class="w-[48%]">
       <h3 class="text-lg font-bold mb-4">2차 카테고리</h3>
+      <div class="border-b border-2 border-primary-0 mb-3"></div>
+      <CategoryAddButton buttonText="+ 2차 카테고리 추가하기" @addCategory="handleAddSecondaryCategory" />
       <ul v-if="filteredSecondaryCategories.length > 0" class="space-y-2">
         <li
           v-for="category in filteredSecondaryCategories"
@@ -45,6 +49,13 @@
       @close="closeEditModal"
       @submit="submitEditCategory"
     />
+    <AddCategoryModal
+      :isOpen="isAddModalOpen"
+      :parentCategory="modalParentCategory"
+      :modalTitle="modalTitle"
+      @close="closeAddModal"
+      @submit="submitAddCategory"
+    />
   </div>
 </template>
 
@@ -53,11 +64,18 @@ import { ref, computed } from 'vue';
 import { primaryCategories, SecondaryCategories } from '../CategoryTest';
 import CategoryDropdown from './CategoryDropdown.vue';
 import EditCategoryModal from './EditCategoryModal.vue';
+import CategoryAddButton from './CategoryAddButton.vue';
+import AddCategoryModal from './AddCategoryModal.vue';
 
 // 선택된 1차 카테고리 상태
 const selectedPrimaryCategory = ref(null);
 const isEditModalOpen = ref(false);
 const selectedCategory = ref(null);
+
+// AddCategoryModal 관련 상태
+const isAddModalOpen = ref(false);
+const modalParentCategory = ref(null);
+const modalTitle = ref('');
 
 // 2차 카테고리 필터링 로직
 const filteredSecondaryCategories = computed(() => {
@@ -95,6 +113,36 @@ function submitEditCategory(updatedCategory) {
 
 function handleDeletePrimaryCategory(category) {
   console.log('1차 카테고리 삭제:', category);
+}
+
+function handleAddPrimaryCategory() {
+  modalTitle.value = '1차 카테고리 추가';
+  modalParentCategory.value = null;
+  isAddModalOpen.value = true;
+}
+
+function handleAddSecondaryCategory() {
+  if (!selectedPrimaryCategory.value) {
+    //공용 다이얼로그 추가
+    alert('1차 카테고리를 먼저 선택해주세요.');
+    return;
+  }
+  modalTitle.value = '2차 카테고리 추가';
+  modalParentCategory.value = selectedPrimaryCategory.value;
+  isAddModalOpen.value = true;
+}
+
+function closeAddModal() {
+  isAddModalOpen.value = false;
+}
+
+function submitAddCategory(newCategory) {
+  if (newCategory.parentId) {
+    console.log('새로운 2차 카테고리:', newCategory);
+  } else {
+    console.log('새로운 1차 카테고리:', newCategory);
+  }
+  closeAddModal();
 }
 
 function handleDeleteSecondaryCategory(category) {
