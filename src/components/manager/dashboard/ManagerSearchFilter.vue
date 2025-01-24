@@ -15,7 +15,6 @@ const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const isFilterOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
-const filterButtonRef = ref<HTMLElement | null>(null);
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
