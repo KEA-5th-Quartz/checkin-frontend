@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { StatusBadgeProps } from '@/types/badges';
+import { StatusBadgeProps } from '@/types/common/badges';
 
 const props = withDefaults(defineProps<StatusBadgeProps>(), {
   size: 'sm',

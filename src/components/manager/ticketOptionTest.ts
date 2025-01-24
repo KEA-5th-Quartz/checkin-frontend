@@ -14,9 +14,9 @@ export const status: StatusTicketOption[] = [
 ];
 
 export const firstCategory: BaseTicketOption[] = [
-  { id: 1, value: 'VM1', label: 'VM1' },
-  { id: 2, value: 'VM2', label: 'VM2' },
-  { id: 3, value: 'VM3', label: 'VM3' },
+  { id: 1, value: '카테고리 1', label: '카테고리 1' },
+  { id: 2, value: '카테고리 2', label: '카테고리 2' },
+  { id: 3, value: '카테고리 3', label: '카테고리 3' },
 ];
 
 export const secondCategory: BaseTicketOption[] = [
@@ -35,4 +35,10 @@ export const managerOptions: BaseTicketOption[] = [
   { id: 7, value: '임찬호', label: '임찬호' },
   { id: 8, value: '조기헌', label: '조기헌' },
   { id: 9, value: '최현준', label: '최현준' },
+];
+
+export const perPageOptions = [
+  { id: 1, value: 10, label: '10개' },
+  { id: 2, value: 20, label: '20개' },
+  { id: 3, value: 50, label: '50개' },
 ];

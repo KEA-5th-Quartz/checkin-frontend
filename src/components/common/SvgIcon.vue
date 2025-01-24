@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IconPathTypes, IconProps } from '@/types/icon';
+import type { IconPathTypes, IconProps } from '@/types/common/icon';
 import { computed } from 'vue';
 
 // IconProps를 확장하여 iconOptions 추가

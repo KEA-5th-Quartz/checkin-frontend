@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PriorityBadgeProps } from '@/types/badges';
+import { PriorityBadgeProps } from '@/types/common/badges';
 
 const props = withDefaults(defineProps<PriorityBadgeProps>(), {
   size: 'sm',
