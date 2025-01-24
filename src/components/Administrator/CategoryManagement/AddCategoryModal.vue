@@ -1,31 +1,31 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 flex-center bg-black-0 bg-opacity-50 z-50" @click="close">
-    <div class="bg-white-0 p-6 rounded-lg shadow-lg w-[90%] max-w-lg" @click.stop>
+  <div v-if="isOpen" class="category-modal-overlay" @click="close">
+    <div class="category-modal-container" @click.stop>
       <!-- 모달 헤더 -->
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-semibold text-black-0">{{ modalTitle }}</h3>
-        <button @click="close" class="text-gray-0 hover:text-black-0 text-lg">✕</button>
+      <div class="category-modal-header">
+        <h3 class="category-modal-title">{{ modalTitle }}</h3>
+        <button @click="close" class="category-modal-close-button">✕</button>
       </div>
 
       <!-- 모달 본문 -->
-      <div class="mb-4">
-        <p v-if="parentCategory" class="text-sm text-gray-600 mb-2">
+      <div class="category-modal-body">
+        <p v-if="parentCategory" class="text-sm text-gray-0 mb-4">
           상위 카테고리: <span class="font-semibold">{{ parentCategory.name }}</span>
         </p>
-        <label class="block text-sm font-medium text-gray-0 mb-2">카테고리 이름</label>
+        <label class="category-modal-input-label">카테고리 이름</label>
         <input
           type="text"
           v-model="categoryName"
-          class="w-full border border-gray-300 p-2 rounded-lg"
+          class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"
         />
         <!-- 경고 메시지 -->
-        <p v-if="errorMessage" class="text-sm text-red-500 mt-1">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
       <!-- 모달 푸터 -->
-      <div class="flex justify-end mt-6">
-        <button @click="close" class="px-4 py-2 mr-3 bg-gray-2 text-black-0 rounded-md hover:opacity-80">취소</button>
-        <button @click="submit" class="px-4 py-2 bg-primary-0 text-white-0 rounded-md hover:opacity-80">확인</button>
+      <div class="category-modal-footer">
+        <button @click="close" class="category-modal-cancel-button">취소</button>
+        <button @click="submit" class="category-modal-submit-button">확인</button>
       </div>
     </div>
   </div>

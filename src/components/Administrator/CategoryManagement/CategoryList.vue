@@ -1,15 +1,16 @@
 <template>
   <div class="flex justify-between">
     <!-- 1차 카테고리 -->
-    <div class="w-[48%]">
-      <h3 class="text-lg font-bold mb-4">1차 카테고리</h3>
-      <div class="border-b border-2 border-primary-0 mb-3"></div>
+    <div class="category-container">
+      <h3 class="category-header">1차 카테고리</h3>
+      <div class="category-divider"></div>
       <CategoryAddButton buttonText="+ 1차 카테고리 추가하기" @addCategory="handleAddPrimaryCategory" />
-      <ul class="space-y-2">
+      <ul v-if="primaryCategories.length > 0" class="category-list">
         <li
           v-for="category in primaryCategories"
           :key="category.id"
-          class="flex justify-between items-center p-3 border rounded-md cursor-pointer hover:bg-gray-3"
+          class="category-list-item"
+          :class="{ 'bg-blue-4 text-primary-3': selectedPrimaryCategory?.id === category.id }"
           @click="selectPrimaryCategory(category)"
         >
           <span>{{ category.name }}</span>
@@ -20,19 +21,21 @@
           />
         </li>
       </ul>
+      <div v-else class="category-list-empty">
+        <p>해당 1차 카테고리가 없습니다.</p>
+      </div>
     </div>
 
+    <!-- 구분 선 -->
+    <div class="border-r border-gray-2 mx-4"></div>
+
     <!-- 2차 카테고리 -->
-    <div class="w-[48%]">
-      <h3 class="text-lg font-bold mb-4">2차 카테고리</h3>
-      <div class="border-b border-2 border-primary-0 mb-3"></div>
+    <div class="category-container">
+      <h3 class="category-header">2차 카테고리</h3>
+      <div class="category-divider"></div>
       <CategoryAddButton buttonText="+ 2차 카테고리 추가하기" @addCategory="handleAddSecondaryCategory" />
-      <ul v-if="filteredSecondaryCategories.length > 0" class="space-y-2">
-        <li
-          v-for="category in filteredSecondaryCategories"
-          :key="category.id"
-          class="flex justify-between items-center p-3 border rounded-md cursor-pointer hover:bg-gray-3"
-        >
+      <ul v-if="filteredSecondaryCategories.length > 0" class="category-list">
+        <li v-for="category in filteredSecondaryCategories" :key="category.id" class="category-list-item">
           <span>{{ category.name }}</span>
           <CategoryDropdown
             :category="category"
@@ -41,7 +44,9 @@
           />
         </li>
       </ul>
-      <p v-else class="text-gray-0">해당 2차 카테고리가 없습니다.</p>
+      <div v-else class="category-list-empty">
+        <p>해당 2차 카테고리가 없습니다.</p>
+      </div>
     </div>
     <EditCategoryModal
       :isOpen="isEditModalOpen"
