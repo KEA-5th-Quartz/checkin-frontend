@@ -2,25 +2,20 @@
 import { ArrowDownIcon, FilterIcon, SearchIcon } from '../../../assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
 import FilterModal from '../dashboard/ManagerFilter.vue';
-import { PageOption } from '../../../types/manager';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
-
-const perPageOptions = [
-  { id: 1, value: 10, label: '10개' },
-  { id: 2, value: 20, label: '20개' },
-  { id: 3, value: 50, label: '50개' },
-];
+import { perPageOptions } from '../ticketOptionTest';
 
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const isFilterOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
-const filterButtonRef = ref<HTMLElement | null>(null);
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
-const selectOption = (option: PageOption) => {
+const selectOption = (
+  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
+) => {
   selectedPerPage.value = option;
   isOpen.value = false;
 };
@@ -31,7 +26,7 @@ const selectOption = (option: PageOption) => {
     <!-- 검색 -->
     <div class="manager-search-div">
       <input placeholder="티켓 검색..." class="manager-search-input" />
-      <SvgIcon :icon="SearchIcon" />
+      <SvgIcon :icon="SearchIcon" class="cursor-pointer" />
     </div>
 
     <!-- 필터 -->
@@ -39,7 +34,7 @@ const selectOption = (option: PageOption) => {
       <div ref="dropdownRef" class="relative mt-1">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon :icon="ArrowDownIcon" />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
         </button>
 
         <div v-if="isOpen" class="manager-filter-menu">
@@ -56,18 +51,15 @@ const selectOption = (option: PageOption) => {
         </div>
       </div>
 
-      <button ref="filterButtonRef" @click="isFilterOpen = true" class="text-gray-0 flex items-center gap-2">
-        <SvgIcon :icon="FilterIcon" />
-        필터
-      </button>
+      <!-- 필터링 아이콘 -->
+      <div class="relative flex items-center">
+        <button @click.stop="isFilterOpen = !isFilterOpen" class="text-gray-0 flex items-center gap-2">
+          <SvgIcon :icon="FilterIcon" />
+          필터
+        </button>
+        <!-- 필터 모달 -->
+        <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="absolute top-12 right-0" />
+      </div>
     </div>
-
-    <!-- 필터 모달 -->
-    <FilterModal
-      v-if="isFilterOpen"
-      :filter-active="isFilterOpen"
-      :button-ref="filterButtonRef"
-      @close="isFilterOpen = false"
-    />
   </section>
 </template>

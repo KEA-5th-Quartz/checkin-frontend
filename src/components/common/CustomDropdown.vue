@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import { ArrowDownIcon } from '@/assets/icons/path';
 import { BaseTicketOption, StatusTicketOption, DropdownProps } from '@/types/tickets';
+import { onClickOutside } from '@vueuse/core';
 
 // withDefaults를 사용하여 props의 기본값 설정
 const props = withDefaults(defineProps<DropdownProps>(), {
@@ -10,7 +11,6 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   onOptionSelect: undefined, // 옵션 선택 시 실행할 콜백 함수
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
-  isUser: false,
   isEdit: false,
 });
 
@@ -19,14 +19,22 @@ const emit = defineEmits<{
   (e: 'select', value: BaseTicketOption): void;
 }>();
 
-const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const isOpen = ref(false);
+let stopClickOutside: (() => void) | undefined;
 
-const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-    isOpen.value = false;
+onMounted(() => {
+  if (dropdownRef.value) {
+    stopClickOutside = onClickOutside(dropdownRef, () => {
+      isOpen.value = false;
+    });
   }
-};
+});
+onUnmounted(() => {
+  if (stopClickOutside) {
+    stopClickOutside();
+  }
+});
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value;
@@ -45,28 +53,19 @@ const handleSelect = (option: BaseTicketOption) => {
 const hasColorStyle = (option: BaseTicketOption | null | undefined): option is StatusTicketOption => {
   return option != null && 'bg' in option && 'text' in option;
 };
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside); // 외부 클릭 이벤트 리스너 추가
-});
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
-});
 </script>
 
 <template>
-  <div ref="dropdownRef" class="relative">
-    <p class="text-sm mb-1.5">{{ label }}</p>
+  <div ref="dropdownRef" class="relative max-w-fit">
+    <p class="text-sm mb-1.5 max-w-fit">{{ label }}</p>
 
+    <!-- 드롭다운 -->
     <button
       @click.stop="toggleDropdown"
       :class="[
         'min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200',
         hasColor
           ? 'inline-flex items-center gap-2 py-1'
-          : isUser
-          ? 'border border-gray-1 py-2'
           : isEdit
           ? 'border border-gray-2 py-2 w-full -mt-2 rounded-xl'
           : 'border border-primary-2 hover:border-primary-4 py-2',
@@ -79,11 +78,12 @@ onUnmounted(() => {
       <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
     </button>
 
+    <!-- 메뉴들 -->
     <div
       v-if="isOpen"
       :class="[
         'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar',
-        isUser ? 'border-gray-1' : isEdit ? 'border-gray-3' : 'border-primary-2',
+        isEdit ? 'border-gray-3' : 'border-primary-2',
       ]"
     >
       <ul>

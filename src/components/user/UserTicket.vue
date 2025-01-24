@@ -8,6 +8,7 @@ import { useTicketStore } from '@/stores/userTicketStore';
 import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
+import '@/assets/slideAnimation.css';
 
 defineProps<{
   ticketId: number;
@@ -219,12 +220,12 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               v-if="!ticketStore.isEditMode"
               class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
             >
-              <p class="text-sm text-gray-1 break-words">{{ ticketStore.ticket.content }}</p>
+              <p class="text-sm text-gray-1">{{ ticketStore.ticket.content }}</p>
             </div>
             <div v-else>
               <textarea
                 v-model="ticketStore.ticket.content"
-                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
+                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 focus:outline-none"
               />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
                 <SvgIcon :icon="ClipIcon" />
@@ -304,30 +305,6 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 </template>
 
 <style scoped>
-.drawer-enter {
-  animation: slideIn 0.3s forwards;
-}
-.drawer-leave {
-  animation: slideOut 0.3s forwards;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
 input[type='date']::-webkit-calendar-picker-indicator {
   position: absolute;
   width: 100%;
