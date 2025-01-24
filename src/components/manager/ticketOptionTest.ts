@@ -14,9 +14,9 @@ export const status: StatusTicketOption[] = [
 ];
 
 export const firstCategory: BaseTicketOption[] = [
-  { id: 1, value: 'VM1', label: 'VM1' },
-  { id: 2, value: 'VM2', label: 'VM2' },
-  { id: 3, value: 'VM3', label: 'VM3' },
+  { id: 1, value: '카테고리 1', label: '카테고리 1' },
+  { id: 2, value: '카테고리 2', label: '카테고리 2' },
+  { id: 3, value: '카테고리 3', label: '카테고리 3' },
 ];
 
 export const secondCategory: BaseTicketOption[] = [

@@ -31,7 +31,7 @@ const selectOption = (
     <!-- 검색 -->
     <div class="manager-search-div">
       <input placeholder="티켓 검색..." class="manager-search-input" />
-      <SvgIcon :icon="SearchIcon" />
+      <SvgIcon :icon="SearchIcon" class="cursor-pointer" />
     </div>
 
     <!-- 필터 -->
@@ -39,7 +39,7 @@ const selectOption = (
       <div ref="dropdownRef" class="relative mt-1">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon :icon="ArrowDownIcon" />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
         </button>
 
         <div v-if="isOpen" class="manager-filter-menu">
