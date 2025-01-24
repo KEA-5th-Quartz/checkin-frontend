@@ -4,12 +4,7 @@ import SvgIcon from '../../common/SvgIcon.vue';
 import FilterModal from '../dashboard/ManagerFilter.vue';
 import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
-
-const perPageOptions = [
-  { id: 1, value: 10, label: '10개' },
-  { id: 2, value: 20, label: '20개' },
-  { id: 3, value: 50, label: '50개' },
-];
+import { perPageOptions } from '../ticketOptionTest';
 
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
@@ -63,7 +58,7 @@ const selectOption = (
           필터
         </button>
         <!-- 필터 모달 -->
-        <FilterModal v-if="isFilterOpen" @close-filter="isFilterOpen = false" class="absolute top-12 right-0" />
+        <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="absolute top-12 right-0" />
       </div>
     </div>
   </section>

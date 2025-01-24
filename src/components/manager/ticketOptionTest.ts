@@ -36,3 +36,9 @@ export const managerOptions: BaseTicketOption[] = [
   { id: 8, value: '조기헌', label: '조기헌' },
   { id: 9, value: '최현준', label: '최현준' },
 ];
+
+export const perPageOptions = [
+  { id: 1, value: 10, label: '10개' },
+  { id: 2, value: 20, label: '20개' },
+  { id: 3, value: 50, label: '50개' },
+];

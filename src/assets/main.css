@@ -103,7 +103,7 @@ body {
     @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded-[10px] hover:border-gray-1;
   }
   .manager-filter-menu {
-    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded shadow-md;
+    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded-[10px] shadow-md z-20;
   }
 
   /* 대시보드 */

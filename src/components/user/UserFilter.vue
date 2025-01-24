@@ -1,44 +1,24 @@
 <script setup lang="ts">
-import { ArrowDownIcon, CalendarIcon } from '@/assets/icons/path';
+import { ArrowDownIcon } from '@/assets/icons/path';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
-import { firstCategory, managerOptions, status } from '../ticketOptionTest';
+import { firstCategory, managerOptions, status } from '../manager/ticketOptionTest';
 
 const emit = defineEmits(['closeFilter']);
 const modalRef = ref<HTMLElement | null>(null);
 
 // 필터 선택 상태 관리
-const selectedQuickFilters = ref<string[]>([]);
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
-const selectedPriorities = ref<string[]>([]);
 const selectedCategories = ref<string[]>([]);
 
 // 드롭다운 상태 관리
 const isManagerDropdownOpen = ref(false);
 const isCategoryDropdownOpen = ref(false);
 
-// 빠른 필터 옵션
-const quickFilters = [{ id: 'dueThisWeek', label: '이번 주에 기한', icon: CalendarIcon }];
-
-// 우선순위 옵션
-const priorities = [
-  { id: 'urgent', label: '긴급', bgClass: 'bg-red-0', textClass: 'text-red-1' },
-  { id: 'high', label: '높음', bgClass: 'bg-orange-0', textClass: 'text-orange-1' },
-  { id: 'medium', label: '보통', bgClass: 'bg-green-0', textClass: 'text-green-1' },
-  { id: 'low', label: '낮음', bgClass: 'bg-primary-2', textClass: 'text-primary-3' },
-];
-
 // 필터 토글 함수들
-const toggleQuickFilter = (filterId: string) => {
-  if (selectedQuickFilters.value.includes(filterId)) {
-    selectedQuickFilters.value = selectedQuickFilters.value.filter((id) => id !== filterId);
-  } else {
-    selectedQuickFilters.value.push(filterId);
-  }
-};
 
 const toggleManager = (value: string) => {
   if (selectedManagers.value.includes(value)) {
@@ -56,14 +36,6 @@ const toggleStatus = (status: string) => {
   }
 };
 
-const togglePriority = (priorityId: string) => {
-  if (selectedPriorities.value.includes(priorityId)) {
-    selectedPriorities.value = selectedPriorities.value.filter((id) => id !== priorityId);
-  } else {
-    selectedPriorities.value.push(priorityId);
-  }
-};
-
 const toggleCategory = (category: string) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== category);
@@ -74,10 +46,8 @@ const toggleCategory = (category: string) => {
 
 // 저장 버튼 클릭 핸들러
 const handleSave = () => {
-  console.log('상위 필터:', selectedQuickFilters.value);
   console.log('담당자', selectedManagers.value);
   console.log('상태:', selectedStatuses.value);
-  console.log('우선순위:', selectedPriorities.value);
   console.log('카테고리:', selectedCategories.value);
 };
 
@@ -89,24 +59,11 @@ onClickOutside(modalRef, () => {
 <template>
   <div
     ref="modalRef"
-    class="bg-white-0 rounded-lg w-[300px] max-h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar"
+    class="bg-white-0 rounded-lg w-[300px] max-h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar z-20"
   >
     <div class="py-3 px-8 bg-primary-0 text-white-1 font-bold">필터</div>
-
-    <section class="flex flex-col py-6 px-5 text-sm">
-      <div
-        v-for="filter in quickFilters"
-        :key="filter.id"
-        @click="toggleQuickFilter(filter.id)"
-        class="flex items-center gap-1 hover:bg-gray-3 py-1 px-2 rounded-xl cursor-pointer"
-        :class="[selectedQuickFilters.includes(filter.id) ? 'opacity-100' : 'opacity-30']"
-      >
-        <SvgIcon :icon="filter.icon" />
-        <p>{{ filter.label }}</p>
-      </div>
-    </section>
     <!-- 담당자 -->
-    <section class="flex flex-col px-7 pb-5">
+    <section class="flex flex-col px-7 py-5">
       <p class="border-b-2 border-gray-0 max-w-fit pr-4 mb-2">담당자</p>
       <div class="relative">
         <div
@@ -189,25 +146,7 @@ onClickOutside(modalRef, () => {
         />
       </div>
     </section>
-    <!-- 우선순위 -->
-    <section class="flex flex-col px-7 pt-5">
-      <p class="border-b-2 border-gray-0 max-w-fit pr-4">우선순위</p>
-      <div class="flex gap-2 pt-3.5">
-        <div
-          v-for="priority in priorities"
-          :key="priority.id"
-          @click="togglePriority(priority.id)"
-          class="px-3 py-1.5 text-sm flex-center font-bold rounded-full cursor-pointer"
-          :class="[
-            priority.bgClass,
-            priority.textClass,
-            selectedPriorities.includes(priority.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
-          ]"
-        >
-          {{ priority.label }}
-        </div>
-      </div>
-    </section>
+
     <!-- 취소 저장 버튼 -->
     <section class="flex justify-center w-full gap-4 pt-7">
       <button
