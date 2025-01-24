@@ -8,6 +8,8 @@ import { firstCategory, managerOptions, status } from '../ticketOptionTest';
 
 const emit = defineEmits(['closeFilter']);
 const modalRef = ref<HTMLElement | null>(null);
+const managerRef = ref<HTMLElement | null>(null);
+const categoryRef = ref<HTMLElement | null>(null);
 
 // 필터 선택 상태 관리
 const selectedQuickFilters = ref<string[]>([]);
@@ -81,6 +83,14 @@ const handleSave = () => {
   console.log('카테고리:', selectedCategories.value);
 };
 
+onClickOutside(managerRef, () => {
+  isManagerDropdownOpen.value = false;
+});
+
+onClickOutside(categoryRef, () => {
+  isCategoryDropdownOpen.value = false;
+});
+
 onClickOutside(modalRef, () => {
   emit('closeFilter');
 });
@@ -108,7 +118,7 @@ onClickOutside(modalRef, () => {
     <!-- 담당자 -->
     <section class="flex flex-col px-7 pb-5">
       <p class="border-b-2 border-gray-0 max-w-fit pr-4 mb-2">담당자</p>
-      <div class="relative">
+      <div class="relative" ref="managerRef">
         <div
           @click="isManagerDropdownOpen = !isManagerDropdownOpen"
           class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"
@@ -142,7 +152,7 @@ onClickOutside(modalRef, () => {
     <!-- 카테고리 -->
     <section class="flex flex-col px-7 pb-5">
       <p class="border-b-2 border-gray-0 max-w-fit mb-3.5">카테고리</p>
-      <div class="relative">
+      <div class="relative" ref="categoryRef">
         <div
           @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
           class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"

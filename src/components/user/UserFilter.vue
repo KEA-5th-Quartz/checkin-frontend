@@ -61,11 +61,7 @@ onClickOutside(modalRef, () => {
       <p class="border-b-2 border-gray-0 max-w-fit mb-3.5">카테고리</p>
       <div class="relative" ref="categoryRef">
         <div
-          @click="
-            console.log(isCategoryDropdownOpen);
-            isCategoryDropdownOpen = !isCategoryDropdownOpen;
-            console.log(isCategoryDropdownOpen);
-          "
+          @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
           class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"
         >
           <p v-if="selectedCategories.length === 0" class="opacity-30">카테고리 선택</p>

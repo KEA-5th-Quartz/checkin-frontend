@@ -21,17 +21,18 @@ const emit = defineEmits<{
 
 const dropdownRef = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
+let stopClickOutside: (() => void) | undefined;
 
-// const handleClickOutside = (event: MouseEvent) => {
-//   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
-//     isOpen.value = false;
-//   }
-// };
 onMounted(() => {
   if (dropdownRef.value) {
-    onClickOutside(dropdownRef, () => {
+    stopClickOutside = onClickOutside(dropdownRef, () => {
       isOpen.value = false;
     });
+  }
+});
+onUnmounted(() => {
+  if (stopClickOutside) {
+    stopClickOutside();
   }
 });
 
@@ -52,14 +53,6 @@ const handleSelect = (option: BaseTicketOption) => {
 const hasColorStyle = (option: BaseTicketOption | null | undefined): option is StatusTicketOption => {
   return option != null && 'bg' in option && 'text' in option;
 };
-
-// onMounted(() => {
-//   document.addEventListener('click', onClickOutside); // 외부 클릭 이벤트 리스너 추가
-// });
-
-// onUnmounted(() => {
-//   document.removeEventListener('click', onClickOutside);
-// });
 </script>
 
 <template>
