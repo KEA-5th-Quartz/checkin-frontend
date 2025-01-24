@@ -99,12 +99,9 @@ onClickOutside(modalRef, () => {
         :key="filter.id"
         @click="toggleQuickFilter(filter.id)"
         class="flex items-center gap-1 hover:bg-gray-3 py-1 px-2 rounded-xl cursor-pointer"
-        :class="{
-          'opacity-100': selectedQuickFilters.includes(filter.id),
-          'opacity-30': !selectedQuickFilters.includes(filter.id),
-        }"
+        :class="[selectedQuickFilters.includes(filter.id) ? 'opacity-100' : 'opacity-30']"
       >
-        <SvgIcon :icon="filter.icon" :class="{ 'p-0.5 bg-gray-2 rounded-full': filter.id === 'assignedToMe' }" />
+        <SvgIcon :icon="filter.icon" />
         <p>{{ filter.label }}</p>
       </div>
     </section>
@@ -133,7 +130,9 @@ onClickOutside(modalRef, () => {
             :key="manager.id"
             @click="toggleManager(manager.value)"
             class="px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between"
-            :class="[selectedManagers.includes(manager.value) ? ['bg-gray-3', 'text-gray-0'] : ['text-gray-2']]"
+            :class="[
+              selectedManagers.includes(manager.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
+            ]"
           >
             <p>{{ manager.label }}</p>
           </div>
@@ -166,7 +165,9 @@ onClickOutside(modalRef, () => {
             :key="category.id"
             @click="toggleCategory(category.value)"
             class="px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between"
-            :class="[selectedCategories.includes(category.value) ? ['bg-gray-3', 'text-gray-0'] : ['text-gray-2']]"
+            :class="[
+              selectedCategories.includes(category.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
+            ]"
           >
             {{ category.label }}
           </div>
@@ -183,10 +184,7 @@ onClickOutside(modalRef, () => {
           :status="sta.label"
           size="lg"
           class="cursor-pointer"
-          :class="{
-            'opacity-100': selectedStatuses.includes(sta.id as unknown as string),
-            'opacity-30 hover:opacity-50': !selectedStatuses.includes(sta.id as unknown as string),
-          }"
+          :class="[selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100':'opacity-30 hover:opacity-50']"
           @click="toggleStatus(sta.id as unknown as string)"
         />
       </div>
@@ -203,10 +201,7 @@ onClickOutside(modalRef, () => {
           :class="[
             priority.bgClass,
             priority.textClass,
-            {
-              'opacity-100': selectedPriorities.includes(priority.id),
-              'opacity-30 hover:opacity-50': !selectedPriorities.includes(priority.id),
-            },
+            selectedPriorities.includes(priority.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
           ]"
         >
           {{ priority.label }}
