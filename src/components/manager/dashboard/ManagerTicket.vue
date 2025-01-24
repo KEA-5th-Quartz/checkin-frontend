@@ -95,7 +95,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
               />
               <!-- 요청자 블록 -->
               <div class="mt-7">
-                <p class="text-sm pb-2">요청자</p>
+                <p class="text-sm pb-1.5">요청자</p>
                 <div class="manager-filter-btn w-full rounded-xl border-primary-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">King.kim</p>
