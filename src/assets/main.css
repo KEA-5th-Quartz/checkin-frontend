@@ -157,6 +157,18 @@ body {
   .manager-none-td {
     @apply manager-td border-none cursor-default;
   }
+  .board-header {
+    @apply flex justify-between mx-auto w-[95%] mt-14;
+  }
+  .board-size-menu {
+    @apply px-3 py-2 hover:bg-gray-3 cursor-pointer;
+  }
+  .board-filter-icon {
+    @apply text-gray-0 flex items-center gap-2;
+  }
+  .board-filter-modal {
+    @apply absolute top-12 right-0;
+  }
 
   /* 필터 */
   .filter-container {
@@ -191,5 +203,75 @@ body {
   }
   .filter-btn {
     @apply px-6 py-1 text-sm whitespace-nowrap rounded-lg;
+  }
+
+  /* 취소 & 메인 버튼 */
+  .btn-cancel {
+    @apply filter-btn border border-gray-1 hover:bg-gray-100;
+  }
+  .btn-main {
+    @apply filter-btn bg-primary-0 hover:bg-opacity-80 text-white-0;
+  }
+
+  /* 티켓 */
+  .ticket-overlay {
+    @apply fixed inset-0 z-10;
+  }
+  .ticket-click-outside {
+    @apply fixed inset-0 transition-opacity;
+  }
+  .ticket-container {
+    @apply fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10;
+  }
+  .ticket-header {
+    @apply flex items-center justify-between w-full;
+  }
+  .ticket-edit-input {
+    @apply w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none;
+  }
+  /* 티켓 섹션 */
+  .ticket-contents-div {
+    @apply mt-6 flex-1 overflow-y-auto hide-scrollbar;
+  }
+  .ticket-section {
+    @apply flex flex-col w-full gap-5;
+  }
+  .ticket-label {
+    @apply block text-sm mb-1.5;
+  }
+  .ticket-date {
+    @apply text-xs text-blue-1;
+  }
+  /* 티켓 설명 */
+  .ticket-desc-label {
+    @apply block font-semibold mb-3;
+  }
+  .ticket-desc-area {
+    @apply min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar;
+  }
+  .ticket-desc-textarea {
+    @apply ticket-desc-area w-full resize-none text-sm text-gray-1 focus:outline-none;
+  }
+  .ticket-desc-content {
+    @apply text-sm text-gray-1;
+  }
+  .ticket-attachment {
+    @apply bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-xs;
+  }
+  /* 티켓 댓글 */
+  .ticket-comment-container {
+    @apply flex flex-col gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4;
+  }
+  .ticket-comment-log {
+    @apply flex items-center gap-5;
+  }
+  .ticket-comment-bubble {
+    @apply px-3 py-3 border border-gray-1 rounded-[10px];
+  }
+  .ticket-comment-input-area {
+    @apply mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl;
+  }
+  .ticket-comment-textarea {
+    @apply w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar;
   }
 }

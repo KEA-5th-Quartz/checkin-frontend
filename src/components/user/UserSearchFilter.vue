@@ -59,7 +59,7 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <section v-if="!ticketStore.isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
+  <header v-if="!ticketStore.isDeleteMode" class="board-header">
     <!-- 검색 -->
     <div class="manager-search-div">
       <input placeholder="티켓 검색..." class="manager-search-input" />
@@ -77,12 +77,7 @@ const handleDelete = () => {
 
         <div v-if="isSizeOpen" class="manager-filter-menu">
           <ul>
-            <li
-              v-for="option in perPageOptions"
-              :key="option.id"
-              @click="selectOption(option)"
-              class="px-3 py-2 hover:bg-gray-3 cursor-pointer"
-            >
+            <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
               {{ option.label }}
             </li>
           </ul>
@@ -92,29 +87,22 @@ const handleDelete = () => {
       <div class="flex items-center">
         <!-- 필터링 아이콘 -->
         <div class="relative flex items-center">
-          <button @click.stop="isFilterOpen = !isFilterOpen" class="text-gray-0 flex items-center gap-2">
+          <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
             <SvgIcon :icon="FilterIcon" />
             필터
           </button>
           <!-- 필터 모달 -->
-          <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="absolute top-8 right-0" />
+          <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="board-filter-modal" />
         </div>
       </div>
       <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
     </div>
-  </section>
+  </header>
 
-  <section v-else class="flex justify-between mx-auto w-[95%] mt-14">
+  <section v-else class="board-header">
     <div class="flex items-center gap-4 ml-auto">
-      <button @click="handleCancel" class="px-6 py-2 text-sm border border-gray-1 rounded-lg hover:bg-gray-100">
-        취소
-      </button>
-      <button
-        @click="handleDelete"
-        class="px-6 py-2 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0"
-      >
-        삭제
-      </button>
+      <button @click="handleCancel" class="btn-cancel py-2">취소</button>
+      <button @click="handleDelete" class="btn-main py-2">삭제</button>
     </div>
   </section>
 

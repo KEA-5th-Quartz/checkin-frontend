@@ -97,8 +97,8 @@ onClickOutside(modalRef, () => {
 
     <!-- 취소 저장 버튼 -->
     <section class="flex justify-center w-full gap-4 pt-2">
-      <button @click="emit('closeFilter')" class="filter-btn border border-gray-1 hover:bg-gray-100">취소</button>
-      <button @click="handleSave" class="filter-btn bg-primary-0 hover:bg-opacity-80 text-white-0">저장</button>
+      <button @click="emit('closeFilter')" class="btn-cancel">취소</button>
+      <button @click="handleSave" class="btn-main">저장</button>
     </section>
   </div>
 </template>
