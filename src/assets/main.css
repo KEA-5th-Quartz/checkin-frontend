@@ -187,4 +187,14 @@ body {
   .category-modal-submit-button {
     @apply px-4 py-2 bg-primary-0 text-white-0 rounded-md hover:opacity-80;
   }
+  /* 관리자 로그 테이블 스타일 */
+  .administrator-thead {
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium;
+  }
+  .administrator-th {
+    @apply text-black-2 font-medium px-2 py-3.5;
+  }
+  .administrator-td {
+    @apply text-center px-2 py-3.5 text-sm text-gray-0 border-b border-gray-2 cursor-pointer;
+  }
 }

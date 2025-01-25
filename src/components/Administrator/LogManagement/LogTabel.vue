@@ -21,33 +21,33 @@ const handlePageChange = (page: number) => {
     <div class="min-h-[calc(100vh-300px)]">
       <table class="min-w-full table-fixed">
         <thead>
-          <tr class="manager-thead">
-            <th class="manager-th text-start w-1/6">시간</th>
-            <th class="manager-th w-1/6">이름</th>
-            <th class="manager-th w-1/6">이메일</th>
-            <th class="manager-th w-1/6">상태</th>
-            <th class="manager-th w-1/6">유형</th>
-            <th class="manager-th w-1/6">IP</th>
+          <tr class="administrator-thead">
+            <th class="administrator-th text-start w-1/6">시간</th>
+            <th class="administrator-th w-1/6">이름</th>
+            <th class="administrator-th w-1/6">이메일</th>
+            <th class="administrator-th w-1/6">상태</th>
+            <th class="administrator-th w-1/6">유형</th>
+            <th class="administrator-th w-1/6">IP</th>
           </tr>
         </thead>
         <tbody class="whitespace-nowrap">
           <tr v-for="item in logDataTest" :key="item.id" class="hover:bg-white-1">
-            <td class="manager-td text-start max-w-0">
+            <td class="administrator-td text-start max-w-0">
               <p class="truncate">{{ item.time }}</p>
             </td>
-            <td class="manager-td max-w-0">
+            <td class="administrator-td max-w-0">
               <p class="truncate">{{ item.name }}</p>
             </td>
-            <td class="manager-td max-w-0">
+            <td class="administrator-td max-w-0">
               <p class="truncate">{{ item.email }}</p>
             </td>
-            <td class="manager-td max-w-0">
+            <td class="administrator-td max-w-0">
               <LogStatusBadge :status="item.status" size="md" />
             </td>
-            <td class="manager-td max-w-0">
+            <td class="administrator-td max-w-0">
               <p class="truncate">{{ item.type }}</p>
             </td>
-            <td class="manager-td max-w-0">
+            <td class="administrator-td max-w-0">
               <p class="truncate">{{ item.ip }}</p>
             </td>
           </tr>
