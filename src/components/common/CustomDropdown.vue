@@ -63,38 +63,25 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
     <button
       @click.stop="toggleDropdown"
       :class="[
-        'min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200',
-        hasColor
-          ? 'inline-flex items-center gap-2 py-1'
-          : isEdit
-          ? 'border border-gray-2 py-2 w-full -mt-2 rounded-xl'
-          : 'border border-primary-2 hover:border-primary-4 py-2',
+        'dropdown-bar',
+        hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
       ]"
     >
       <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
         {{ selectedOption.label }}
       </span>
-      <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
+      <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
     </button>
 
     <!-- 메뉴들 -->
-    <div
-      v-if="isOpen"
-      :class="[
-        'absolute bg-white-0 z-10 w-full mt-1 bg-white rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar',
-        isEdit ? 'border-gray-3' : 'border-primary-2',
-      ]"
-    >
+    <div v-if="isOpen" :class="['dropdown-menu', isEdit ? 'border-gray-3' : 'border-primary-2']">
       <ul>
         <li
           v-for="option in options"
           :key="option.id"
           @click="handleSelect(option)"
-          :class="[
-            'px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap',
-            selectedOption.id === option.id ? 'bg-gray-50' : '',
-          ]"
+          :class="['dropdown-li', selectedOption.id === option.id ? 'bg-gray-50' : '']"
         >
           {{ option.label }}
         </li>

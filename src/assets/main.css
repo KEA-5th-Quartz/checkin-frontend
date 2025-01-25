@@ -39,14 +39,29 @@ body {
 }
 
 @layer components {
-  /* flex display 중앙 정렬 */
+  /* flex 속성 */
   .flex-center {
     @apply flex justify-center items-center;
+  }
+  .flex-stack {
+    @apply flex flex-col;
+  }
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+
+  .card-base {
+    @apply bg-white-0 rounded-lg shadow-md;
   }
 
   /* 컨테이너 */
   .container {
     @apply w-full px-8;
+  }
+
+  /* 0.2초 애니메이션 */
+  .transition-02s {
+    @apply transition-transform duration-200;
   }
 
   /* 사이드바 */
@@ -58,13 +73,13 @@ body {
     @apply text-center text-white-0 font-extrabold text-2xl mt-12;
   }
   .sidebar-profile {
-    @apply flex flex-col items-center gap-5 w-full mt-12;
+    @apply flex-stack items-center gap-5 w-full mt-12;
   }
   .sidebar-p {
     @apply font-semibold text-white-0;
   }
   .sidebar-ul {
-    @apply flex flex-col items-start font-semibold text-white-0 cursor-pointer pl-8 lg:pl-16 mt-12;
+    @apply flex-stack items-start font-semibold text-white-0 cursor-pointer pl-8 lg:pl-16 mt-12;
   }
   .sidebar-li {
     @apply flex items-center py-[18px] gap-[30px];
@@ -73,12 +88,45 @@ body {
     @apply absolute -left-8 lg:-left-16 w-2 h-full bg-gradient-to-b from-[#7E73FF] to-[#5B4DFF];
   }
 
+  /* 다이얼로그 */
+  .dialog-overlay {
+    @apply fixed inset-0 flex-center bg-black-2 bg-opacity-25 z-50 backdrop-blur-[2px] cursor-default;
+  }
+  .dialog-section {
+    @apply fixed flex-stack bg-white-1 w-96 p-6 shadow-lg rounded-xl;
+  }
+  .dialog-input {
+    @apply placeholder:text-sm placeholder:text-gray-1 p-2 bg-white-1 focus:outline-none border-b border-gray-0 mt-4;
+  }
+  .dialog-btn {
+    @apply w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80;
+  }
+
+  /* 드롭다운 */
+  .dropdown-bar {
+    @apply min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200;
+  }
+  .dropdown-bar-hasColor {
+    @apply inline-flex gap-2 py-1;
+  }
+  .dropdown-bar-isEdit {
+    @apply border border-gray-2 py-2 w-full -mt-2 rounded-xl;
+  }
+  .dropdown-bar-default {
+    @apply border border-primary-2 hover:border-primary-4 py-2;
+  }
+  .dropdown-menu {
+    @apply absolute card-base z-10 w-full mt-1 border max-h-60 overflow-y-auto hide-scrollbar;
+  }
+  .dropdown-li {
+    @apply px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap;
+  }
+
   /* 담당자 */
+  /* 담당자 헤더 */
   .manager-header-title {
     @apply text-gray-1 pb-1.5 whitespace-nowrap;
   }
-
-  /* 담당자 헤더 */
   .manager-header-section {
     @apply flex justify-center gap-4 lg:gap-8 mt-12 w-full px-2;
   }
@@ -94,16 +142,16 @@ body {
 
   /* 담당자 검색/필터 */
   .manager-search-div {
-    @apply flex items-center w-1/4 justify-between pr-4 bg-white-0 border border-gray-1 rounded;
+    @apply flex-between w-1/4 pr-4 bg-white-0 border border-gray-1 rounded;
   }
   .manager-search-input {
     @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
   }
   .manager-filter-btn {
-    @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded-[10px];
+    @apply flex-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded-lg;
   }
   .manager-filter-menu {
-    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded-[10px] shadow-md z-20;
+    @apply absolute card-base mt-0.5 w-full border border-gray-2 z-20;
   }
 
   /* 대시보드 */
@@ -118,5 +166,122 @@ body {
   }
   .manager-none-td {
     @apply manager-td border-none cursor-default;
+  }
+  .board-header {
+    @apply flex justify-between mx-auto w-[95%] mt-14;
+  }
+  .board-size-menu {
+    @apply px-3 py-2 hover:bg-gray-3 cursor-pointer;
+  }
+  .board-filter-icon {
+    @apply text-gray-0 flex items-center gap-2;
+  }
+  .board-filter-modal {
+    @apply absolute top-12 right-0;
+  }
+
+  /* 필터 */
+  .filter-container {
+    @apply card-base w-[300px] max-h-[600px] overflow-y-auto pb-4 hide-scrollbar;
+  }
+  .filter-title {
+    @apply py-3 px-8 bg-primary-0 text-white-1 font-bold;
+  }
+  .filter-section {
+    @apply flex-stack px-7 pb-5;
+  }
+  .filter-quick-div {
+    @apply flex items-center gap-1 hover:bg-gray-2 py-1 px-2 rounded-xl cursor-pointer;
+  }
+  .filter-label {
+    @apply border-b-2 border-gray-0 max-w-fit pr-4 mb-3.5;
+  }
+  .filter-dropdown {
+    @apply flex-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer;
+  }
+  .filter-dropdown-ul {
+    @apply absolute z-10 top-9 mt-1 w-full card-base border border-gray-2 max-h-60 overflow-y-auto hide-scrollbar;
+  }
+  .filter-dropdown-li {
+    @apply flex-between px-3 py-2 hover:bg-gray-3 cursor-pointer;
+  }
+  .filter-priority-li {
+    @apply px-3 py-1.5 text-sm flex-center font-bold rounded-full cursor-pointer;
+  }
+  .filter-btn-section {
+    @apply flex justify-center w-full gap-4 pt-2;
+  }
+  .filter-btn {
+    @apply px-6 py-1 text-sm whitespace-nowrap rounded-lg;
+  }
+
+  /* 취소 & 메인 버튼 */
+  .btn-cancel {
+    @apply filter-btn border border-gray-1 hover:bg-gray-100;
+  }
+  .btn-main {
+    @apply filter-btn bg-primary-0 hover:bg-opacity-80 text-white-0;
+  }
+
+  /* 티켓 */
+  .ticket-overlay {
+    @apply fixed inset-0 z-10;
+  }
+  .ticket-click-outside {
+    @apply fixed inset-0 transition-opacity;
+  }
+  .ticket-container {
+    @apply fixed top-0 right-0 w-[490px] h-screen card-base rounded-xl flex-stack py-9 px-6 translate-x-full z-10;
+  }
+  .ticket-header {
+    @apply flex-between w-full;
+  }
+  .ticket-edit-input {
+    @apply w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none;
+  }
+  /* 티켓 섹션 */
+  .ticket-contents-div {
+    @apply mt-6 flex-1 overflow-y-auto hide-scrollbar;
+  }
+  .ticket-section {
+    @apply flex-stack w-full gap-5;
+  }
+  .ticket-label {
+    @apply block text-sm mb-1.5;
+  }
+  .ticket-date {
+    @apply text-xs text-blue-1;
+  }
+  /* 티켓 설명 */
+  .ticket-desc-label {
+    @apply block font-semibold mb-3;
+  }
+  .ticket-desc-area {
+    @apply min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar;
+  }
+  .ticket-desc-textarea {
+    @apply ticket-desc-area w-full resize-none text-sm text-gray-1 focus:outline-none;
+  }
+  .ticket-desc-content {
+    @apply text-sm text-gray-1;
+  }
+  .ticket-attachment {
+    @apply bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-xs;
+  }
+  /* 티켓 댓글 */
+  .ticket-comment-container {
+    @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4;
+  }
+  .ticket-comment-log {
+    @apply flex items-center gap-5;
+  }
+  .ticket-comment-bubble {
+    @apply px-3 py-3 border border-gray-1 rounded-[10px];
+  }
+  .ticket-comment-input-area {
+    @apply mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl;
+  }
+  .ticket-comment-textarea {
+    @apply w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar;
   }
 }

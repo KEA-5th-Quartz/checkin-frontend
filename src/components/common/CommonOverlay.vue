@@ -5,10 +5,7 @@ defineProps<OverlayProps>();
 </script>
 
 <template>
-  <div
-    @click="onClick"
-    class="overlay-container fixed inset-0 flex-center bg-black-2 bg-opacity-25 z-50 backdrop-blur-[2px] cursor-default"
-  >
+  <div @click="onClick" class="overlay-container dialog-overlay">
     <slot></slot>
   </div>
 </template>

@@ -7,7 +7,7 @@
         <li
           v-for="category in primaryCategories"
           :key="category.id"
-          class="flex justify-between items-center p-3 border rounded-md cursor-pointer hover:bg-gray-3"
+          class="flex-between p-3 border rounded-md cursor-pointer hover:bg-gray-3"
           @click="selectPrimaryCategory(category)"
         >
           <span>{{ category.name }}</span>
@@ -27,7 +27,7 @@
         <li
           v-for="category in filteredSecondaryCategories"
           :key="category.id"
-          class="flex justify-between items-center p-3 border rounded-md cursor-pointer hover:bg-gray-3"
+          class="flex-between p-3 border rounded-md cursor-pointer hover:bg-gray-3"
         >
           <span>{{ category.name }}</span>
           <CategoryDropdown
