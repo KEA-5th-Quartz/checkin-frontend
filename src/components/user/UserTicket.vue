@@ -23,6 +23,7 @@ const handleClose = () => {
   show.value = false;
   setTimeout(() => {
     emit('close');
+    handleCancelEdit();
   }, 300);
 };
 
@@ -42,7 +43,7 @@ onMounted(() => {
 
 const handleCancelEdit = () => {
   ticketStore.resetToOriginal();
-  ticketStore.toggleEditMode();
+  ticketStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
