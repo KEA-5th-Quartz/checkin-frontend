@@ -1,8 +1,10 @@
 import axios from 'axios';
 // import { AxiosError } from 'axios'; 인터셉터 작성과 함께 사용
 
+const BASE_URL = process.env.VUE_APP_BASE_URL;
+
 const api = axios.create({
-  baseURL: 'testurl',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
