@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center p-4 mx-auto w-[84%] mt-[40px]">
+  <div class="flex-between p-4 mx-auto w-[84%] mt-[40px]">
     <!-- 검색 필드 -->
     <div class="flex items-center px-2 py-3 rounded-md shadow-md w-full max-w-sm border border-gray-2">
       <input

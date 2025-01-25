@@ -169,7 +169,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
 
             <!-- 댓글 -->
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
@@ -183,7 +183,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             </div>
 
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>

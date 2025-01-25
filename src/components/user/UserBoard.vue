@@ -125,10 +125,10 @@ const handleCheckboxClick = (event: Event, id: number) => {
       <UserTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
     </article>
   </section>
-  <section v-else class="w-full flex flex-col items-center pb-40">
-    <div class="flex flex-col items-center gap-8 mt-32">
+  <section v-else class="w-full flex-stack items-center pb-40">
+    <div class="flex-stack items-center gap-8 mt-32">
       <img src="@/assets/no-ticket.png" />
-      <div class="flex flex-col items-center gap-2">
+      <div class="flex-stack items-center gap-2">
         <h1 class="text-xl">아직 요청한 티켓이 없어요</h1>
         <p>티켓 생성을 눌러 새로운 티켓을 생성하세요</p>
       </div>

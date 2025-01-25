@@ -1,8 +1,8 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center bg-black-0 bg-opacity-50 z-50">
-    <div class="bg-white-0 p-6 rounded-lg shadow-lg w-[90%] max-w-lg">
+    <div class="card-base p-6 shadow-lg w-[90%] max-w-lg">
       <!-- 모달 헤더 -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="flex-between mb-6">
         <h3 class="text-lg font-semibold text-black-0">카테고리 수정</h3>
         <button @click="closeModal" class="text-gray-0 hover:text-black-0 text-lg">✕</button>
       </div>

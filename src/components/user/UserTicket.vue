@@ -106,7 +106,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
             <!-- 왼쪽 섹션 -->
             <section class="ticket-section">
               <!-- 중요도 블록 -->
-              <div class="flex flex-col items-start">
+              <div class="flex-stack items-start">
                 <label class="ticket-label">중요도</label>
                 <div class="py-1">
                   <PriorityBadge />
@@ -150,7 +150,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
             <!-- 오른쪽 섹션 -->
             <section class="ticket-section">
               <!-- 진행상태 블록 -->
-              <div class="flex flex-col items-start">
+              <div class="flex-stack items-start">
                 <label class="ticket-label">진행상태</label>
                 <StatusBadge status="생성" size="xl" />
               </div>
@@ -233,7 +233,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
             <!-- 댓글 -->
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
@@ -247,7 +247,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
             </div>
 
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
