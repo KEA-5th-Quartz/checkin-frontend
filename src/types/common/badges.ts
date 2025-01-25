@@ -11,3 +11,9 @@ export interface PriorityBadgeProps {
   dotClass?: string;
   textClass?: string;
 }
+
+export interface LogStatusBadgeProps {
+  status: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  class?: string;
+}
