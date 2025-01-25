@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'MainFont';
+  src: url('@/fonts/PretendardVariable.ttf') format('truetype-variations');
+  font-weight: 45 920;
+  font-display: swap;
+  font-style: normal;
+}
+
 html,
 body,
 #app {
@@ -14,6 +22,10 @@ body {
   background-color: #fafafa;
   min-width: 1024px;
   overflow-x: auto;
+  overflow-wrap: break-word;
+  font-family: 'MainFont', system-ui, -apple-system, sans-serif; /* fallback 폰트 추가 */
+  -webkit-font-smoothing: antialiased; /* 폰트 렌더링 개선 */
+  -moz-osx-font-smoothing: grayscale; /* Firefox에서 폰트 렌더링 개선 */
 }
 
 /* 스크롤바 숨기기 */
@@ -88,10 +100,10 @@ body {
     @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
   }
   .manager-filter-btn {
-    @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded;
+    @apply flex items-center justify-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded-[10px];
   }
   .manager-filter-menu {
-    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded shadow-md;
+    @apply absolute mt-0.5 w-full bg-white-0 border border-gray-2 rounded-[10px] shadow-md z-20;
   }
 
   /* 대시보드 */

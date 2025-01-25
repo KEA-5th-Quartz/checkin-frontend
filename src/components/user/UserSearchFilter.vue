@@ -1,56 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { SearchIcon, TrashcanIcon } from '../../assets/icons/path';
+import { ArrowDownIcon, FilterIcon, SearchIcon, TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
-import { BaseTicketOption } from '@/types/tickets';
-import CustomDropdown from '../common/CustomDropdown.vue';
 import { useUserTicketListStore } from '../../stores/userTicketListStore';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '../common/CommonDialog.vue';
+import FilterModal from '../user/UserFilter.vue';
+import { onClickOutside } from '@vueuse/core';
+import { perPageOptions } from '../manager/ticketOptionTest';
 
 const ticketStore = useUserTicketListStore();
 
-const statusOptions = [
-  { id: 0, value: 'none', label: '진행 상태' },
-  { id: 1, value: '생성', label: '생성' },
-  { id: 2, value: '진행중', label: '진행중' },
-  { id: 3, value: '완료', label: '완료' },
-];
+const selectedPerPage = ref(perPageOptions[0]);
+const isSizeOpen = ref(false);
+const isFilterOpen = ref(false);
 
-const managerOptions = [
-  { id: 0, value: 'none', label: '담당자' },
-  { id: 1, value: '김철환', label: '김철환' },
-  { id: 2, value: '김현중', label: '김현중' },
-  { id: 3, value: '박가현', label: '박가현' },
-  { id: 4, value: '박석종', label: '박석종' },
-  { id: 5, value: '박준한', label: '박준한' },
-  { id: 6, value: '손성민', label: '손성민' },
-  { id: 7, value: '임찬호', label: '임찬호' },
-  { id: 8, value: '조기헌', label: '조기헌' },
-  { id: 9, value: '최현준', label: '최현준' },
-];
+const dropdownRef = ref<HTMLElement | null>(null);
 
-const firstCategory = [
-  { id: 0, value: 'none', label: '1차 카테고리' },
-  { id: 1, value: 'VM1', label: 'VM1' },
-  { id: 2, value: 'VM2', label: 'VM2' },
-  { id: 3, value: 'VM3', label: 'VM3' },
-];
+onClickOutside(dropdownRef, () => (isSizeOpen.value = false));
 
-const statusSelected = ref<BaseTicketOption>(statusOptions[0]);
-const handleStatusSelect = (option: BaseTicketOption) => {
-  console.log('진행 상태 변경: ', option.label);
-  statusSelected.value = option;
-};
-
-const managerSelected = ref(managerOptions[0]);
-const handleManagerSelect = (option: BaseTicketOption) => {
-  console.log('담당자 변경:', option.label);
-  managerSelected.value = option;
-};
-
-const firstCategorySelected = ref(firstCategory[0]);
-const handleFirstCategorySelect = (option: BaseTicketOption) => {
-  console.log('1차 카테고리 변경:', option.label);
-  firstCategorySelected.value = option;
+const selectOption = (
+  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
+) => {
+  selectedPerPage.value = option;
+  isSizeOpen.value = false;
 };
 
 const handleCancel = () => {
@@ -58,8 +31,30 @@ const handleCancel = () => {
   ticketStore.clearSelectedTickets();
 };
 
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
 const handleDelete = () => {
-  console.log('삭제 확인 모달 등장');
+  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
+  const selectedTicketIds = Array.from(ticketStore.selectedTickets);
+  const ticketCount = selectedTicketIds.length;
+
+  dialogState.value = {
+    open: true,
+    isWarn: true,
+    title: `${ticketCount}개의 티켓을 삭제하시겠습니까?`,
+    cancelText: '취소',
+    onCancelClick: () => {
+      dialogState.value = { ...initialDialog };
+    },
+    mainText: '삭제',
+    onMainClick: () => {
+      console.log('삭제하는 id 배열: ', selectedTicketIds);
+
+      ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
+      ticketStore.toggleDeleteMode(); // 삭제 모드 종료
+      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+    },
+  };
 };
 </script>
 
@@ -71,35 +66,43 @@ const handleDelete = () => {
       <SvgIcon :icon="SearchIcon" />
     </div>
 
-    <!-- 필터 -->
+    <!-- 개수 & 필터 -->
     <div class="flex items-center gap-10">
-      <CustomDropdown
-        label=""
-        :options="statusOptions"
-        :selected-option="statusSelected"
-        :option-select="(option: BaseTicketOption)=>handleStatusSelect(option as BaseTicketOption)"
-        @select="(option) => statusSelected = option as BaseTicketOption"
-        isUser
-      />
+      <!-- 개수 -->
+      <div ref="dropdownRef" class="relative mt-1">
+        <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
+          <span class="font-medium">{{ selectedPerPage.label }}</span>
+          <SvgIcon
+            :icon="ArrowDownIcon"
+            :class="['transition-transform duration-200', isSizeOpen ? 'rotate-180' : '']"
+          />
+        </button>
 
-      <CustomDropdown
-        label=""
-        :options="managerOptions"
-        :selected-option="managerSelected"
-        :onOptionSelect="handleManagerSelect"
-        @select="(option) => (managerSelected = option)"
-        isUser
-      />
+        <div v-if="isSizeOpen" class="manager-filter-menu">
+          <ul>
+            <li
+              v-for="option in perPageOptions"
+              :key="option.id"
+              @click="selectOption(option)"
+              class="px-3 py-2 hover:bg-gray-3 cursor-pointer"
+            >
+              {{ option.label }}
+            </li>
+          </ul>
+        </div>
+      </div>
 
-      <CustomDropdown
-        label=""
-        :options="firstCategory"
-        :selected-option="firstCategorySelected"
-        :onOptionSelect="handleFirstCategorySelect"
-        @select="(option) => (firstCategorySelected = option)"
-        isUser
-      />
-
+      <div class="flex items-center">
+        <!-- 필터링 아이콘 -->
+        <div class="relative flex items-center">
+          <button @click.stop="isFilterOpen = !isFilterOpen" class="text-gray-0 flex items-center gap-2">
+            <SvgIcon :icon="FilterIcon" />
+            필터
+          </button>
+          <!-- 필터 모달 -->
+          <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="absolute top-8 right-0" />
+        </div>
+      </div>
       <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
     </div>
   </section>
@@ -117,4 +120,14 @@ const handleDelete = () => {
       </button>
     </div>
   </section>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isWarn="dialogState.isWarn"
+    :title="dialogState.title"
+    :cancelText="dialogState.cancelText"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onCancelClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

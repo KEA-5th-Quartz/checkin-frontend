@@ -6,6 +6,7 @@ import { ref } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
 import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
 import { priority, status, firstCategory, secondCategory, managerOptions } from '../ticketOptionTest';
+import '@/assets/slideAnimation.css';
 
 defineProps<{
   ticketId: number;
@@ -94,7 +95,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
               />
               <!-- 요청자 블록 -->
               <div class="mt-7">
-                <p class="text-sm pb-2">요청자</p>
+                <p class="text-sm pb-1.5">요청자</p>
                 <div class="manager-filter-btn w-full rounded-xl border-primary-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">King.kim</p>
@@ -222,29 +223,3 @@ const handleManagerSelect = (option: BaseTicketOption) => {
     </div>
   </Teleport>
 </template>
-
-<style scoped>
-.drawer-enter {
-  animation: slideIn 0.3s forwards;
-}
-.drawer-leave {
-  animation: slideOut 0.3s forwards;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-</style>
