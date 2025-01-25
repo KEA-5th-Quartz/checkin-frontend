@@ -29,35 +29,20 @@ const handleMainClick = () => {
 
 <template>
   <CommonOverlay @click="onCancelClick">
-    <div class="dialog-container fixed flex flex-col bg-white-1 w-96 p-6 shadow-lg rounded-xl">
+    <section class="dialog-container dialog-section">
       <p class="font-bold">{{ title }}</p>
 
-      <input
-        v-if="hasInput"
-        v-model="inputValue"
-        :placeholder="placeholder"
-        class="placeholder:text-sm placeholder:text-gray-1 p-2 bg-white-1 focus:outline-none border-b border-gray-0 mt-4"
-      />
+      <input v-if="hasInput" v-model="inputValue" :placeholder="placeholder" class="dialog-input" />
 
       <div class="flex w-full gap-6 mt-6">
-        <button
-          v-if="!isOneBtn"
-          @click="onCancelClick"
-          class="w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80 bg-gray-2"
-        >
+        <button v-if="!isOneBtn" @click="onCancelClick" class="dialog-btn bg-gray-2">
           {{ cancelText }}
         </button>
-        <button
-          @click="handleMainClick"
-          :class="[
-            'w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80 text-white-0',
-            isWarn ? ' bg-red-1' : 'bg-primary-0',
-          ]"
-        >
+        <button @click="handleMainClick" :class="['dialog-btn text-white-0', isWarn ? ' bg-red-1' : 'bg-primary-0']">
           {{ mainText }}
         </button>
       </div>
-    </div>
+    </section>
   </CommonOverlay>
 </template>
 

@@ -72,10 +72,7 @@ const handleDelete = () => {
       <div ref="dropdownRef" class="relative mt-1">
         <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon
-            :icon="ArrowDownIcon"
-            :class="['transition-transform duration-200', isSizeOpen ? 'rotate-180' : '']"
-          />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isSizeOpen ? 'rotate-180' : '']" />
         </button>
 
         <div v-if="isSizeOpen" class="manager-filter-menu">

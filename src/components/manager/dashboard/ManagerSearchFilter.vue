@@ -34,7 +34,7 @@ const selectOption = (
       <div ref="dropdownRef" class="relative mt-1">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon :icon="ArrowDownIcon" :class="['transition-transform duration-200', isOpen ? 'rotate-180' : '']" />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
         </button>
 
         <div v-if="isOpen" class="manager-filter-menu">

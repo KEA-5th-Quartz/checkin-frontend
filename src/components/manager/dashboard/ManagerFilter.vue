@@ -97,18 +97,15 @@ onClickOutside(modalRef, () => {
 </script>
 
 <template>
-  <div
-    ref="modalRef"
-    class="bg-white-0 rounded-lg w-[300px] max-h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar"
-  >
-    <div class="py-3 px-8 bg-primary-0 text-white-1 font-bold">필터</div>
+  <div ref="modalRef" class="filter-container">
+    <div class="filter-title">필터</div>
 
-    <section class="flex flex-col py-6 px-5 text-sm">
+    <section class="filter-section pt-5 text-sm">
       <div
         v-for="filter in quickFilters"
         :key="filter.id"
         @click="toggleQuickFilter(filter.id)"
-        class="flex items-center gap-1 hover:bg-gray-3 py-1 px-2 rounded-xl cursor-pointer"
+        class="filter-quick-div"
         :class="[selectedQuickFilters.includes(filter.id) ? 'opacity-100' : 'opacity-30']"
       >
         <SvgIcon :icon="filter.icon" />
@@ -116,78 +113,60 @@ onClickOutside(modalRef, () => {
       </div>
     </section>
     <!-- 담당자 -->
-    <section class="flex flex-col px-7 pb-5">
-      <p class="border-b-2 border-gray-0 max-w-fit pr-4 mb-2">담당자</p>
+    <section class="filter-section">
+      <label class="filter-label">담당자</label>
       <div class="relative" ref="managerRef">
-        <div
-          @click="isManagerDropdownOpen = !isManagerDropdownOpen"
-          class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"
-        >
+        <div @click="isManagerDropdownOpen = !isManagerDropdownOpen" class="filter-dropdown">
           <p v-if="selectedManagers.length === 0" class="opacity-30">담당자 선택</p>
           <p v-else>{{ selectedManagers.length }}명 선택</p>
-          <SvgIcon
-            :icon="ArrowDownIcon"
-            :class="['transition-transform duration-200', isManagerDropdownOpen ? 'rotate-180' : '']"
-          />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isManagerDropdownOpen ? 'rotate-180' : '']" />
         </div>
 
-        <div
-          v-if="isManagerDropdownOpen"
-          class="absolute z-20 top-9 mt-1 w-full bg-white-0 border border-gray-2 rounded-lg shadow-md max-h-60 overflow-y-auto hide-scrollbar"
-        >
-          <div
+        <ul v-if="isManagerDropdownOpen" class="filter-dropdown-ul">
+          <li
             v-for="manager in managerOptions"
             :key="manager.id"
             @click="toggleManager(manager.value)"
-            class="px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between"
+            class="filter-dropdown-li"
             :class="[
               selectedManagers.includes(manager.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
             ]"
           >
-            <p>{{ manager.label }}</p>
-          </div>
-        </div>
+            {{ manager.label }}
+          </li>
+        </ul>
       </div>
     </section>
     <!-- 카테고리 -->
-    <section class="flex flex-col px-7 pb-5">
-      <p class="border-b-2 border-gray-0 max-w-fit mb-3.5">카테고리</p>
+    <section class="filter-section">
+      <label class="filter-label">카테고리</label>
       <div class="relative" ref="categoryRef">
-        <div
-          @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
-          class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"
-        >
+        <div @click="isCategoryDropdownOpen = !isCategoryDropdownOpen" class="filter-dropdown">
           <p v-if="selectedCategories.length === 0" class="opacity-30">카테고리 선택</p>
           <p v-else>{{ selectedCategories.length }}개 선택</p>
 
-          <SvgIcon
-            :icon="ArrowDownIcon"
-            :class="['transition-transform duration-200', isCategoryDropdownOpen ? 'rotate-180' : '']"
-          />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isCategoryDropdownOpen ? 'rotate-180' : '']" />
         </div>
 
-        <div
-          v-if="isCategoryDropdownOpen"
-          class="absolute z-10 top-9 mt-1 w-full bg-white-0 border border-gray-2 rounded-lg shadow-md max-h-60 overflow-y-auto hide-scrollbar"
-        >
-          <div
+        <ul v-if="isCategoryDropdownOpen" class="filter-dropdown-ul">
+          <li
             v-for="category in firstCategory"
             :key="category.id"
             @click="toggleCategory(category.value)"
-            class="px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between"
+            class="filter-dropdown-li"
             :class="[
               selectedCategories.includes(category.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
             ]"
           >
             {{ category.label }}
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </section>
     <!-- 상태 -->
-    <section class="flex flex-col px-7">
-      <p class="border-b-2 border-gray-0 max-w-fit pr-4">상태</p>
-      <div class="flex gap-2 pt-3.5">
+    <section class="filter-section">
+      <label class="filter-label">상태</label>
+      <div class="flex gap-2">
         <StatusBadge
           v-for="sta in status"
           :key="sta.id"
@@ -200,14 +179,14 @@ onClickOutside(modalRef, () => {
       </div>
     </section>
     <!-- 우선순위 -->
-    <section class="flex flex-col px-7 pt-5">
-      <p class="border-b-2 border-gray-0 max-w-fit pr-4">우선순위</p>
-      <div class="flex gap-2 pt-3.5">
-        <div
+    <section class="filter-section">
+      <label class="filter-label">우선순위</label>
+      <ul class="flex gap-2">
+        <li
           v-for="priority in priorities"
           :key="priority.id"
           @click="togglePriority(priority.id)"
-          class="px-3 py-1.5 text-sm flex-center font-bold rounded-full cursor-pointer"
+          class="filter-priority-li"
           :class="[
             priority.bgClass,
             priority.textClass,
@@ -215,23 +194,13 @@ onClickOutside(modalRef, () => {
           ]"
         >
           {{ priority.label }}
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
     <!-- 취소 저장 버튼 -->
-    <section class="flex justify-center w-full gap-4 pt-7">
-      <button
-        @click="emit('closeFilter')"
-        class="px-6 py-1 text-sm border border-gray-1 rounded-lg hover:bg-gray-100 whitespace-nowrap"
-      >
-        취소
-      </button>
-      <button
-        @click="handleSave"
-        class="px-6 py-1 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0 whitespace-nowrap"
-      >
-        저장
-      </button>
+    <section class="filter-btn-section">
+      <button @click="emit('closeFilter')" class="filter-btn border border-gray-1 hover:bg-gray-100">취소</button>
+      <button @click="handleSave" class="filter-btn bg-primary-0 hover:bg-opacity-80 text-white-0">저장</button>
     </section>
   </div>
 </template>

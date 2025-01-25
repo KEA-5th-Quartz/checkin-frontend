@@ -49,6 +49,11 @@ body {
     @apply w-full px-8;
   }
 
+  /* 0.2초 애니메이션 */
+  .transition-02s {
+    @apply transition-transform duration-200;
+  }
+
   /* 사이드바 */
   .sidebar-nav-container {
     @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] 
@@ -73,12 +78,45 @@ body {
     @apply absolute -left-8 lg:-left-16 w-2 h-full bg-gradient-to-b from-[#7E73FF] to-[#5B4DFF];
   }
 
+  /* 다이얼로그 */
+  .dialog-overlay {
+    @apply fixed inset-0 flex-center bg-black-2 bg-opacity-25 z-50 backdrop-blur-[2px] cursor-default;
+  }
+  .dialog-section {
+    @apply fixed flex flex-col bg-white-1 w-96 p-6 shadow-lg rounded-xl;
+  }
+  .dialog-input {
+    @apply placeholder:text-sm placeholder:text-gray-1 p-2 bg-white-1 focus:outline-none border-b border-gray-0 mt-4;
+  }
+  .dialog-btn {
+    @apply w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80;
+  }
+
+  /* 드롭다운 */
+  .dropdown-bar {
+    @apply min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200;
+  }
+  .dropdown-bar-hasColor {
+    @apply inline-flex gap-2 py-1;
+  }
+  .dropdown-bar-isEdit {
+    @apply border border-gray-2 py-2 w-full -mt-2 rounded-xl;
+  }
+  .dropdown-bar-default {
+    @apply border border-primary-2 hover:border-primary-4 py-2;
+  }
+  .dropdown-menu {
+    @apply absolute bg-white-0 z-10 w-full mt-1 rounded-lg shadow-md border max-h-60 overflow-y-auto hide-scrollbar;
+  }
+  .dropdown-li {
+    @apply px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap;
+  }
+
   /* 담당자 */
+  /* 담당자 헤더 */
   .manager-header-title {
     @apply text-gray-1 pb-1.5 whitespace-nowrap;
   }
-
-  /* 담당자 헤더 */
   .manager-header-section {
     @apply flex justify-center gap-4 lg:gap-8 mt-12 w-full px-2;
   }
@@ -118,5 +156,40 @@ body {
   }
   .manager-none-td {
     @apply manager-td border-none cursor-default;
+  }
+
+  /* 필터 */
+  .filter-container {
+    @apply bg-white-0 rounded-lg w-[300px] max-h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar;
+  }
+  .filter-title {
+    @apply py-3 px-8 bg-primary-0 text-white-1 font-bold;
+  }
+  .filter-section {
+    @apply flex flex-col px-7 pb-5;
+  }
+  .filter-quick-div {
+    @apply flex items-center gap-1 hover:bg-gray-2 py-1 px-2 rounded-xl cursor-pointer;
+  }
+  .filter-label {
+    @apply border-b-2 border-gray-0 max-w-fit pr-4 mb-3.5;
+  }
+  .filter-dropdown {
+    @apply flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer;
+  }
+  .filter-dropdown-ul {
+    @apply absolute z-10 top-9 mt-1 w-full bg-white-0 border border-gray-2 rounded-lg shadow-md max-h-60 overflow-y-auto hide-scrollbar;
+  }
+  .filter-dropdown-li {
+    @apply px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between;
+  }
+  .filter-priority-li {
+    @apply px-3 py-1.5 text-sm flex-center font-bold rounded-full cursor-pointer;
+  }
+  .filter-btn-section {
+    @apply flex justify-center w-full gap-4 pt-2;
+  }
+  .filter-btn {
+    @apply px-6 py-1 text-sm whitespace-nowrap rounded-lg;
   }
 }
