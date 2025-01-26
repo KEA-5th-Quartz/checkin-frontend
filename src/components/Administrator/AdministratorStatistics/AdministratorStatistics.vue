@@ -9,11 +9,11 @@
           :key="filter"
           :class="[
             'px-4 py-2 rounded-lg border text-sm',
-            timeFilter === filter
+            timeFilterTickets === filter
               ? 'bg-primary-0 text-white-0 border-blue-3'
               : 'bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2',
           ]"
-          @click="timeFilter = filter"
+          @click="timeFilterTickets = filter"
         >
           {{ filter }}
         </button>
@@ -36,11 +36,11 @@
           :key="filter"
           :class="[
             'px-4 py-2 rounded-lg border text-sm',
-            timeFilter === filter
+            timeFilterCompletion === filter
               ? 'bg-primary-0 text-white-0 border-blue-3'
               : 'bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2',
           ]"
-          @click="timeFilter = filter"
+          @click="timeFilterCompletion = filter"
         >
           {{ filter }}
         </button>
@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { timeFilter, chartData, updateChartData } from '../StatisticsTest.ts';
+import { timeFilterTickets, chartData, updateChartData } from '../StatisticsTest.ts';
 
 const series = ref([]);
 const chartOptions = ref({
@@ -114,7 +114,7 @@ const processChartData = () => {
 
 // 필터 변경 감지
 watch(
-  () => timeFilter.value,
+  () => timeFilterTickets.value,
   () => {
     updateChartData();
     processChartData();
@@ -200,6 +200,8 @@ const chartOptions2 = ref({
 const closedRateData = ref({ closed_rate: 50 }); // 초기값 50%
 const series3 = ref([closedRateData.value.closed_rate, 100 - closedRateData.value.closed_rate]);
 
+const timeFilterCompletion = ref('WEEK');
+
 const chartOptions3 = ref({
   chart: {
     type: 'donut',
@@ -231,13 +233,13 @@ const updateClosedRateData = () => {
 
 // 필터 변경 감지
 watch(
-  () => timeFilter.value,
+  () => timeFilterCompletion.value,
   () => {
-    if (timeFilter.value === 'WEEK') {
+    if (timeFilterCompletion.value === 'WEEK') {
       closedRateData.value.closed_rate = 50;
-    } else if (timeFilter.value === 'MONTH') {
+    } else if (timeFilterCompletion.value === 'MONTH') {
       closedRateData.value.closed_rate = 60;
-    } else if (timeFilter.value === 'QUARTER') {
+    } else if (timeFilterCompletion.value === 'QUARTER') {
       closedRateData.value.closed_rate = 75;
     }
     updateClosedRateData();

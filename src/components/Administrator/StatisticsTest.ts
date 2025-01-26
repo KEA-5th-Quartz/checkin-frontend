@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-export const timeFilter = ref('WEEK'); // 기본 필터링: WEEK
+export const timeFilterTickets = ref('WEEK'); // 기본 필터링: WEEK
 
 export const chartData = ref([
   {
@@ -70,7 +70,7 @@ export const chartData = ref([
 
 // 필터링에 따른 데이터 업데이트
 export const updateChartData = () => {
-  if (timeFilter.value === 'WEEK') {
+  if (timeFilterTickets.value === 'WEEK') {
     chartData.value = [
       {
         username: '담당자1',
@@ -136,7 +136,7 @@ export const updateChartData = () => {
         ],
       },
     ];
-  } else if (timeFilter.value === 'MONTH') {
+  } else if (timeFilterTickets.value === 'MONTH') {
     chartData.value = [
       {
         username: '담당자1',
@@ -202,7 +202,7 @@ export const updateChartData = () => {
         ],
       },
     ];
-  } else if (timeFilter.value === 'QUARTER') {
+  } else if (timeFilterTickets.value === 'QUARTER') {
     chartData.value = [
       // "QUARTER" 필터에 따른 데이터
     ];
