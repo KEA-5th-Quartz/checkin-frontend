@@ -42,7 +42,7 @@ const handleLogin = async () => {
       router.push('/first-login');
     } else {
       const redirectPath = getRedirectPath(memberData.role);
-      router.push(redirectPath);
+      router.replace(redirectPath);
     }
   } catch (error) {
     console.error('로그인 실패:', error);
