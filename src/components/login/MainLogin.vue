@@ -51,29 +51,12 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <form class="mt-8 flex-stack gap-6" @submit.prevent="handleLogin">
-    <input
-      v-model="username"
-      type="text"
-      required
-      class="bg-transparent w-full px-3 py-3 border-b-2 border-primary-0 focus:outline-none placeholder:text-black-2"
-      placeholder="Username"
-    />
+  <form class="login-form" @submit.prevent="handleLogin">
+    <input v-model="username" type="text" required class="login-input border-primary-0" placeholder="Username" />
 
-    <input
-      v-model="password"
-      type="password"
-      required
-      class="bg-transparent w-full px-3 py-3 border-b-2 border-primary-0 focus:outline-none placeholder:text-black-2"
-      placeholder="Password"
-    />
+    <input v-model="password" type="password" required class="login-input border-primary-0" placeholder="Password" />
 
-    <button
-      type="submit"
-      class="w-full flex justify-center mt-4 py-2.5 font-semibold rounded text-white-0 bg-[#2b3272] hover:bg-opacity-80 focus:outline-none"
-    >
-      로그인
-    </button>
+    <button type="submit" class="login-btn mt-4">로그인</button>
 
     <a href="#" class="block text-center text-sm text-gray-1 hover:text-gray-0">비밀번호 찾기</a>
   </form>

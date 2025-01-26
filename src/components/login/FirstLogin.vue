@@ -66,7 +66,7 @@ const onSubmit = handleSubmit(async (values) => {
 </script>
 
 <template>
-  <form class="mt-8 flex-stack gap-6" @submit="onSubmit">
+  <form class="login-form" @submit="onSubmit">
     <div>
       <label>비밀번호</label>
       <input
@@ -76,7 +76,7 @@ const onSubmit = handleSubmit(async (values) => {
         maxlength="20"
         placeholder="password"
         :class="[
-          'bg-transparent w-full px-1 py-3 border-b-2 focus:outline-none placeholder:text-gray-0',
+          'login-input',
           {
             'border-primary-0': !newPassword,
             'border-red-1': errors.newPassword,
@@ -86,7 +86,7 @@ const onSubmit = handleSubmit(async (values) => {
       />
       <p
         :class="[
-          'pt-2.5 text-sm font-bold',
+          'login-p',
           {
             'text-gray-1': !newPassword,
             'text-red-1': errors.newPassword,
@@ -112,7 +112,7 @@ const onSubmit = handleSubmit(async (values) => {
         name="checkPassword"
         placeholder="check password"
         :class="[
-          'bg-transparent w-full px-1 py-3 border-b-2 focus:outline-none placeholder:text-gray-0',
+          'login-input',
           {
             'border-primary-0': !checkPassword,
             'border-red-1': errors.checkPassword,
@@ -123,7 +123,7 @@ const onSubmit = handleSubmit(async (values) => {
       <p
         v-if="checkPassword"
         :class="[
-          'pt-2.5 text-sm font-bold',
+          'login-p',
           {
             'text-red-1': errors.checkPassword,
             'text-green-1': !errors.checkPassword && checkPassword,
@@ -137,11 +137,7 @@ const onSubmit = handleSubmit(async (values) => {
     <button
       type="submit"
       :disabled="!meta.valid"
-      :class="[
-        'w-full flex justify-center mt-20 py-2.5 font-semibold rounded',
-        'text-white-0 bg-[#2b3272] hover:bg-opacity-80 focus:outline-none',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
-      ]"
+      class="login-btn mt-20 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       변경
     </button>
