@@ -284,4 +284,82 @@ body {
   .ticket-comment-textarea {
     @apply w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar;
   }
+  /* 관리자 카테고리 스타일 */
+  .category-container {
+    @apply w-[48%];
+  }
+
+  .category-header {
+    @apply text-lg font-bold mb-4;
+  }
+
+  .category-divider {
+    @apply border-b border-2 border-primary-0 mb-3;
+  }
+  .category-list {
+    @apply space-y-2 text-gray-0;
+  }
+
+  .category-list-item {
+    @apply flex justify-between items-center px-4 py-3 border border-gray-1 rounded-md cursor-pointer hover:bg-white-1;
+  }
+
+  .category-list-empty {
+    @apply flex-center text-gray-2;
+  }
+
+  /* 관리자 카테고리 모달 스타일 */
+  .category-modal-overlay {
+    @apply fixed inset-0 flex-center bg-black-0 bg-opacity-50 z-50;
+  }
+  .category-modal-container {
+    @apply bg-white-0 p-6 rounded-lg shadow-lg w-[80%] max-w-lg;
+  }
+  .category-modal-header {
+    @apply flex justify-between items-center mb-6;
+  }
+
+  .category-modal-title {
+    @apply text-lg font-semibold text-black-0;
+  }
+
+  .category-modal-close-button {
+    @apply text-gray-0 hover:text-black-0 text-lg;
+  }
+  .category-modal-body {
+    @apply mb-4;
+  }
+
+  .category-modal-input-label {
+    @apply block text-sm text-gray-0 mb-2;
+  }
+
+  .category-modal-input {
+    @apply w-full border-b border-gray-2 focus:outline-none focus:border-primary-3 px-2 py-1;
+  }
+
+  .category-modal-error-message {
+    @apply text-sm text-red-1 mt-1;
+  }
+  .category-modal-footer {
+    @apply flex-center mt-10;
+  }
+
+  .category-modal-cancel-button {
+    @apply px-4 py-2 mr-3 bg-gray-2 text-black-0 rounded-md hover:opacity-80;
+  }
+
+  .category-modal-submit-button {
+    @apply px-4 py-2 bg-primary-0 text-white-0 rounded-md hover:opacity-80;
+  }
+  /* 관리자 로그 테이블 스타일 */
+  .administrator-thead {
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium;
+  }
+  .administrator-th {
+    @apply text-black-2 font-medium px-2 py-3.5;
+  }
+  .administrator-td {
+    @apply text-center px-2 py-3.5 text-sm text-gray-0 border-b border-gray-2 cursor-pointer;
+  }
 }

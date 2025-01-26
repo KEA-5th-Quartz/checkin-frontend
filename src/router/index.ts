@@ -34,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'CategoryManagement',
     component: () => import('../views/Administrator/CategoryManagement.vue'),
   },
+  {
+    path: '/administrator/LogPage',
+    name: 'LogPage',
+    component: () => import('../views/Administrator/LogPage.vue'),
+  },
   // 사용자
   {
     path: '/user/tickets',
