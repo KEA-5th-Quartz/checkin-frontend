@@ -39,6 +39,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'LogPage',
     component: () => import('../views/Administrator/LogPage.vue'),
   },
+  {
+    path: '/administrator/statistics',
+    name: 'administrator-statistics',
+    component: () => import('../views/Administrator/AdministratorStatisticsView.vue'),
+  },
   // 사용자
   {
     path: '/user/tickets',
