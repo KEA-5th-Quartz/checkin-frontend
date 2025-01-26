@@ -14,7 +14,7 @@ import {
 } from '@/assets/icons/path';
 
 type Role = 'manager' | 'admin' | 'user';
-const role = ref<Role>('user'); // ref를 사용하여 반응형 상태로 선언
+const role = ref<Role>('manager'); // ref를 사용하여 반응형 상태로 선언
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
@@ -36,6 +36,8 @@ const userNavItems = [
   { name: '요청 티켓', icon: CategoryIcon, path: '/tickets/requested' },
   { name: '티켓 템플릿', icon: CategoryIcon, path: '/tickets/templates' },
   { name: '티켓 생성', icon: CreateIcon, path: '/tickets/create' },
+  { name: '새 요청 티켓', icon: CategoryIcon, path: '/tickets/requested' },
+  { name: '새 티켓 템플릿', icon: CategoryIcon, path: '/tickets/templates' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
 </script>
