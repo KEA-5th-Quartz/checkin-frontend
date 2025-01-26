@@ -26,6 +26,27 @@
       <h2 class="font-bold mb-5">카테고리별 티켓 수</h2>
       <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
     </div>
+
+    <!-- 작업 완성률 -->
+    <div class="p-5 bg-white-0">
+      <h2 class="font-bold mb-5">작업 완성률</h2>
+      <div class="flex gap-4 mb-5">
+        <button
+          v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
+          :key="filter"
+          :class="[
+            'px-4 py-2 rounded-lg border text-sm',
+            timeFilter === filter
+              ? 'bg-primary-0 text-white-0 border-blue-3'
+              : 'bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2',
+          ]"
+          @click="timeFilter = filter"
+        >
+          {{ filter }}
+        </button>
+      </div>
+      <apexchart type="donut" height="400" :options="chartOptions3" :series="series3" />
+    </div>
   </section>
 </template>
 
@@ -121,16 +142,16 @@ const categories = ref([
 // 카테고리가 추가되었을 때 아래의 색상을 반복함
 const customColors = [
   '#232D64',
-  '#1F295B',
-  '#2A3570',
-  '#1B2350',
-  '#2E3B75',
-  '#19204C',
-  '#36408A',
-  '#1C285D',
-  '#404895',
-  '#121738',
-  '#4C5CB2',
+  '#2C396C',
+  '#1A2357',
+  '#3C4A85',
+  '#121A46',
+  '#465493',
+  '#2E3772',
+  '#394B6E',
+  '#556AA3',
+  '#1B274B',
+  '#3F5689',
 ];
 
 const series2 = ref([
@@ -173,4 +194,56 @@ const chartOptions2 = ref({
     show: false,
   },
 });
+
+// 도넛 차트 옵션
+
+const closedRateData = ref({ closed_rate: 50 }); // 초기값 50%
+const series3 = ref([closedRateData.value.closed_rate, 100 - closedRateData.value.closed_rate]);
+
+const chartOptions3 = ref({
+  chart: {
+    type: 'donut',
+  },
+  labels: ['완료된 작업', '미완료 작업'],
+  colors: ['#3570FF', '#D1D5DB'], // 완료/미완료 색상
+  dataLabels: {
+    enabled: true,
+    formatter: (val: number) => `${val.toFixed(1)}%`,
+  },
+  legend: {
+    position: 'top',
+    horizontalAlign: 'center',
+  },
+  states: {
+    hover: {
+      filter: {
+        type: 'dark',
+        value: 0.15,
+      },
+    },
+  },
+});
+
+// 데이터 업데이트 함수
+const updateClosedRateData = () => {
+  series3.value = [closedRateData.value.closed_rate, 100 - closedRateData.value.closed_rate];
+};
+
+// 필터 변경 감지
+watch(
+  () => timeFilter.value,
+  () => {
+    if (timeFilter.value === 'WEEK') {
+      closedRateData.value.closed_rate = 50;
+    } else if (timeFilter.value === 'MONTH') {
+      closedRateData.value.closed_rate = 60;
+    } else if (timeFilter.value === 'QUARTER') {
+      closedRateData.value.closed_rate = 75;
+    }
+    updateClosedRateData();
+  },
+);
+
+// 초기 데이터 설정
+updateClosedRateData();
 </script>
