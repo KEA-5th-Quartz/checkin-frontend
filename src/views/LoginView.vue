@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
+import { MemberType } from '@/types/member';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -8,6 +9,15 @@ const router = useRouter();
 const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
+
+const getRedirectPath = (role: MemberType): string => {
+  const roleRedirectMap: Record<MemberType, string> = {
+    ADMIN: '/administrator/memberManagement',
+    MANAGER: '/manager/dashboard',
+    USER: '/user/tickets',
+  };
+  return roleRedirectMap[role];
+};
 
 const handleLogin = async () => {
   try {
@@ -24,9 +34,16 @@ const handleLogin = async () => {
       profilePic: memberData.profilePic,
       role: memberData.role,
       accessToken: memberData.accessToken,
+      passwordChangedAt: memberData.passwordChangedAt,
     });
 
-    // router.push('/');
+    // 최초로그인인지 검사
+    if (memberData.passwordChangedAt === null) {
+      router.push('/first-login');
+    } else {
+      const redirectPath = getRedirectPath(memberData.role);
+      router.push(redirectPath);
+    }
   } catch (error) {
     console.error('로그인 실패:', error);
   }

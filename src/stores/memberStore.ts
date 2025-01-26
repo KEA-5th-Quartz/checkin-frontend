@@ -1,12 +1,5 @@
+import { MemberState } from '@/types/member';
 import { defineStore } from 'pinia';
-
-export interface MemberState {
-  memberId: number | null;
-  username: string;
-  profilePic: string;
-  role: string;
-  accessToken: string;
-}
 
 export const useMemberStore = defineStore('member', {
   state: (): MemberState => ({
@@ -15,6 +8,7 @@ export const useMemberStore = defineStore('member', {
     profilePic: '',
     role: '',
     accessToken: '',
+    passwordChangedAt: null,
   }),
 
   actions: {
@@ -24,6 +18,7 @@ export const useMemberStore = defineStore('member', {
       this.profilePic = memberData.profilePic;
       this.role = memberData.role;
       this.accessToken = memberData.accessToken;
+      this.passwordChangedAt = memberData.passwordChangedAt;
     },
 
     clearMemberInfo() {
@@ -32,6 +27,7 @@ export const useMemberStore = defineStore('member', {
       this.profilePic = '';
       this.role = '';
       this.accessToken = '';
+      this.passwordChangedAt = null;
     },
   },
 });
