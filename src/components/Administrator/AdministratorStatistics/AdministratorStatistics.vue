@@ -1,18 +1,13 @@
 <template>
   <section class="overflow-x-auto mt-5 p-5 pb-20">
     <!-- 담당자별 티켓 진행 상황 -->
-    <div class="p-5 bg-white-0">
-      <h2 class="font-bold mb-5">담당자별 티켓 진행 현황</h2>
-      <div class="flex gap-4">
+    <div class="stat-section">
+      <h2 class="stat-section-title">담당자별 티켓 진행 현황</h2>
+      <div class="stat-flex-gap">
         <button
           v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
           :key="filter"
-          :class="[
-            'px-4 py-2 rounded-lg border text-sm',
-            timeFilterTickets === filter
-              ? 'bg-primary-0 text-white-0 border-blue-3'
-              : 'bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2',
-          ]"
+          :class="['stat-button', timeFilterTickets === filter ? 'stat-button-active' : 'stat-button-inactive']"
           @click="timeFilterTickets = filter"
         >
           {{ filter }}
@@ -22,24 +17,19 @@
     </div>
 
     <!-- 카테고리별 티켓 수-->
-    <div class="p-5 bg-white-0">
-      <h2 class="font-bold mb-5">카테고리별 티켓 수</h2>
+    <div class="stat-section">
+      <h2 class="stat-section-title">카테고리별 티켓 수</h2>
       <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
     </div>
 
     <!-- 작업 완성률 -->
-    <div class="p-5 bg-white-0">
-      <h2 class="font-bold mb-5">작업 완성률</h2>
-      <div class="flex gap-4 mb-5">
+    <div class="stat-section">
+      <h2 class="stat-section-title">작업 완성률</h2>
+      <div class="stat-flex-gap mb-5">
         <button
           v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
           :key="filter"
-          :class="[
-            'px-4 py-2 rounded-lg border text-sm',
-            timeFilterCompletion === filter
-              ? 'bg-primary-0 text-white-0 border-blue-3'
-              : 'bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2',
-          ]"
+          :class="['stat-button', timeFilterCompletion === filter ? 'stat-button-active' : 'stat-button-inactive']"
           @click="timeFilterCompletion = filter"
         >
           {{ filter }}

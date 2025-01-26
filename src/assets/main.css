@@ -362,4 +362,23 @@ body {
   .administrator-td {
     @apply text-center px-2 py-3.5 text-sm text-gray-0 border-b border-gray-2 cursor-pointer;
   }
+  /* 관리자 통계 스타일 */
+  .stat-button {
+    @apply px-4 py-2 rounded-lg border text-sm;
+  }
+  .stat-button-active {
+    @apply bg-primary-0 text-white-0 border-blue-3;
+  }
+  .stat-button-inactive {
+    @apply bg-white-0 text-blue-1 border-gray-1 hover:bg-primary-2;
+  }
+  .stat-section {
+    @apply p-5 bg-white-0;
+  }
+  .stat-section-title {
+    @apply font-bold mb-5;
+  }
+  .stat-flex-gap {
+    @apply flex gap-4;
+  }
 }
