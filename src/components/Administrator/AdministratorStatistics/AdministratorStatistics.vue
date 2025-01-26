@@ -1,13 +1,16 @@
 <template>
   <section class="overflow-x-auto mt-5 p-5 pb-20">
     <!-- 담당자별 티켓 진행 상황 -->
-    <div class="stat-section">
-      <h2 class="stat-section-title">담당자별 티켓 진행 현황</h2>
-      <div class="stat-flex-gap">
+    <div class="statistics-section">
+      <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
+      <div class="statistics-flex-gap">
         <button
           v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
           :key="filter"
-          :class="['stat-button', timeFilterTickets === filter ? 'stat-button-active' : 'stat-button-inactive']"
+          :class="[
+            'statistics-button',
+            timeFilterTickets === filter ? 'statistics-button-active' : 'statistics-button-inactive',
+          ]"
           @click="timeFilterTickets = filter"
         >
           {{ filter }}
@@ -17,19 +20,22 @@
     </div>
 
     <!-- 카테고리별 티켓 수-->
-    <div class="stat-section">
-      <h2 class="stat-section-title">카테고리별 티켓 수</h2>
+    <div class="statistics-section">
+      <h2 class="statistics-section-title">카테고리별 티켓 수</h2>
       <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
     </div>
 
     <!-- 작업 완성률 -->
-    <div class="stat-section">
-      <h2 class="stat-section-title">작업 완성률</h2>
-      <div class="stat-flex-gap mb-5">
+    <div class="statistics-section">
+      <h2 class="statistics-section-title">작업 완성률</h2>
+      <div class="statistics-flex-gap mb-5">
         <button
           v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
           :key="filter"
-          :class="['stat-button', timeFilterCompletion === filter ? 'stat-button-active' : 'stat-button-inactive']"
+          :class="[
+            'statistics-button',
+            timeFilterCompletion === filter ? 'statistics-button-active' : 'statistics-button-inactive',
+          ]"
           @click="timeFilterCompletion = filter"
         >
           {{ filter }}
