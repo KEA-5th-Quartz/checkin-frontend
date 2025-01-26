@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
-import { useUserTicketListStore } from '../../stores/userTicketListStore';
+import { useUserTemplateListStore } from '../../stores/userTemplateListStore';
 
-const ticketStore = useUserTicketListStore();
+const ticketStore = useUserTemplateListStore();
 
 const handleCancel = () => {
   ticketStore.toggleDeleteMode();
