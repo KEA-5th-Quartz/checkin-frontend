@@ -73,6 +73,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Administrator/LogPage.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
+      {
+        path: 'administrator/statistics',
+        name: 'administrator-statistics',
+        component: () => import('../views/Administrator/AdministratorStatisticsView.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+      },
       // 사용자
       {
         path: 'user/tickets',
@@ -80,27 +86,31 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/user/TicketView.vue'),
         meta: { requiresAuth: true, roles: ['USER'] },
       },
+      {
+        path: 'user/templates',
+        name: 'user-templates',
+        component: () => import('../views/user/TemplateLists.vue'),
+        meta: { requiresAuth: true, roles: ['USER'] },
+      },
+      {
+        path: 'user/addticket',
+        name: 'user-addticket',
+        component: () => import('../views/user/AddTicket.vue'),
+        meta: { requiresAuth: true, roles: ['USER'] },
+      },
+      {
+        path: 'user/addtemplate',
+        name: 'user-addtemplate',
+        component: () => import('../views/user/AddTemplate.vue'),
+        meta: { requiresAuth: true, roles: ['USER'] },
+      },
+      {
+        path: 'user/usersettings',
+        name: 'user-usersettings',
+        component: () => import('../views/user/UserSettings.vue'),
+        meta: { requiresAuth: true, roles: ['USER'] },
+      },
     ],
-  },
-  {
-    path: '/user/templates',
-    name: 'user-templates',
-    component: () => import('../views/user/TemplateLists.vue'),
-  },
-  {
-    path: '/user/addticket',
-    name: 'user-addticket',
-    component: () => import('../views/user/AddTicket.vue'),
-  },
-  {
-    path: '/user/addtemplate',
-    name: 'user-addtemplate',
-    component: () => import('../views/user/AddTemplate.vue'),
-  },
-  {
-    path: '/user/usersettings',
-    name: 'user-usersettings',
-    component: () => import('../views/user/UserSettings.vue'),
   },
 ];
 
