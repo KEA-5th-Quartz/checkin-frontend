@@ -4,7 +4,7 @@ export interface MemberState {
   memberId: number | null;
   username: string;
   profilePic: string;
-  role: string;
+  role: string | MemberType;
   accessToken: string;
   passwordChangedAt: string | null;
 }

@@ -4,6 +4,9 @@ import MainLogin from '@/components/login/MainLogin.vue';
 
 <template>
   <article class="min-h-screen flex-center">
-    <MainLogin />
+    <div class="max-w-[39%] w-full">
+      <img class="h-44 w-auto mb-24 mx-auto" src="../assets/logo.png" alt="logo" />
+      <MainLogin />
+    </div>
   </article>
 </template>
