@@ -12,6 +12,10 @@ import {
   StatisticIcon,
   TimelineIcon,
 } from '@/assets/icons/path';
+import { useMemberStore } from '@/stores/memberStore';
+
+const memberStore = useMemberStore();
+console.log(memberStore);
 
 type Role = 'manager' | 'admin' | 'user';
 const role = ref<Role>('user'); // ref를 사용하여 반응형 상태로 선언

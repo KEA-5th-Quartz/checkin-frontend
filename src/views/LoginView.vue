@@ -1,16 +1,29 @@
 <script setup lang="ts">
+import { userApi } from '@/services/userService/userService';
+import { useMemberStore } from '@/stores/memberStore';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
 
 const handleLogin = async () => {
   try {
-    console.log('로그인 정보:', {
+    const response = await userApi.login({
       username: username.value,
       password: password.value,
+    });
+    console.log('data:', response.data.data);
+    const memberData = response.data.data;
+
+    memberStore.setMemberInfo({
+      memberId: memberData.memberId,
+      username: memberData.username,
+      profilePic: memberData.profilePic,
+      role: memberData.role,
+      accessToken: memberData.accessToken,
     });
 
     // router.push('/');
