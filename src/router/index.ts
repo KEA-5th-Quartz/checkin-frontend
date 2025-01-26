@@ -67,6 +67,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Administrator/CategoryManagement.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
+      {
+        path: 'administrator/LogPage',
+        name: 'LogPage',
+        component: () => import('../views/Administrator/LogPage.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+      },
       // 사용자
       {
         path: 'user/tickets',
