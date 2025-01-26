@@ -23,6 +23,7 @@ const handleClose = () => {
   show.value = false;
   setTimeout(() => {
     emit('close');
+    handleCancelEdit();
   }, 300);
 };
 
@@ -42,7 +43,7 @@ onMounted(() => {
 
 const handleCancelEdit = () => {
   ticketStore.resetToOriginal();
-  ticketStore.toggleEditMode();
+  ticketStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
@@ -82,56 +83,39 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
 <template>
   <Teleport to="body">
-    <div v-if="ticketId && ticketStore.ticket" class="fixed inset-0 z-10">
-      <div class="fixed inset-0 transition-opacity" @click="handleClose" />
-      <div
-        class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
-        :class="{ 'drawer-enter': show, 'drawer-leave': !show }"
-      >
+    <div v-if="ticketId && ticketStore.ticket" class="ticket-overlay">
+      <div class="ticket-click-outside" @click="handleClose" />
+      <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
-        <div class="flex items-center justify-between w-full gap-3">
+        <header class="ticket-header">
           <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
-          <input
-            v-else
-            v-model="ticketStore.ticket.title"
-            class="w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none"
-          />
+          <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
-          <div v-else class="flex items-center gap-4">
-            <button
-              @click="handleCancelEdit"
-              class="px-6 py-1.5 text-sm border border-gray-1 rounded-lg hover:bg-gray-100 whitespace-nowrap"
-            >
-              취소
-            </button>
-            <button
-              @click="handleConfirmEdit"
-              class="px-6 py-1.5 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0 whitespace-nowrap"
-            >
-              저장
-            </button>
+          <div v-else class="filter-btn-section pt-0">
+            <button @click="handleCancelEdit" class="btn-cancel">취소</button>
+            <button @click="handleConfirmEdit" class="btn-main">저장</button>
           </div>
-        </div>
+        </header>
 
         <!-- 컨텐츠 -->
-        <div class="mt-6 flex-1 overflow-y-auto hide-scrollbar">
+        <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
             <!-- 왼쪽 섹션 -->
-            <section class="flex flex-col w-full">
+            <section class="ticket-section">
               <!-- 중요도 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">중요도</p>
+              <div class="flex-stack items-start">
+                <label class="ticket-label">중요도</label>
                 <div class="py-1">
                   <PriorityBadge />
                 </div>
               </div>
 
               <!-- 1차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">1차 카테고리</p>
+              <div>
+                <label class="ticket-label">1차 카테고리</label>
                 <div
                   v-if="!ticketStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
@@ -149,31 +133,31 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                 />
               </div>
               <!-- 요청자 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">요청자</p>
+              <div>
+                <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">King.kim</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">요청 일자</p>
-                <p class="text-xs text-blue-1">2025/01/20</p>
+              <div>
+                <label class="ticket-label">요청 일자</label>
+                <p class="ticket-date">2025/01/20</p>
               </div>
             </section>
 
             <!-- 오른쪽 섹션 -->
-            <section class="flex flex-col w-full">
+            <section class="ticket-section">
               <!-- 진행상태 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">진행상태</p>
+              <div class="flex-stack items-start">
+                <label class="ticket-label">진행상태</label>
                 <StatusBadge status="생성" size="xl" />
               </div>
 
               <!-- 2차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">2차 카테고리</p>
+              <div>
+                <label class="ticket-label">2차 카테고리</label>
                 <div
                   v-if="!ticketStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
@@ -191,22 +175,22 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                 />
               </div>
               <!-- 담당자 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">담당자</p>
+              <div>
+                <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">king.kim</p>
                 </div>
               </div>
               <!-- 마감 기한 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">마감 기한</p>
-                <p v-if="!ticketStore.isEditMode" class="text-xs text-blue-1">{{ ticketStore.ticket.due_date }}</p>
+              <div>
+                <label class="ticket-label">마감 기한</label>
+                <p v-if="!ticketStore.isEditMode" class="ticket-date">{{ ticketStore.ticket.due_date }}</p>
                 <input
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
-                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
+                  class="ticket-date ticket-edit-input py-2"
                   v-model="ticketStore.ticket.due_date"
                 />
               </div>
@@ -215,18 +199,12 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
           <!-- 설명 -->
           <div class="mt-11">
-            <p class="font-semibold mb-3">설명</p>
-            <div
-              v-if="!ticketStore.isEditMode"
-              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
-            >
-              <p class="text-sm text-gray-1">{{ ticketStore.ticket.content }}</p>
+            <label class="ticket-desc-label">설명</label>
+            <div v-if="!ticketStore.isEditMode" class="ticket-desc-area">
+              <p class="ticket-desc-content">{{ ticketStore.ticket.content }}</p>
             </div>
             <div v-else>
-              <textarea
-                v-model="ticketStore.ticket.content"
-                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 focus:outline-none"
-              />
+              <textarea v-model="ticketStore.ticket.content" class="ticket-desc-textarea" />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
                 <SvgIcon :icon="ClipIcon" />
               </div>
@@ -234,18 +212,14 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           </div>
 
           <!-- 첨부 파일 -->
-          <div class="mt-6" v-if="!ticketStore.isEditMode">
-            <div
-              class="bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-sm"
-            >
-              Customer KYC
-            </div>
+          <div class="mt-4" v-if="!ticketStore.isEditMode">
+            <div class="ticket-attachment">Customer KYC</div>
           </div>
 
           <!-- 댓글 입력창 -->
-          <div v-if="!ticketStore.isEditMode" class="flex flex-col gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4">
+          <div v-if="!ticketStore.isEditMode" class="ticket-comment-container">
             <!-- 로그 -->
-            <div class="flex items-center gap-5">
+            <div class="ticket-comment-log">
               <div class="w-8 h-8 bg-blue-300 rounded-full" />
               <div>
                 <p class="text-sm text-gray-1">Neo.js 상태 변경 2025-01-17 13:27</p>
@@ -259,11 +233,11 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
             <!-- 댓글 -->
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
-              <div class="px-3 py-3 border border-gray-1 rounded-[10px]">
+              <div class="ticket-comment-bubble">
                 <p class="text-sm">
                   화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
                   부탁드립니다.
@@ -273,11 +247,11 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
             </div>
 
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
-              <div class="px-3 py-3 border border-gray-1 rounded-[10px]">
+              <div class="ticket-comment-bubble">
                 <p class="text-sm">
                   화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
                   부탁드립니다.
@@ -288,11 +262,8 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           </div>
 
           <!-- 댓글 인풋 -->
-          <div v-if="!ticketStore.isEditMode" class="mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl">
-            <textarea
-              placeholder="댓글을 작성하세요"
-              class="w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar"
-            />
+          <div v-if="!ticketStore.isEditMode" class="ticket-comment-input-area">
+            <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
             <div class="flex gap-2 w-full justify-end pb-1.5">
               <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
               <SvgIcon :icon="SendIcon" class="cursor-pointer" />

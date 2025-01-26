@@ -50,51 +50,39 @@ onClickOutside(modalRef, () => {
 </script>
 
 <template>
-  <div
-    ref="modalRef"
-    class="bg-white-0 rounded-lg w-[300px] max-h-[600px] overflow-y-auto shadow-md pb-4 hide-scrollbar z-20"
-  >
-    <div class="py-3 px-8 bg-primary-0 text-white-1 font-bold">필터</div>
+  <div ref="modalRef" class="filter-container z-20">
+    <div class="filter-title">필터</div>
 
     <!-- 카테고리 -->
-    <section class="flex flex-col px-7 py-5">
-      <p class="border-b-2 border-gray-0 max-w-fit mb-3.5">카테고리</p>
+    <section class="filter-section pt-5">
+      <p class="filter-label">카테고리</p>
       <div class="relative" ref="categoryRef">
-        <div
-          @click="isCategoryDropdownOpen = !isCategoryDropdownOpen"
-          class="flex items-center justify-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer"
-        >
+        <div @click="isCategoryDropdownOpen = !isCategoryDropdownOpen" class="filter-dropdown">
           <p v-if="selectedCategories.length === 0" class="opacity-30">카테고리 선택</p>
           <p v-else>{{ selectedCategories.length }}개 선택</p>
 
-          <SvgIcon
-            :icon="ArrowDownIcon"
-            :class="['transition-transform duration-200', isCategoryDropdownOpen ? 'rotate-180' : '']"
-          />
+          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isCategoryDropdownOpen ? 'rotate-180' : '']" />
         </div>
 
-        <div
-          v-if="isCategoryDropdownOpen"
-          class="absolute z-10 top-9 mt-1 w-full bg-white-0 border border-gray-2 rounded-lg shadow-md max-h-60 overflow-y-auto hide-scrollbar"
-        >
-          <div
+        <ul v-if="isCategoryDropdownOpen" class="filter-dropdown-ul">
+          <li
             v-for="category in firstCategory"
             :key="category.id"
             @click="toggleCategory(category.value)"
-            class="px-3 py-2 hover:bg-gray-3 cursor-pointer flex items-center justify-between"
+            class="filter-dropdown-li"
             :class="[
               selectedCategories.includes(category.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
             ]"
           >
             {{ category.label }}
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </section>
     <!-- 상태 -->
-    <section class="flex flex-col px-7">
-      <p class="border-b-2 border-gray-0 max-w-fit pr-4">상태</p>
-      <div class="flex gap-2 pt-3.5">
+    <section class="filter-section">
+      <p class="filter-label">상태</p>
+      <div class="flex gap-2">
         <StatusBadge
           v-for="sta in status"
           :key="sta.id"
@@ -108,19 +96,9 @@ onClickOutside(modalRef, () => {
     </section>
 
     <!-- 취소 저장 버튼 -->
-    <section class="flex justify-center w-full gap-4 pt-7">
-      <button
-        @click="emit('closeFilter')"
-        class="px-6 py-1 text-sm border border-gray-1 rounded-lg hover:bg-gray-100 whitespace-nowrap"
-      >
-        취소
-      </button>
-      <button
-        @click="handleSave"
-        class="px-6 py-1 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0 whitespace-nowrap"
-      >
-        저장
-      </button>
+    <section class="flex justify-center w-full gap-4 pt-2">
+      <button @click="emit('closeFilter')" class="btn-cancel">취소</button>
+      <button @click="handleSave" class="btn-main">저장</button>
     </section>
   </div>
 </template>

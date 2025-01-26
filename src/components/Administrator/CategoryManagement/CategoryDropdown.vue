@@ -4,9 +4,9 @@
     <button @click.stop="toggleMenu" class="text-gray-0 hover:text-black-0">⋮</button>
 
     <!-- 드롭다운 메뉴 -->
-    <ul v-if="isOpen" class="absolute right-0 mt-2 bg-white-0 border border-gray-2 rounded-md shadow-lg w-28 z-50">
+    <ul v-if="isOpen" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
       <li @click="handleEdit" class="px-4 py-2 cursor-pointer hover:bg-gray-3">수정</li>
-      <li @click="handleDelete" class="px-4 py-2 cursor-pointer text-red-500 hover:bg-gray-3">삭제</li>
+      <li @click="handleDelete" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-3">삭제</li>
     </ul>
   </div>
 </template>

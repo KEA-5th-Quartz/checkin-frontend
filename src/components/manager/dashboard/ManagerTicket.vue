@@ -58,23 +58,20 @@ const handleManagerSelect = (option: BaseTicketOption) => {
 
 <template>
   <Teleport to="body">
-    <div v-if="ticketId" class="fixed inset-0 z-10">
-      <div class="fixed inset-0 transition-opacity" @click="handleClose" />
-      <div
-        class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
-        :class="{ 'drawer-enter': show, 'drawer-leave': !show }"
-      >
+    <div v-if="ticketId" class="ticket-overlay">
+      <div class="ticket-click-outside" @click="handleClose" />
+      <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
-        <div class="flex items-center justify-between w-full">
+        <header class="ticket-header">
           <p class="text-2xl">SSH 접속 확인</p>
           <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
-        </div>
+        </header>
 
         <!-- 컨텐츠 -->
-        <div class="mt-6 flex-1 overflow-y-auto hide-scrollbar">
+        <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
             <!-- 왼쪽 섹션 -->
-            <section class="flex flex-col w-full">
+            <section class="ticket-section">
               <!-- 중요도 블록 -->
               <CustomDropdown
                 label="중요도"
@@ -91,25 +88,24 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :selected-option="firstCategorySelected"
                 :onOptionSelect="handleFirstCategorySelect"
                 @select="(option) => (firstCategorySelected = option)"
-                class="mt-[18px]"
               />
               <!-- 요청자 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-1.5">요청자</p>
-                <div class="manager-filter-btn w-full rounded-xl border-primary-2 justify-start gap-2">
+              <div>
+                <label class="ticket-label">요청자</label>
+                <div class="manager-filter-btn w-full border-primary-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
                   <p class="text-xs text-gray-1">King.kim</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">요청 일자</p>
-                <p class="text-xs text-blue-1">2025/01/20</p>
+              <div>
+                <label class="ticket-label">요청 일자</label>
+                <p class="ticket-date">2025/01/20</p>
               </div>
             </section>
 
             <!-- 오른쪽 섹션 -->
-            <section class="flex flex-col w-full">
+            <section class="ticket-section">
               <!-- 진행상태 블록 -->
               <CustomDropdown
                 label="진행상태"
@@ -126,7 +122,6 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :selected-option="secondCategorySelected"
                 :onOptionSelect="handleSecondCategorySelect"
                 @select="(option) => (secondCategorySelected = option)"
-                class="mt-[18px]"
               />
               <!-- 담당자 블록 -->
               <CustomDropdown
@@ -135,37 +130,32 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                 :selected-option="managerSelected"
                 :onOptionSelect="handleManagerSelect"
                 @select="(option) => (managerSelected = option)"
-                class="mt-7"
               />
               <!-- 마감 기한 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">마감 기한</p>
-                <p class="text-xs text-blue-1">2025/01/20</p>
+              <div>
+                <label class="ticket-label">마감 기한</label>
+                <p class="ticket-date">2025/01/20</p>
               </div>
             </section>
           </div>
 
           <!-- 설명 -->
           <div class="mt-11">
-            <p class="font-semibold mb-3">설명</p>
-            <div class="min-h-32 border-y border-y-primary-2 px-2 py-6">
-              <p class="text-sm text-gray-1">Github Repo가 접속이 되지 않습니다.</p>
+            <label class="ticket-desc-label">설명</label>
+            <div class="ticket-desc-area">
+              <p class="ticket-desc-content">Github Repo가 접속이 되지 않습니다.</p>
             </div>
           </div>
 
           <!-- 첨부파일 -->
-          <div class="mt-6">
-            <div
-              class="bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-sm"
-            >
-              Customer KYC
-            </div>
+          <div class="mt-4">
+            <div class="ticket-attachment">Customer KYC</div>
           </div>
 
           <!-- 댓글 창 -->
-          <div class="flex flex-col gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4">
+          <div class="ticket-comment-container">
             <!-- 로그 -->
-            <div class="flex items-center gap-5">
+            <div class="ticket-comment-log">
               <div class="w-8 h-8 bg-blue-300 rounded-full" />
               <div>
                 <p class="text-sm text-gray-1">Neo.js 상태 변경 2025-01-17 13:27</p>
@@ -179,11 +169,11 @@ const handleManagerSelect = (option: BaseTicketOption) => {
 
             <!-- 댓글 -->
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
-              <div class="px-3 py-3 border border-gray-1 rounded-[10px]">
+              <div class="ticket-comment-bubble">
                 <p class="text-sm">
                   화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
                   부탁드립니다.
@@ -193,11 +183,11 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             </div>
 
             <div class="flex gap-2">
-              <div class="flex flex-col gap-2">
+              <div class="flex-stack gap-2">
                 <div class="w-8 h-8 bg-blue-300 rounded-full" />
                 <p class="text-xs whitespace-nowrap">Neo.js</p>
               </div>
-              <div class="px-3 py-3 border border-gray-1 rounded-[10px]">
+              <div class="ticket-comment-bubble">
                 <p class="text-sm">
                   화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
                   부탁드립니다.
@@ -208,11 +198,8 @@ const handleManagerSelect = (option: BaseTicketOption) => {
           </div>
 
           <!-- 댓글 인풋 -->
-          <div class="mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl">
-            <textarea
-              placeholder="댓글을 작성하세요"
-              class="w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar"
-            />
+          <div class="ticket-comment-input-area">
+            <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
             <div class="flex gap-2 w-full justify-end pb-1.5">
               <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
               <SvgIcon :icon="SendIcon" class="cursor-pointer" />

@@ -1,8 +1,8 @@
 <template>
   <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center bg-black-0 bg-opacity-40 z-50">
-    <div ref="modalRef" class="bg-white-0 p-10 rounded-lg shadow-lg w-[90%] max-w-lg">
+    <div ref="modalRef" class="card-base p-10 shadow-lg w-[90%] max-w-lg">
       <!-- 모달 헤더 -->
-      <div class="flex justify-between items-center mb-12">
+      <div class="flex-between mb-12">
         <h3 class="text-lg font-semibold text-black-0">인원 등록</h3>
         <button @click="closeModal" class="text-gray-0 hover:text-black-0">
           <SvgIcon :icon="XIcon" />

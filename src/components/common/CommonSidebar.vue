@@ -100,7 +100,7 @@ const userNavItems = [
       </router-link>
     </ul>
 
-    <button class="fixed left-10 bottom-10" @click="console.log('로그아웃')">
+    <button class="absolute left-10 bottom-10" @click="console.log('로그아웃')">
       <SvgIcon :icon="LogoutIcon" />
     </button>
   </nav>
