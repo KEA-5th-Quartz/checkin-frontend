@@ -7,31 +7,31 @@ import { useUserTemplateListStore } from '@/stores/userTemplateListStore'; // �
 import SvgIcon from '../common/SvgIcon.vue'; // 아이콘
 import { CreateTicketIcon } from '@/assets/icons/path';
 
-const ticketStore = useUserTemplateListStore();
+const templateStore = useUserTemplateListStore();
 
-const selectedTicketId = ref<number | null>(null);
+const selectedTemplateId = ref<number | null>(null);
 
 const handleRowClick = (id: number) => {
-  selectedTicketId.value = id;
+  selectedTemplateId.value = id;
 };
 
 const handleCloseModal = () => {
-  selectedTicketId.value = null;
+  selectedTemplateId.value = null;
 };
 
 const handleCheckboxClick = (event: Event, id: number) => {
   // 체크박스 클릭 시 이벤트 전파 중지 (행 클릭 이벤트 방지)
   event.stopPropagation();
 
-  if (ticketStore.selectedTickets.has(id)) {
-    ticketStore.removeSelectedTicket(id);
+  if (templateStore.selectedTemplates.has(id)) {
+    templateStore.removeSelectedTemplate(id);
   } else {
-    ticketStore.addSelectedTicket(id);
+    templateStore.addSelectedTemplate(id);
   }
   // 현재 선택된 모든 티켓 출력
   console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(ticketStore.selectedTickets),
-    totalSelected: ticketStore.selectedTickets.size,
+    selectedIds: Array.from(templateStore.selectedTemplates),
+    totalSelected: templateStore.selectedTemplates.size,
   });
 };
 </script>
@@ -44,8 +44,8 @@ const handleCheckboxClick = (event: Event, id: number) => {
         <table class="min-w-full table-fixed">
           <thead class="manager-thead">
             <tr>
-              <th v-if="ticketStore.isDeleteMode" class="manager-th w-[1%]">선택</th>
-              <th :class="['manager-th w-[5%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
+              <th v-if="templateStore.isDeleteMode" class="manager-th w-[1%]">선택</th>
+              <th :class="['manager-th w-[5%]', templateStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
               <th class="manager-th text-start w-[25%]">제목</th>
               <th class="manager-th w-[10%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
@@ -61,17 +61,17 @@ const handleCheckboxClick = (event: Event, id: number) => {
               class="hover:bg-white-1 relative"
               @click="handleRowClick(item.id)"
             >
-              <td v-if="ticketStore.isDeleteMode" class="manager-td">
+              <td v-if="templateStore.isDeleteMode" class="manager-td">
                 <div class="flex items-center justify-center">
                   <input
                     type="checkbox"
                     :class="['w-4 h-4 cursor-pointer']"
-                    :checked="ticketStore.selectedTickets.has(item.id)"
+                    :checked="templateStore.selectedTemplates.has(item.id)"
                     @click="(e) => handleCheckboxClick(e, item.id)"
                   />
                 </div>
               </td>
-              <td :class="['manager-td max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
+              <td :class="['manager-td max-w-0', templateStore.isDeleteMode ? 'pl-0' : 'pl-6']">
                 <p :title="item.id as unknown as string">
                   {{ item.id }}
                 </p>
@@ -106,7 +106,7 @@ const handleCheckboxClick = (event: Event, id: number) => {
         </table>
       </div>
 
-      <UserTemplateTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
+      <UserTemplateTicket v-if="selectedTemplateId" :template-id="selectedTemplateId" @close="handleCloseModal" />
     </article>
   </section>
   <section v-else class="w-full flex flex-col items-center pb-40">

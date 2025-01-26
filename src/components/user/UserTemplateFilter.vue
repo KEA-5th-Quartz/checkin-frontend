@@ -3,11 +3,11 @@ import { TrashcanIcon } from '../../assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { useUserTemplateListStore } from '../../stores/userTemplateListStore';
 
-const ticketStore = useUserTemplateListStore();
+const templateStore = useUserTemplateListStore();
 
 const handleCancel = () => {
-  ticketStore.toggleDeleteMode();
-  ticketStore.clearSelectedTickets();
+  templateStore.toggleDeleteMode();
+  templateStore.clearSelectedTemplates();
 };
 
 const handleDelete = () => {
@@ -16,10 +16,10 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <section v-if="!ticketStore.isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
+  <section v-if="!templateStore.isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
     <!-- 필터 -->
     <div class="flex items-center gap-10 w-full">
-      <SvgIcon :icon="TrashcanIcon" class="cursor-pointer ml-auto" @click="ticketStore.toggleDeleteMode" />
+      <SvgIcon :icon="TrashcanIcon" class="cursor-pointer ml-auto" @click="templateStore.toggleDeleteMode" />
     </div>
   </section>
 

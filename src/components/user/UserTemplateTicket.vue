@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, PencilIcon, SendIcon, XIcon } from '@/assets/icons/path';
+import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { computed, onMounted, ref } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
-import { useTicketStore } from '@/stores/userTicketStore';
+import { useTemplateStore } from '../../stores/userTemplateStore';
 import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
+import '@/assets/slideAnimation.css';
 
 defineProps<{
-  ticketId: number;
+  templateId: number;
 }>();
 
 const emit = defineEmits<{
@@ -25,7 +26,7 @@ const handleClose = () => {
   }, 300);
 };
 
-let ticketDefaultTest = {
+let templateDefaultTest = {
   title: 'SSH 접속 확인',
   firstCategory: 'VM1',
   secondCategory: '생성',
@@ -33,32 +34,32 @@ let ticketDefaultTest = {
   content: 'Github Repo가 접속이 되지 않습니다.',
 };
 
-const ticketStore = useTicketStore();
+const templateStore = useTemplateStore();
 
 onMounted(() => {
-  ticketStore.setTicket(ticketDefaultTest);
+  templateStore.setTemplate(templateDefaultTest);
 });
 
 const handleCancelEdit = () => {
-  ticketStore.resetToOriginal();
-  ticketStore.toggleEditMode();
+  templateStore.resetToOriginal();
+  templateStore.toggleEditMode();
 };
 
 const handleConfirmEdit = () => {
-  ticketStore.toggleEditMode();
+  templateStore.toggleEditMode();
 };
 
 const startEdit = () => {
-  ticketStore.toggleEditMode();
+  templateStore.toggleEditMode();
 };
 
-const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof ticketStore.ticket) => {
+const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof templateStore.template) => {
   return computed({
-    get: () => options.find((option) => option.label === ticketStore.ticket?.[field]) || options[0],
+    get: () => options.find((option) => option.label === templateStore.template?.[field]) || options[0],
     set: (newValue: BaseTicketOption) => {
-      if (ticketStore.ticket) {
-        ticketStore.updateTicket({
-          ...ticketStore.ticket,
+      if (templateStore.template) {
+        templateStore.updateTicket({
+          ...templateStore.template,
           [field]: newValue.label,
         });
       }
@@ -69,10 +70,10 @@ const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof
 const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
 const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
 
-const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: BaseTicketOption) => {
-  if (ticketStore.ticket) {
-    ticketStore.updateTicket({
-      ...ticketStore.ticket,
+const handleOptionSelect = (field: keyof typeof templateStore.template) => (option: BaseTicketOption) => {
+  if (templateStore.template) {
+    templateStore.updateTicket({
+      ...templateStore.template,
       [field]: option.label,
     });
   }
@@ -81,7 +82,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
 <template>
   <Teleport to="body">
-    <div v-if="ticketId && ticketStore.ticket" class="fixed inset-0 z-10">
+    <div v-if="templateId && templateStore.template" class="fixed inset-0 z-10">
       <div class="fixed inset-0 transition-opacity" @click="handleClose" />
       <div
         class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
@@ -89,13 +90,13 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
       >
         <!-- 헤더 -->
         <div class="flex items-center justify-between w-full gap-3">
-          <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
+          <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
           <input
             v-else
-            v-model="ticketStore.ticket.title"
+            v-model="templateStore.template.title"
             class="w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none"
           />
-          <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
+          <div v-if="!templateStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
@@ -132,10 +133,10 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <div class="flex flex-col mt-7">
                 <p class="text-sm pb-2">1차 카테고리</p>
                 <div
-                  v-if="!ticketStore.isEditMode"
+                  v-if="!templateStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
                 >
-                  {{ ticketStore.ticket.firstCategory }}
+                  {{ templateStore.template.firstCategory }}
                 </div>
                 <CustomDropdown
                   v-else
@@ -167,10 +168,10 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <div class="flex flex-col mt-7">
                 <p class="text-sm pb-2">2차 카테고리</p>
                 <div
-                  v-if="!ticketStore.isEditMode"
+                  v-if="!templateStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
                 >
-                  {{ ticketStore.ticket.secondCategory }}
+                  {{ templateStore.template.secondCategory }}
                 </div>
                 <CustomDropdown
                   v-else
@@ -186,13 +187,15 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <!-- 마감 기한 블록 -->
               <div class="mt-7">
                 <p class="text-sm pb-2">마감 기한</p>
-                <p v-if="!ticketStore.isEditMode" class="text-xs text-blue-1">{{ ticketStore.ticket.due_date }}</p>
+                <p v-if="!templateStore.isEditMode" class="text-xs text-blue-1">
+                  {{ templateStore.template.due_date }}
+                </p>
                 <input
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
                   class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
-                  v-model="ticketStore.ticket.due_date"
+                  v-model="templateStore.template.due_date"
                 />
               </div>
             </section>
@@ -202,14 +205,14 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           <div class="mt-11">
             <p class="font-semibold mb-3">설명</p>
             <div
-              v-if="!ticketStore.isEditMode"
+              v-if="!templateStore.isEditMode"
               class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
             >
-              <p class="text-sm text-gray-1 break-words">{{ ticketStore.ticket.content }}</p>
+              <p class="text-sm text-gray-1 break-words">{{ templateStore.template.content }}</p>
             </div>
             <div v-else>
               <textarea
-                v-model="ticketStore.ticket.content"
+                v-model="templateStore.template.content"
                 class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
               />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
@@ -224,30 +227,6 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 </template>
 
 <style scoped>
-.drawer-enter {
-  animation: slideIn 0.3s forwards;
-}
-.drawer-leave {
-  animation: slideOut 0.3s forwards;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-@keyframes slideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
 input[type='date']::-webkit-calendar-picker-indicator {
   position: absolute;
   width: 100%;
