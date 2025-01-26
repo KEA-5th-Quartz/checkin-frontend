@@ -20,7 +20,8 @@
     "vis-timeline": "^7.7.3",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
-    "vue3-apexcharts": "^1.8.0"
+    "vue3-apexcharts": "^1.8.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
