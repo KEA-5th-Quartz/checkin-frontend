@@ -18,21 +18,21 @@ const { handleSubmit, errors, meta } = useForm({
   validationSchema: schema,
 });
 
-const { value: originalpassword } = useField('originalPassword');
-const { value: newPassword } = useField('newPassword');
-const { value: checkPassword } = useField('checkPassword');
+const { value: originalpwd } = useField('originalPwd');
+const { value: newPwd } = useField('newPwd');
+const { value: checkPwd } = useField('checkPwd');
 
 const resetForm = () => {
-  originalpassword.value = '';
-  newPassword.value = '';
-  checkPassword.value = '';
+  originalpwd.value = '';
+  newPwd.value = '';
+  checkPwd.value = '';
 };
 
 const onSubmit = handleSubmit(async (values) => {
   try {
     await userApi.changePassword(memberStore.memberId, {
-      originalpassword: values.originalpassword,
-      newpassword: values.newPassword,
+      originalpassword: values.originalpwd,
+      newpassword: values.newPwd,
     });
 
     resetForm();
@@ -75,15 +75,15 @@ const handleImageChange = async (event: Event) => {
 };
 
 // 비밀번호 표시 여부
-const showPasswords = ref({
+const showPwd = ref({
   original: false,
   new: false,
   check: false,
 });
 
 // 비밀번호 표시/숨김 토글 함수
-const togglePasswordVisibility = (field: 'original' | 'new' | 'check') => {
-  showPasswords.value[field] = !showPasswords.value[field];
+const togglePwdVisibility = (field: 'original' | 'new' | 'check') => {
+  showPwd.value[field] = !showPwd.value[field];
 };
 </script>
 
@@ -110,15 +110,15 @@ const togglePasswordVisibility = (field: 'original' | 'new' | 'check') => {
         <label class="text-gray-0">현재 비밀번호</label>
         <div class="relative">
           <input
-            v-model="originalpassword"
+            v-model="originalpwd"
             class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none pr-10"
-            :type="showPasswords.original ? 'text' : 'password'"
+            :type="showPwd.original ? 'text' : 'password'"
             placeholder="현재 비밀번호를 입력해주세요"
           />
           <SvgIcon
             class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
-            @click="togglePasswordVisibility('original')"
-            :icon="showPasswords.original ? EyeIcon : EyeSlashIcon"
+            @click="togglePwdVisibility('original')"
+            :icon="showPwd.original ? EyeIcon : EyeSlashIcon"
           />
         </div>
       </div>
@@ -127,33 +127,33 @@ const togglePasswordVisibility = (field: 'original' | 'new' | 'check') => {
         <label class="text-gray-0">새 비밀번호</label>
         <div class="relative">
           <input
-            v-model="newPassword"
-            name="newPassword"
+            v-model="newPwd"
+            name="newPwd"
             maxlength="20"
             class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
-            :type="showPasswords.new ? 'text' : 'password'"
+            :type="showPwd.new ? 'text' : 'password'"
             placeholder="새 비밀번호를 입력해주세요"
           />
           <SvgIcon
             class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
-            @click="togglePasswordVisibility('new')"
-            :icon="showPasswords.new ? EyeIcon : EyeSlashIcon"
+            @click="togglePwdVisibility('new')"
+            :icon="showPwd.new ? EyeIcon : EyeSlashIcon"
           />
         </div>
         <p
           :class="[
             'absolute top-[70px]',
             {
-              'text-gray-1': !newPassword,
-              'text-red-1': errors.newPassword,
-              'text-green-1': newPassword && !errors.newPassword,
+              'text-gray-1': !newPwd,
+              'text-red-1': errors.newPwd,
+              'text-green-1': newPwd && !errors.newPwd,
             },
           ]"
         >
           {{
-            errors.newPassword
-              ? errors.newPassword
-              : newPassword
+            errors.newPwd
+              ? errors.newPwd
+              : newPwd
               ? '사용 가능한 비밀번호입니다.'
               : '비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상 20자리 이하'
           }}
@@ -164,29 +164,29 @@ const togglePasswordVisibility = (field: 'original' | 'new' | 'check') => {
         <label class="text-gray-0">새 비밀번호 확인</label>
         <div class="relative">
           <input
-            v-model="checkPassword"
-            name="checkPassword"
+            v-model="checkPwd"
+            name="checkPwd"
             class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
-            :type="showPasswords.check ? 'text' : 'password'"
+            :type="showPwd.check ? 'text' : 'password'"
             placeholder="새 비밀번호를 확인해주세요"
           />
           <SvgIcon
             class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
-            @click="togglePasswordVisibility('check')"
-            :icon="showPasswords.check ? EyeIcon : EyeSlashIcon"
+            @click="togglePwdVisibility('check')"
+            :icon="showPwd.check ? EyeIcon : EyeSlashIcon"
           />
         </div>
         <p
-          v-if="checkPassword"
+          v-if="checkPwd"
           :class="[
             'absolute top-[70px]',
             {
-              'text-red-1': errors.checkPassword,
-              'text-green-1': !errors.checkPassword && checkPassword,
+              'text-red-1': errors.checkPwd,
+              'text-green-1': !errors.checkPwd && checkPwd,
             },
           ]"
         >
-          {{ errors.checkPassword || '비밀번호가 일치합니다.' }}
+          {{ errors.checkPwd || '비밀번호가 일치합니다.' }}
         </p>
       </div>
 
