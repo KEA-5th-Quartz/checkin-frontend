@@ -4,6 +4,8 @@ import { useMemberStore } from '@/stores/memberStore';
 import { schema } from '@/utils/passwordSchema';
 import { useField, useForm } from 'vee-validate';
 import { ref } from 'vue';
+import SvgIcon from './common/SvgIcon.vue';
+import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 
 const assignmentNotification = ref(false);
 const statusNotification = ref(false);
@@ -71,6 +73,18 @@ const handleImageChange = async (event: Event) => {
     }
   }
 };
+
+// 비밀번호 표시 여부
+const showPasswords = ref({
+  original: false,
+  new: false,
+  check: false,
+});
+
+// 비밀번호 표시/숨김 토글 함수
+const togglePasswordVisibility = (field: 'original' | 'new' | 'check') => {
+  showPasswords.value[field] = !showPasswords.value[field];
+};
 </script>
 
 <template>
@@ -92,26 +106,40 @@ const handleImageChange = async (event: Event) => {
     </section>
 
     <form class="flex-stack gap-10 mt-14" @submit="onSubmit">
-      <div class="flex-stack gap-0.5">
+      <div class="flex-stack gap-0.5 relative">
         <label class="text-gray-0">현재 비밀번호</label>
-        <input
-          v-model="originalpassword"
-          class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
-          type="password"
-          placeholder="현재 비밀번호를 입력해주세요"
-        />
+        <div class="relative">
+          <input
+            v-model="originalpassword"
+            class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none pr-10"
+            :type="showPasswords.original ? 'text' : 'password'"
+            placeholder="현재 비밀번호를 입력해주세요"
+          />
+          <SvgIcon
+            class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
+            @click="togglePasswordVisibility('original')"
+            :icon="showPasswords.original ? EyeIcon : EyeSlashIcon"
+          />
+        </div>
       </div>
 
       <div class="flex-stack gap-0.5 relative">
         <label class="text-gray-0">새 비밀번호</label>
-        <input
-          v-model="newPassword"
-          name="newPassword"
-          maxlength="20"
-          class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
-          type="password"
-          placeholder="새 비밀번호를 입력해주세요"
-        />
+        <div class="relative">
+          <input
+            v-model="newPassword"
+            name="newPassword"
+            maxlength="20"
+            class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
+            :type="showPasswords.new ? 'text' : 'password'"
+            placeholder="새 비밀번호를 입력해주세요"
+          />
+          <SvgIcon
+            class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
+            @click="togglePasswordVisibility('new')"
+            :icon="showPasswords.new ? EyeIcon : EyeSlashIcon"
+          />
+        </div>
         <p
           :class="[
             'absolute top-[70px]',
@@ -134,13 +162,20 @@ const handleImageChange = async (event: Event) => {
 
       <div class="flex-stack gap-0.5 relative">
         <label class="text-gray-0">새 비밀번호 확인</label>
-        <input
-          v-model="checkPassword"
-          name="checkPassword"
-          class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
-          type="password"
-          placeholder="새 비밀번호를 확인해주세요"
-        />
+        <div class="relative">
+          <input
+            v-model="checkPassword"
+            name="checkPassword"
+            class="w-full bg-gray-2 bg-opacity-80 rounded-lg py-2 px-3.5 focus:outline-none"
+            :type="showPasswords.check ? 'text' : 'password'"
+            placeholder="새 비밀번호를 확인해주세요"
+          />
+          <SvgIcon
+            class="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer"
+            @click="togglePasswordVisibility('check')"
+            :icon="showPasswords.check ? EyeIcon : EyeSlashIcon"
+          />
+        </div>
         <p
           v-if="checkPassword"
           :class="[
@@ -157,7 +192,7 @@ const handleImageChange = async (event: Event) => {
 
       <!-- 알림 조건부 렌더링 -->
       <div class="flex-stack gap-5 mt-5">
-        <div class="flex items-center justify-between w-1/3">
+        <div class="flex items-center justify-between w-1/2">
           <p class="font-bold">담당자 배정 알림</p>
           <button
             type="button"
@@ -172,7 +207,7 @@ const handleImageChange = async (event: Event) => {
           </button>
         </div>
 
-        <div class="flex items-center justify-between w-1/3">
+        <div class="flex items-center justify-between w-1/2">
           <p class="font-bold">진행상태 변경 알림</p>
           <button
             type="button"
@@ -187,7 +222,7 @@ const handleImageChange = async (event: Event) => {
           </button>
         </div>
 
-        <div class="flex items-center justify-between w-1/3">
+        <div class="flex items-center justify-between w-1/2">
           <p class="font-bold">티켓 댓글 알림</p>
           <button
             type="button"
