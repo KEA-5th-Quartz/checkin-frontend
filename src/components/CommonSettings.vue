@@ -51,9 +51,12 @@ const handleImageChange = async (event: Event) => {
       return;
     }
 
+    // 허용된 이미지 타입 정의
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+
     // 이미지 타입 체크
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.');
+    if (!allowedTypes.includes(file.type)) {
+      alert('JPG, PNG, WEBP 형식의 이미지만 업로드 가능합니다.');
       return;
     }
 
