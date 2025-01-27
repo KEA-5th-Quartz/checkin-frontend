@@ -10,4 +10,8 @@ export const userApi = {
   changePassword(memberId: number | null, data: { originalpassword: string; newpassword: string }) {
     return api.put(`/members/${memberId}/password`, data);
   },
+  // 회원의 프로필 사진 변경
+  changeProfileImg(memberId: number | null, data: FormData) {
+    return api.put(`/members/${memberId}/profile-pic`, data);
+  },
 };

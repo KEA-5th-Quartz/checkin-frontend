@@ -8,6 +8,7 @@ import { ref } from 'vue';
 const assignmentNotification = ref(false);
 const statusNotification = ref(false);
 const commentNotification = ref(false);
+const previewImage = ref('../assets/logo.png'); // 나중에 프로필 기본 이미지로 변경
 
 const memberStore = useMemberStore();
 
@@ -37,16 +38,52 @@ const onSubmit = handleSubmit(async (values) => {
     console.log('비밀번호 변경 실패:', error);
   }
 });
+
+const handleImageChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement; // 이벤트 객체에서 input 가져옴
+  const file = target.files?.[0];
+
+  if (file) {
+    // 파일 크기 체크, 일단 5mb로 지정
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
+    // 이미지 타입 체크
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    const reader = new FileReader(); // FileReader 객체 생성
+    reader.onload = (e) => {
+      previewImage.value = e.target?.result as string; // 읽은 결과를 미리보기 이미지 소스로 설정
+    }; // 파일을 Base64 인코딩된 문자열로 읽기
+    reader.readAsDataURL(file);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await userApi.changeProfileImg(memberStore.memberId, formData);
+    } catch (error) {
+      console.log('프로필 이미지 변경 실패:', error);
+    }
+  }
+};
 </script>
 
 <template>
   <div class="flex-stack w-1/2">
     <section class="flex gap-8 items-center">
       <div class="relative">
-        <img src="../assets/logo.png" class="border w-36 h-36 rounded-full bg-pink-300" />
-        <button class="absolute bottom-1 right-2 w-7 h-7 bg-gray-2 rounded-full flex-center text-xl hover:bg-gray-1">
+        <img :src="previewImage" class="border w-36 h-36 rounded-full bg-pink-300 object-cover" />
+        <label
+          class="absolute bottom-1 right-2 w-7 h-7 bg-gray-2 rounded-full flex-center text-xl hover:bg-gray-1 cursor-pointer"
+        >
           +
-        </button>
+          <input type="file" accept="image/*" class="hidden" @change="handleImageChange" />
+        </label>
       </div>
       <div class="flex flex-col gap-5">
         <p class="font-semibold text-2xl">stone.vue</p>
