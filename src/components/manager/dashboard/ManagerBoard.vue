@@ -11,6 +11,7 @@ import { ArrowDownIcon, FilterIcon, SearchIcon } from '@/assets/icons/path';
 import ManagerFilter from './ManagerFilter.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
+import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 
 interface FilterState {
   statuses: string[];
@@ -207,7 +208,7 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   </header>
 
   <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
-    <div v-if="isLoading" class="flex justify-center items-center min-h-[calc(100vh-300px)]">로딩 중...</div>
+    <SkeletonTable v-if="isLoading" />
 
     <div v-else class="max-h-[calc(100vh-340px)]">
       <table v-if="!isMyTicket" class="min-w-full table-fixed">
