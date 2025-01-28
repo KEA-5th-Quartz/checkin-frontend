@@ -29,7 +29,6 @@ onMounted(async () => {
 });
 
 const isTemplateOpen = ref(false);
-console.log(memberStore);
 
 const role = computed(() => memberStore.role as 'MANAGER' | 'ADMIN' | 'USER');
 

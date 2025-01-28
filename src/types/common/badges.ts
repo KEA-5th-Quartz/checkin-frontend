@@ -1,11 +1,11 @@
 export interface StatusBadgeProps {
-  status: '생성' | '진행중' | '완료';
+  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   class?: string;
 }
 
 export interface PriorityBadgeProps {
-  priority?: '긴급' | '높음' | '보통' | '낮음';
+  priority?: 'EMERGENCY' | 'HIGH' | 'MEDIUM' | 'LOW';
   size?: 'sm' | 'md' | 'lg';
   class?: string;
   dotClass?: string;
