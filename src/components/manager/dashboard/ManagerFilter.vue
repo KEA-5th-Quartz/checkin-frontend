@@ -6,6 +6,10 @@ import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 import { firstCategory, managerOptions, status } from '../ticketOptionTest';
 
+const props = defineProps<{
+  isMyTicket: boolean;
+}>();
+
 const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const managerRef = ref<HTMLElement | null>(null);
@@ -66,7 +70,8 @@ const toggleCategory = (category: string) => {
 const handleSave = () => {
   emit('applyFilters', {
     quickFilters: selectedQuickFilter.value,
-    managers: selectedManagers.value,
+    // isMyTicket이 true일 때는 빈 배열 전달
+    managers: props.isMyTicket ? [] : selectedManagers.value,
     statuses: selectedStatuses.value,
     categories: selectedCategories.value,
   });
@@ -103,7 +108,7 @@ onClickOutside(modalRef, () => {
       </div>
     </section>
     <!-- 담당자 -->
-    <section class="filter-section">
+    <section v-if="!isMyTicket" class="filter-section">
       <label class="filter-label">담당자</label>
       <div class="relative" ref="managerRef">
         <div @click="isManagerDropdownOpen = !isManagerDropdownOpen" class="filter-dropdown">

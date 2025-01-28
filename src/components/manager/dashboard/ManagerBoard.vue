@@ -10,6 +10,7 @@ import { perPageOptions, status } from '../ticketOptionTest';
 import { ArrowDownIcon, FilterIcon, SearchIcon } from '@/assets/icons/path';
 import ManagerFilter from './ManagerFilter.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 
 interface FilterState {
   statuses: string[];
@@ -29,6 +30,7 @@ interface FilterPayload {
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
+const isMyTicket = ref(false);
 
 const filterState = ref<FilterState>({
   statuses: [],
@@ -43,7 +45,11 @@ const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
   statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
-  usernames: Array.isArray(filterState.value.usernames) ? filterState.value.usernames : [],
+  usernames: isMyTicket.value
+    ? ['manager2.js']
+    : Array.isArray(filterState.value.usernames)
+    ? filterState.value.usernames
+    : [],
   categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
   dueToday: filterState.value.dueToday,
   dueThisWeek: filterState.value.dueThisWeek,
@@ -136,9 +142,10 @@ const selectOption = (
       </div>
 
       <!-- 내 티켓 -->
-      <div class="btn-main py-2">
-        <button>내 티켓 조회</button>
-      </div>
+
+      <button class="btn-main py-2" @click="isMyTicket = !isMyTicket">
+        {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
+      </button>
 
       <!-- 필터링 아이콘 -->
       <div class="relative flex items-center max-h-fit">
@@ -149,6 +156,7 @@ const selectOption = (
         <!-- 필터 모달 -->
         <ManagerFilter
           v-if="isFilterOpen"
+          :isMyTicket="isMyTicket"
           @applyFilters="handleApplyFilters"
           @closeFilter="isFilterOpen = false"
           class="board-filter-modal"
@@ -161,7 +169,7 @@ const selectOption = (
     <div v-if="isLoading" class="flex justify-center items-center min-h-[calc(100vh-300px)]">로딩 중...</div>
 
     <div v-else class="max-h-[calc(100vh-340px)]">
-      <table class="min-w-full table-fixed">
+      <table v-if="!isMyTicket" class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>
             <th class="manager-th w-[5%] pl-6">번호</th>
@@ -172,7 +180,6 @@ const selectOption = (
             <th class="manager-th w-[7.5%]">진행 상태</th>
             <th class="manager-th w-[10%]">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
-            <!-- <th class="manager-th w-[5%] pr-6">중요도</th> -->
           </tr>
         </thead>
 
@@ -222,9 +229,74 @@ const selectOption = (
                 {{ ticket.dueDate }}
               </p>
             </td>
-            <!-- <td class="manager-td pr-6">
+          </tr>
+        </tbody>
+      </table>
+
+      <table v-else class="min-w-full table-fixed">
+        <thead class="manager-thead">
+          <tr>
+            <th class="manager-th w-[5%] pl-6">번호</th>
+            <th class="manager-th text-start w-[25%]">제목</th>
+            <th class="manager-th w-[10%]">1차 카테고리</th>
+            <th class="manager-th w-[7.5%]">2차 카테고리</th>
+            <th class="manager-th w-[25%]">설명</th>
+            <th class="manager-th w-[7.5%]">진행 상태</th>
+            <th class="manager-th w-[10%]">담당자</th>
+            <th class="manager-th w-[5%]">마감일</th>
+            <th class="manager-th w-[5%] pr-6">중요도</th>
+          </tr>
+        </thead>
+
+        <tbody class="whitespace-nowrap">
+          <tr
+            v-for="ticket in ticketData?.tickets"
+            :key="ticket.ticketId"
+            class="hover:bg-white-1"
+            @click="handleRowClick(ticket.ticketId)"
+          >
+            <td class="manager-td max-w-0 pl-6">
+              <p :title="ticket.ticketId.toString()">
+                {{ ticket.ticketId }}
+              </p>
+            </td>
+            <td class="manager-td max-w-0 text-start">
+              <p class="truncate" :title="ticket.title">
+                {{ ticket.title }}
+              </p>
+            </td>
+            <td class="manager-td max-w-0">
+              <p class="truncate">
+                {{ ticket.firstCategory }}
+              </p>
+            </td>
+            <td class="manager-td max-w-0">
+              <p class="truncate">
+                {{ ticket.secondCategory }}
+              </p>
+            </td>
+            <td class="manager-td max-w-0 text-start">
+              <p class="truncate" :title="ticket.content">
+                {{ ticket.content }}
+              </p>
+            </td>
+            <td class="manager-td text-center">
+              <StatusBadge :status="ticket.status" size="md" />
+            </td>
+            <td class="manager-td">
+              <div class="flex items-center gap-2 ml-4">
+                <img class="h-7 min-w-7 rounded-full bg-pink-200" />
+                <span class="truncate">{{ ticket.manager }}</span>
+              </div>
+            </td>
+            <td class="manager-td">
+              <p class="truncate">
+                {{ ticket.dueDate }}
+              </p>
+            </td>
+            <td class="manager-td pr-6">
               <PriorityBadge :priority="ticket.priority" size="md" />
-            </td> -->
+            </td>
           </tr>
         </tbody>
       </table>
