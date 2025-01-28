@@ -69,7 +69,7 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
       <label>비밀번호</label>
       <input
         v-model="newPwd"
-        type="password"
+        :type="showPwd.new ? 'text' : 'password'"
         name="newPwd"
         maxlength="20"
         placeholder="Password"
@@ -111,7 +111,7 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
       <label>비밀번호 확인</label>
       <input
         v-model="checkPwd"
-        type="password"
+        :type="showPwd.check ? 'text' : 'password'"
         name="checkPwd"
         placeholder="Check Password"
         :class="[
@@ -125,8 +125,8 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
       />
       <SvgIcon
         class="absolute top-1/2 right-3 transform cursor-pointer"
-        @click="togglePwdVisibility('new')"
-        :icon="showPwd.new ? EyeIcon : EyeSlashIcon"
+        @click="togglePwdVisibility('check')"
+        :icon="showPwd.check ? EyeIcon : EyeSlashIcon"
       />
       <p
         v-if="checkPwd"
