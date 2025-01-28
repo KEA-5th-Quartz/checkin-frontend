@@ -3,13 +3,14 @@ import { ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import {
   CategoryIcon,
-  CreateIcon,
+  CreateTicketIcon,
   DashboardIcon,
   HomeIcon,
   LogoutIcon,
   MemberIcon,
   SettingIcon,
   StatisticIcon,
+  TemplateIcon,
   TimelineIcon,
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
@@ -38,8 +39,7 @@ const adminNavItems = [
 
 const userNavItems = [
   { name: '티켓 목록', icon: CategoryIcon, path: '/user/tickets' },
-  { name: '새 요청 티켓', icon: CategoryIcon, path: '/user/addticket' },
-  { name: '설정', icon: SettingIcon, path: '/settings' },
+  { name: '새 요청 티켓', icon: TemplateIcon, path: '/user/addticket' },
 ];
 
 const userTemplateItems = [
@@ -112,8 +112,7 @@ const userTemplateItems = [
           :class="{ active: isTemplateOpen }"
           @click="isTemplateOpen = !isTemplateOpen"
         >
-          <SvgIcon :icon="CategoryIcon" />
-          템플릿
+          <SvgIcon :icon="CreateTicketIcon" class="" /> 템플릿
         </div>
 
         <!-- 하위 메뉴 -->
@@ -134,6 +133,15 @@ const userTemplateItems = [
           </ul>
         </transition>
       </li>
+
+      <!-- 설정 메뉴 -->
+      <router-link to="/settings" custom v-slot="{ isActive, navigate }">
+        <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
+          <div v-if="isActive" class="sidebar-active" />
+          <SvgIcon :icon="SettingIcon" />
+          설정
+        </li>
+      </router-link>
     </ul>
 
     <button class="absolute left-10 bottom-10" @click="console.log('로그아웃')">
