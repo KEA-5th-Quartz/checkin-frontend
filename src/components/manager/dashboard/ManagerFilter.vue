@@ -12,7 +12,7 @@ const managerRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
 
 // 필터 선택 상태 관리
-const selectedQuickFilters = ref<string[]>([]);
+const selectedQuickFilter = ref<string>('');
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
 const selectedCategories = ref<string[]>([]);
@@ -29,10 +29,12 @@ const quickFilters = [
 
 // 필터 토글 함수들
 const toggleQuickFilter = (filterId: string) => {
-  if (selectedQuickFilters.value.includes(filterId)) {
-    selectedQuickFilters.value = selectedQuickFilters.value.filter((id) => id !== filterId);
+  // 이미 선택된 필터를 다시 클릭하면 선택 해제
+  if (selectedQuickFilter.value === filterId) {
+    selectedQuickFilter.value = '';
   } else {
-    selectedQuickFilters.value.push(filterId);
+    // 다른 필터 선택
+    selectedQuickFilter.value = filterId;
   }
 };
 
@@ -63,7 +65,7 @@ const toggleCategory = (category: string) => {
 // 저장 버튼 클릭 핸들러
 const handleSave = () => {
   emit('applyFilters', {
-    quickFilters: selectedQuickFilters.value,
+    quickFilters: selectedQuickFilter.value,
     managers: selectedManagers.value,
     statuses: selectedStatuses.value,
     categories: selectedCategories.value,
@@ -94,7 +96,7 @@ onClickOutside(modalRef, () => {
         :key="filter.id"
         @click="toggleQuickFilter(filter.id)"
         class="filter-quick-div"
-        :class="[selectedQuickFilters.includes(filter.id) ? 'opacity-100' : 'opacity-30']"
+        :class="[selectedQuickFilter === filter.id ? 'opacity-100' : 'opacity-30']"
       >
         <SvgIcon :icon="filter.icon" />
         <p>{{ filter.label }}</p>
@@ -161,7 +163,7 @@ onClickOutside(modalRef, () => {
           :status="sta.label"
           size="lg"
           class="cursor-pointer"
-          :class="[selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100':'opacity-30 hover:opacity-50']"
+          :class="selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100' : 'opacity-30 hover:opacity-50'"
           @click="toggleStatus(sta.id as unknown as string)"
         />
       </div>

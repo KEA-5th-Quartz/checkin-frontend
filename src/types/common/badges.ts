@@ -1,5 +1,5 @@
 export interface StatusBadgeProps {
-  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+  status: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   class?: string;
 }
