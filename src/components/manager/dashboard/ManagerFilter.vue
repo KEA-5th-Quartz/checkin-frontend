@@ -5,6 +5,7 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 import { firstCategory, managerOptions, status } from '../ticketOptionTest';
+import { priority } from '../ticketOptionTest';
 
 const emit = defineEmits(['closeFilter']);
 const modalRef = ref<HTMLElement | null>(null);
@@ -15,7 +16,7 @@ const categoryRef = ref<HTMLElement | null>(null);
 const selectedQuickFilters = ref<string[]>([]);
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
-const selectedPriorities = ref<string[]>([]);
+const selectedPriorities = ref<number[]>([]);
 const selectedCategories = ref<string[]>([]);
 
 // 드롭다운 상태 관리
@@ -23,14 +24,9 @@ const isManagerDropdownOpen = ref(false);
 const isCategoryDropdownOpen = ref(false);
 
 // 빠른 필터 옵션
-const quickFilters = [{ id: 'dueThisWeek', label: '이번 주에 기한', icon: CalendarIcon }];
-
-// 우선순위 옵션
-const priorities = [
-  { id: 'urgent', label: '긴급', bgClass: 'bg-red-0', textClass: 'text-red-1' },
-  { id: 'high', label: '높음', bgClass: 'bg-orange-0', textClass: 'text-orange-1' },
-  { id: 'medium', label: '보통', bgClass: 'bg-green-0', textClass: 'text-green-1' },
-  { id: 'low', label: '낮음', bgClass: 'bg-primary-2', textClass: 'text-primary-3' },
+const quickFilters = [
+  { id: 'dueToday', label: '오늘 마감', icon: CalendarIcon },
+  { id: 'dueThisWeek', label: '이번 주 마감', icon: CalendarIcon },
 ];
 
 // 필터 토글 함수들
@@ -58,7 +54,7 @@ const toggleStatus = (status: string) => {
   }
 };
 
-const togglePriority = (priorityId: string) => {
+const togglePriority = (priorityId: number) => {
   if (selectedPriorities.value.includes(priorityId)) {
     selectedPriorities.value = selectedPriorities.value.filter((id) => id !== priorityId);
   } else {
@@ -183,17 +179,17 @@ onClickOutside(modalRef, () => {
       <label class="filter-label">우선순위</label>
       <ul class="flex gap-2">
         <li
-          v-for="priority in priorities"
-          :key="priority.id"
-          @click="togglePriority(priority.id)"
+          v-for="pri in priority"
+          :key="pri.id"
+          @click="togglePriority(pri.id)"
           class="filter-priority-li"
           :class="[
-            priority.bgClass,
-            priority.textClass,
-            selectedPriorities.includes(priority.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
+            pri.bg,
+            pri.text,
+            selectedPriorities.includes(pri.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
           ]"
         >
-          {{ priority.label }}
+          {{ pri.label }}
         </li>
       </ul>
     </section>

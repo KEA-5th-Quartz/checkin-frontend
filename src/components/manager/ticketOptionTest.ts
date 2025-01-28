@@ -8,9 +8,9 @@ export const priority: StatusTicketOption[] = [
 ];
 
 export const status: StatusTicketOption[] = [
-  { id: 1, value: '생성', label: '생성', bg: 'bg-gray-4', text: 'text-gray-0' },
-  { id: 2, value: '진행중', label: '진행중', bg: 'bg-blue-4', text: 'text-blue-2' },
-  { id: 3, value: '완료', label: '완료', bg: 'bg-green-0', text: 'text-green-1' },
+  { id: 1, value: 'OPEN', label: '생성', bg: 'bg-gray-4', text: 'text-gray-0' },
+  { id: 2, value: 'IN_PROGRESS', label: '진행중', bg: 'bg-blue-4', text: 'text-blue-2' },
+  { id: 3, value: 'CLOSED', label: '완료', bg: 'bg-green-0', text: 'text-green-1' },
 ];
 
 export const firstCategory: BaseTicketOption[] = [
