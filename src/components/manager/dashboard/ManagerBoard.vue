@@ -29,8 +29,9 @@ interface FilterPayload {
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
-const pageSize = ref(10);
+const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
+const isSearch = ref(false);
 
 const filterState = ref<FilterState>({
   statuses: [],
@@ -108,10 +109,9 @@ const dropdownRef = ref<HTMLElement | null>(null);
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
-const selectOption = (
-  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
-) => {
+const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
+  pageSize.value = option.value;
   isOpen.value = false;
 };
 </script>
@@ -309,7 +309,7 @@ const selectOption = (
     :items-per-page="pageSize"
     :current-page="currentPage"
     :total-pages="ticketData?.totalPages || 1"
-    :visible-pages="10"
+    :visible-pages="5"
     @page-change="handlePageChange"
   />
 </template>
