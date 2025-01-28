@@ -31,6 +31,8 @@ const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
+
+const keyword = ref('');
 const isSearch = ref(false);
 
 const filterState = ref<FilterState>({
@@ -47,7 +49,7 @@ const queryParams = computed(() => ({
   size: pageSize.value,
   statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
   usernames: isMyTicket.value
-    ? ['manager2.js']
+    ? ['manager2.js'] // 기본으로 manager2.js, 나중에 수정
     : Array.isArray(filterState.value.usernames)
     ? filterState.value.usernames
     : [],
@@ -55,6 +57,29 @@ const queryParams = computed(() => ({
   dueToday: filterState.value.dueToday,
   dueThisWeek: filterState.value.dueThisWeek,
 }));
+
+// 검색 쿼리 파라미터
+const searchQueryParams = computed(() => ({
+  page: currentPage.value,
+  size: pageSize.value,
+}));
+
+// 검색 함수
+const handleSearch = () => {
+  if (keyword.value.trim()) {
+    isSearch.value = true;
+    currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+  } else {
+    resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
+  }
+};
+
+// 검색 초기화 함수
+const resetSearch = () => {
+  keyword.value = '';
+  isSearch.value = false;
+  currentPage.value = 1;
+};
 
 // 필터 적용 핸들러
 const handleApplyFilters = (filters: FilterPayload) => {
@@ -70,13 +95,25 @@ const handleApplyFilters = (filters: FilterPayload) => {
   };
 };
 
+// 검색 쿼리 키 computed
+const queryKey = computed(() =>
+  isSearch.value
+    ? ['search-tickets', keyword.value, currentPage.value, pageSize.value]
+    : ['tickets', queryParams.value],
+);
+
 // 데이터 페칭
 const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(['tickets', queryParams], () =>
-  ticketApi
+} = useCustomQuery(queryKey, () => {
+  if (isSearch.value) {
+    return ticketApi
+      .getSearchTicekts(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
+      .then((response) => response.data.data);
+  }
+  return ticketApi
     .getTickets(
       queryParams.value.statuses,
       queryParams.value.usernames,
@@ -86,8 +123,8 @@ const {
       queryParams.value.page,
       queryParams.value.size,
     )
-    .then((response) => response.data.data),
-);
+    .then((response) => response.data.data);
+});
 
 const handleRowClick = (id: number) => {
   selectedTicketId.value = id;
@@ -119,9 +156,14 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
 <template>
   <header class="board-header">
     <!-- 검색 -->
-    <div class="manager-search-div">
-      <input placeholder="티켓 검색..." class="manager-search-input" />
-      <SvgIcon :icon="SearchIcon" class="cursor-pointer" />
+    <div class="flex w-1/4">
+      <div class="manager-search-div">
+        <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+        <input v-model="keyword" placeholder="티켓 검색..." class="manager-search-input" @keyup.enter="handleSearch" />
+        <div class="flex items-center gap-2">
+          <SvgIcon :icon="SearchIcon" class="cursor-pointer pl-1" @click="handleSearch" />
+        </div>
+      </div>
     </div>
 
     <!-- 필터 -->
@@ -142,13 +184,12 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
       </div>
 
       <!-- 내 티켓 -->
-
       <button class="btn-main py-2" @click="isMyTicket = !isMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
       <!-- 필터링 아이콘 -->
-      <div class="relative flex items-center max-h-fit">
+      <div v-if="!isSearch" class="relative flex items-center max-h-fit">
         <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
           <SvgIcon :icon="FilterIcon" />
           필터

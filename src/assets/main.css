@@ -159,7 +159,7 @@ body {
 
   /* 담당자 검색/필터 */
   .manager-search-div {
-    @apply flex-between max-h-fit py-2 w-1/4 pr-4 bg-white-0 border border-gray-1 rounded text-sm;
+    @apply flex-between max-h-fit py-2 w-full pr-4 bg-white-0 border border-gray-1 rounded text-sm;
   }
   .manager-search-input {
     @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
