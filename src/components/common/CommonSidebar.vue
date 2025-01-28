@@ -161,7 +161,7 @@ const userTemplateItems = [
       </router-link>
     </ul>
 
-    <button class="absolute left-10 bottom-10" @click="console.log('로그아웃')">
+    <button class="absolute left-10 bottom-10" @click="router.push('/')">
       <SvgIcon :icon="LogoutIcon" />
     </button>
   </nav>

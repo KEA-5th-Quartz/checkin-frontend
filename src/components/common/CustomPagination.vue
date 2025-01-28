@@ -1,5 +1,72 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+
+interface PaginationProps {
+  itemsPerPage: number;
+  currentPage: number;
+  totalPages: number;
+  visiblePages?: number;
+}
+
+const props = withDefaults(defineProps<PaginationProps>(), {
+  visiblePages: 5,
+});
+
+const emit = defineEmits<{
+  (e: 'page-change', page: number): void;
+}>();
+
+// 페이지 이동 핸들러
+const goToPage = (page: number) => {
+  if (page < 1 || page > props.totalPages) return;
+  emit('page-change', page);
+};
+
+// 동적으로 표시할 페이지 계산
+const pages = computed(() => {
+  const { currentPage, totalPages, visiblePages } = props;
+  const half = Math.floor(visiblePages / 2);
+
+  let start = Math.max(1, currentPage - half);
+  let end = Math.min(totalPages, currentPage + half);
+
+  if (end - start + 1 < visiblePages) {
+    if (start === 1) {
+      end = Math.min(totalPages, start + visiblePages - 1);
+    } else if (end === totalPages) {
+      start = Math.max(1, end - visiblePages + 1);
+    }
+  }
+
+  if (end - start + 1 > visiblePages) {
+    end = start + visiblePages - 1;
+  }
+
+  const result: (number | string)[] = [];
+
+  // 첫 페이지 표시
+  if (start > 1) {
+    result.push(1);
+    if (start > 2) result.push('...');
+  }
+
+  // 중간 페이지들
+  for (let i = start; i <= end; i++) {
+    result.push(i);
+  }
+
+  // 마지막 페이지 표시
+  if (end < totalPages) {
+    if (end < totalPages - 1) result.push('...');
+    result.push(totalPages);
+  }
+
+  return result;
+});
+</script>
+
 <template>
-  <div class="flex justify-end items-center space-x-2 mt-4 gap-1">
+  <div class="flex justify-end items-center space-x-2 mt-4 mb-20 mr-5 gap-1">
     <!-- 이전 버튼 -->
     <button
       :disabled="currentPage === 1"
@@ -13,10 +80,11 @@
     <button
       v-for="page in pages"
       :key="page"
-      @click="goToPage(page)"
+      @click="typeof page === 'number' ? goToPage(page) : null"
       :class="[
         'w-10 h-10 text-sm px-2 py-1 rounded border-gray-4',
         page === currentPage ? 'bg-primary-0 text-white-0 border-purple-400' : 'bg-gray-3',
+        page === '...' ? 'cursor-default' : 'cursor-pointer',
       ]"
       :disabled="page === '...'"
     >
@@ -34,70 +102,6 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed } from 'vue';
-
-export default defineComponent({
-  name: 'CustomPagination',
-  props: {
-    itemsPerPage: {
-      type: Number,
-      required: true, // 한 페이지에 표시할 데이터 수
-    },
-    currentPage: {
-      type: Number,
-      required: true, // 현재 페이지 번호
-    },
-    totalPages: {
-      type: Number,
-      required: true, // 총 페이지 수
-    },
-    visiblePages: {
-      type: Number,
-      default: 10, // 한 번에 보여줄 페이지 번호의 개수
-    },
-  },
-  emits: ['pageChange'], // 페이지 변경 이벤트
-  setup(props, { emit }) {
-    // 페이지 이동 핸들러
-    const goToPage = (page: number) => {
-      if (page < 1 || page > props.totalPages) return; // 유효하지 않은 페이지 번호 무시
-      emit('pageChange', page); // 부모 컴포넌트로 변경된 페이지 번호 전달
-    };
-
-    // 동적으로 표시할 페이지 계산
-    const pages = computed(() => {
-      const { currentPage, totalPages, visiblePages } = props;
-      const half = Math.floor(visiblePages / 2);
-
-      let start = Math.max(1, currentPage - half); // 시작 페이지
-      let end = Math.min(totalPages, currentPage + half); // 끝 페이지
-
-      // 페이지 범위가 부족하면 보정
-      if (end - start + 1 < visiblePages) {
-        if (start === 1) {
-          end = Math.min(totalPages, start + visiblePages - 1);
-        } else if (end === totalPages) {
-          start = Math.max(1, end - visiblePages + 1);
-        }
-      }
-
-      // 최대 visiblePages 개수만 유지
-      if (end - start + 1 > visiblePages) {
-        end = start + visiblePages - 1;
-      }
-
-      // 페이지 목록 생성
-      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    });
-
-    return {
-      goToPage,
-      pages,
-    };
-  },
-});
-</script>
 <style scoped>
 button:disabled {
   cursor: not-allowed;

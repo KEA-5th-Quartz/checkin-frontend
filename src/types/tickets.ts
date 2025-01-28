@@ -23,3 +23,16 @@ export interface DropdownProps {
   isEdit?: boolean;
   my_ref?: null;
 }
+
+// 티켓 타입
+export interface Ticket {
+  ticketId: number;
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  manager: string;
+  content: string;
+  dueDate: string;
+  priority: 'EMERGENCY' | 'HIGH' | 'MEDIUM' | 'LOW';
+  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
+}

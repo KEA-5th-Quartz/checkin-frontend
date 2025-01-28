@@ -5,32 +5,13 @@ import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import ManagerTicket from './ManagerTicket.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
-
-interface Ticket {
-  ticketId: number;
-  title: string;
-  firstCategory: string;
-  secondCategory: string;
-  manager: string;
-  content: string;
-  dueDate: string;
-  priority: 'EMERGENCY' | 'HIGH' | 'MEDIUM' | 'LOW';
-  status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
-}
-
-interface TicketResponse {
-  page: number;
-  size: number;
-  totalPages: number;
-  totalTickets: number;
-  tickets: Ticket[];
-}
+import CustomPagination from '@/components/common/CustomPagination.vue';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
-// Query Parameters
+// 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -47,7 +28,7 @@ const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery<TicketResponse>(['tickets', queryParams], () =>
+} = useCustomQuery(['tickets', queryParams], () =>
   ticketApi
     .getTickets(
       queryParams.value.statuses,
@@ -69,15 +50,15 @@ const handleRowClick = (id: number) => {
 const handleCloseModal = () => {
   selectedTicketId.value = null;
 };
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+};
 </script>
 
 <template>
   <section class="overflow-x-auto mt-5 px-5 pb-20">
     <div v-if="isLoading" class="flex justify-center items-center min-h-[calc(100vh-300px)]">로딩 중...</div>
-
-    <div v-else-if="error" class="flex justify-center items-center min-h-[calc(100vh-300px)]">
-      데이터를 불러오는데 실패했습니다.
-    </div>
 
     <div v-else class="min-h-[calc(100vh-300px)]">
       <table class="min-w-full table-fixed">
@@ -149,8 +130,13 @@ const handleCloseModal = () => {
       </table>
     </div>
 
-    <div>페이지네이션</div>
-
     <ManagerTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
   </section>
+  <CustomPagination
+    :items-per-page="pageSize"
+    :current-page="currentPage"
+    :total-pages="ticketData?.totalPages || 1"
+    :visible-pages="5"
+    @page-change="handlePageChange"
+  />
 </template>
