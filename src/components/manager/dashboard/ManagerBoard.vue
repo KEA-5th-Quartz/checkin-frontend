@@ -1,32 +1,67 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import PriorityBadge from '../../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import ManagerTicket from './ManagerTicket.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { onClickOutside } from '@vueuse/core';
-import { perPageOptions } from '../ticketOptionTest';
+import { perPageOptions, status } from '../ticketOptionTest';
 import { ArrowDownIcon, FilterIcon, SearchIcon } from '@/assets/icons/path';
 import ManagerFilter from './ManagerFilter.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+
+interface FilterState {
+  statuses: string[];
+  usernames: string[];
+  categories: string[];
+  dueToday: boolean;
+  dueThisWeek: boolean;
+}
+
+interface FilterPayload {
+  quickFilters: string[];
+  managers: string[];
+  statuses: string[];
+  categories: string[];
+}
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
+const filterState = ref<FilterState>({
+  statuses: [],
+  usernames: [],
+  categories: [],
+  dueToday: false,
+  dueThisWeek: false,
+});
+
 // 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
-  statuses: '',
-  usernames: '',
-  categories: '',
-  priorities: '',
-  dueToday: false,
-  dueThisWeek: false,
+  statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
+  usernames: Array.isArray(filterState.value.usernames) ? filterState.value.usernames : [],
+  categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
+  dueToday: filterState.value.dueToday,
+  dueThisWeek: filterState.value.dueThisWeek,
 }));
+
+// 필터 적용 핸들러
+const handleApplyFilters = (filters: FilterPayload) => {
+  filterState.value = {
+    statuses: filters.statuses.map((id: string) => {
+      const statusItem = status.find((s) => s.id === (id as unknown as number));
+      return statusItem?.label || '';
+    }),
+    usernames: filters.managers,
+    categories: filters.categories,
+    dueToday: filters.quickFilters.includes('dueToday'),
+    dueThisWeek: filters.quickFilters.includes('dueThisWeek'),
+  };
+};
 
 // 데이터 페칭
 const {
@@ -39,7 +74,6 @@ const {
       queryParams.value.statuses,
       queryParams.value.usernames,
       queryParams.value.categories,
-      queryParams.value.priorities,
       queryParams.value.dueToday,
       queryParams.value.dueThisWeek,
       queryParams.value.page,
@@ -101,6 +135,11 @@ const selectOption = (
         </div>
       </div>
 
+      <!-- 내 티켓 -->
+      <div class="btn-main py-2">
+        <button>내 티켓 조회</button>
+      </div>
+
       <!-- 필터링 아이콘 -->
       <div class="relative flex items-center max-h-fit">
         <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
@@ -108,12 +147,17 @@ const selectOption = (
           필터
         </button>
         <!-- 필터 모달 -->
-        <ManagerFilter v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="board-filter-modal" />
+        <ManagerFilter
+          v-if="isFilterOpen"
+          @applyFilters="handleApplyFilters"
+          @closeFilter="isFilterOpen = false"
+          class="board-filter-modal"
+        />
       </div>
     </div>
   </header>
 
-  <section class="overflow-x-auto mt-1 px-5 pb-20 hide-scrollbar">
+  <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
     <div v-if="isLoading" class="flex justify-center items-center min-h-[calc(100vh-300px)]">로딩 중...</div>
 
     <div v-else class="max-h-[calc(100vh-340px)]">
@@ -169,7 +213,7 @@ const selectOption = (
             </td>
             <td class="manager-td">
               <div class="flex items-center gap-2 ml-4">
-                <img class="h-7 w-7 rounded-full bg-pink-200" />
+                <img class="h-7 min-w-7 rounded-full bg-pink-200" />
                 <span class="truncate">{{ ticket.manager }}</span>
               </div>
             </td>
@@ -193,7 +237,7 @@ const selectOption = (
     :items-per-page="pageSize"
     :current-page="currentPage"
     :total-pages="ticketData?.totalPages || 1"
-    :visible-pages="5"
+    :visible-pages="10"
     @page-change="handlePageChange"
   />
 </template>

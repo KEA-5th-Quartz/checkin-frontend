@@ -5,9 +5,8 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 import { firstCategory, managerOptions, status } from '../ticketOptionTest';
-import { priority } from '../ticketOptionTest';
 
-const emit = defineEmits(['closeFilter']);
+const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const managerRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
@@ -16,7 +15,6 @@ const categoryRef = ref<HTMLElement | null>(null);
 const selectedQuickFilters = ref<string[]>([]);
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
-const selectedPriorities = ref<number[]>([]);
 const selectedCategories = ref<string[]>([]);
 
 // 드롭다운 상태 관리
@@ -54,14 +52,6 @@ const toggleStatus = (status: string) => {
   }
 };
 
-const togglePriority = (priorityId: number) => {
-  if (selectedPriorities.value.includes(priorityId)) {
-    selectedPriorities.value = selectedPriorities.value.filter((id) => id !== priorityId);
-  } else {
-    selectedPriorities.value.push(priorityId);
-  }
-};
-
 const toggleCategory = (category: string) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== category);
@@ -72,11 +62,13 @@ const toggleCategory = (category: string) => {
 
 // 저장 버튼 클릭 핸들러
 const handleSave = () => {
-  console.log('상위 필터:', selectedQuickFilters.value);
-  console.log('담당자', selectedManagers.value);
-  console.log('상태:', selectedStatuses.value);
-  console.log('우선순위:', selectedPriorities.value);
-  console.log('카테고리:', selectedCategories.value);
+  emit('applyFilters', {
+    quickFilters: selectedQuickFilters.value,
+    managers: selectedManagers.value,
+    statuses: selectedStatuses.value,
+    categories: selectedCategories.value,
+  });
+  emit('closeFilter');
 };
 
 onClickOutside(managerRef, () => {
@@ -173,25 +165,6 @@ onClickOutside(modalRef, () => {
           @click="toggleStatus(sta.id as unknown as string)"
         />
       </div>
-    </section>
-    <!-- 우선순위 -->
-    <section class="filter-section">
-      <label class="filter-label">우선순위</label>
-      <ul class="flex gap-2">
-        <li
-          v-for="pri in priority"
-          :key="pri.id"
-          @click="togglePriority(pri.id)"
-          class="filter-priority-li"
-          :class="[
-            pri.bg,
-            pri.text,
-            selectedPriorities.includes(pri.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
-          ]"
-        >
-          {{ pri.label }}
-        </li>
-      </ul>
     </section>
     <!-- 취소 저장 버튼 -->
     <section class="filter-btn-section">
