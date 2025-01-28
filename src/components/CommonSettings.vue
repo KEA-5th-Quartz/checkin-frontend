@@ -9,9 +9,9 @@ import PasswordInput from './common/PasswordInput.vue';
 const assignmentNotification = ref(false);
 const statusNotification = ref(false);
 const commentNotification = ref(false);
-const previewImage = ref('../assets/logo.png'); // 나중에 프로필 기본 이미지로 변경
 
 const memberStore = useMemberStore();
+const previewImage = ref(memberStore.profilePic);
 
 const { handleSubmit, errors, meta } = useForm({
   validationSchema: schema,
@@ -68,7 +68,7 @@ const handleImageChange = async (event: Event) => {
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', file, file.name);
       await userApi.changeProfileImg(memberStore.memberId, formData);
     } catch (error) {
       console.log('프로필 이미지 변경 실패:', error);

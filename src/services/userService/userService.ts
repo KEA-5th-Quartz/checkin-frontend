@@ -16,6 +16,10 @@ export const userApi = {
   },
   // 회원의 프로필 사진 변경
   changeProfileImg(memberId: number | null, data: FormData) {
-    return api.put(`/members/${memberId}/profile-pic`, data);
+    return api.put(`/members/${memberId}/profile-pic`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };

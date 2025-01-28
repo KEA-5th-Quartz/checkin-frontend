@@ -31,8 +31,7 @@ onMounted(async () => {
 const isTemplateOpen = ref(false);
 console.log(memberStore);
 
-type Role = 'manager' | 'admin' | 'user';
-const role = computed(() => memberStore.role as 'manager' | 'admin' | 'user');
+const role = computed(() => memberStore.role as 'MANAGER' | 'ADMIN' | 'USER');
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
@@ -78,7 +77,7 @@ const userTemplateItems = [
     </section>
 
     <!-- 담당자 -->
-    <ul v-if="role === 'manager'" class="sidebar-ul">
+    <ul v-if="role === 'MANAGER'" class="sidebar-ul">
       <router-link
         v-for="item in managerNavItems"
         :key="item.path"
@@ -98,7 +97,7 @@ const userTemplateItems = [
     </ul>
 
     <!-- 관리자 -->
-    <ul v-else-if="role === 'admin'" class="sidebar-ul">
+    <ul v-else-if="role === 'ADMIN'" class="sidebar-ul">
       <router-link
         v-for="item in adminNavItems"
         :key="item.path"
@@ -115,7 +114,7 @@ const userTemplateItems = [
     </ul>
 
     <!-- 사용자 -->
-    <ul v-else-if="role === 'user'" class="sidebar-ul">
+    <ul v-else-if="role === 'USER'" class="sidebar-ul">
       <router-link v-for="item in userNavItems" :key="item.path" :to="item.path" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />
