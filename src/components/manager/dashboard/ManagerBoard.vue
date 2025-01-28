@@ -57,10 +57,10 @@ const handlePageChange = (page: number) => {
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 px-5 pb-20">
+  <section class="overflow-x-auto mt-1 px-5 pb-20 hide-scrollbar">
     <div v-if="isLoading" class="flex justify-center items-center min-h-[calc(100vh-300px)]">로딩 중...</div>
 
-    <div v-else class="min-h-[calc(100vh-300px)]">
+    <div v-else class="max-h-[calc(100vh-340px)]">
       <table class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>

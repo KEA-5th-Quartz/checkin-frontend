@@ -145,7 +145,7 @@ body {
     @apply text-gray-1 pb-1.5 whitespace-nowrap;
   }
   .manager-header-section {
-    @apply flex justify-center gap-4 lg:gap-8 mt-12 w-full px-2;
+    @apply flex justify-center gap-4 lg:gap-8 mt-6 w-full px-2;
   }
   .manager-header-card {
     @apply flex-center gap-3 lg:gap-6 pr-6 lg:pr-[70px] border-r;
@@ -159,13 +159,13 @@ body {
 
   /* 담당자 검색/필터 */
   .manager-search-div {
-    @apply flex-between w-1/4 pr-4 bg-white-0 border border-gray-1 rounded;
+    @apply flex-between max-h-fit py-2 w-1/4 pr-4 bg-white-0 border border-gray-1 rounded text-sm;
   }
   .manager-search-input {
     @apply w-full bg-none placeholder:text-gray-1 pl-4 focus:outline-none;
   }
   .manager-filter-btn {
-    @apply flex-between w-28 px-3 py-2 text-left bg-white-0 border border-gray-2 rounded-lg;
+    @apply flex-between w-28 px-3 py-2 text-sm text-left bg-white-0 border border-gray-2 rounded-lg;
   }
   .manager-filter-menu {
     @apply absolute card-base mt-0.5 w-full border border-gray-2 z-20;
@@ -173,7 +173,7 @@ body {
 
   /* 대시보드 */
   .manager-thead {
-    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium;
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium sticky top-0 z-10 bg-white-0;
   }
   .manager-th {
     @apply text-black-2 font-medium px-2 py-3.5;
@@ -185,7 +185,7 @@ body {
     @apply manager-td border-none cursor-default;
   }
   .board-header {
-    @apply flex justify-between mx-auto w-[95%] mt-14;
+    @apply flex justify-between mx-auto w-[95%] mt-8;
   }
   .board-size-menu {
     @apply px-3 py-2 hover:bg-gray-3 cursor-pointer;

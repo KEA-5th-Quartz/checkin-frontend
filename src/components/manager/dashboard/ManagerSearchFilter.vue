@@ -30,8 +30,8 @@ const selectOption = (
     </div>
 
     <!-- 필터 -->
-    <div class="flex gap-10">
-      <div ref="dropdownRef" class="relative mt-1">
+    <div class="flex items-center gap-10">
+      <div ref="dropdownRef" class="relative">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
@@ -47,7 +47,7 @@ const selectOption = (
       </div>
 
       <!-- 필터링 아이콘 -->
-      <div class="relative flex items-center">
+      <div class="relative flex items-center max-h-fit">
         <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
           <SvgIcon :icon="FilterIcon" />
           필터

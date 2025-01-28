@@ -66,7 +66,7 @@ const pages = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-end items-center space-x-2 mt-4 mb-20 mr-5 gap-1">
+  <div class="flex justify-end items-center space-x-2 mt-4 mr-5 gap-1">
     <!-- 이전 버튼 -->
     <button
       :disabled="currentPage === 1"
