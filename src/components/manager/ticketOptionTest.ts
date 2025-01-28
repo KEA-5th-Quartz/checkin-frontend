@@ -13,6 +13,13 @@ export const status: StatusTicketOption[] = [
   { id: 3, value: 'CLOSED', label: 'CLOSED', bg: 'bg-green-0', text: 'text-green-1' },
 ];
 
+// 매핑 없는 버전
+export const ticket_status: StatusTicketOption[] = [
+  { id: 1, value: 'OPEN', label: '생성', bg: 'bg-gray-4', text: 'text-gray-0' },
+  { id: 2, value: 'IN_PROGRESS', label: '진행중', bg: 'bg-blue-4', text: 'text-blue-2' },
+  { id: 3, value: 'CLOSED', label: '완료', bg: 'bg-green-0', text: 'text-green-1' },
+];
+
 export const firstCategory: BaseTicketOption[] = [
   { id: 1, value: '카테고리 1', label: '카테고리 1' },
   { id: 2, value: '카테고리 2', label: '카테고리 2' },

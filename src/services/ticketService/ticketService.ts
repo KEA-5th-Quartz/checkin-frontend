@@ -36,6 +36,10 @@ export const ticketApi = {
 
     return api.get(`/tickets?${params.toString()}`);
   },
+  // 티켓 상세 조회
+  getTicketDetail(ticketId: number) {
+    return api.get(`/tickets/${ticketId}`);
+  },
   // 담당자가 제목 또는 내용으로 검색
   getSearchTicekts(keyword: string, page?: number, size?: number) {
     const params = new URLSearchParams();
@@ -43,6 +47,6 @@ export const ticketApi = {
     if (page) params.append('page', page.toString());
     if (size) params.append('size', size.toString());
 
-    return api.get(`/tickets/my-tickets/search?keyword=${keyword}&${params.toString()}`);
+    return api.get(`/tickets/search?keyword=${keyword}&${params.toString()}`);
   },
 };

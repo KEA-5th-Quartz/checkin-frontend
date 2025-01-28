@@ -344,7 +344,12 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
       </table>
     </div>
 
-    <ManagerTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
+    <ManagerTicket
+      v-if="selectedTicketId"
+      :isMyTicket="isMyTicket"
+      :ticket-id="selectedTicketId"
+      @close="handleCloseModal"
+    />
   </section>
 
   <CustomPagination
