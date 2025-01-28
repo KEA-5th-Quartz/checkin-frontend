@@ -22,6 +22,7 @@ export interface DropdownProps {
   onOptionSelect?: (option: BaseTicketOption) => void;
   isEdit?: boolean;
   my_ref?: null;
+  disabled?: boolean;
 }
 
 // 티켓 타입

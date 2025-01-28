@@ -2,16 +2,18 @@
 import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
 import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
 import { priority, firstCategory, secondCategory, managerOptions, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
+import { useMemberStore } from '@/stores/memberStore';
+
+const memberStore = useMemberStore();
 
 const props = defineProps<{
-  isMyTicket: boolean;
   ticketId: number;
 }>();
 
@@ -31,10 +33,9 @@ const handleClose = () => {
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
-    console.log('[API 응답]', response.data.data);
     return response.data.data;
   } catch (err) {
-    console.error('[API 에러] 티켓 상세 조회 실패:', err);
+    console.error('티켓 상세 조회 실패:', err);
     throw err;
   }
 });
@@ -51,7 +52,6 @@ watch(
   detailData,
   (newData) => {
     if (newData) {
-      console.log('[데이터 설정]', newData);
       prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[0];
       statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
       firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
@@ -62,6 +62,11 @@ watch(
   },
   { immediate: true },
 );
+
+const isMe = computed(() => {
+  if (!detailData.value) return false;
+  return memberStore.username === detailData.value.manager;
+});
 
 const handlePrioritySelect = (option: StatusTicketOption) => {
   console.log('중요도 변경:', option.label);
@@ -115,6 +120,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   :onOptionSelect="handlePrioritySelect"
                   @select="(option) => handlePrioritySelect(option as StatusTicketOption)"
                   has-color
+                  :disabled="!isMe"
                 />
                 <!-- 1차 카테고리 블록 -->
                 <CustomDropdown
@@ -123,6 +129,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   :selected-option="firstCategorySelected"
                   :onOptionSelect="handleFirstCategorySelect"
                   @select="(option) => handleFirstCategorySelect(option)"
+                  :disabled="!isMe"
                 />
                 <!-- 요청자 블록 -->
                 <div>
@@ -149,6 +156,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   :onOptionSelect="handleStatusSelect"
                   @select="(option) => handleStatusSelect(option as StatusTicketOption)"
                   has-color
+                  :disabled="!isMe"
                 />
                 <!-- 2차 카테고리 블록 -->
                 <CustomDropdown
@@ -157,6 +165,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   :selected-option="secondCategorySelected"
                   :onOptionSelect="handleSecondCategorySelect"
                   @select="(option) => handleSecondCategorySelect(option)"
+                  :disabled="!isMe"
                 />
                 <!-- 담당자 블록 -->
                 <CustomDropdown
@@ -165,6 +174,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   :selected-option="managerSelected"
                   :onOptionSelect="handleManagerSelect"
                   @select="(option) => handleManagerSelect(option)"
+                  :disabled="!isMe"
                 />
                 <!-- 마감 기한 블록 -->
                 <div>
