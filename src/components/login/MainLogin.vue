@@ -4,6 +4,8 @@ import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import SvgIcon from '../common/SvgIcon.vue';
+import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -48,13 +50,30 @@ const handleLogin = async () => {
     console.error('로그인 실패:', error);
   }
 };
+
+const showPwd = ref(false);
+const togglePwdVisibility = () => {
+  showPwd.value = !showPwd.value;
+};
 </script>
 
 <template>
   <form class="login-form" @submit.prevent="handleLogin">
     <input v-model="username" type="text" required class="login-input border-primary-0" placeholder="Username" />
-
-    <input v-model="password" type="password" required class="login-input border-primary-0" placeholder="Password" />
+    <div class="relative">
+      <input
+        v-model="password"
+        :type="showPwd ? 'text' : 'password'"
+        required
+        class="login-input border-primary-0"
+        placeholder="Password"
+      />
+      <SvgIcon
+        class="absolute top-1/3 right-3 transform cursor-pointer"
+        @click="togglePwdVisibility()"
+        :icon="showPwd ? EyeIcon : EyeSlashIcon"
+      />
+    </div>
 
     <button type="submit" class="login-btn mt-4">로그인</button>
 

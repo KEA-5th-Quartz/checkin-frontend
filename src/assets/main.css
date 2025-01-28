@@ -66,7 +66,7 @@ body {
 
   /* 로그인 */
   .login-form {
-    @apply mt-8 flex-stack gap-6;
+    @apply mt-8 flex-stack gap-12;
   }
   .login-input {
     @apply bg-transparent w-full px-1 py-3 border-b-2 focus:outline-none placeholder:text-gray-0;
@@ -75,7 +75,7 @@ body {
     @apply w-full flex justify-center py-2.5 font-semibold rounded text-white-0 bg-primary-0 hover:bg-opacity-80 focus:outline-none;
   }
   .login-p {
-    @apply pt-2.5 text-sm font-bold;
+    @apply absolute pt-1.5 text-sm font-bold;
   }
 
   /* 사이드바 */
@@ -100,6 +100,9 @@ body {
   }
   .sidebar-active {
     @apply absolute -left-8 lg:-left-16 w-2 h-full bg-gradient-to-b from-[#7E73FF] to-[#5B4DFF];
+  }
+  .sidebar-sub-menu {
+    @apply flex-stack gap-2 py-3 pl-8 bg-primary-0 bg-opacity-50 w-full;
   }
 
   /* 다이얼로그 */
