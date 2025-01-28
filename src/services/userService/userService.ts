@@ -6,6 +6,10 @@ export const userApi = {
   login(data: { username: string; password: string }) {
     return api.post('/auth/login', data);
   },
+  // refresh토큰으로 accessToken과 refreshToken 재발급
+  refresh() {
+    return api.post('/auth/refresh');
+  },
   // 비밀번호 변경(최초 로그인)
   changePassword(memberId: number | null, data: { originalpassword: string; newpassword: string }) {
     return api.put(`/members/${memberId}/password`, data);

@@ -38,7 +38,7 @@ const resetForm = () => {
 const onSubmit = handleSubmit(async (values) => {
   try {
     await userApi.changePassword(memberStore.memberId, {
-      originalpassword: '',
+      originalpassword: '5v,nkbde',
       newpassword: values.newPwd,
     });
 

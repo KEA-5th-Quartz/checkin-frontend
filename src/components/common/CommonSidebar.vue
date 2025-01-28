@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import {
   CategoryIcon,
@@ -14,13 +14,25 @@ import {
   TimelineIcon,
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const memberStore = useMemberStore();
+
+onMounted(async () => {
+  if (!memberStore.accessToken) {
+    const success = await memberStore.restoreAuth();
+    if (!success) {
+      router.push('/');
+    }
+  }
+});
+
 const isTemplateOpen = ref(false);
 console.log(memberStore);
 
 type Role = 'manager' | 'admin' | 'user';
-const role = ref<Role>('user'); // ref를 사용하여 반응형 상태로 선언
+const role = computed(() => memberStore.role as 'manager' | 'admin' | 'user');
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
@@ -53,9 +65,16 @@ const userTemplateItems = [
     <p class="sidebar-logo">CheckIn</p>
 
     <section class="sidebar-profile">
-      <div class="w-[77px] h-[77px] rounded-full bg-pink-200" />
-      <p class="sidebar-p">Neo.js</p>
-      <p class="sidebar-p text-sm">담당자</p>
+      <div class="w-[77px] h-[77px] rounded-full bg-pink-200">
+        <img
+          v-if="memberStore.profilePic"
+          :src="memberStore.profilePic"
+          alt="프로필"
+          class="w-full h-full rounded-full object-cover"
+        />
+      </div>
+      <p class="sidebar-p">{{ memberStore.username }}</p>
+      <p class="sidebar-p text-sm">{{ memberStore.role }}</p>
     </section>
 
     <!-- 담당자 -->

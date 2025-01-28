@@ -1,3 +1,5 @@
+import api from '@/api/axios';
+import { userApi } from '@/services/userService/userService';
 import { MemberState } from '@/types/member';
 import { defineStore } from 'pinia';
 
@@ -28,6 +30,17 @@ export const useMemberStore = defineStore('member', {
       this.role = '';
       this.accessToken = '';
       this.passwordChangedAt = null;
+    },
+
+    async restoreAuth() {
+      try {
+        const response = await userApi.refresh();
+        this.setMemberInfo(response.data.data);
+        return true;
+      } catch (error) {
+        this.clearMemberInfo();
+        return false;
+      }
     },
   },
 });
