@@ -11,6 +11,15 @@ import { onClickOutside } from '@vueuse/core';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
 import UserFilter from './UserFilter.vue';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { ticketApi } from '@/services/ticketService/ticketService';
+import SkeletonTable from '../UI/SkeletonTable.vue';
+import CustomPagination from '../common/CustomPagination.vue';
+
+interface FilterState {
+  statuses: string[];
+  categories: string[];
+}
 
 const ticketStore = useUserTicketListStore();
 
@@ -54,12 +63,52 @@ const selectOption = (
   option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
 ) => {
   selectedPerPage.value = option;
+  pageSize.value = option.value;
   isSizeOpen.value = false;
 };
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
+const filterState = ref<FilterState>({
+  statuses: [],
+  categories: [],
+});
+
+// 쿼리 파라미터
+const queryParams = computed(() => ({
+  page: currentPage.value,
+  size: pageSize.value,
+  statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
+  categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
+}));
+
+// 검색 쿼리 키 computed
+const queryKey = computed(() =>
+  isSearch.value
+    ? ['search-user-tickets', keyword.value, currentPage.value, pageSize.value]
+    : ['user-tickets', queryParams.value],
+);
+
 // 데이터 페칭
+const {
+  data: ticketData,
+  isLoading,
+  error,
+} = useCustomQuery(queryKey, () => {
+  if (isSearch.value) {
+    return ticketApi
+      .getSearchUserTickets(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
+      .then((response) => response.data.data);
+  }
+  return ticketApi
+    .getUserTickets(
+      queryParams.value.statuses,
+      queryParams.value.categories,
+      queryParams.value.page,
+      queryParams.value.size,
+    )
+    .then((response) => response.data.data);
+});
 
 const handleDelete = () => {
   // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
@@ -111,6 +160,10 @@ const handleCheckboxClick = (event: Event, id: number) => {
     selectedIds: Array.from(ticketStore.selectedTickets),
     totalSelected: ticketStore.selectedTickets.size,
   });
+};
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
 };
 </script>
 
@@ -190,7 +243,9 @@ const handleCheckboxClick = (event: Event, id: number) => {
     />
 
     <article class="overflow-x-auto mt-5 px-5 pb-20">
-      <div class="min-h-[calc(100vh-300px)] h-full">
+      <SkeletonTable v-if="isLoading" />
+
+      <div v-else class="min-h-[calc(100vh-300px)] h-full">
         <table class="min-w-full table-fixed">
           <thead class="manager-thead">
             <tr>
@@ -208,24 +263,24 @@ const handleCheckboxClick = (event: Event, id: number) => {
 
           <tbody class="whitespace-nowrap">
             <tr
-              v-for="item in tableDataTest"
-              :key="item.id"
+              v-for="item in ticketData?.tickets"
+              :key="item.ticketId"
               class="hover:bg-white-1 relative"
-              @click="handleRowClick(item.id)"
+              @click="handleRowClick(item.ticketId)"
             >
               <td v-if="ticketStore.isDeleteMode" class="manager-td">
                 <div class="flex items-center justify-center">
                   <input
                     type="checkbox"
                     :class="[item.status !== '진행중' ? 'w-4 h-4 cursor-pointer' : 'hidden']"
-                    :checked="ticketStore.selectedTickets.has(item.id)"
-                    @click="(e) => handleCheckboxClick(e, item.id)"
+                    :checked="ticketStore.selectedTickets.has(item.ticketId)"
+                    @click="(e) => handleCheckboxClick(e, item.ticketId)"
                   />
                 </div>
               </td>
               <td :class="['manager-td max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
-                <p :title="item.id as unknown as string">
-                  {{ item.id }}
+                <p :title="item.ticketId as unknown as string">
+                  {{ item.ticketId }}
                 </p>
               </td>
               <td class="manager-td max-w-0 text-start">
@@ -235,17 +290,17 @@ const handleCheckboxClick = (event: Event, id: number) => {
               </td>
               <td class="manager-td max-w-0">
                 <p class="truncate">
-                  {{ item.category1 }}
+                  {{ item.firstCategory }}
                 </p>
               </td>
               <td class="manager-td max-w-0">
                 <p class="truncate">
-                  {{ item.category2 }}
+                  {{ item.secondCategory }}
                 </p>
               </td>
               <td class="manager-td max-w-0 text-start">
-                <p class="truncate" :title="item.description">
-                  {{ item.description }}
+                <p class="truncate" :title="item.content">
+                  {{ item.content }}
                 </p>
               </td>
               <td class="manager-td text-center">
@@ -254,7 +309,7 @@ const handleCheckboxClick = (event: Event, id: number) => {
               <td class="manager-td">
                 <div class="flex items-center gap-2 ml-4">
                   <div class="h-7 w-7 rounded-full bg-pink-200" />
-                  <span class="truncate">{{ item.assignee }}</span>
+                  <span class="truncate">{{ item.manager }}</span>
                 </div>
               </td>
               <td class="manager-td">
@@ -269,6 +324,14 @@ const handleCheckboxClick = (event: Event, id: number) => {
 
       <UserTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
     </article>
+
+    <CustomPagination
+      :items-per-page="pageSize"
+      :current-page="currentPage"
+      :total-pages="ticketData?.totalPages || 1"
+      :visible-pages="5"
+      @page-change="handlePageChange"
+    />
   </section>
   <section v-else class="w-full flex-stack items-center pb-40">
     <div class="flex-stack items-center gap-8 mt-32">
