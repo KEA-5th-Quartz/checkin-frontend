@@ -114,9 +114,66 @@ const handlePrioritySelect = async (option: BaseTicketOption) => {
   }
 };
 
-const handleStatusSelect = (option: BaseTicketOption) => {
-  console.log('상태 변경:', option.label);
-  statusSelected.value = option;
+// 상태 변경 뮤테이션들
+const inProgressMutation = useCustomMutation(
+  async ({ ticketId, status }: { ticketId: number; status: string }) => {
+    const response = await ticketApi.patchTicketInProgress(ticketId, { status });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['ticket-detail', props.ticketId] });
+    },
+  },
+);
+
+const closeMutation = useCustomMutation(
+  async (ticketId: number) => {
+    const response = await ticketApi.patchTicketClose(ticketId);
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      queryClient.invalidateQueries({ queryKey: ['ticket-detail', props.ticketId] });
+    },
+  },
+);
+
+// 현재 상태에 따른 사용 가능한 상태 옵션 계산
+const availableStatusOptions = computed(() => {
+  const currentStatus = statusSelected.value.value;
+
+  switch (currentStatus) {
+    case 'CREATED':
+      return ticket_status.filter((status) => ['CREATED', 'IN_PROGRESS'].includes(status.value));
+    case 'IN_PROGRESS':
+      return ticket_status.filter((status) => ['IN_PROGRESS', 'CLOSED'].includes(status.value));
+    case 'CLOSED':
+      return ticket_status.filter((status) => ['CLOSED'].includes(status.value));
+    default:
+      return ticket_status;
+  }
+});
+
+// 상태 변경 핸들러
+const handleStatusSelect = async (option: BaseTicketOption) => {
+  const currentStatus = statusSelected.value.value;
+  const newStatus = option.value;
+
+  try {
+    if (currentStatus === 'CREATED' && newStatus === 'IN_PROGRESS') {
+      await inProgressMutation.mutateAsync({ ticketId: props.ticketId, status: 'in_progress' });
+    } else if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
+      await closeMutation.mutateAsync(props.ticketId);
+    }
+    statusSelected.value = option;
+  } catch (err) {
+    console.error('상태 변경 실패:', err);
+  }
 };
 
 // 1차 카테고리 변경 뮤테이션
@@ -291,10 +348,9 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                 <!-- 진행상태 블록 -->
                 <CustomDropdown
                   label="진행상태"
-                  :options="ticket_status"
+                  :options="availableStatusOptions"
                   :selected-option="statusSelected"
-                  :onOptionSelect="handleStatusSelect"
-                  @select="(option) => handleStatusSelect(option as StatusTicketOption)"
+                  @select="handleStatusSelect"
                   has-color
                   :disabled="!isMe"
                 />
