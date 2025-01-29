@@ -4,7 +4,7 @@ import SvgIcon from '../../common/SvgIcon.vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
-import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
+import { BaseTicketOption } from '@/types/tickets';
 import { priority, firstCategory, secondCategory, managerOptions, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -82,12 +82,22 @@ const isMe = computed(() => {
   return memberStore.username === detailData.value.manager;
 });
 
+// 완료된 티켓의 담당자 변경 불가능
 const isManagerChangeDisabled = computed(() => {
   // isMe가 false면 무조건 disabled
   if (!isMe.value) return true;
   // 상태가 CLOSED면 담당자 변경 불가
   return statusSelected.value.value === 'CLOSED';
 });
+
+// 공통 쿼리 무효화 함수
+const invalidateTicketQueries = () => {
+  queryClient.invalidateQueries({ queryKey: ['tickets'] });
+  queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+  queryClient.invalidateQueries({
+    queryKey: ['ticket-detail', props.ticketId],
+  });
+};
 
 // 중요도 변경 뮤테이션
 const priorityMutation = useCustomMutation(
@@ -96,16 +106,7 @@ const priorityMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      // 티켓 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      // 검색 결과 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      // 현재 티켓 상세 정보 쿼리 무효화
-      queryClient.invalidateQueries({
-        queryKey: ['ticket-detail', props.ticketId],
-      });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 // 중요도 변경
@@ -128,11 +129,7 @@ const inProgressMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['ticket-detail', props.ticketId] });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 
@@ -142,11 +139,7 @@ const closeMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['ticket-detail', props.ticketId] });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 
@@ -190,16 +183,7 @@ const firstCategoryMution = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      // 티켓 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      // 검색 결과 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      // 현재 티켓 상세 정보 쿼리 무효화
-      queryClient.invalidateQueries({
-        queryKey: ['ticket-detail', props.ticketId],
-      });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 // 1차 카테고리 변경
@@ -241,16 +225,7 @@ const secondCategoryMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      // 티켓 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      // 검색 결과 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      // 현재 티켓 상세 정보 쿼리 무효화
-      queryClient.invalidateQueries({
-        queryKey: ['ticket-detail', props.ticketId],
-      });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 // 2차 카테고리 변경
@@ -274,16 +249,7 @@ const reassignMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
-      // 티켓 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['tickets'] });
-      // 검색 결과 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
-      // 현재 티켓 상세 정보 쿼리 무효화
-      queryClient.invalidateQueries({
-        queryKey: ['ticket-detail', props.ticketId],
-      });
-    },
+    onSuccess: invalidateTicketQueries,
   },
 );
 // 담당자 변경
