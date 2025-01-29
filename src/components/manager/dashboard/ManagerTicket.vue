@@ -82,6 +82,13 @@ const isMe = computed(() => {
   return memberStore.username === detailData.value.manager;
 });
 
+const isManagerChangeDisabled = computed(() => {
+  // isMe가 false면 무조건 disabled
+  if (!isMe.value) return true;
+  // 상태가 CLOSED면 담당자 변경 불가
+  return statusSelected.value.value === 'CLOSED';
+});
+
 // 중요도 변경 뮤테이션
 const priorityMutation = useCustomMutation(
   async ({ ticketId, priority }: { ticketId: number; priority: string }) => {
@@ -368,7 +375,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                   :options="managerOptions"
                   :selected-option="managerSelected"
                   @select="handleManagerSelect"
-                  :disabled="!isMe"
+                  :disabled="isManagerChangeDisabled"
                 />
                 <!-- 마감 기한 블록 -->
                 <div>
