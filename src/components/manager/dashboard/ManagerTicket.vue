@@ -146,6 +146,17 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       firstCategory: option.value,
     });
     firstCategorySelected.value = option;
+
+    // 2. 2차 카테고리를 첫 번째 요소로 설정
+    const firstSecondCategoryOption = secondCategory[0];
+    secondCategorySelected.value = firstSecondCategoryOption;
+
+    // 3. 2차 카테고리 변경 API 호출
+    await secondCategoryMutation.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategoryId: option.id, // 새로 선택된 1차 카테고리의 ID
+      secondCategory: firstSecondCategoryOption.value,
+    });
   } catch (err) {
     console.error('1차 카테고리 변경 실패:', err);
   }
@@ -183,7 +194,7 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
   try {
     await secondCategoryMutation.mutateAsync({
       ticketId: props.ticketId,
-      firstCategoryId: 102,
+      firstCategoryId: firstCategorySelected.value.id,
       secondCategory: option.value,
     });
     secondCategorySelected.value = option;
