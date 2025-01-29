@@ -12,7 +12,7 @@ export interface TableData {
   category1: string;
   category2: string;
   description: string;
-  status: '생성' | '진행중' | '완료';
+  status: string;
   assignee: string;
   dueDate: string;
   priority?: '긴급' | '높음' | '보통' | '낮음';

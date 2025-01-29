@@ -1,17 +1,94 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import PriorityBadge from '../common/Badges/PriorityBadge.vue';
+import { computed, ref } from 'vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { tableDataTest } from '../manager/dashboardTest';
 import UserTicket from './UserTicket.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 import SvgIcon from '../common/SvgIcon.vue';
-import { CreateTicketIcon } from '@/assets/icons/path';
-import UserSearchFilter from './UserSearchFilter.vue';
+import { ArrowDownIcon, CreateTicketIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
+import { perPageOptions } from '../manager/ticketOptionTest';
+import { onClickOutside } from '@vueuse/core';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '../common/CommonDialog.vue';
+import UserFilter from './UserFilter.vue';
 
 const ticketStore = useUserTicketListStore();
 
 const selectedTicketId = ref<number | null>(null);
+const selectedPerPage = ref(perPageOptions[0]);
+const isSizeOpen = ref(false);
+const isFilterOpen = ref(false);
+
+const currentPage = ref(1);
+const pageSize = ref(perPageOptions[0].value);
+const keyword = ref('');
+const isSearch = ref(false);
+
+// 검색 쿼리 파라미터
+const searchQueryParams = computed(() => ({
+  page: currentPage.value,
+  size: pageSize.value,
+}));
+
+// 검색 함수
+const handleSearch = () => {
+  if (keyword.value.trim()) {
+    isSearch.value = true;
+    currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+  } else {
+    resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
+  }
+};
+
+// 검색 초기화 함수
+const resetSearch = () => {
+  keyword.value = '';
+  isSearch.value = false;
+  currentPage.value = 1;
+};
+
+const dropdownRef = ref<HTMLElement | null>(null);
+onClickOutside(dropdownRef, () => (isSizeOpen.value = false));
+
+const selectOption = (
+  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
+) => {
+  selectedPerPage.value = option;
+  isSizeOpen.value = false;
+};
+
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
+// 데이터 페칭
+
+const handleDelete = () => {
+  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
+  const selectedTicketIds = Array.from(ticketStore.selectedTickets);
+  const ticketCount = selectedTicketIds.length;
+
+  dialogState.value = {
+    open: true,
+    isWarn: true,
+    title: `${ticketCount}개의 티켓을 삭제하시겠습니까?`,
+    cancelText: '취소',
+    onCancelClick: () => {
+      dialogState.value = { ...initialDialog };
+    },
+    mainText: '삭제',
+    onMainClick: () => {
+      console.log('삭제하는 id 배열: ', selectedTicketIds);
+
+      ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
+      ticketStore.toggleDeleteMode(); // 삭제 모드 종료
+      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+    },
+  };
+};
+
+const handleCancel = () => {
+  ticketStore.toggleDeleteMode();
+  ticketStore.clearSelectedTickets();
+};
 
 const handleRowClick = (id: number) => {
   selectedTicketId.value = id;
@@ -39,7 +116,79 @@ const handleCheckboxClick = (event: Event, id: number) => {
 
 <template>
   <section v-if="tableDataTest.length !== 0">
-    <UserSearchFilter />
+    <!-- 티켓 헤더 -->
+    <header v-if="!ticketStore.isDeleteMode" class="board-header">
+      <!-- 검색 -->
+      <div class="flex w-1/4">
+        <div class="manager-search-div">
+          <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+          <input
+            v-model="keyword"
+            placeholder="티켓 검색..."
+            class="manager-search-input"
+            @keyup.enter="handleSearch"
+          />
+          <div class="flex items-center gap-2">
+            <SvgIcon :icon="SearchIcon" class="cursor-pointer pl-1" @click="handleSearch" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 개수 & 필터 -->
+      <div class="flex items-center gap-10">
+        <!-- 개수 -->
+        <div ref="dropdownRef" class="relative mt-1">
+          <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
+            <span class="font-medium">{{ selectedPerPage.label }}</span>
+            <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isSizeOpen ? 'rotate-180' : '']" />
+          </button>
+
+          <div v-if="isSizeOpen" class="manager-filter-menu">
+            <ul>
+              <li
+                v-for="option in perPageOptions"
+                :key="option.id"
+                @click="selectOption(option)"
+                class="board-size-menu"
+              >
+                {{ option.label }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <!-- 필터링 아이콘 -->
+          <div class="relative flex items-center">
+            <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
+              <SvgIcon :icon="FilterIcon" />
+              필터
+            </button>
+            <!-- 필터 모달 -->
+            <UserFilter v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="board-filter-modal" />
+          </div>
+        </div>
+        <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
+      </div>
+    </header>
+    <!-- 티켓 삭제모드 헤더 -->
+    <header v-else class="board-header">
+      <div class="flex items-center gap-4 ml-auto">
+        <button @click="handleCancel" class="btn-cancel py-2">취소</button>
+        <button @click="handleDelete" class="btn-main py-2">삭제</button>
+      </div>
+    </header>
+
+    <CommonDialog
+      v-if="dialogState.open"
+      :isWarn="dialogState.isWarn"
+      :title="dialogState.title"
+      :cancelText="dialogState.cancelText"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onCancelClick"
+      :onMainClick="dialogState.onMainClick"
+    />
+
     <article class="overflow-x-auto mt-5 px-5 pb-20">
       <div class="min-h-[calc(100vh-300px)] h-full">
         <table class="min-w-full table-fixed">
@@ -54,7 +203,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
               <th class="manager-th w-[7.5%]">진행 상태</th>
               <th class="manager-th w-[10%]">담당자</th>
               <th class="manager-th w-[5%]">마감일</th>
-              <th class="manager-th w-[5%] pr-6">중요도</th>
             </tr>
           </thead>
 
@@ -113,9 +261,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
                 <p class="truncate">
                   {{ item.dueDate }}
                 </p>
-              </td>
-              <td class="manager-td pr-6">
-                <PriorityBadge :priority="item.priority" size="md" />
               </td>
             </tr>
           </tbody>
