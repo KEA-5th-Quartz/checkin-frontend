@@ -45,19 +45,19 @@ export const ticketApi = {
     return api.get(`/tickets/${ticketId}/comments`);
   },
   // [담당자] 티켓 상태 변경 (생성 -> 진행중)
-  patchTicketInProgress(ticketId: number) {
-    return api.patch(`/tickets/${ticketId}/assign`);
+  patchTicketInProgress(ticketId: number, data: { status: string }) {
+    return api.patch(`/tickets/${ticketId}/assign`, data);
   },
   // [담당자] 티켓 상태 변경 (진행중 -> 완료)
   patchTicketClose(ticketId: number) {
     return api.patch(`/tickets/${ticketId}/close`);
   },
   // [담당자] 티켓 1차 카테고리 수정
-  patchTicketFirstCategory(ticketId: number, data: { first_category: string }) {
+  patchTicketFirstCategory(ticketId: number, data: { firstCategory: string }) {
     return api.patch(`/tickets/${ticketId}/category`, data);
   },
   // [담당자] 티켓 2차 카테고리 수정
-  patchTicketSecondCategory(ticketId: number, firstCategoryId: number, data: { second_category: string }) {
+  patchTicketSecondCategory(ticketId: number, firstCategoryId: number, data: { secondCategory: string }) {
     return api.patch(`/tickets/${ticketId}/${firstCategoryId}/category`, data);
   },
   // [담당자] 티켓의 담당자 변경

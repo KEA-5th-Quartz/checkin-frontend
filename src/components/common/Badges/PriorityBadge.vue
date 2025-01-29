@@ -47,8 +47,8 @@ const getPriorityColor = (priority: PriorityType | undefined) => {
       };
     case 'LOW':
       return {
-        dot: 'bg-green-1',
-        text: 'text-green-1',
+        dot: 'bg-blue-2',
+        text: 'text-blue-2',
       };
     default:
       return {

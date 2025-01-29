@@ -10,8 +10,11 @@ import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useMemberStore } from '@/stores/memberStore';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const memberStore = useMemberStore();
+const queryClient = useQueryClient();
 
 const props = defineProps<{
   ticketId: number;
@@ -41,8 +44,8 @@ const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.t
 });
 
 // 초기값 설정
-const prioritySelected = ref<StatusTicketOption>(priority[0]);
-const statusSelected = ref<StatusTicketOption>(ticket_status[0]);
+const prioritySelected = ref<BaseTicketOption>(priority[0]);
+const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref(firstCategory[0]);
 const secondCategorySelected = ref(secondCategory[0]);
 const managerSelected = ref(managerOptions[0]);
@@ -79,29 +82,146 @@ const isMe = computed(() => {
   return memberStore.username === detailData.value.manager;
 });
 
-const handlePrioritySelect = (option: StatusTicketOption) => {
-  console.log('중요도 변경:', option.label);
-  prioritySelected.value = option;
+// 중요도 변경 뮤테이션
+const priorityMutation = useCustomMutation(
+  async ({ ticketId, priority }: { ticketId: number; priority: string }) => {
+    const response = await ticketApi.patchTicketPriority(ticketId, { priority });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      // 티켓 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      // 검색 결과 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      // 현재 티켓 상세 정보 쿼리 무효화
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-detail', props.ticketId],
+      });
+    },
+  },
+);
+// 중요도 변경
+const handlePrioritySelect = async (option: BaseTicketOption) => {
+  try {
+    await priorityMutation.mutateAsync({
+      ticketId: props.ticketId,
+      priority: option.value,
+    });
+    prioritySelected.value = option;
+  } catch (err) {
+    console.error('중요도 변경 실패:', err);
+  }
 };
 
-const handleStatusSelect = (option: StatusTicketOption) => {
+const handleStatusSelect = (option: BaseTicketOption) => {
   console.log('상태 변경:', option.label);
   statusSelected.value = option;
 };
 
-const handleFirstCategorySelect = (option: BaseTicketOption) => {
-  console.log('1차 카테고리 변경:', option.label);
-  firstCategorySelected.value = option;
+// 1차 카테고리 변경 뮤테이션
+const firstCategoryMution = useCustomMutation(
+  async ({ ticketId, firstCategory }: { ticketId: number; firstCategory: string }) => {
+    const response = await ticketApi.patchTicketFirstCategory(ticketId, { firstCategory });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      // 티켓 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      // 검색 결과 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      // 현재 티켓 상세 정보 쿼리 무효화
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-detail', props.ticketId],
+      });
+    },
+  },
+);
+// 1차 카테고리 변경
+const handleFirstCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    await firstCategoryMution.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategory: option.value,
+    });
+    firstCategorySelected.value = option;
+  } catch (err) {
+    console.error('1차 카테고리 변경 실패:', err);
+  }
 };
 
-const handleSecondCategorySelect = (option: BaseTicketOption) => {
-  console.log('2차 카테고리 변경:', option.label);
-  secondCategorySelected.value = option;
+// 2차 카테고리 변경 뮤테이션
+const secondCategoryMutation = useCustomMutation(
+  async ({
+    ticketId,
+    firstCategoryId,
+    secondCategory,
+  }: {
+    ticketId: number;
+    firstCategoryId: number;
+    secondCategory: string;
+  }) => {
+    const response = await ticketApi.patchTicketSecondCategory(ticketId, firstCategoryId, { secondCategory });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      // 티켓 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      // 검색 결과 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      // 현재 티켓 상세 정보 쿼리 무효화
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-detail', props.ticketId],
+      });
+    },
+  },
+);
+// 2차 카테고리 변경
+const handleSecondCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    await secondCategoryMutation.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategoryId: 102,
+      secondCategory: option.value,
+    });
+    secondCategorySelected.value = option;
+  } catch (err) {
+    console.error('2차 카테고리 변경 실패:', err);
+  }
 };
 
-const handleManagerSelect = (option: BaseTicketOption) => {
-  console.log('담당자 변경:', option.label);
-  managerSelected.value = option;
+// 담당자 변경 뮤테이션
+const reassignMutation = useCustomMutation(
+  async ({ ticketId, manager }: { ticketId: number; manager: string }) => {
+    const response = await ticketApi.patchTicketReassign(ticketId, { manager });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      // 티켓 목록 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      // 검색 결과 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+      // 현재 티켓 상세 정보 쿼리 무효화
+      queryClient.invalidateQueries({
+        queryKey: ['ticket-detail', props.ticketId],
+      });
+    },
+  },
+);
+// 담당자 변경
+const handleManagerSelect = async (option: BaseTicketOption) => {
+  try {
+    await reassignMutation.mutateAsync({
+      ticketId: props.ticketId,
+      manager: option.value,
+    });
+    managerSelected.value = option;
+  } catch (err) {
+    console.error('담당자 변경 실패:', err);
+  }
 };
 </script>
 
@@ -128,8 +248,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label="중요도"
                   :options="priority"
                   :selected-option="prioritySelected"
-                  :onOptionSelect="handlePrioritySelect"
-                  @select="(option) => handlePrioritySelect(option as StatusTicketOption)"
+                  @select="handlePrioritySelect"
                   has-color
                   :disabled="!isMe"
                 />
@@ -138,8 +257,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label="1차 카테고리"
                   :options="firstCategory"
                   :selected-option="firstCategorySelected"
-                  :onOptionSelect="handleFirstCategorySelect"
-                  @select="(option) => handleFirstCategorySelect(option)"
+                  @select="handleFirstCategorySelect"
                   :disabled="!isMe"
                 />
                 <!-- 요청자 블록 -->
@@ -174,8 +292,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label="2차 카테고리"
                   :options="secondCategory"
                   :selected-option="secondCategorySelected"
-                  :onOptionSelect="handleSecondCategorySelect"
-                  @select="(option) => handleSecondCategorySelect(option)"
+                  @select="handleSecondCategorySelect"
                   :disabled="!isMe"
                 />
                 <!-- 담당자 블록 -->
@@ -183,8 +300,7 @@ const handleManagerSelect = (option: BaseTicketOption) => {
                   label="담당자"
                   :options="managerOptions"
                   :selected-option="managerSelected"
-                  :onOptionSelect="handleManagerSelect"
-                  @select="(option) => handleManagerSelect(option)"
+                  @select="handleManagerSelect"
                   :disabled="!isMe"
                 />
                 <!-- 마감 기한 블록 -->
