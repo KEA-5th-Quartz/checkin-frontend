@@ -6,7 +6,7 @@ import UserTicket from './UserTicket.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 import SvgIcon from '../common/SvgIcon.vue';
 import { ArrowDownIcon, CreateTicketIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
-import { perPageOptions } from '../manager/ticketOptionTest';
+import { perPageOptions, status } from '../manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
@@ -17,6 +17,11 @@ import SkeletonTable from '../UI/SkeletonTable.vue';
 import CustomPagination from '../common/CustomPagination.vue';
 
 interface FilterState {
+  statuses: string[];
+  categories: string[];
+}
+
+interface FilterPayload {
   statuses: string[];
   categories: string[];
 }
@@ -73,6 +78,17 @@ const filterState = ref<FilterState>({
   statuses: [],
   categories: [],
 });
+
+// 필터 적용 핸들러
+const handleApplyFilters = (filters: FilterPayload) => {
+  filterState.value = {
+    statuses: filters.statuses.map((id: string) => {
+      const statusItem = status.find((s) => s.id === (id as unknown as number));
+      return statusItem?.label || '';
+    }),
+    categories: filters.categories,
+  };
+};
 
 // 쿼리 파라미터
 const queryParams = computed(() => ({
@@ -218,7 +234,12 @@ const handlePageChange = (page: number) => {
               필터
             </button>
             <!-- 필터 모달 -->
-            <UserFilter v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="board-filter-modal" />
+            <UserFilter
+              v-if="isFilterOpen"
+              @applyFilters="handleApplyFilters"
+              @closeFilter="isFilterOpen = false"
+              class="board-filter-modal"
+            />
           </div>
         </div>
         <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
@@ -242,10 +263,10 @@ const handlePageChange = (page: number) => {
       :onMainClick="dialogState.onMainClick"
     />
 
-    <article class="overflow-x-auto mt-5 px-5 pb-20">
+    <article class="overflow-x-auto mt-5 px-5 pb-20 hide-scrollbar">
       <SkeletonTable v-if="isLoading" />
 
-      <div v-else class="min-h-[calc(100vh-300px)] h-full">
+      <div v-else class="h-[calc(100vh-300px)]">
         <table class="min-w-full table-fixed">
           <thead class="manager-thead">
             <tr>
@@ -269,10 +290,10 @@ const handlePageChange = (page: number) => {
               @click="handleRowClick(item.ticketId)"
             >
               <td v-if="ticketStore.isDeleteMode" class="manager-td">
-                <div class="flex items-center justify-center">
+                <div class="flex-center">
                   <input
                     type="checkbox"
-                    :class="[item.status !== '진행중' ? 'w-4 h-4 cursor-pointer' : 'hidden']"
+                    :class="[item.status !== 'IN_PROGRESS' ? 'w-4 h-4 cursor-pointer' : 'hidden']"
                     :checked="ticketStore.selectedTickets.has(item.ticketId)"
                     @click="(e) => handleCheckboxClick(e, item.ticketId)"
                   />

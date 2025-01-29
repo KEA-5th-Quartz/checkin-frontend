@@ -210,7 +210,7 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
     <SkeletonTable v-if="isLoading" />
 
-    <div v-else class="max-h-[calc(100vh-340px)]">
+    <div v-else class="h-[calc(100vh-340px)]">
       <table v-if="!isMyTicket" class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>
