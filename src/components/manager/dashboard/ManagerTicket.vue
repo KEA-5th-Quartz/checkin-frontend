@@ -23,7 +23,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
-
 const show = ref(true);
 
 const handleClose = () => {
