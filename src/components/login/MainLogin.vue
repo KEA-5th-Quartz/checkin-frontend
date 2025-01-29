@@ -6,11 +6,16 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SvgIcon from '../common/SvgIcon.vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '../common/CommonDialog.vue';
+import { ApiError } from '@/types/common/error';
 
 const router = useRouter();
 const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
+
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const getRedirectPath = (role: MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
@@ -46,8 +51,18 @@ const handleLogin = async () => {
       const redirectPath = getRedirectPath(memberData.role);
       router.replace(redirectPath);
     }
-  } catch (error) {
-    console.error('로그인 실패:', error);
+  } catch (error: unknown) {
+    const { message } = error as ApiError;
+
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: message,
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
   }
 };
 
@@ -79,4 +94,13 @@ const togglePwdVisibility = () => {
 
     <a href="#" class="block text-center text-sm text-gray-1 hover:text-gray-0">비밀번호 찾기</a>
   </form>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

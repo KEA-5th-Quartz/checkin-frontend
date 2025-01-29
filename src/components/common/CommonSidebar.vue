@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import {
   CategoryIcon,
@@ -14,13 +14,23 @@ import {
   TimelineIcon,
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const memberStore = useMemberStore();
-const isTemplateOpen = ref(false);
-console.log(memberStore);
 
-type Role = 'manager' | 'admin' | 'user';
-const role = ref<Role>('user'); // ref를 사용하여 반응형 상태로 선언
+onMounted(async () => {
+  if (!memberStore.accessToken) {
+    const success = await memberStore.restoreAuth();
+    if (!success) {
+      router.push('/');
+    }
+  }
+});
+
+const isTemplateOpen = ref(false);
+
+const role = computed(() => memberStore.role as 'MANAGER' | 'ADMIN' | 'USER');
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
@@ -53,13 +63,20 @@ const userTemplateItems = [
     <p class="sidebar-logo">CheckIn</p>
 
     <section class="sidebar-profile">
-      <div class="w-[77px] h-[77px] rounded-full bg-pink-200" />
-      <p class="sidebar-p">Neo.js</p>
-      <p class="sidebar-p text-sm">담당자</p>
+      <div class="w-[77px] h-[77px] rounded-full bg-pink-200">
+        <img
+          v-if="memberStore.profilePic"
+          :src="memberStore.profilePic"
+          alt="프로필"
+          class="w-full h-full rounded-full object-cover"
+        />
+      </div>
+      <p class="sidebar-p">{{ memberStore.username }}</p>
+      <p class="sidebar-p text-sm">{{ memberStore.role }}</p>
     </section>
 
     <!-- 담당자 -->
-    <ul v-if="role === 'manager'" class="sidebar-ul">
+    <ul v-if="role === 'MANAGER'" class="sidebar-ul">
       <router-link
         v-for="item in managerNavItems"
         :key="item.path"
@@ -79,7 +96,7 @@ const userTemplateItems = [
     </ul>
 
     <!-- 관리자 -->
-    <ul v-else-if="role === 'admin'" class="sidebar-ul">
+    <ul v-else-if="role === 'ADMIN'" class="sidebar-ul">
       <router-link
         v-for="item in adminNavItems"
         :key="item.path"
@@ -96,7 +113,7 @@ const userTemplateItems = [
     </ul>
 
     <!-- 사용자 -->
-    <ul v-else-if="role === 'user'" class="sidebar-ul">
+    <ul v-else-if="role === 'USER'" class="sidebar-ul">
       <router-link v-for="item in userNavItems" :key="item.path" :to="item.path" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />
@@ -144,7 +161,7 @@ const userTemplateItems = [
       </router-link>
     </ul>
 
-    <button class="absolute left-10 bottom-10" @click="console.log('로그아웃')">
+    <button class="absolute left-10 bottom-10" @click="router.push('/')">
       <SvgIcon :icon="LogoutIcon" />
     </button>
   </nav>

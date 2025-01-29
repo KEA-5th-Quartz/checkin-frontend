@@ -6,16 +6,19 @@ import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 import { firstCategory, managerOptions, status } from '../ticketOptionTest';
 
-const emit = defineEmits(['closeFilter']);
+const props = defineProps<{
+  isMyTicket: boolean;
+}>();
+
+const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const managerRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
 
 // 필터 선택 상태 관리
-const selectedQuickFilters = ref<string[]>([]);
+const selectedQuickFilter = ref<string>('');
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
-const selectedPriorities = ref<string[]>([]);
 const selectedCategories = ref<string[]>([]);
 
 // 드롭다운 상태 관리
@@ -23,22 +26,19 @@ const isManagerDropdownOpen = ref(false);
 const isCategoryDropdownOpen = ref(false);
 
 // 빠른 필터 옵션
-const quickFilters = [{ id: 'dueThisWeek', label: '이번 주에 기한', icon: CalendarIcon }];
-
-// 우선순위 옵션
-const priorities = [
-  { id: 'urgent', label: '긴급', bgClass: 'bg-red-0', textClass: 'text-red-1' },
-  { id: 'high', label: '높음', bgClass: 'bg-orange-0', textClass: 'text-orange-1' },
-  { id: 'medium', label: '보통', bgClass: 'bg-green-0', textClass: 'text-green-1' },
-  { id: 'low', label: '낮음', bgClass: 'bg-primary-2', textClass: 'text-primary-3' },
+const quickFilters = [
+  { id: 'dueToday', label: '오늘 마감', icon: CalendarIcon },
+  { id: 'dueThisWeek', label: '이번 주 마감', icon: CalendarIcon },
 ];
 
 // 필터 토글 함수들
 const toggleQuickFilter = (filterId: string) => {
-  if (selectedQuickFilters.value.includes(filterId)) {
-    selectedQuickFilters.value = selectedQuickFilters.value.filter((id) => id !== filterId);
+  // 이미 선택된 필터를 다시 클릭하면 선택 해제
+  if (selectedQuickFilter.value === filterId) {
+    selectedQuickFilter.value = '';
   } else {
-    selectedQuickFilters.value.push(filterId);
+    // 다른 필터 선택
+    selectedQuickFilter.value = filterId;
   }
 };
 
@@ -58,14 +58,6 @@ const toggleStatus = (status: string) => {
   }
 };
 
-const togglePriority = (priorityId: string) => {
-  if (selectedPriorities.value.includes(priorityId)) {
-    selectedPriorities.value = selectedPriorities.value.filter((id) => id !== priorityId);
-  } else {
-    selectedPriorities.value.push(priorityId);
-  }
-};
-
 const toggleCategory = (category: string) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== category);
@@ -76,11 +68,14 @@ const toggleCategory = (category: string) => {
 
 // 저장 버튼 클릭 핸들러
 const handleSave = () => {
-  console.log('상위 필터:', selectedQuickFilters.value);
-  console.log('담당자', selectedManagers.value);
-  console.log('상태:', selectedStatuses.value);
-  console.log('우선순위:', selectedPriorities.value);
-  console.log('카테고리:', selectedCategories.value);
+  emit('applyFilters', {
+    quickFilters: selectedQuickFilter.value,
+    // isMyTicket이 true일 때는 빈 배열 전달
+    managers: props.isMyTicket ? [] : selectedManagers.value,
+    statuses: selectedStatuses.value,
+    categories: selectedCategories.value,
+  });
+  emit('closeFilter');
 };
 
 onClickOutside(managerRef, () => {
@@ -106,14 +101,14 @@ onClickOutside(modalRef, () => {
         :key="filter.id"
         @click="toggleQuickFilter(filter.id)"
         class="filter-quick-div"
-        :class="[selectedQuickFilters.includes(filter.id) ? 'opacity-100' : 'opacity-30']"
+        :class="[selectedQuickFilter === filter.id ? 'opacity-100' : 'opacity-30']"
       >
         <SvgIcon :icon="filter.icon" />
         <p>{{ filter.label }}</p>
       </div>
     </section>
     <!-- 담당자 -->
-    <section class="filter-section">
+    <section v-if="!isMyTicket" class="filter-section">
       <label class="filter-label">담당자</label>
       <div class="relative" ref="managerRef">
         <div @click="isManagerDropdownOpen = !isManagerDropdownOpen" class="filter-dropdown">
@@ -173,29 +168,10 @@ onClickOutside(modalRef, () => {
           :status="sta.label"
           size="lg"
           class="cursor-pointer"
-          :class="[selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100':'opacity-30 hover:opacity-50']"
+          :class="selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100' : 'opacity-30 hover:opacity-50'"
           @click="toggleStatus(sta.id as unknown as string)"
         />
       </div>
-    </section>
-    <!-- 우선순위 -->
-    <section class="filter-section">
-      <label class="filter-label">우선순위</label>
-      <ul class="flex gap-2">
-        <li
-          v-for="priority in priorities"
-          :key="priority.id"
-          @click="togglePriority(priority.id)"
-          class="filter-priority-li"
-          :class="[
-            priority.bgClass,
-            priority.textClass,
-            selectedPriorities.includes(priority.id) ? ['opacity-100'] : ['opacity-30', 'hover:opacity-50'],
-          ]"
-        >
-          {{ priority.label }}
-        </li>
-      </ul>
     </section>
     <!-- 취소 저장 버튼 -->
     <section class="filter-btn-section">

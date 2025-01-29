@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
   isEdit: false,
+  disabled: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -37,14 +38,18 @@ onUnmounted(() => {
 });
 
 const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
+  if (!props.disabled) {
+    isOpen.value = !isOpen.value;
+  }
 };
 
 // 선택된 옵션에 대해 이벤트를 발생시키고, 콜백을 실행하며, 드롭다운을 닫음
 const handleSelect = (option: BaseTicketOption) => {
-  emit('select', option); // select 이벤트 발생
+  if (props.disabled) return; // disabled일 경우 클릭 무시
+
+  emit('select', option);
   if (props.onOptionSelect) {
-    props.onOptionSelect(option); // 콜백 함수 실행
+    props.onOptionSelect(option);
   }
   isOpen.value = false;
 };
@@ -66,6 +71,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
         'dropdown-bar',
         hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
         hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
+        disabled ? 'cursor-default' : '',
       ]"
     >
       <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
