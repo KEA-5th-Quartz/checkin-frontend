@@ -44,7 +44,14 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
+    // 401 에러 처리 (토큰 관련)
     if (error.response?.status === 401 && originalRequest) {
+      // 로그인 엔드포인트에서의 401 에러는 바로 반환
+      if (originalRequest.url === '/auth/login') {
+        return Promise.reject(error.response.data);
+      }
+
+      // 토큰 갱신 로직
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -54,12 +61,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // refresh 요청 시 withCredentials 옵션 추가
         const response = await api.post(
           '/auth/refresh',
           {},
           {
-            withCredentials: true, // 쿠키 포함
+            withCredentials: true,
           },
         );
 
@@ -69,7 +75,6 @@ api.interceptors.response.use(
         isRefreshing = false;
         processQueue();
 
-        // 원래 요청 재시도
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${memberStore.accessToken}`;
         }
@@ -80,7 +85,17 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-    return Promise.reject(error);
+
+    // 다른 에러들의 처리
+    if (error.response?.data) {
+      return Promise.reject(error.response.data);
+    }
+
+    // 네트워크 에러 등의 경우
+    return Promise.reject({
+      message: '서버와의 통신에 실패했습니다.',
+      status: 500,
+    });
   },
 );
 

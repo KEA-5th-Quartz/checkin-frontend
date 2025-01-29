@@ -29,7 +29,7 @@ const handleMainClick = () => {
 
 <template>
   <CommonOverlay @click="onCancelClick">
-    <section class="dialog-container dialog-section">
+    <section @click.stop class="dialog-container dialog-section">
       <p class="font-bold">{{ title }}</p>
 
       <input v-if="hasInput" v-model="inputValue" :placeholder="placeholder" class="dialog-input" />
