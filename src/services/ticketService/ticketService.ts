@@ -36,11 +36,39 @@ export const ticketApi = {
 
     return api.get(`/tickets?${params.toString()}`);
   },
-  // 티켓 상세 조회
+  // [담당자, 사용자] 티켓 상세 조회
   getTicketDetail(ticketId: number) {
     return api.get(`/tickets/${ticketId}`);
   },
-  // 담당자가 제목 또는 내용으로 검색
+  // [담당자, 사용자] 티켓의 로그와 댓글 전체 조회
+  getTicketComments(ticketId: number) {
+    return api.get(`/tickets/${ticketId}/comments`);
+  },
+  // [담당자] 티켓 상태 변경 (생성 -> 진행중)
+  patchTicketInProgress(ticketId: number) {
+    return api.patch(`/tickets/${ticketId}/assign`);
+  },
+  // [담당자] 티켓 상태 변경 (진행중 -> 완료)
+  patchTicketClose(ticketId: number) {
+    return api.patch(`/tickets/${ticketId}/close`);
+  },
+  // [담당자] 티켓 1차 카테고리 수정
+  patchTicketFirstCategory(ticketId: number, data: { first_category: string }) {
+    return api.patch(`/tickets/${ticketId}/category`, data);
+  },
+  // [담당자] 티켓 2차 카테고리 수정
+  patchTicketSecondCategory(ticketId: number, firstCategoryId: number, data: { second_category: string }) {
+    return api.patch(`/tickets/${ticketId}/${firstCategoryId}/category`, data);
+  },
+  // [담당자] 티켓의 담당자 변경
+  patchTicketReassign(ticketId: number, data: { manager: string }) {
+    return api.patch(`/tickets/${ticketId}/reassign`, data);
+  },
+  // [담당자] 티켓의 중요도 변경
+  patchTicketPriority(ticketId: number, data: { priority: string }) {
+    return api.patch(`/tickets/${ticketId}/priority`, data);
+  },
+  // [담당자] 제목 또는 내용으로 검색
   getSearchTicekts(keyword: string, page?: number, size?: number) {
     const params = new URLSearchParams();
 

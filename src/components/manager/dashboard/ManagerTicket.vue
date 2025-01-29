@@ -63,6 +63,17 @@ watch(
   { immediate: true },
 );
 
+const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
+  try {
+    const response = await ticketApi.getTicketComments(props.ticketId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 댓글 조회 실패:', err);
+    throw err;
+  }
+});
+
+// 본인인지 확인
 const isMe = computed(() => {
   if (!detailData.value) return false;
   return memberStore.username === detailData.value.manager;
@@ -200,31 +211,34 @@ const handleManagerSelect = (option: BaseTicketOption) => {
             <!-- 댓글 창 -->
             <div class="ticket-comment-container">
               <!-- 로그 -->
-              <div class="ticket-comment-log">
-                <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                <div>
-                  <p class="text-sm text-gray-1">Neo.js 상태 변경 2025-01-17 13:27</p>
-                  <div class="flex gap-2">
-                    <StatusBadge status="OPEN" size="sm" />
-                    <span>→</span>
-                    <StatusBadge status="IN_PROGRESS" size="sm" />
+              <div v-if="commentData">
+                <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
+                  <!-- 로그 표시 -->
+                  <div v-if="item.type === 'LOG'" class="ticket-comment-log">
+                    <div class="w-8 h-8 bg-blue-300 rounded-full" />
+                    <div>
+                      <p class="text-sm text-gray-1">
+                        {{ item.log_content }}
+                        {{ new Date(item.created_at).toLocaleString() }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- 댓글 표시 -->
+                  <div v-else class="flex gap-2 mb-4">
+                    <div class="flex-stack gap-2">
+                      <div class="w-8 h-8 bg-blue-300 rounded-full" />
+                      <p class="text-xs whitespace-nowrap">user{{ item.member_id }}</p>
+                    </div>
+                    <div class="ticket-comment-bubble">
+                      <p class="text-sm">{{ item.comment_content }}</p>
+                      <p class="text-xs text-gray-500 mt-1">
+                        {{ new Date(item.created_at).toLocaleString() }}
+                      </p>
+                    </div>
+                    <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
                   </div>
                 </div>
-              </div>
-
-              <!-- 댓글 -->
-              <div class="flex gap-2">
-                <div class="flex-stack gap-2">
-                  <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                  <p class="text-xs whitespace-nowrap">Neo.js</p>
-                </div>
-                <div class="ticket-comment-bubble">
-                  <p class="text-sm">
-                    화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
-                    부탁드립니다.
-                  </p>
-                </div>
-                <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
               </div>
             </div>
 
