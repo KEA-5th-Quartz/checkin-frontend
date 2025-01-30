@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
-import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
 import { BaseTicketOption, CommentMember } from '@/types/tickets';
@@ -34,6 +33,55 @@ const handleClose = () => {
   }, 300);
 };
 
+// 초기값 설정
+const prioritySelected = ref<BaseTicketOption>(priority[0]);
+const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
+const firstCategorySelected = ref(firstCategory[0]);
+const secondCategorySelected = ref(secondCategory[0]);
+const managerSelected = ref(managerOptions[0]);
+// 댓글 작성자 정보를 저장할 Map
+const commentUserMap = ref(new Map<number, CommentMember>());
+const commentContent = ref('');
+// 댓글 좋아요 정보를 저장할 Map
+const commentLikesMap = ref(
+  new Map<
+    number,
+    {
+      totalLikes: number;
+      likes: Array<{ memberId: number; memberName: string }>;
+    }
+  >(),
+);
+
+// 댓글 작성자 정보를 가져오는 함수
+const fetchCommentUserInfo = async (memberId: number) => {
+  try {
+    const response = await userApi.getMember(memberId);
+    const userData = response.data.data;
+    commentUserMap.value.set(memberId, {
+      memberId: userData.memberId,
+      username: userData.username,
+      profilePic: userData.profilePic,
+    });
+  } catch (err) {
+    console.error('회원 정보 조회 실패:', err);
+  }
+};
+
+// 댓글의 좋아요 정보를 가져오는 함수
+const fetchCommentLikes = async (ticketId: number, commentId: number) => {
+  try {
+    const response = await ticketApi.getCommentsLikes(ticketId, commentId);
+    const likesData = response.data.data;
+    commentLikesMap.value.set(commentId, {
+      totalLikes: likesData.totalLikes,
+      likes: likesData.likes,
+    });
+  } catch (err) {
+    console.error('댓글 좋아요 정보 조회 실패:', err);
+  }
+};
+
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
@@ -43,13 +91,6 @@ const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.t
     throw err;
   }
 });
-
-// 초기값 설정
-const prioritySelected = ref<BaseTicketOption>(priority[0]);
-const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
-const firstCategorySelected = ref(firstCategory[0]);
-const secondCategorySelected = ref(secondCategory[0]);
-const managerSelected = ref(managerOptions[0]);
 
 // API 데이터로 초기값 설정
 watch(
@@ -67,7 +108,6 @@ watch(
   { immediate: true },
 );
 
-const commentContent = ref('');
 // 댓글 데이터 페치
 const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
   try {
@@ -78,6 +118,58 @@ const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId]
     throw err;
   }
 });
+
+// 댓글 작성자 정보와 좋아요 정보
+watch(
+  () => commentData.value?.activities,
+  async (activities) => {
+    if (activities) {
+      // 멤버 정보 수집 및 좋아요 정보 가져오기
+      const memberIds = new Set(
+        activities
+          .filter((item: { type: string }) => item.type !== 'LOG')
+          .map((item: { memberId: number }) => item.memberId),
+      );
+      // 멤버 정보 가져오기
+      for (const memberId of memberIds) {
+        if (!commentUserMap.value.has(memberId as number)) {
+          await fetchCommentUserInfo(memberId as number);
+        }
+      }
+      // 각 댓글의 좋아요 정보 가져오기
+      for (const item of activities) {
+        if (item.type !== 'LOG') {
+          await fetchCommentLikes(props.ticketId, item.commentId);
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
+// 좋아요 토글 뮤테이션
+const likeMutation = useCustomMutation(
+  async ({ ticketId, commentId }: { ticketId: number; commentId: number }) => {
+    const response = await ticketApi.putCommentsLikes(ticketId, commentId);
+    return response.data;
+  },
+  {
+    onSuccess: async (_, variables) => {
+      // 좋아요 토글 후 해당 댓글의 좋아요 정보 새로고침
+      await fetchCommentLikes(variables.ticketId, variables.commentId);
+    },
+  },
+);
+// 좋아요 토글 핸들러
+const handleLikeToggle = async (commentId: number) => {
+  try {
+    await likeMutation.mutateAsync({
+      ticketId: props.ticketId,
+      commentId: commentId,
+    });
+  } catch (err) {
+    console.error('좋아요 토글 실패:', err);
+  }
+};
 // 댓글 작성 뮤테이션
 const commentsMutation = useCustomMutation(
   async ({ ticketId, content }: { ticketId: number; content: string }) => {
@@ -294,24 +386,6 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
   }
 };
 
-// 댓글 작성자 정보를 저장할 Map
-const commentUserMap = ref(new Map<number, CommentMember>());
-
-// 댓글 작성자 정보를 가져오는 함수
-const fetchCommentUserInfo = async (memberId: number) => {
-  try {
-    const response = await userApi.getMember(memberId);
-    const userData = response.data.data;
-    commentUserMap.value.set(memberId, {
-      memberId: userData.memberId,
-      username: userData.username,
-      profilePic: userData.profilePic,
-    });
-  } catch (err) {
-    console.error('회원 정보 조회 실패:', err);
-  }
-};
-
 // commentData watch를 수정하여 댓글 작성자 정보를 가져오도록 함
 watch(
   () => commentData.value?.activities,
@@ -337,7 +411,7 @@ watch(
 <template>
   <Teleport to="body">
     <div v-if="ticketId" class="ticket-overlay">
-      <div v-if="isLoading" class="loading-spinner">Loading...</div>
+      <div v-if="isLoading" class="loading-spinner">로딩중...</div>
       <template v-else-if="detailData">
         <div class="ticket-click-outside" @click="handleClose" />
         <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
@@ -436,7 +510,7 @@ watch(
             <div class="ticket-comment-container">
               <!-- 로그 -->
               <div v-if="commentData">
-                <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
+                <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
                   <!-- 로그 표시 -->
                   <div v-if="item.type === 'LOG'" class="ticket-comment-log">
                     <div class="flex-stack items-center">
@@ -450,7 +524,7 @@ watch(
                   </div>
 
                   <!-- 댓글 표시 -->
-                  <div v-else class="flex gap-2 mb-4 items-end">
+                  <div v-else class="flex gap-2 mb-3 items-end">
                     <div class="flex-stack gap-2">
                       <img
                         v-if="commentUserMap.get(item.memberId)?.profilePic"
@@ -465,7 +539,12 @@ watch(
                       <p class="text-sm">{{ item.commentContent }}</p>
                     </div>
                     <div class="flex-stack">
-                      <SvgIcon :icon="LikeIcon" class="cursor-pointer" />
+                      <div class="flex gap-2">
+                        <SvgIcon :icon="LikeIcon" class="cursor-pointer" @click="handleLikeToggle(item.commentId)" />
+                        <span class="text-xs text-gray-1">
+                          {{ commentLikesMap.get(item.commentId)?.totalLikes || 0 }}
+                        </span>
+                      </div>
                       <p class="text-[10px] text-gray-1">
                         {{ formatShortDateTime(item.createdAt) }}
                       </p>
