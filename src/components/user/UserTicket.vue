@@ -126,6 +126,10 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
     });
   }
 };
+
+const canEdit = computed(() => {
+  return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
+});
 </script>
 
 <template>
@@ -138,7 +142,13 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
           <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
-            <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
+            <SvgIcon
+              v-if="canEdit"
+              :icon="PencilIcon"
+              :iconOptions="{ fill: '#000' }"
+              class="cursor-pointer"
+              @click="startEdit"
+            />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
           <div v-else class="filter-btn-section pt-0">
