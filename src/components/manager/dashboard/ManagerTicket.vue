@@ -223,6 +223,7 @@ const invalidateTicketQueries = () => {
   queryClient.invalidateQueries({
     queryKey: ['ticket-detail', props.ticketId],
   });
+  queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
 // 중요도 변경 뮤테이션
