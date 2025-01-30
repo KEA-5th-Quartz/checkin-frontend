@@ -4,7 +4,7 @@ import SvgIcon from '../../common/SvgIcon.vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
-import { BaseTicketOption } from '@/types/tickets';
+import { BaseTicketOption, CommentMember } from '@/types/tickets';
 import { priority, firstCategory, secondCategory, managerOptions, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -12,6 +12,8 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useMemberStore } from '@/stores/memberStore';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
+import { userApi } from '@/services/userService/userService';
+import { formatShortDateTime } from '@/utils/dateFormat';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -291,6 +293,45 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
     console.error('담당자 변경 실패:', err);
   }
 };
+
+// 댓글 작성자 정보를 저장할 Map
+const commentUserMap = ref(new Map<number, CommentMember>());
+
+// 댓글 작성자 정보를 가져오는 함수
+const fetchCommentUserInfo = async (memberId: number) => {
+  try {
+    const response = await userApi.getMember(memberId);
+    const userData = response.data.data;
+    commentUserMap.value.set(memberId, {
+      memberId: userData.memberId,
+      username: userData.username,
+      profilePic: userData.profilePic,
+    });
+  } catch (err) {
+    console.error('회원 정보 조회 실패:', err);
+  }
+};
+
+// commentData watch를 수정하여 댓글 작성자 정보를 가져오도록 함
+watch(
+  () => commentData.value?.activities,
+  async (activities) => {
+    if (activities) {
+      const memberIds = new Set(
+        activities
+          .filter((item: { type: string }) => item.type !== 'LOG')
+          .map((item: { memberId: number }) => item.memberId),
+      );
+      // 아직 가져오지 않은 회원 정보만 가져오기
+      for (const memberId of memberIds) {
+        if (!commentUserMap.value.has(memberId as number)) {
+          await fetchCommentUserInfo(memberId as number);
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -409,18 +450,26 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                   </div>
 
                   <!-- 댓글 표시 -->
-                  <div v-else class="flex gap-2 mb-4">
+                  <div v-else class="flex gap-2 mb-4 items-end">
                     <div class="flex-stack gap-2">
-                      <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                      <p class="text-xs whitespace-nowrap">user{{ item.member_id }}</p>
-                    </div>
-                    <div class="ticket-comment-bubble">
-                      <p class="text-sm">{{ item.comment_content }}</p>
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ new Date(item.createdAt).toLocaleString() }}
+                      <img
+                        v-if="commentUserMap.get(item.memberId)?.profilePic"
+                        :src="commentUserMap.get(item.memberId)?.profilePic"
+                        class="w-8 h-8 rounded-full object-cover"
+                      />
+                      <p class="text-xs whitespace-nowrap">
+                        {{ commentUserMap.get(item.memberId)?.username }}
                       </p>
                     </div>
-                    <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
+                    <div class="ticket-comment-bubble">
+                      <p class="text-sm">{{ item.commentContent }}</p>
+                    </div>
+                    <div class="flex-stack">
+                      <SvgIcon :icon="LikeIcon" class="cursor-pointer" />
+                      <p class="text-[10px] text-gray-1">
+                        {{ formatShortDateTime(item.createdAt) }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -32,3 +32,9 @@ export interface Ticket {
   priority: 'EMERGENCY' | 'HIGH' | 'MEDIUM' | 'LOW';
   status: 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
 }
+
+export interface CommentMember {
+  memberId: number;
+  username: string;
+  profilePic: string;
+}
