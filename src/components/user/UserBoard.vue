@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import UserTicket from './UserTicket.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
@@ -23,7 +23,7 @@ const selectedPerPage = ref(perPageOptions[0]);
 const isSizeOpen = ref(false);
 const isFilterOpen = ref(false);
 
-const currentPage = ref(1);
+const currentPage = ref(parseInt(sessionStorage.getItem('userCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
 const isSearch = ref(false);
@@ -39,6 +39,7 @@ const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
     currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+    sessionStorage.setItem('userCurrentPage', '1');
   } else {
     resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
   }
@@ -48,7 +49,7 @@ const handleSearch = () => {
 const resetSearch = () => {
   keyword.value = '';
   isSearch.value = false;
-  currentPage.value = 1;
+  currentPage.value = parseInt(sessionStorage.getItem('userCurrentPage') || '1');
 };
 
 const dropdownRef = ref<HTMLElement | null>(null);
@@ -59,6 +60,8 @@ const selectOption = (
 ) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
+  currentPage.value = 1;
+  sessionStorage.setItem('sizeCurrentPage', '1');
   isSizeOpen.value = false;
 };
 
@@ -78,6 +81,8 @@ const handleApplyFilters = (filters: UserFilterPayload) => {
     }),
     categories: filters.categories,
   };
+  currentPage.value = 1;
+  sessionStorage.setItem('userCurrentPage', '1');
 };
 
 // 쿼리 파라미터
@@ -170,7 +175,12 @@ const handleCheckboxClick = (event: Event, id: number) => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
+  sessionStorage.setItem('userCurrentPage', page.toString());
 };
+
+onBeforeUnmount(() => {
+  sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
+});
 </script>
 
 <template>

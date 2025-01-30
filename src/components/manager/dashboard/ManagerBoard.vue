@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import ManagerTicket from './ManagerTicket.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -15,7 +15,7 @@ import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 
 const selectedTicketId = ref<number | null>(null);
-const currentPage = ref(1);
+const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
 
@@ -55,9 +55,10 @@ const searchQueryParams = computed(() => ({
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
-    currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+    currentPage.value = 1;
+    sessionStorage.setItem('managerCurrentPage', '1');
   } else {
-    resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
+    resetSearch();
   }
 };
 
@@ -65,7 +66,7 @@ const handleSearch = () => {
 const resetSearch = () => {
   keyword.value = '';
   isSearch.value = false;
-  currentPage.value = 1;
+  currentPage.value = parseInt(sessionStorage.getItem('managerCurrentPage') || '1');
 };
 
 // 필터 적용 핸들러
@@ -80,6 +81,14 @@ const handleApplyFilters = (filters: ManagerFilterPayload) => {
     dueToday: filters.quickFilters.includes('dueToday'),
     dueThisWeek: filters.quickFilters.includes('dueThisWeek'),
   };
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
+};
+
+const toggleMyTicket = () => {
+  isMyTicket.value = !isMyTicket.value;
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
 };
 
 // 검색 쿼리 키 computed
@@ -123,6 +132,7 @@ const handleCloseModal = () => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
+  sessionStorage.setItem('managerCurrentPage', page.toString());
 };
 
 // 배너
@@ -136,8 +146,14 @@ onClickOutside(dropdownRef, () => (isOpen.value = false));
 const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
   isOpen.value = false;
 };
+
+onBeforeUnmount(() => {
+  sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
+});
 </script>
 
 <template>
@@ -171,7 +187,7 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
       </div>
 
       <!-- 내 티켓 -->
-      <button class="btn-main py-2" @click="isMyTicket = !isMyTicket">
+      <button class="btn-main py-2" @click="toggleMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
