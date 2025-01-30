@@ -15,7 +15,9 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { formatMinusDate, formatShortDateTime } from '@/utils/dateFormat';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { userApi } from '@/services/userService/userService';
+import { useMemberStore } from '@/stores/memberStore';
 
+const memberStore = useMemberStore();
 const queryClient = useQueryClient();
 
 const props = defineProps<{
@@ -294,6 +296,12 @@ const handleShowLikes = (commentId: number) => {
     }
   }
 };
+
+// 현재 사용자가 좋아요를 눌렀는지 확인하는 함수
+const hasLiked = (commentId: number) => {
+  const likes = commentLikesMap.value.get(commentId)?.likes || [];
+  return likes.some((like) => like.memberId === memberStore.memberId);
+};
 </script>
 
 <template>
@@ -457,8 +465,8 @@ const handleShowLikes = (commentId: number) => {
                 </div>
 
                 <!-- 댓글 표시 -->
-                <div v-else class="flex gap-2 mb-3 items-end">
-                  <div class="flex-stack gap-2">
+                <div v-else class="flex mb-5 items-end">
+                  <div class="flex-stack">
                     <img
                       v-if="commentUserMap.get(item.memberId)?.profilePic"
                       :src="commentUserMap.get(item.memberId)?.profilePic"
@@ -473,9 +481,17 @@ const handleShowLikes = (commentId: number) => {
                   </div>
                   <div class="flex-stack self-end">
                     <div class="flex gap-2 relative">
-                      <SvgIcon :icon="LikeIcon" class="cursor-pointer" @click="handleLikeToggle(item.commentId)" />
+                      <SvgIcon
+                        :icon="LikeIcon"
+                        class="cursor-pointer"
+                        :iconOptions="{ fill: hasLiked(item.commentId) ? '#48c5ff' : '#8A8A8A' }"
+                        @click="handleLikeToggle(item.commentId)"
+                      />
                       <span
                         class="border px-4 text-xs text-gray-1 cursor-pointer"
+                        :class="{
+                          'bg-primary-4 text-white-0': selectedCommentId === item.commentId,
+                        }"
                         @click="handleShowLikes(item.commentId)"
                       >
                         {{ commentLikesMap.get(item.commentId)?.totalLikes || 0 }}
