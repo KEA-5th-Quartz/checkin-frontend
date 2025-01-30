@@ -13,6 +13,7 @@ import { useMemberStore } from '@/stores/memberStore';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
+import { formatMinusDate } from '@/utils/dateFormat';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -99,6 +100,20 @@ const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof
     },
   });
 };
+
+const formattedDueDate = computed({
+  get: () => {
+    return formatMinusDate(ticketStore.ticket.due_date);
+  },
+  set: (newValue: string) => {
+    // '-' 형식을 '/' 형식으로 변환하여 저장
+    const formattedValue = newValue.replace(/-/g, '/');
+    ticketStore.updateTicket({
+      ...ticketStore.ticket,
+      due_date: formattedValue,
+    });
+  },
+});
 
 const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
 const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
@@ -217,13 +232,15 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <!-- 마감 기한 블록 -->
               <div>
                 <label class="ticket-label">마감 기한</label>
-                <p v-if="!ticketStore.isEditMode" class="ticket-date">{{ ticketStore.ticket.due_date }}</p>
+                <p v-if="!ticketStore.isEditMode" class="ticket-date">
+                  {{ formatMinusDate(ticketStore.ticket.due_date) }}
+                </p>
                 <input
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
                   class="ticket-date ticket-edit-input py-2"
-                  v-model="ticketStore.ticket.due_date"
+                  v-model="formattedDueDate"
                 />
               </div>
             </section>
