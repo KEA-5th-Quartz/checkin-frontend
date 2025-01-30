@@ -287,10 +287,13 @@ body {
   }
   /* 티켓 댓글 */
   .ticket-comment-container {
-    @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4;
+    @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar pb-4 bg-gray-3 py-3 px-2;
   }
   .ticket-comment-log {
-    @apply flex items-center gap-5;
+    @apply flex-center gap-5 w-full;
+  }
+  .ticket-log-p-content {
+    @apply text-xs text-gray-0 font-semibold;
   }
   .ticket-comment-bubble {
     @apply px-3 py-3 border border-gray-1 rounded-[10px];

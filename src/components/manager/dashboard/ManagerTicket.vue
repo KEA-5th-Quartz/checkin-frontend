@@ -65,6 +65,8 @@ watch(
   { immediate: true },
 );
 
+const commentContent = ref('');
+// 댓글 데이터 페치
 const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketComments(props.ticketId);
@@ -74,6 +76,32 @@ const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId]
     throw err;
   }
 });
+// 댓글 작성 뮤테이션
+const commentsMutation = useCustomMutation(
+  async ({ ticketId, content }: { ticketId: number; content: string }) => {
+    const response = await ticketApi.postTicketComments(ticketId, { content });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
+    },
+  },
+);
+// 댓글 작성 함수
+const handleAddComments = async () => {
+  if (!commentContent.value.trim()) return; // 빈 댓글 방지
+  try {
+    await commentsMutation.mutateAsync({
+      ticketId: props.ticketId,
+      content: commentContent.value,
+    });
+    // 성공적으로 댓글이 작성되면 textarea 비우기
+    commentContent.value = '';
+  } catch (err) {
+    console.error('댓글 작성 실패:', err);
+  }
+};
 
 // 본인인지 확인
 const isMe = computed(() => {
@@ -370,11 +398,12 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                 <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
                   <!-- 로그 표시 -->
                   <div v-if="item.type === 'LOG'" class="ticket-comment-log">
-                    <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                    <div>
-                      <p class="text-sm text-gray-1">
-                        {{ item.log_content }}
-                        {{ new Date(item.created_at).toLocaleString() }}
+                    <div class="flex-stack items-center">
+                      <p class="text-xs text-gray-1">
+                        {{ new Date(item.createdAt).toLocaleString() }}
+                      </p>
+                      <p class="ticket-log-p-content">
+                        {{ item.logContent }}
                       </p>
                     </div>
                   </div>
@@ -388,7 +417,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                     <div class="ticket-comment-bubble">
                       <p class="text-sm">{{ item.comment_content }}</p>
                       <p class="text-xs text-gray-500 mt-1">
-                        {{ new Date(item.created_at).toLocaleString() }}
+                        {{ new Date(item.createdAt).toLocaleString() }}
                       </p>
                     </div>
                     <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
@@ -399,10 +428,10 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
 
             <!-- 댓글 인풋 -->
             <div class="ticket-comment-input-area">
-              <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
+              <textarea v-model="commentContent" placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
               <div class="flex gap-2 w-full justify-end pb-1.5">
                 <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
-                <SvgIcon :icon="SendIcon" class="cursor-pointer" />
+                <SvgIcon :icon="SendIcon" class="cursor-pointer" @click="handleAddComments" />
               </div>
             </div>
           </div>
