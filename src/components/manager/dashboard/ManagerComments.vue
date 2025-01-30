@@ -201,9 +201,9 @@ const hasLiked = (commentId: number) => {
         </div>
 
         <!-- 댓글 표시 -->
-        <div v-else class="flex gap-2 mb-6 items-center">
+        <div v-else class="ticket-comment-comment">
           <div class="relative flex-stack">
-            <p class="absolute -top-5 text-xs whitespace-nowrap">
+            <p class="ticket-comment-username">
               {{ commentUserMap.get(item.memberId)?.username }}
             </p>
             <img
@@ -224,7 +224,7 @@ const hasLiked = (commentId: number) => {
                 @click="handleLikeToggle(item.commentId)"
               />
               <span
-                class="border px-4 text-xs text-gray-1 cursor-pointer"
+                class="ticket-like-count-span"
                 :class="{
                   'bg-primary-4 text-white-0': selectedCommentId === item.commentId,
                 }"
@@ -235,16 +235,12 @@ const hasLiked = (commentId: number) => {
 
               <section
                 v-if="selectedCommentId === item.commentId && selectedCommentLikes"
-                class="absolute bottom-5 left-4 flex-center border border-primary-4 z-20"
+                class="ticket-like-modal-section"
               >
-                <div class="bg-white-0 max-h-[400px] overflow-y-auto whitespace-nowrap text-xs" @click.stop>
-                  <div class="sticky bg-primary-4 text-white-0 px-2 text-center">좋아요</div>
+                <div class="ticket-like-modal-div" @click.stop>
+                  <div class="ticket-like-modal-header">좋아요</div>
                   <div class="space-y-0">
-                    <div
-                      v-for="like in selectedCommentLikes.likes"
-                      :key="like.memberId"
-                      class="flex items-center gap-0.5 py-0.5 px-2 border-b"
-                    >
+                    <div v-for="like in selectedCommentLikes.likes" :key="like.memberId" class="ticket-like-modal-item">
                       <span class="text-xs">{{ like.username }}</span>
                     </div>
                   </div>

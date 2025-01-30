@@ -179,8 +179,7 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">{{ detailData?.username }}</p>
+                  <p class="text-sm text-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
