@@ -162,7 +162,7 @@ const handleAddComments = async () => {
 // 좋아요 목록 모달 표시 함수
 const handleShowLikes = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId);
-  if (likes && likes.totalLikes > 0) {
+  if (likes) {
     if (selectedCommentId.value === commentId) {
       // 같은 댓글을 다시 클릭하면 모달 닫기
       selectedCommentId.value = null;
