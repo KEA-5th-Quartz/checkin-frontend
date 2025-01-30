@@ -290,7 +290,7 @@ body {
     @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar bg-gray-3 pt-5 pb-3 px-2;
   }
   .ticket-comment-log {
-    @apply flex-center gap-5 w-full mb-1.5;
+    @apply flex-center gap-5 w-full mb-5;
   }
   .ticket-log-p-content {
     @apply text-xs text-gray-0 font-semibold;

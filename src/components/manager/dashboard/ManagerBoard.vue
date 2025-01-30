@@ -15,12 +15,14 @@ import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey } from '@tanstack/vue-query';
+import { useMemberStore } from '@/stores/memberStore';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
 
+const memberStore = useMemberStore();
 const keyword = ref('');
 const isSearch = ref(false);
 
@@ -38,7 +40,7 @@ const queryParams = computed(() => ({
   size: pageSize.value,
   statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
-    ? ['manager2.js'] // 기본으로 manager2.js, 나중에 수정
+    ? [memberStore.username] // 기본으로 manager2.js, 나중에 수정
     : Array.isArray(ManagerfilterState.value.usernames)
     ? ManagerfilterState.value.usernames
     : [],
