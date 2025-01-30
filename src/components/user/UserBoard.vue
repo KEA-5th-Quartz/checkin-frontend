@@ -16,6 +16,7 @@ import SkeletonTable from '../UI/SkeletonTable.vue';
 import CustomPagination from '../common/CustomPagination.vue';
 import { UserFilterPayload, UserFilterState } from '@/types/user';
 import ErrorTable from '../UI/ErrorTable.vue';
+import { QueryKey } from '@tanstack/vue-query';
 
 const ticketStore = useUserTicketListStore();
 
@@ -95,7 +96,7 @@ const queryParams = computed(() => ({
 }));
 
 // 검색 쿼리 키 computed
-const queryKey = computed(() => {
+const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
     return ['search-user-tickets', keyword.value, currentPage.value, pageSize.value] as const;
   }
@@ -107,7 +108,7 @@ const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey.value, () => {
+} = useCustomQuery(queryKey as unknown as QueryKey, () => {
   if (isSearch.value) {
     return ticketApi
       .getSearchUserTickets(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)

@@ -14,6 +14,7 @@ import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
+import { QueryKey } from '@tanstack/vue-query';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
@@ -93,19 +94,18 @@ const toggleMyTicket = () => {
 };
 
 // 검색 쿼리 키 computed
-const queryKey = computed(() => {
+const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
-    return ['search-tickets', keyword.value, currentPage.value, pageSize.value] as const;
+    return ['search-tickets', keyword.value, currentPage.value, pageSize.value];
   }
-  return ['tickets', queryParams.value] as const;
+  return ['tickets', queryParams.value];
 });
 
-// 데이터 페칭
 const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey.value, () => {
+} = useCustomQuery(queryKey as unknown as QueryKey, () => {
   if (isSearch.value) {
     return ticketApi
       .getSearchTicekts(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
