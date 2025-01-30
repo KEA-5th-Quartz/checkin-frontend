@@ -44,10 +44,15 @@ const commentLikesMap = ref(
     number,
     {
       totalLikes: number;
-      likes: Array<{ memberId: number; memberName: string }>;
+      likes: Array<{ memberId: number; username: string }>;
     }
   >(),
 );
+const selectedCommentId = ref<number | null>(null);
+const selectedCommentLikes = ref<{
+  totalLikes: number;
+  likes: Array<{ memberId: number; username: string }>;
+} | null>(null);
 
 // 댓글의 좋아요 정보를 가져오는 함수
 const fetchCommentLikes = async (ticketId: number, commentId: number) => {
@@ -273,6 +278,22 @@ watch(
   },
   { immediate: true },
 );
+
+// 좋아요 목록 모달 표시 함수
+const handleShowLikes = (commentId: number) => {
+  const likes = commentLikesMap.value.get(commentId);
+  if (likes && likes.totalLikes > 0) {
+    if (selectedCommentId.value === commentId) {
+      // 같은 댓글을 다시 클릭하면 모달 닫기
+      selectedCommentId.value = null;
+      selectedCommentLikes.value = null;
+    } else {
+      // 다른 댓글을 클릭하면 해당 댓글의 좋아요 정보 표시
+      selectedCommentId.value = commentId;
+      selectedCommentLikes.value = likes;
+    }
+  }
+};
 </script>
 
 <template>
@@ -450,12 +471,33 @@ watch(
                   <div class="ticket-comment-bubble">
                     <p class="text-sm">{{ item.commentContent }}</p>
                   </div>
-                  <div class="flex-stack">
-                    <div class="flex gap-2">
+                  <div class="flex-stack self-end">
+                    <div class="flex gap-2 relative">
                       <SvgIcon :icon="LikeIcon" class="cursor-pointer" @click="handleLikeToggle(item.commentId)" />
-                      <span class="text-xs text-gray-1">
+                      <span
+                        class="border px-4 text-xs text-gray-1 cursor-pointer"
+                        @click="handleShowLikes(item.commentId)"
+                      >
                         {{ commentLikesMap.get(item.commentId)?.totalLikes || 0 }}
                       </span>
+
+                      <section
+                        v-if="selectedCommentId === item.commentId && selectedCommentLikes"
+                        class="absolute bottom-5 left-4 flex-center border border-primary-4 z-20"
+                      >
+                        <div class="bg-white-0 max-h-[400px] overflow-y-auto whitespace-nowrap text-xs" @click.stop>
+                          <div class="sticky bg-primary-4 text-white-0 px-2 text-center">좋아요</div>
+                          <div class="space-y-3">
+                            <div
+                              v-for="like in selectedCommentLikes.likes"
+                              :key="like.memberId"
+                              class="flex items-center gap-0.5 py-0.5 px-2"
+                            >
+                              <span class="text-xs">{{ like.username }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
                     </div>
                     <p class="text-[10px] text-gray-1">
                       {{ formatShortDateTime(item.createdAt) }}
