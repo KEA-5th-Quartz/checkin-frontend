@@ -13,6 +13,7 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
+import ErrorTable from '@/components/UI/ErrorTable.vue';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
@@ -92,18 +93,19 @@ const toggleMyTicket = () => {
 };
 
 // 검색 쿼리 키 computed
-const queryKey = computed(() =>
-  isSearch.value
-    ? ['search-tickets', keyword.value, currentPage.value, pageSize.value]
-    : ['tickets', queryParams.value],
-);
+const queryKey = computed(() => {
+  if (isSearch.value) {
+    return ['search-tickets', keyword.value, currentPage.value, pageSize.value] as const;
+  }
+  return ['tickets', queryParams.value] as const;
+});
 
 // 데이터 페칭
 const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey, () => {
+} = useCustomQuery(queryKey.value, () => {
   if (isSearch.value) {
     return ticketApi
       .getSearchTicekts(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
@@ -211,6 +213,7 @@ onBeforeUnmount(() => {
 
   <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
     <SkeletonTable v-if="isLoading" />
+    <ErrorTable v-else-if="error" :error="error" />
 
     <div v-else class="h-[calc(100vh-340px)]">
       <table v-if="!isMyTicket" class="min-w-full table-fixed">

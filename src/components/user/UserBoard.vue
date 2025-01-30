@@ -15,6 +15,7 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import SkeletonTable from '../UI/SkeletonTable.vue';
 import CustomPagination from '../common/CustomPagination.vue';
 import { UserFilterPayload, UserFilterState } from '@/types/user';
+import ErrorTable from '../UI/ErrorTable.vue';
 
 const ticketStore = useUserTicketListStore();
 
@@ -94,18 +95,19 @@ const queryParams = computed(() => ({
 }));
 
 // 검색 쿼리 키 computed
-const queryKey = computed(() =>
-  isSearch.value
-    ? ['search-user-tickets', keyword.value, currentPage.value, pageSize.value]
-    : ['user-tickets', queryParams.value],
-);
+const queryKey = computed(() => {
+  if (isSearch.value) {
+    return ['search-user-tickets', keyword.value, currentPage.value, pageSize.value] as const;
+  }
+  return ['user-tickets', queryParams.value] as const;
+});
 
 // 데이터 페칭
 const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey, () => {
+} = useCustomQuery(queryKey.value, () => {
   if (isSearch.value) {
     return ticketApi
       .getSearchUserTickets(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
@@ -265,6 +267,7 @@ onBeforeUnmount(() => {
 
     <article class="overflow-x-auto mt-5 px-5 pb-20 hide-scrollbar">
       <SkeletonTable v-if="isLoading" />
+      <ErrorTable v-else-if="error" :error="error" />
 
       <div v-else class="h-[calc(100vh-300px)]">
         <table class="min-w-full table-fixed">
