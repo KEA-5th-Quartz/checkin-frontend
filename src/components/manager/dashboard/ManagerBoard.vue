@@ -12,21 +12,7 @@ import ManagerFilter from './ManagerFilter.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 import SkeletonTable from '@/components/UI/SkeletonTable.vue';
-
-interface FilterState {
-  statuses: string[];
-  usernames: string[];
-  categories: string[];
-  dueToday: boolean;
-  dueThisWeek: boolean;
-}
-
-interface FilterPayload {
-  quickFilters: string[];
-  managers: string[];
-  statuses: string[];
-  categories: string[];
-}
+import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(1);
@@ -36,7 +22,7 @@ const isMyTicket = ref(false);
 const keyword = ref('');
 const isSearch = ref(false);
 
-const filterState = ref<FilterState>({
+const ManagerfilterState = ref<ManagerFilterState>({
   statuses: [],
   usernames: [],
   categories: [],
@@ -48,15 +34,15 @@ const filterState = ref<FilterState>({
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
-  statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
+  statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
     ? ['manager2.js'] // 기본으로 manager2.js, 나중에 수정
-    : Array.isArray(filterState.value.usernames)
-    ? filterState.value.usernames
+    : Array.isArray(ManagerfilterState.value.usernames)
+    ? ManagerfilterState.value.usernames
     : [],
-  categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
-  dueToday: filterState.value.dueToday,
-  dueThisWeek: filterState.value.dueThisWeek,
+  categories: Array.isArray(ManagerfilterState.value.categories) ? ManagerfilterState.value.categories : [],
+  dueToday: ManagerfilterState.value.dueToday,
+  dueThisWeek: ManagerfilterState.value.dueThisWeek,
 }));
 
 // 검색 쿼리 파라미터
@@ -83,8 +69,8 @@ const resetSearch = () => {
 };
 
 // 필터 적용 핸들러
-const handleApplyFilters = (filters: FilterPayload) => {
-  filterState.value = {
+const handleApplyFilters = (filters: ManagerFilterPayload) => {
+  ManagerfilterState.value = {
     statuses: filters.statuses.map((id: string) => {
       const statusItem = status.find((s) => s.id === (id as unknown as number));
       return statusItem?.label || '';

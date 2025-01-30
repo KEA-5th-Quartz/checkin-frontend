@@ -20,18 +20,19 @@ export const ticket_status: StatusTicketOption[] = [
   { id: 3, value: 'CLOSED', label: '완료', bg: 'bg-green-0', text: 'text-green-1' },
 ];
 
+// 실제 카테고리로 대체
 export const firstCategory: BaseTicketOption[] = [
   { id: 1, value: '카테고리 1', label: '카테고리 1' },
   { id: 2, value: '카테고리 2', label: '카테고리 2' },
   { id: 3, value: 'SSL', label: 'SSL' },
 ];
-
+// 실제 카테고리로 대체
 export const secondCategory: BaseTicketOption[] = [
   { id: 1, value: '생성', label: '생성' },
   { id: 2, value: '수정', label: '수정' },
   { id: 3, value: '삭제', label: '삭제' },
 ];
-
+// 실제 담당자로 대체
 export const managerOptions: BaseTicketOption[] = [
   { id: 1, value: 'admin2.js', label: 'admin2.js' },
   { id: 2, value: 'admin3.js', label: 'admin3.js' },

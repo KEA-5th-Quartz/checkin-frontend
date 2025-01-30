@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
-import { tableDataTest } from '../manager/dashboardTest';
 import UserTicket from './UserTicket.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 import SvgIcon from '../common/SvgIcon.vue';
@@ -15,16 +14,7 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import SkeletonTable from '../UI/SkeletonTable.vue';
 import CustomPagination from '../common/CustomPagination.vue';
-
-interface FilterState {
-  statuses: string[];
-  categories: string[];
-}
-
-interface FilterPayload {
-  statuses: string[];
-  categories: string[];
-}
+import { UserFilterPayload, UserFilterState } from '@/types/user';
 
 const ticketStore = useUserTicketListStore();
 
@@ -74,14 +64,14 @@ const selectOption = (
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-const filterState = ref<FilterState>({
+const UserfilterState = ref<UserFilterState>({
   statuses: [],
   categories: [],
 });
 
 // 필터 적용 핸들러
-const handleApplyFilters = (filters: FilterPayload) => {
-  filterState.value = {
+const handleApplyFilters = (filters: UserFilterPayload) => {
+  UserfilterState.value = {
     statuses: filters.statuses.map((id: string) => {
       const statusItem = status.find((s) => s.id === (id as unknown as number));
       return statusItem?.label || '';
@@ -94,8 +84,8 @@ const handleApplyFilters = (filters: FilterPayload) => {
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
-  statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
-  categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
+  statuses: Array.isArray(UserfilterState.value.statuses) ? UserfilterState.value.statuses : [],
+  categories: Array.isArray(UserfilterState.value.categories) ? UserfilterState.value.categories : [],
 }));
 
 // 검색 쿼리 키 computed
@@ -184,7 +174,7 @@ const handlePageChange = (page: number) => {
 </script>
 
 <template>
-  <section v-if="tableDataTest.length !== 0">
+  <section v-if="ticketData?.length !== 0">
     <!-- 티켓 헤더 -->
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
       <!-- 검색 -->
