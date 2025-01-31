@@ -19,7 +19,7 @@ const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const getRedirectPath = (role: MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
-    ADMIN: '/administrator/memberManagement',
+    ADMIN: '/admin',
     MANAGER: '/manager/dashboard',
     USER: '/user/tickets',
   };
