@@ -5,6 +5,10 @@ export const userApi = {
   login(data: { username: string; password: string }) {
     return api.post('/auth/login', data);
   },
+  // 로그아웃
+  logout() {
+    return api.post('/auth/logout');
+  },
   // refresh토큰으로 accessToken과 refreshToken 재발급
   refresh() {
     return api.post('/auth/refresh');

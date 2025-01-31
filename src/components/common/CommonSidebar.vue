@@ -15,6 +15,7 @@ import {
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
+import { userApi } from '@/services/userService/userService';
 
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -56,6 +57,17 @@ const userTemplateItems = [
   { name: '티켓 템플릿', path: '/user/templates' },
   { name: '새 티켓 템플릿', path: '/user/addtemplate' },
 ];
+
+// 로그아웃
+const handleLogout = async () => {
+  try {
+    const response = await userApi.logout();
+    console.log(response);
+    router.replace('/');
+  } catch (err) {
+    console.error('로그아웃 실패:', err);
+  }
+};
 </script>
 
 <template>
@@ -161,7 +173,7 @@ const userTemplateItems = [
       </router-link>
     </ul>
 
-    <button class="absolute left-10 bottom-10" @click="router.push('/')">
+    <button class="absolute left-10 bottom-10" @click="handleLogout">
       <SvgIcon :icon="LogoutIcon" />
     </button>
   </nav>
