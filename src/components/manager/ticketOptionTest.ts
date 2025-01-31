@@ -56,15 +56,6 @@ export const secondCategory: BaseTicketOption[] = [
   { id: 2, value: '수정', label: '수정' },
   { id: 3, value: '삭제', label: '삭제' },
 ];
-// 실제 담당자로 대체
-export const managerOptions: BaseTicketOption[] = [
-  { id: 1, value: 'admin2.js', label: 'admin2.js' },
-  { id: 2, value: 'admin3.js', label: 'admin3.js' },
-  { id: 3, value: 'admin4.js', label: 'admin4.js' },
-  { id: 4, value: 'manager1.js', label: 'manager1.js' },
-  { id: 5, value: 'manager2.js', label: 'manager2.js' },
-  { id: 6, value: 'manager3.js', label: 'manager3.js' },
-];
 
 export const perPageOptions = [
   { id: 1, value: 20, label: '20개' },

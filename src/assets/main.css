@@ -220,7 +220,7 @@ body {
     @apply absolute z-10 top-9 mt-1 w-full card-base border border-gray-2 max-h-60 overflow-y-auto hide-scrollbar;
   }
   .filter-dropdown-li {
-    @apply flex-between px-3 py-2 hover:bg-gray-3 cursor-pointer;
+    @apply flex px-3 py-2 hover:bg-gray-3 cursor-pointer;
   }
   .filter-priority-li {
     @apply px-3 py-1.5 text-sm flex-center font-bold rounded-full cursor-pointer;
