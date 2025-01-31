@@ -43,7 +43,7 @@ export const managerOptions: BaseTicketOption[] = [
 ];
 
 export const perPageOptions = [
-  { id: 1, value: 10, label: '10개' },
-  { id: 2, value: 20, label: '20개' },
+  { id: 1, value: 20, label: '20개' },
+  { id: 2, value: 30, label: '30개' },
   { id: 3, value: 50, label: '50개' },
 ];

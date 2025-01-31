@@ -136,7 +136,7 @@ body {
     @apply absolute card-base z-10 w-full mt-1 border max-h-60 overflow-y-auto hide-scrollbar;
   }
   .dropdown-li {
-    @apply px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap;
+    @apply flex items-center px-3 py-2 cursor-pointer text-sm transition-colors duration-200 text-gray-0 hover:bg-gray-3 min-w-full whitespace-nowrap;
   }
 
   /* 담당자 */

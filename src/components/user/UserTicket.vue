@@ -31,6 +31,7 @@ const handleClose = () => {
   }, 300);
 };
 
+// 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);

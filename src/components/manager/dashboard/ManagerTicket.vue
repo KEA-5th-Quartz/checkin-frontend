@@ -4,7 +4,7 @@ import SvgIcon from '../../common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
 import { BaseTicketOption } from '@/types/tickets';
-import { priority, firstCategory, secondCategory, managerOptions, ticket_status } from '../ticketOptionTest';
+import { priority, firstCategory, secondCategory, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
@@ -12,6 +12,7 @@ import { useMemberStore } from '@/stores/memberStore';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
 import ManagerComments from './ManagerComments.vue';
+import { userApi } from '@/services/userService/userService';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -37,7 +38,6 @@ const prioritySelected = ref<BaseTicketOption>(priority[0]);
 const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref(firstCategory[0]);
 const secondCategorySelected = ref(secondCategory[0]);
-const managerSelected = ref(managerOptions[0]);
 
 // 티켓 상세 페치
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
@@ -50,17 +50,45 @@ const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.t
   }
 });
 
+// 담당자 목록 페치
+const { data: managersData } = useCustomQuery(['manager-list'], async () => {
+  try {
+    const response = await userApi.getManagers('MANAGER', 1, 100);
+    return response;
+  } catch (err) {
+    console.error('담당자 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+// managerOptions를 동적으로 생성하는 computed 속성 추가
+const managerOptions = computed(() => {
+  if (!managersData.value?.data?.data?.members) return [];
+
+  return managersData.value.data.data.members.map(
+    (manager: { memberId: number; username: string; profilePic: string }) => ({
+      id: manager.memberId,
+      value: manager.username,
+      label: manager.username,
+      profilePic: manager.profilePic,
+    }),
+  );
+});
+
+// 초기값 설정 부분 수정
+const managerSelected = ref<BaseTicketOption>();
+
 // API 데이터로 초기값 설정
 watch(
-  detailData,
-  (newData) => {
-    if (newData) {
+  [detailData, managerOptions],
+  ([newData, options]) => {
+    if (newData && options.length > 0) {
       prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[0];
       statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
       firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
       secondCategorySelected.value =
         secondCategory.find((s) => s.value === newData.secondCategory) || secondCategory[0];
-      managerSelected.value = managerOptions.find((m) => m.value === newData.manager) || managerOptions[0];
+      managerSelected.value = options.find((m: { value: unknown }) => m.value === newData.manager) || options[0];
     }
   },
   { immediate: true },
@@ -332,6 +360,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                   :selected-option="managerSelected"
                   @select="handleManagerSelect"
                   :disabled="isManagerChangeDisabled"
+                  isManager
                 />
                 <!-- 마감 기한 블록 -->
                 <div>

@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   selectedOption: () => ({ id: 0, value: '', label: '' }),
   isEdit: false,
   disabled: false,
+  isManager: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -70,10 +71,12 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
       :class="[
         'dropdown-bar',
         hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
-        hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
-        disabled ? 'cursor-default' : '',
+        isManager && 'py-1',
+        hasColor && hasColorStyle(selectedOption) && `${selectedOption.bg} ${selectedOption.text} max-w-fit`,
+        disabled && 'cursor-default',
       ]"
     >
+      <img v-if="isManager" :src="selectedOption.profilePic" class="w-7 h-7 object-fill rounded-full mr-2" />
       <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
         {{ selectedOption.label }}
       </span>
@@ -89,6 +92,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
           @click="handleSelect(option)"
           :class="['dropdown-li', selectedOption.id === option.id ? 'bg-gray-50' : '']"
         >
+          <img v-if="isManager" :src="option.profilePic" class="w-5 h-5 object-fill rounded-full mr-2" />
           {{ option.label }}
         </li>
       </ul>

@@ -13,8 +13,17 @@ export const userApi = {
   changePassword(memberId: number | null, data: { originalpassword: string; newpassword: string }) {
     return api.put(`/members/${memberId}/password`, data);
   },
+  // 담당자 목록 조회
+  getManagers(role: string, page: number, size: number, username?: string) {
+    const params = new URLSearchParams();
+
+    if (page) params.append('page', page.toString());
+    if (size) params.append('size', size.toString());
+    if (username) params.append('username', username.toString());
+    return api.get(`/members?role=${role}&${params.toString()}`);
+  },
   // 회원 ID로 회원 정보 조회
-  getMember(memberId: number) {
+  getMemberId(memberId: number) {
     return api.get(`/members/${memberId}`);
   },
   // 회원의 프로필 사진 변경

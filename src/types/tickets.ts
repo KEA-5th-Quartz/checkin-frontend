@@ -2,6 +2,7 @@ export interface BaseTicketOption {
   id: number;
   value: string;
   label: string;
+  profilePic?: string;
 }
 
 export interface StatusTicketOption extends BaseTicketOption {
@@ -18,6 +19,7 @@ export interface DropdownProps {
   isEdit?: boolean;
   my_ref?: null;
   disabled?: boolean;
+  isManager?: boolean;
 }
 
 // 티켓 타입

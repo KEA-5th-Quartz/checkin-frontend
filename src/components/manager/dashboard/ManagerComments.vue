@@ -40,7 +40,7 @@ const selectedCommentLikes = ref<{
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
   try {
-    const response = await userApi.getMember(memberId);
+    const response = await userApi.getMemberId(memberId);
     const userData = response.data.data;
     commentUserMap.value.set(memberId, {
       memberId: userData.memberId,
