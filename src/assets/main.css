@@ -302,7 +302,7 @@ body {
     @apply border px-2.5 text-xs text-gray-1 cursor-pointer;
   }
   .ticket-like-modal-section {
-    @apply absolute bottom-5 left-4 flex-center border border-primary-4 z-20;
+    @apply absolute bottom-0 left-[52px] flex-center border border-primary-4 z-20;
   }
   .ticket-like-modal-div {
     @apply bg-white-0 max-h-[400px] overflow-y-auto whitespace-nowrap text-xs;

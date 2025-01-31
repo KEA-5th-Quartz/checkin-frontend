@@ -216,7 +216,7 @@ const hasLiked = (commentId: number) => {
             <p class="text-sm">{{ item.commentContent }}</p>
           </div>
           <div class="flex-stack self-end">
-            <div class="flex gap-2 relative">
+            <div class="flex gap-1 relative">
               <SvgIcon
                 :icon="LikeIcon"
                 class="cursor-pointer"
@@ -226,7 +226,7 @@ const hasLiked = (commentId: number) => {
               <span
                 class="ticket-like-count-span"
                 :class="{
-                  'bg-primary-4 text-white-0': selectedCommentId === item.commentId,
+                  'bg-primary-4 text-white-0 border-primary-4': selectedCommentId === item.commentId,
                 }"
                 @click="handleShowLikes(item.commentId)"
               >

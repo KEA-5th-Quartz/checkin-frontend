@@ -218,7 +218,7 @@ const hasLiked = (commentId: number) => {
             <p class="text-sm">{{ item.commentContent }}</p>
           </div>
           <div class="flex-stack self-end">
-            <div class="flex gap-2 relative">
+            <div class="flex gap-1 relative">
               <SvgIcon
                 :icon="LikeIcon"
                 class="cursor-pointer"
