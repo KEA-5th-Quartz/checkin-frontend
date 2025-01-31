@@ -62,7 +62,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
 </script>
 
 <template>
-  <div ref="dropdownRef" class="relative max-w-fit">
+  <div ref="dropdownRef" class="relative">
     <p class="text-sm mb-1.5 max-w-fit">{{ label }}</p>
 
     <!-- 드롭다운 -->
@@ -71,16 +71,25 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
       :class="[
         'dropdown-bar',
         hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
-        isManager && 'py-1',
+        isManager && 'py-1 w-full justify-start',
         hasColor && hasColorStyle(selectedOption) && `${selectedOption.bg} ${selectedOption.text} max-w-fit`,
         disabled && 'border-gray-2 hover:border-gray-2 cursor-default hover:ring-0',
       ]"
     >
-      <img v-if="isManager" :src="selectedOption?.profilePic" class="w-7 h-7 object-fill rounded-full mr-2" />
-      <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1', disabled ? 'pr-0' : 'pr-4']">
-        {{ selectedOption?.label }}
-      </span>
-      <SvgIcon v-if="!disabled" :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+      <img
+        v-if="isManager"
+        :src="
+          selectedOption?.profilePic ||
+          'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+        "
+        class="w-7 h-7 object-fill rounded-full mr-2"
+      />
+      <div class="w-full flex-between">
+        <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1', disabled ? 'pr-0' : 'pr-4']">
+          {{ selectedOption?.label }}
+        </span>
+        <SvgIcon v-if="!disabled" :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+      </div>
     </button>
 
     <!-- 메뉴들 -->
@@ -92,7 +101,14 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
           @click="handleSelect(option)"
           :class="['dropdown-li', selectedOption?.id === option.id ? 'bg-gray-50' : '']"
         >
-          <img v-if="isManager" :src="option.profilePic" class="w-5 h-5 object-fill rounded-full mr-2" />
+          <img
+            v-if="isManager"
+            :src="
+              option.profilePic ||
+              'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+            "
+            class="w-5 h-5 object-fill rounded-full mr-2"
+          />
           {{ option.label }}
         </li>
       </ul>

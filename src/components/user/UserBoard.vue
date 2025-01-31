@@ -333,8 +333,14 @@ onBeforeUnmount(() => {
               </td>
               <td class="manager-td">
                 <div class="flex items-center gap-2 ml-4">
-                  <div class="h-7 w-7 rounded-full bg-pink-200" />
-                  <span class="truncate">{{ item.manager }}</span>
+                  <img
+                    v-if="item.manager !== null"
+                    :src="item.managerProfilePic"
+                    class="h-7 max-w-7 rounded-full object-fill"
+                  />
+                  <span class="truncate" :class="item.manager ? '' : 'flex-center w-full mr-3'">
+                    {{ item.manager || '━' }}
+                  </span>
                 </div>
               </td>
               <td class="manager-td">

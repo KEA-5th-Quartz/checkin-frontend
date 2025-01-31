@@ -34,7 +34,7 @@ const handleClose = () => {
 };
 
 // 초기값 설정
-const prioritySelected = ref<BaseTicketOption>(priority[0]);
+const prioritySelected = ref<BaseTicketOption>(priority[2]);
 const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref(firstCategory[0]);
 const secondCategorySelected = ref(secondCategory[0]);
@@ -65,14 +65,22 @@ const { data: managersData } = useCustomQuery(['manager-list'], async () => {
 const managerOptions = computed(() => {
   if (!managersData.value?.data?.data?.members) return [];
 
-  return managersData.value.data.data.members.map(
-    (manager: { memberId: number; username: string; profilePic: string }) => ({
-      id: manager.memberId,
-      value: manager.username,
-      label: manager.username,
-      profilePic: manager.profilePic,
-    }),
-  );
+  return [
+    {
+      id: 0,
+      value: null,
+      label: '-',
+      profilePic: null,
+    },
+    ...managersData.value.data.data.members.map(
+      (manager: { memberId: number; username: string; profilePic: string }) => ({
+        id: manager.memberId,
+        value: manager.username,
+        label: manager.username,
+        profilePic: manager.profilePic,
+      }),
+    ),
+  ];
 });
 
 // 초기값 설정 부분 수정
@@ -83,17 +91,17 @@ watch(
   [detailData, managerOptions],
   ([newData, options]) => {
     if (newData && options.length > 0) {
-      prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[0];
+      prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[2];
       statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
       firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
       secondCategorySelected.value =
         secondCategory.find((s) => s.value === newData.secondCategory) || secondCategory[0];
-      managerSelected.value = options.find((m: { value: unknown }) => m.value === newData.manager) || options[0];
+      // manager가 null일 경우 미지정 옵션 선택
+      managerSelected.value = newData.manager ? options.find((m) => m.value === newData.manager) : options[0]; // 미지정 옵션
     }
   },
   { immediate: true },
 );
-
 // 본인인지 확인
 const isMe = computed(() => {
   if (!detailData.value) return false;
@@ -102,8 +110,12 @@ const isMe = computed(() => {
 
 // 완료된 티켓의 담당자 변경 불가능
 const isManagerChangeDisabled = computed(() => {
-  // isMe가 false면 무조건 disabled
-  if (!isMe.value) return true;
+  // 현재 manager가 null이면 변경 가능
+  if (!detailData.value?.manager) return false;
+
+  // isMe가 false면서 manager가 있으면 disabled
+  if (!isMe.value && detailData.value.manager) return true;
+
   // 상태가 CLOSED면 담당자 변경 불가
   return statusSelected.value.value === 'CLOSED';
 });

@@ -221,7 +221,13 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <div class="w-5 h-5 bg-green-500 rounded-full" />
+                  <img
+                    :src="
+                      detailData?.managerProfilePic ||
+                      'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+                    "
+                    class="w-5 h-5 object-fill rounded-full mr-2"
+                  />
                   <p class="text-xs text-gray-1">{{ detailData?.manager }}</p>
                 </div>
               </div>
