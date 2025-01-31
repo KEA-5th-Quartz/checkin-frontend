@@ -228,7 +228,7 @@ const canEdit = computed(() => {
                     "
                     class="w-5 h-5 object-fill rounded-full mr-2"
                   />
-                  <p class="text-xs text-gray-1">{{ detailData?.manager }}</p>
+                  <p class="text-xs text-gray-1">{{ detailData?.manager || '━' }}</p>
                 </div>
               </div>
               <!-- 마감 기한 블록 -->
