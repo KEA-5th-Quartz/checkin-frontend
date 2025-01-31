@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
 import { useRouter } from 'vue-router';
@@ -8,9 +7,13 @@ import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
 import { ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
+import axios from 'axios';
+import { userApi } from '@/services/userService/userService';
 
+const BASE_URL = process.env.VUE_APP_BASE_URL;
 const router = useRouter();
 const memberStore = useMemberStore();
+console.log('패스워드리셋토큰', memberStore.passwordResetToken);
 
 // Form 설정
 const { handleSubmit, errors, meta } = useForm({
@@ -37,10 +40,17 @@ const resetForm = () => {
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    await userApi.changePassword(memberStore.memberId, {
-      originalpassword: '5v,nkbde',
-      newpassword: values.newPwd,
+    if (!memberStore.passwordResetToken) {
+      alert('오류가 발생했습니다 다시 로그인해주세요.');
+      router.replace('/');
+    }
+
+    await userApi.passwordReset(memberStore.memberId, {
+      passwordResetToken: memberStore.passwordResetToken,
+      newPassword: values.newPwd,
     });
+
+    alert('비밀번호가 변경되었습니다.');
 
     const redirectPath = getRedirectPath(memberStore.role);
     router.replace(redirectPath);

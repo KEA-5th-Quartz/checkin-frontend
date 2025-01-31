@@ -1,4 +1,3 @@
-import api from '@/api/axios';
 import { userApi } from '@/services/userService/userService';
 import { MemberState } from '@/types/member';
 import { defineStore } from 'pinia';
@@ -10,7 +9,7 @@ export const useMemberStore = defineStore('member', {
     profilePic: '',
     role: '',
     accessToken: '',
-    passwordChangedAt: null,
+    passwordResetToken: null,
   }),
 
   actions: {
@@ -20,7 +19,7 @@ export const useMemberStore = defineStore('member', {
       this.profilePic = memberData.profilePic;
       this.role = memberData.role;
       this.accessToken = memberData.accessToken;
-      this.passwordChangedAt = memberData.passwordChangedAt;
+      this.passwordResetToken = memberData.passwordResetToken;
     },
 
     clearMemberInfo() {
@@ -29,7 +28,7 @@ export const useMemberStore = defineStore('member', {
       this.profilePic = '';
       this.role = '';
       this.accessToken = '';
-      this.passwordChangedAt = null;
+      this.passwordResetToken = null;
     },
 
     async restoreAuth() {

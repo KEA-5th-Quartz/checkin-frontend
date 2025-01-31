@@ -6,5 +6,5 @@ export interface MemberState {
   profilePic: string;
   role: string | MemberType;
   accessToken: string;
-  passwordChangedAt: string | null;
+  passwordResetToken: string | null;
 }

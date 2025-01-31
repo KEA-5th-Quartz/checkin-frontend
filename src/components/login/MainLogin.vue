@@ -32,8 +32,8 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value,
     });
-    console.log('data:', response.data.data);
     const memberData = response.data.data;
+    console.log(memberData);
 
     memberStore.setMemberInfo({
       memberId: memberData.memberId,
@@ -41,11 +41,11 @@ const handleLogin = async () => {
       profilePic: memberData.profilePic,
       role: memberData.role,
       accessToken: memberData.accessToken,
-      passwordChangedAt: memberData.passwordChangedAt,
+      passwordResetToken: memberData.passwordResetToken,
     });
 
     // 최초로그인인지 검사
-    if (memberData.passwordChangedAt === null) {
+    if (memberData.passwordResetToken !== null) {
       router.push('/first-login');
     } else {
       const redirectPath = getRedirectPath(memberData.role);

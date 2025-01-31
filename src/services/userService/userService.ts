@@ -9,6 +9,10 @@ export const userApi = {
   logout() {
     return api.post('/auth/logout');
   },
+  // 첫 로그인 비밀번호 초기화
+  passwordReset(memberId: number | null, data: { passwordResetToken: string | null; newPassword: string }) {
+    return api.put(`/members/${memberId}/password-reset`, data);
+  },
   // refresh토큰으로 accessToken과 refreshToken 재발급
   refresh() {
     return api.post('/auth/refresh');
