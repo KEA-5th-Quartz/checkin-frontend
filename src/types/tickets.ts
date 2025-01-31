@@ -12,7 +12,7 @@ export interface StatusTicketOption extends BaseTicketOption {
 
 export interface DropdownProps {
   options: BaseTicketOption[];
-  selectedOption: BaseTicketOption;
+  selectedOption: BaseTicketOption | undefined;
   label: string;
   hasColor?: boolean;
   onOptionSelect?: (option: BaseTicketOption) => void;

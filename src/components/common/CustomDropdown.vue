@@ -76,9 +76,9 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
         disabled && 'border-gray-2 hover:border-gray-2 cursor-default hover:ring-0',
       ]"
     >
-      <img v-if="isManager" :src="selectedOption.profilePic" class="w-7 h-7 object-fill rounded-full mr-2" />
+      <img v-if="isManager" :src="selectedOption?.profilePic" class="w-7 h-7 object-fill rounded-full mr-2" />
       <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1', disabled ? 'pr-0' : 'pr-4']">
-        {{ selectedOption.label }}
+        {{ selectedOption?.label }}
       </span>
       <SvgIcon v-if="!disabled" :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
     </button>
@@ -90,7 +90,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
           v-for="option in options"
           :key="option.id"
           @click="handleSelect(option)"
-          :class="['dropdown-li', selectedOption.id === option.id ? 'bg-gray-50' : '']"
+          :class="['dropdown-li', selectedOption?.id === option.id ? 'bg-gray-50' : '']"
         >
           <img v-if="isManager" :src="option.profilePic" class="w-5 h-5 object-fill rounded-full mr-2" />
           {{ option.label }}
