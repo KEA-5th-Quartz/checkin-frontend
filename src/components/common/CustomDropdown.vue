@@ -73,14 +73,14 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
         hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
         isManager && 'py-1',
         hasColor && hasColorStyle(selectedOption) && `${selectedOption.bg} ${selectedOption.text} max-w-fit`,
-        disabled && 'cursor-default',
+        disabled && 'border-gray-2 hover:border-gray-2 cursor-default hover:ring-0',
       ]"
     >
       <img v-if="isManager" :src="selectedOption.profilePic" class="w-7 h-7 object-fill rounded-full mr-2" />
-      <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
+      <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1', disabled ? 'pr-0' : 'pr-4']">
         {{ selectedOption.label }}
       </span>
-      <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+      <SvgIcon v-if="!disabled" :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
     </button>
 
     <!-- 메뉴들 -->
