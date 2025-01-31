@@ -6,7 +6,7 @@ import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
 import { firstCategory, status } from '../manager/ticketOptionTest';
 
-const emit = defineEmits(['closeFilter']);
+const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
 
@@ -36,8 +36,11 @@ const toggleCategory = (category: string) => {
 
 // 저장 버튼 클릭 핸들러
 const handleSave = () => {
-  console.log('상태:', selectedStatuses.value);
-  console.log('카테고리:', selectedCategories.value);
+  emit('applyFilters', {
+    statuses: selectedStatuses.value,
+    categories: selectedCategories.value,
+  });
+  emit('closeFilter');
 };
 
 onClickOutside(categoryRef, () => {
@@ -89,7 +92,7 @@ onClickOutside(modalRef, () => {
           :status="sta.label"
           size="lg"
           class="cursor-pointer"
-          :class="[selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100':'opacity-30 hover:opacity-50']"
+          :class="selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100' : 'opacity-30 hover:opacity-50'"
           @click="toggleStatus(sta.id as unknown as string)"
         />
       </div>

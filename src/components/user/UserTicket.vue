@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ClipIcon, LikeIcon, PencilIcon, SendIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
 import StatusBadge from '../common/Badges/StatusBadge.vue';
 import { useTicketStore } from '@/stores/userTicketStore';
@@ -9,8 +9,16 @@ import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
+import { useMemberStore } from '@/stores/memberStore';
+import { useQueryClient } from '@tanstack/vue-query';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { ticketApi } from '@/services/ticketService/ticketService';
+import { formatMinusDate } from '@/utils/dateFormat';
 
-defineProps<{
+const memberStore = useMemberStore();
+const queryClient = useQueryClient();
+
+const props = defineProps<{
   ticketId: number;
 }>();
 
@@ -27,19 +35,44 @@ const handleClose = () => {
   }, 300);
 };
 
-let ticketDefaultTest = {
-  title: 'SSH 접속 확인',
-  firstCategory: 'VM1',
-  secondCategory: '생성',
-  due_date: '2025-02-22',
-  content: 'Github Repo가 접속이 되지 않습니다.',
-};
+const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
+  try {
+    const response = await ticketApi.getTicketDetail(props.ticketId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 상세 조회 실패:', err);
+    throw err;
+  }
+});
+
+const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
+  try {
+    const response = await ticketApi.getTicketComments(props.ticketId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 댓글 조회 실패:', err);
+    throw err;
+  }
+});
 
 const ticketStore = useTicketStore();
 
-onMounted(() => {
-  ticketStore.setTicket(ticketDefaultTest);
-});
+watch(
+  () => detailData.value,
+  (newData) => {
+    if (newData) {
+      const ticketDefaultData = {
+        title: newData.title,
+        firstCategory: newData.firstCategory,
+        secondCategory: newData.secondCategory,
+        due_date: newData.dueDate,
+        content: newData.content,
+      };
+      ticketStore.setTicket(ticketDefaultData);
+    }
+  },
+  { immediate: true },
+);
 
 const handleCancelEdit = () => {
   ticketStore.resetToOriginal();
@@ -68,6 +101,20 @@ const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof
   });
 };
 
+const formattedDueDate = computed({
+  get: () => {
+    return formatMinusDate(ticketStore.ticket.due_date);
+  },
+  set: (newValue: string) => {
+    // '-' 형식을 '/' 형식으로 변환하여 저장
+    const formattedValue = newValue.replace(/-/g, '/');
+    ticketStore.updateTicket({
+      ...ticketStore.ticket,
+      due_date: formattedValue,
+    });
+  },
+});
+
 const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
 const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
 
@@ -79,11 +126,15 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
     });
   }
 };
+
+const canEdit = computed(() => {
+  return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
+});
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="ticketId && ticketStore.ticket" class="ticket-overlay">
+    <div v-if="ticketId && ticketStore.ticket && detailData" class="ticket-overlay">
       <div class="ticket-click-outside" @click="handleClose" />
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
@@ -91,7 +142,13 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
           <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
-            <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
+            <SvgIcon
+              v-if="canEdit"
+              :icon="PencilIcon"
+              :iconOptions="{ fill: '#000' }"
+              class="cursor-pointer"
+              @click="startEdit"
+            />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
           <div v-else class="filter-btn-section pt-0">
@@ -109,7 +166,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <div class="flex-stack items-start">
                 <label class="ticket-label">중요도</label>
                 <div class="py-1">
-                  <PriorityBadge />
+                  <PriorityBadge :priority="detailData?.priority" size="lg" />
                 </div>
               </div>
 
@@ -118,7 +175,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                 <label class="ticket-label">1차 카테고리</label>
                 <div
                   v-if="!ticketStore.isEditMode"
-                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
+                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm line-clamp-1 overflow-scroll hide-scrollbar"
                 >
                   {{ ticketStore.ticket.firstCategory }}
                 </div>
@@ -137,13 +194,13 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">King.kim</p>
+                  <p class="text-xs text-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
               <div>
                 <label class="ticket-label">요청 일자</label>
-                <p class="ticket-date">2025/01/20</p>
+                <p class="ticket-date">{{ detailData?.createdAt }}</p>
               </div>
             </section>
 
@@ -152,7 +209,7 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
               <!-- 진행상태 블록 -->
               <div class="flex-stack items-start">
                 <label class="ticket-label">진행상태</label>
-                <StatusBadge status="생성" size="xl" />
+                <StatusBadge :status="detailData?.status" size="xl" />
               </div>
 
               <!-- 2차 카테고리 블록 -->
@@ -179,19 +236,21 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">king.kim</p>
+                  <p class="text-xs text-gray-1">{{ detailData?.manager }}</p>
                 </div>
               </div>
               <!-- 마감 기한 블록 -->
               <div>
                 <label class="ticket-label">마감 기한</label>
-                <p v-if="!ticketStore.isEditMode" class="ticket-date">{{ ticketStore.ticket.due_date }}</p>
+                <p v-if="!ticketStore.isEditMode" class="ticket-date">
+                  {{ formatMinusDate(ticketStore.ticket.due_date) }}
+                </p>
                 <input
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
                   class="ticket-date ticket-edit-input py-2"
-                  v-model="ticketStore.ticket.due_date"
+                  v-model="formattedDueDate"
                 />
               </div>
             </section>
@@ -217,47 +276,36 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
           </div>
 
           <!-- 댓글 입력창 -->
-          <div v-if="!ticketStore.isEditMode" class="ticket-comment-container">
+          <div class="ticket-comment-container">
             <!-- 로그 -->
-            <div class="ticket-comment-log">
-              <div class="w-8 h-8 bg-blue-300 rounded-full" />
-              <div>
-                <p class="text-sm text-gray-1">Neo.js 상태 변경 2025-01-17 13:27</p>
-                <div class="flex gap-2">
-                  <StatusBadge status="생성" size="sm" />
-                  <span>→</span>
-                  <StatusBadge status="진행중" size="sm" />
+            <div v-if="commentData">
+              <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
+                <!-- 로그 표시 -->
+                <div v-if="item.type === 'LOG'" class="ticket-comment-log">
+                  <div class="w-8 h-8 bg-blue-300 rounded-full" />
+                  <div>
+                    <p class="text-sm text-gray-1">
+                      {{ item.log_content }}
+                      {{ new Date(item.created_at).toLocaleString() }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 댓글 표시 -->
+                <div v-else class="flex gap-2 mb-4">
+                  <div class="flex-stack gap-2">
+                    <div class="w-8 h-8 bg-blue-300 rounded-full" />
+                    <p class="text-xs whitespace-nowrap">user{{ item.member_id }}</p>
+                  </div>
+                  <div class="ticket-comment-bubble">
+                    <p class="text-sm">{{ item.comment_content }}</p>
+                    <p class="text-xs text-gray-500 mt-1">
+                      {{ new Date(item.created_at).toLocaleString() }}
+                    </p>
+                  </div>
+                  <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
                 </div>
               </div>
-            </div>
-
-            <!-- 댓글 -->
-            <div class="flex gap-2">
-              <div class="flex-stack gap-2">
-                <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                <p class="text-xs whitespace-nowrap">Neo.js</p>
-              </div>
-              <div class="ticket-comment-bubble">
-                <p class="text-sm">
-                  화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
-                  부탁드립니다.
-                </p>
-              </div>
-              <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
-            </div>
-
-            <div class="flex gap-2">
-              <div class="flex-stack gap-2">
-                <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                <p class="text-xs whitespace-nowrap">Neo.js</p>
-              </div>
-              <div class="ticket-comment-bubble">
-                <p class="text-sm">
-                  화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
-                  부탁드립니다.
-                </p>
-              </div>
-              <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
             </div>
           </div>
 

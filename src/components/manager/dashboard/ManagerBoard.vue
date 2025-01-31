@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onBeforeUnmount } from 'vue';
 import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import ManagerTicket from './ManagerTicket.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -12,31 +12,19 @@ import ManagerFilter from './ManagerFilter.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 import SkeletonTable from '@/components/UI/SkeletonTable.vue';
-
-interface FilterState {
-  statuses: string[];
-  usernames: string[];
-  categories: string[];
-  dueToday: boolean;
-  dueThisWeek: boolean;
-}
-
-interface FilterPayload {
-  quickFilters: string[];
-  managers: string[];
-  statuses: string[];
-  categories: string[];
-}
+import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
+import ErrorTable from '@/components/UI/ErrorTable.vue';
+import { QueryKey } from '@tanstack/vue-query';
 
 const selectedTicketId = ref<number | null>(null);
-const currentPage = ref(1);
+const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
 
 const keyword = ref('');
 const isSearch = ref(false);
 
-const filterState = ref<FilterState>({
+const ManagerfilterState = ref<ManagerFilterState>({
   statuses: [],
   usernames: [],
   categories: [],
@@ -48,15 +36,15 @@ const filterState = ref<FilterState>({
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
-  statuses: Array.isArray(filterState.value.statuses) ? filterState.value.statuses : [],
+  statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
     ? ['manager2.js'] // 기본으로 manager2.js, 나중에 수정
-    : Array.isArray(filterState.value.usernames)
-    ? filterState.value.usernames
+    : Array.isArray(ManagerfilterState.value.usernames)
+    ? ManagerfilterState.value.usernames
     : [],
-  categories: Array.isArray(filterState.value.categories) ? filterState.value.categories : [],
-  dueToday: filterState.value.dueToday,
-  dueThisWeek: filterState.value.dueThisWeek,
+  categories: Array.isArray(ManagerfilterState.value.categories) ? ManagerfilterState.value.categories : [],
+  dueToday: ManagerfilterState.value.dueToday,
+  dueThisWeek: ManagerfilterState.value.dueThisWeek,
 }));
 
 // 검색 쿼리 파라미터
@@ -69,9 +57,10 @@ const searchQueryParams = computed(() => ({
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
-    currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+    currentPage.value = 1;
+    sessionStorage.setItem('managerCurrentPage', '1');
   } else {
-    resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
+    resetSearch();
   }
 };
 
@@ -79,12 +68,12 @@ const handleSearch = () => {
 const resetSearch = () => {
   keyword.value = '';
   isSearch.value = false;
-  currentPage.value = 1;
+  currentPage.value = parseInt(sessionStorage.getItem('managerCurrentPage') || '1');
 };
 
 // 필터 적용 핸들러
-const handleApplyFilters = (filters: FilterPayload) => {
-  filterState.value = {
+const handleApplyFilters = (filters: ManagerFilterPayload) => {
+  ManagerfilterState.value = {
     statuses: filters.statuses.map((id: string) => {
       const statusItem = status.find((s) => s.id === (id as unknown as number));
       return statusItem?.label || '';
@@ -94,21 +83,29 @@ const handleApplyFilters = (filters: FilterPayload) => {
     dueToday: filters.quickFilters.includes('dueToday'),
     dueThisWeek: filters.quickFilters.includes('dueThisWeek'),
   };
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
+};
+
+const toggleMyTicket = () => {
+  isMyTicket.value = !isMyTicket.value;
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
 };
 
 // 검색 쿼리 키 computed
-const queryKey = computed(() =>
-  isSearch.value
-    ? ['search-tickets', keyword.value, currentPage.value, pageSize.value]
-    : ['tickets', queryParams.value],
-);
+const queryKey = computed<QueryKey>(() => {
+  if (isSearch.value) {
+    return ['search-tickets', keyword.value, currentPage.value, pageSize.value];
+  }
+  return ['tickets', queryParams.value];
+});
 
-// 데이터 페칭
 const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey, () => {
+} = useCustomQuery(queryKey as unknown as QueryKey, () => {
   if (isSearch.value) {
     return ticketApi
       .getSearchTicekts(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
@@ -137,6 +134,7 @@ const handleCloseModal = () => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
+  sessionStorage.setItem('managerCurrentPage', page.toString());
 };
 
 // 배너
@@ -150,8 +148,14 @@ onClickOutside(dropdownRef, () => (isOpen.value = false));
 const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
+  currentPage.value = 1;
+  sessionStorage.setItem('managerCurrentPage', '1');
   isOpen.value = false;
 };
+
+onBeforeUnmount(() => {
+  sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
+});
 </script>
 
 <template>
@@ -185,7 +189,7 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
       </div>
 
       <!-- 내 티켓 -->
-      <button class="btn-main py-2" @click="isMyTicket = !isMyTicket">
+      <button class="btn-main py-2" @click="toggleMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
@@ -209,8 +213,9 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
 
   <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
     <SkeletonTable v-if="isLoading" />
+    <ErrorTable v-else-if="error" :error="error" />
 
-    <div v-else class="max-h-[calc(100vh-340px)]">
+    <div v-else class="h-[calc(100vh-340px)]">
       <table v-if="!isMyTicket" class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>

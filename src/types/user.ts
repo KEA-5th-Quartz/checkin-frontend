@@ -7,3 +7,13 @@ export interface TemplateData {
   description: string;
   dueDate: string;
 }
+
+export interface UserFilterState {
+  statuses: string[];
+  categories: string[];
+}
+
+export interface UserFilterPayload {
+  statuses: string[];
+  categories: string[];
+}

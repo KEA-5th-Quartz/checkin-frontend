@@ -7,3 +7,9 @@ export const formatSlashDate = (dateString: string): string => {
 
   return `${year}/${month}/${day}`;
 };
+
+// 2025/01/30 -> 2025-01-30
+export const formatMinusDate = (dateStr: string): string => {
+  const [year, month, day] = dateStr.split('/');
+  return `${year}-${month}-${day}`;
+};
