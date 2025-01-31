@@ -173,7 +173,7 @@ body {
 
   /* 대시보드 */
   .manager-thead {
-    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium sticky top-0 z-10 bg-white-0;
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium sticky top-0 z-10 bg-primary-5;
   }
   .manager-th {
     @apply text-black-2 font-medium px-2 py-3.5;
