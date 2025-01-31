@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'settings',
         name: 'settings',
-        component: () => import('../views/LoginView.vue'),
+        component: () => import('../views/SettingsView.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN', 'MANAGER', 'USER'] },
       },
       // 담당자

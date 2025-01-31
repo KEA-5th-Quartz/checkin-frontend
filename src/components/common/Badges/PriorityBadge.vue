@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PriorityBadgeProps } from '@/types/common/badges';
+import { computed } from 'vue';
 
 const props = withDefaults(defineProps<PriorityBadgeProps>(), {
   size: 'sm',
@@ -8,27 +9,46 @@ const props = withDefaults(defineProps<PriorityBadgeProps>(), {
   textClass: '',
 });
 
-const getPriorityColor = (priority: string) => {
+type PriorityType = 'EMERGENCY' | 'HIGH' | 'MEDIUM' | 'LOW';
+
+const priorityMap: Record<PriorityType, string> = {
+  EMERGENCY: '긴급',
+  HIGH: '높음',
+  MEDIUM: '보통',
+  LOW: '낮음',
+};
+
+const priorityText = computed(() => {
+  return (props.priority && priorityMap[props.priority as PriorityType]) || '-';
+});
+
+const getPriorityColor = (priority: PriorityType | undefined) => {
+  if (!priority)
+    return {
+      dot: '',
+      text: '',
+    };
+
   switch (priority) {
-    case '긴급':
+    case 'EMERGENCY':
       return {
         dot: 'bg-red-1',
         text: 'text-red-1',
       };
-    case '높음':
+    case 'HIGH':
       return {
         dot: 'bg-orange-1',
         text: 'text-orange-1',
       };
-    case '보통':
+    case 'MEDIUM':
       return {
         dot: 'bg-green-1',
         text: 'text-green-1',
       };
-    case '낮음':
+    case 'LOW':
       return {
-        dot: 'bg-green-1',
-        text: 'text-green-1',
+        dot: 'bg-blue-2',
+        text: 'text-blue-2',
       };
     default:
       return {
@@ -54,9 +74,11 @@ const getSizeClass = (size: string) => {
 
 <template>
   <div v-if="priority" :class="['flex-center gap-2', props.class]">
-    <div :class="['rounded-full', getSizeClass(size), getPriorityColor(priority).dot, props.dotClass]" />
-    <span :class="['font-medium', getPriorityColor(priority).text, props.textClass]">
-      {{ priority }}
+    <div
+      :class="['rounded-full', getSizeClass(size), getPriorityColor(priority as PriorityType).dot, props.dotClass]"
+    />
+    <span :class="['font-medium', getPriorityColor(priority as PriorityType).text, props.textClass]">
+      {{ priorityText }}
     </span>
   </div>
   <div v-else class="text-center">-</div>

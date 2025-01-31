@@ -12,6 +12,8 @@ const props = withDefaults(defineProps<DropdownProps>(), {
   options: () => [], // 드롭다운 옵션 배열
   selectedOption: () => ({ id: 0, value: '', label: '' }),
   isEdit: false,
+  disabled: false,
+  isManager: false,
 });
 
 // 'select' 이벤트를 발생시킬 때 BaseTicketOption 타입의 값을 전달
@@ -37,14 +39,18 @@ onUnmounted(() => {
 });
 
 const toggleDropdown = () => {
-  isOpen.value = !isOpen.value;
+  if (!props.disabled) {
+    isOpen.value = !isOpen.value;
+  }
 };
 
 // 선택된 옵션에 대해 이벤트를 발생시키고, 콜백을 실행하며, 드롭다운을 닫음
 const handleSelect = (option: BaseTicketOption) => {
-  emit('select', option); // select 이벤트 발생
+  if (props.disabled) return; // disabled일 경우 클릭 무시
+
+  emit('select', option);
   if (props.onOptionSelect) {
-    props.onOptionSelect(option); // 콜백 함수 실행
+    props.onOptionSelect(option);
   }
   isOpen.value = false;
 };
@@ -56,7 +62,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
 </script>
 
 <template>
-  <div ref="dropdownRef" class="relative max-w-fit">
+  <div ref="dropdownRef" class="relative">
     <p class="text-sm mb-1.5 max-w-fit">{{ label }}</p>
 
     <!-- 드롭다운 -->
@@ -65,13 +71,25 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
       :class="[
         'dropdown-bar',
         hasColor ? 'dropdown-bar-hasColor' : isEdit ? 'dropdown-bar-isEdit' : 'dropdown-bar-default',
-        hasColor && hasColorStyle(selectedOption) ? `${selectedOption.bg} ${selectedOption.text} max-w-fit` : '',
+        isManager && 'py-1 w-full justify-start',
+        hasColor && hasColorStyle(selectedOption) && `${selectedOption.bg} ${selectedOption.text} max-w-fit`,
+        disabled && 'border-gray-2 hover:border-gray-2 cursor-default hover:ring-0',
       ]"
     >
-      <span :class="['text-sm pr-4', hasColor ? 'font-semibold' : 'text-gray-1']">
-        {{ selectedOption.label }}
-      </span>
-      <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+      <img
+        v-if="isManager"
+        :src="
+          selectedOption?.profilePic ||
+          'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+        "
+        class="w-7 h-7 object-fill rounded-full mr-2"
+      />
+      <div class="w-full flex-between">
+        <span :class="['text-sm', hasColor ? 'font-semibold' : 'text-gray-1', disabled ? 'pr-0' : 'pr-4']">
+          {{ selectedOption?.label }}
+        </span>
+        <SvgIcon v-if="!disabled" :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+      </div>
     </button>
 
     <!-- 메뉴들 -->
@@ -81,8 +99,16 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
           v-for="option in options"
           :key="option.id"
           @click="handleSelect(option)"
-          :class="['dropdown-li', selectedOption.id === option.id ? 'bg-gray-50' : '']"
+          :class="['dropdown-li', selectedOption?.id === option.id ? 'bg-gray-50' : '']"
         >
+          <img
+            v-if="isManager"
+            :src="
+              option.profilePic ||
+              'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+            "
+            class="w-5 h-5 object-fill rounded-full mr-2"
+          />
           {{ option.label }}
         </li>
       </ul>

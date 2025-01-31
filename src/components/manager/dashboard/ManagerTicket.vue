@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
+import { XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
-import StatusBadge from '../../common/Badges/StatusBadge.vue';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
-import { StatusTicketOption, BaseTicketOption } from '@/types/tickets';
-import { priority, status, firstCategory, secondCategory, managerOptions } from '../ticketOptionTest';
+import { BaseTicketOption } from '@/types/tickets';
+import { priority, firstCategory, secondCategory, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { ticketApi } from '@/services/ticketService/ticketService';
+import { useMemberStore } from '@/stores/memberStore';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useQueryClient } from '@tanstack/vue-query';
+import ManagerComments from './ManagerComments.vue';
+import { userApi } from '@/services/userService/userService';
 
-defineProps<{
+const memberStore = useMemberStore();
+const queryClient = useQueryClient();
+
+const props = defineProps<{
   ticketId: number;
 }>();
-// close라는 이벤트를 방출할 수 있는 emit 함수를 정의
+
 const emit = defineEmits<{
-  (e: 'close'): void; // void는 이벤트가 데이터를 전달하지 않음을 의미
+  (e: 'close'): void;
 }>();
-// drawer의 표시 여부를 제어하는 반응형 변수
 const show = ref(true);
 
 const handleClose = () => {
@@ -25,188 +33,372 @@ const handleClose = () => {
   }, 300);
 };
 
-const prioritySelected = ref<StatusTicketOption>(priority[0]);
-const handlePrioritySelect = (option: StatusTicketOption) => {
-  console.log('중요도 변경:', option.label);
-  prioritySelected.value = option;
-};
-
-const statusSelected = ref<StatusTicketOption>(status[0]);
-const handleStatusSelect = (option: StatusTicketOption) => {
-  console.log('상태 변경:', option.label);
-  statusSelected.value = option;
-};
-
+// 초기값 설정
+const prioritySelected = ref<BaseTicketOption>(priority[2]);
+const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref(firstCategory[0]);
-const handleFirstCategorySelect = (option: BaseTicketOption) => {
-  console.log('1차 카테고리 변경:', option.label);
-  firstCategorySelected.value = option;
-};
-
 const secondCategorySelected = ref(secondCategory[0]);
-const handleSecondCategorySelect = (option: BaseTicketOption) => {
-  console.log('2차 카테고리 변경:', option.label);
-  secondCategorySelected.value = option;
+
+// 티켓 상세 페치
+const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
+  try {
+    const response = await ticketApi.getTicketDetail(props.ticketId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 상세 조회 실패:', err);
+    throw err;
+  }
+});
+
+// 담당자 목록 페치
+const { data: managersData } = useCustomQuery(['manager-list'], async () => {
+  try {
+    const response = await userApi.getManagers('MANAGER', 1, 100);
+    return response;
+  } catch (err) {
+    console.error('담당자 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+// managerOptions를 동적으로 생성하는 computed 속성 추가
+const managerOptions = computed(() => {
+  if (!managersData.value?.data?.data?.members) return [];
+
+  return [
+    {
+      id: 0,
+      value: null,
+      label: '-',
+      profilePic: null,
+    },
+    ...managersData.value.data.data.members.map(
+      (manager: { memberId: number; username: string; profilePic: string }) => ({
+        id: manager.memberId,
+        value: manager.username,
+        label: manager.username,
+        profilePic: manager.profilePic,
+      }),
+    ),
+  ];
+});
+
+// 초기값 설정 부분 수정
+const managerSelected = ref<BaseTicketOption>();
+
+// API 데이터로 초기값 설정
+watch(
+  [detailData, managerOptions],
+  ([newData, options]) => {
+    if (newData && options.length > 0) {
+      prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[2];
+      statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
+      firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
+      secondCategorySelected.value =
+        secondCategory.find((s) => s.value === newData.secondCategory) || secondCategory[0];
+      // manager가 null일 경우 미지정 옵션 선택
+      managerSelected.value = newData.manager ? options.find((m) => m.value === newData.manager) : options[0]; // 미지정 옵션
+    }
+  },
+  { immediate: true },
+);
+// 본인인지 확인
+const isMe = computed(() => {
+  if (!detailData.value) return false;
+  return memberStore.username === detailData.value.manager;
+});
+
+// 완료된 티켓의 담당자 변경 불가능
+const isManagerChangeDisabled = computed(() => {
+  // 현재 manager가 null이면 변경 가능
+  if (!detailData.value?.manager) return false;
+
+  // isMe가 false면서 manager가 있으면 disabled
+  if (!isMe.value && detailData.value.manager) return true;
+
+  // 상태가 CLOSED면 담당자 변경 불가
+  return statusSelected.value.value === 'CLOSED';
+});
+
+// 공통 쿼리 무효화 함수
+const invalidateTicketQueries = () => {
+  queryClient.invalidateQueries({ queryKey: ['tickets'] });
+  queryClient.invalidateQueries({ queryKey: ['search-tickets'] });
+  queryClient.invalidateQueries({
+    queryKey: ['ticket-detail', props.ticketId],
+  });
+  queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
-const managerSelected = ref(managerOptions[0]);
-const handleManagerSelect = (option: BaseTicketOption) => {
-  console.log('담당자 변경:', option.label);
-  managerSelected.value = option;
+// 중요도 변경 뮤테이션
+const priorityMutation = useCustomMutation(
+  async ({ ticketId, priority }: { ticketId: number; priority: string }) => {
+    const response = await ticketApi.patchTicketPriority(ticketId, { priority });
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+// 중요도 변경
+const handlePrioritySelect = async (option: BaseTicketOption) => {
+  try {
+    await priorityMutation.mutateAsync({
+      ticketId: props.ticketId,
+      priority: option.value,
+    });
+    prioritySelected.value = option;
+  } catch (err) {
+    console.error('중요도 변경 실패:', err);
+  }
+};
+
+// 상태 변경 뮤테이션들
+const inProgressMutation = useCustomMutation(
+  async ({ ticketId, status }: { ticketId: number; status: string }) => {
+    const response = await ticketApi.patchTicketInProgress(ticketId, { status });
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+
+const closeMutation = useCustomMutation(
+  async (ticketId: number) => {
+    const response = await ticketApi.patchTicketClose(ticketId);
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+
+// 현재 상태에 따른 사용 가능한 상태 옵션 계산
+const availableStatusOptions = computed(() => {
+  const currentStatus = statusSelected.value.value;
+
+  switch (currentStatus) {
+    case 'CREATED':
+      return ticket_status.filter((status) => ['CREATED', 'IN_PROGRESS'].includes(status.value));
+    case 'IN_PROGRESS':
+      return ticket_status.filter((status) => ['IN_PROGRESS', 'CLOSED'].includes(status.value));
+    case 'CLOSED':
+      return ticket_status.filter((status) => ['CLOSED'].includes(status.value));
+    default:
+      return ticket_status;
+  }
+});
+
+// 상태 변경 핸들러
+const handleStatusSelect = async (option: BaseTicketOption) => {
+  const currentStatus = statusSelected.value.value;
+  const newStatus = option.value;
+
+  try {
+    if (currentStatus === 'CREATED' && newStatus === 'IN_PROGRESS') {
+      await inProgressMutation.mutateAsync({ ticketId: props.ticketId, status: 'in_progress' });
+    } else if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
+      await closeMutation.mutateAsync(props.ticketId);
+    }
+    statusSelected.value = option;
+  } catch (err) {
+    console.error('상태 변경 실패:', err);
+  }
+};
+
+// 1차 카테고리 변경 뮤테이션
+const firstCategoryMution = useCustomMutation(
+  async ({ ticketId, firstCategory }: { ticketId: number; firstCategory: string }) => {
+    const response = await ticketApi.patchTicketFirstCategory(ticketId, { firstCategory });
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+// 1차 카테고리 변경
+const handleFirstCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    await firstCategoryMution.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategory: option.value,
+    });
+    firstCategorySelected.value = option;
+
+    // 2. 2차 카테고리를 첫 번째 요소로 설정
+    const firstSecondCategoryOption = secondCategory[0];
+    secondCategorySelected.value = firstSecondCategoryOption;
+
+    // 3. 2차 카테고리 변경 API 호출
+    await secondCategoryMutation.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategoryId: option.id, // 새로 선택된 1차 카테고리의 ID
+      secondCategory: firstSecondCategoryOption.value,
+    });
+  } catch (err) {
+    console.error('1차 카테고리 변경 실패:', err);
+  }
+};
+
+// 2차 카테고리 변경 뮤테이션
+const secondCategoryMutation = useCustomMutation(
+  async ({
+    ticketId,
+    firstCategoryId,
+    secondCategory,
+  }: {
+    ticketId: number;
+    firstCategoryId: number;
+    secondCategory: string;
+  }) => {
+    const response = await ticketApi.patchTicketSecondCategory(ticketId, firstCategoryId, { secondCategory });
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+// 2차 카테고리 변경
+const handleSecondCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    await secondCategoryMutation.mutateAsync({
+      ticketId: props.ticketId,
+      firstCategoryId: firstCategorySelected.value.id,
+      secondCategory: option.value,
+    });
+    secondCategorySelected.value = option;
+  } catch (err) {
+    console.error('2차 카테고리 변경 실패:', err);
+  }
+};
+
+// 담당자 변경 뮤테이션
+const reassignMutation = useCustomMutation(
+  async ({ ticketId, manager }: { ticketId: number; manager: string }) => {
+    const response = await ticketApi.patchTicketReassign(ticketId, { manager });
+    return response.data;
+  },
+  {
+    onSuccess: invalidateTicketQueries,
+  },
+);
+// 담당자 변경
+const handleManagerSelect = async (option: BaseTicketOption) => {
+  try {
+    await reassignMutation.mutateAsync({
+      ticketId: props.ticketId,
+      manager: option.value,
+    });
+    managerSelected.value = option;
+  } catch (err) {
+    console.error('담당자 변경 실패:', err);
+  }
 };
 </script>
 
 <template>
   <Teleport to="body">
     <div v-if="ticketId" class="ticket-overlay">
-      <div class="ticket-click-outside" @click="handleClose" />
-      <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
-        <!-- 헤더 -->
-        <header class="ticket-header">
-          <p class="text-2xl">SSH 접속 확인</p>
-          <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
-        </header>
+      <div v-if="isLoading" class="loading-spinner">로딩중...</div>
+      <template v-else-if="detailData">
+        <div class="ticket-click-outside" @click="handleClose" />
+        <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
+          <!-- 헤더 -->
+          <header class="ticket-header">
+            <p class="text-2xl">{{ detailData.title }}</p>
+            <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
+          </header>
 
-        <!-- 컨텐츠 -->
-        <div class="ticket-contents-div">
-          <div class="flex gap-2.5 w-full">
-            <!-- 왼쪽 섹션 -->
-            <section class="ticket-section">
-              <!-- 중요도 블록 -->
-              <CustomDropdown
-                label="중요도"
-                :options="priority"
-                :selected-option="prioritySelected"
-                :onOptionSelect="(option) => handlePrioritySelect(option as StatusTicketOption)"
-                @select="(option) => prioritySelected = option as StatusTicketOption"
-                has-color
-              />
-              <!-- 1차 카테고리 블록 -->
-              <CustomDropdown
-                label="1차 카테고리"
-                :options="firstCategory"
-                :selected-option="firstCategorySelected"
-                :onOptionSelect="handleFirstCategorySelect"
-                @select="(option) => (firstCategorySelected = option)"
-              />
-              <!-- 요청자 블록 -->
-              <div>
-                <label class="ticket-label">요청자</label>
-                <div class="manager-filter-btn w-full border-primary-2 justify-start gap-2">
-                  <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">King.kim</p>
+          <!-- 컨텐츠 -->
+          <div class="ticket-contents-div">
+            <div class="flex gap-2.5 w-full">
+              <!-- 왼쪽 섹션 -->
+              <section class="ticket-section">
+                <!-- 중요도 블록 -->
+                <CustomDropdown
+                  label="중요도"
+                  :options="priority"
+                  :selected-option="prioritySelected"
+                  @select="handlePrioritySelect"
+                  has-color
+                  :disabled="!isMe"
+                />
+                <!-- 1차 카테고리 블록 -->
+                <CustomDropdown
+                  label="1차 카테고리"
+                  :options="firstCategory"
+                  :selected-option="firstCategorySelected"
+                  @select="handleFirstCategorySelect"
+                  :disabled="!isMe"
+                />
+                <!-- 요청자 블록 -->
+                <div>
+                  <label class="ticket-label">요청자</label>
+                  <div class="manager-filter-btn w-full border-primary-2 justify-start gap-2">
+                    <p class="text-sm text-gray-1">{{ detailData.username }}</p>
+                  </div>
                 </div>
-              </div>
-              <!-- 요청 일자 블록 -->
-              <div>
-                <label class="ticket-label">요청 일자</label>
-                <p class="ticket-date">2025/01/20</p>
-              </div>
-            </section>
-
-            <!-- 오른쪽 섹션 -->
-            <section class="ticket-section">
-              <!-- 진행상태 블록 -->
-              <CustomDropdown
-                label="진행상태"
-                :options="status"
-                :selected-option="statusSelected"
-                :onOptionSelect="(option) => handleStatusSelect(option as StatusTicketOption)"
-                @select="(option) => statusSelected = option as StatusTicketOption"
-                has-color
-              />
-              <!-- 2차 카테고리 블록 -->
-              <CustomDropdown
-                label="2차 카테고리"
-                :options="secondCategory"
-                :selected-option="secondCategorySelected"
-                :onOptionSelect="handleSecondCategorySelect"
-                @select="(option) => (secondCategorySelected = option)"
-              />
-              <!-- 담당자 블록 -->
-              <CustomDropdown
-                label="담당자"
-                :options="managerOptions"
-                :selected-option="managerSelected"
-                :onOptionSelect="handleManagerSelect"
-                @select="(option) => (managerSelected = option)"
-              />
-              <!-- 마감 기한 블록 -->
-              <div>
-                <label class="ticket-label">마감 기한</label>
-                <p class="ticket-date">2025/01/20</p>
-              </div>
-            </section>
-          </div>
-
-          <!-- 설명 -->
-          <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
-            <div class="ticket-desc-area">
-              <p class="ticket-desc-content">Github Repo가 접속이 되지 않습니다.</p>
-            </div>
-          </div>
-
-          <!-- 첨부파일 -->
-          <div class="mt-4">
-            <div class="ticket-attachment">Customer KYC</div>
-          </div>
-
-          <!-- 댓글 창 -->
-          <div class="ticket-comment-container">
-            <!-- 로그 -->
-            <div class="ticket-comment-log">
-              <div class="w-8 h-8 bg-blue-300 rounded-full" />
-              <div>
-                <p class="text-sm text-gray-1">Neo.js 상태 변경 2025-01-17 13:27</p>
-                <div class="flex gap-2">
-                  <StatusBadge status="생성" size="sm" />
-                  <span>→</span>
-                  <StatusBadge status="진행중" size="sm" />
+                <!-- 요청 일자 블록 -->
+                <div>
+                  <label class="ticket-label">요청 일자</label>
+                  <p class="ticket-date">{{ detailData.createdAt }}</p>
                 </div>
+              </section>
+
+              <!-- 오른쪽 섹션 -->
+              <section class="ticket-section">
+                <!-- 진행상태 블록 -->
+                <CustomDropdown
+                  label="진행상태"
+                  :options="availableStatusOptions"
+                  :selected-option="statusSelected"
+                  @select="handleStatusSelect"
+                  has-color
+                  :disabled="!isMe"
+                />
+                <!-- 2차 카테고리 블록 -->
+                <CustomDropdown
+                  label="2차 카테고리"
+                  :options="secondCategory"
+                  :selected-option="secondCategorySelected"
+                  @select="handleSecondCategorySelect"
+                  :disabled="!isMe"
+                />
+                <!-- 담당자 블록 -->
+                <CustomDropdown
+                  label="담당자"
+                  :options="managerOptions"
+                  :selected-option="managerSelected"
+                  @select="handleManagerSelect"
+                  :disabled="isManagerChangeDisabled"
+                  isManager
+                />
+                <!-- 마감 기한 블록 -->
+                <div>
+                  <label class="ticket-label">마감 기한</label>
+                  <p class="ticket-date">{{ detailData.dueDate }}</p>
+                </div>
+              </section>
+            </div>
+
+            <!-- 설명 -->
+            <div class="mt-11">
+              <label class="ticket-desc-label">설명</label>
+              <div class="ticket-desc-area">
+                <p class="ticket-desc-content">{{ detailData.content }}</p>
               </div>
             </div>
 
-            <!-- 댓글 -->
-            <div class="flex gap-2">
-              <div class="flex-stack gap-2">
-                <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                <p class="text-xs whitespace-nowrap">Neo.js</p>
-              </div>
-              <div class="ticket-comment-bubble">
-                <p class="text-sm">
-                  화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
-                  부탁드립니다.
-                </p>
-              </div>
-              <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
+            <!-- 첨부파일 -->
+            <div class="mt-4">
+              <div class="ticket-attachment">Customer KYC</div>
             </div>
 
-            <div class="flex gap-2">
-              <div class="flex-stack gap-2">
-                <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                <p class="text-xs whitespace-nowrap">Neo.js</p>
-              </div>
-              <div class="ticket-comment-bubble">
-                <p class="text-sm">
-                  화면에 출력된 로그좀 볼 수 있을까요? 스샷 첨부 부탁 드려요. 사용하시는 계정과 서버 호스트명도
-                  부탁드립니다.
-                </p>
-              </div>
-              <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
-            </div>
-          </div>
-
-          <!-- 댓글 인풋 -->
-          <div class="ticket-comment-input-area">
-            <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
-            <div class="flex gap-2 w-full justify-end pb-1.5">
-              <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
-              <SvgIcon :icon="SendIcon" class="cursor-pointer" />
-            </div>
+            <ManagerComments :ticket-id="ticketId" />
           </div>
         </div>
-      </div>
+      </template>
     </div>
   </Teleport>
 </template>

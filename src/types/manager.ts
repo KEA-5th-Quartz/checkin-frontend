@@ -12,8 +12,23 @@ export interface TableData {
   category1: string;
   category2: string;
   description: string;
-  status: '생성' | '진행중' | '완료';
+  status: string;
   assignee: string;
   dueDate: string;
   priority?: '긴급' | '높음' | '보통' | '낮음';
+}
+
+export interface ManagerFilterState {
+  statuses: string[];
+  usernames: string[];
+  categories: string[];
+  dueToday: boolean;
+  dueThisWeek: boolean;
+}
+
+export interface ManagerFilterPayload {
+  quickFilters: string[];
+  managers: string[];
+  statuses: string[];
+  categories: string[];
 }
