@@ -3,8 +3,10 @@ import { ArrowDownIcon, CalendarIcon } from '@/assets/icons/path';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
-import { ref } from 'vue';
-import { firstCategory, managerOptions, status } from '../ticketOptionTest';
+import { computed, ref } from 'vue';
+import { firstCategory, status } from '../ticketOptionTest';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { userApi } from '@/services/userService/userService';
 
 const props = defineProps<{
   isMyTicket: boolean;
@@ -30,6 +32,31 @@ const quickFilters = [
   { id: 'dueToday', label: '오늘 마감', icon: CalendarIcon },
   { id: 'dueThisWeek', label: '이번 주 마감', icon: CalendarIcon },
 ];
+
+// 담당자 목록 페치
+const { data: managersData } = useCustomQuery(['manager-list'], async () => {
+  try {
+    const response = await userApi.getManagers('MANAGER', 1, 100);
+    return response;
+  } catch (err) {
+    console.error('담당자 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+// managerOptions를 동적으로 생성하는 computed 속성 추가
+const managerOptions = computed(() => {
+  if (!managersData.value?.data?.data?.members) return [];
+
+  return managersData.value.data.data.members.map(
+    (manager: { memberId: number; username: string; profilePic: string }) => ({
+      id: manager.memberId,
+      value: manager.username,
+      label: manager.username,
+      profilePic: manager.profilePic,
+    }),
+  );
+});
 
 // 필터 토글 함수들
 const toggleQuickFilter = (filterId: string) => {
@@ -122,12 +149,13 @@ onClickOutside(modalRef, () => {
             v-for="manager in managerOptions"
             :key="manager.id"
             @click="toggleManager(manager.value)"
-            class="filter-dropdown-li"
+            class="filter-dropdown-li flex items-center gap-2"
             :class="[
               selectedManagers.includes(manager.value) ? 'bg-gray-3 text-gray-0 hover:font-semibold' : 'text-gray-2',
             ]"
           >
-            {{ manager.label }}
+            <img :src="manager.profilePic" :alt="manager.label" class="w-6 h-6 rounded-full object-cover" />
+            <span>{{ manager.label }}</span>
           </li>
         </ul>
       </div>

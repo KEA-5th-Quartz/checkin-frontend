@@ -15,12 +15,14 @@ import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey } from '@tanstack/vue-query';
+import { useMemberStore } from '@/stores/memberStore';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const isMyTicket = ref(false);
 
+const memberStore = useMemberStore();
 const keyword = ref('');
 const isSearch = ref(false);
 
@@ -38,7 +40,7 @@ const queryParams = computed(() => ({
   size: pageSize.value,
   statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
-    ? ['manager2.js'] // 기본으로 manager2.js, 나중에 수정
+    ? [memberStore.username] // 기본으로 manager2.js, 나중에 수정
     : Array.isArray(ManagerfilterState.value.usernames)
     ? ManagerfilterState.value.usernames
     : [],
@@ -266,9 +268,15 @@ onBeforeUnmount(() => {
               <StatusBadge :status="ticket.status" size="md" />
             </td>
             <td class="manager-td">
-              <div class="flex items-center gap-2 ml-4">
-                <img class="h-7 min-w-7 rounded-full bg-pink-200" />
-                <span class="truncate">{{ ticket.manager }}</span>
+              <div class="flex items-center gap-2 ml-4 w-full">
+                <img
+                  v-if="ticket.manager !== null"
+                  :src="ticket.managerProfilePic"
+                  class="h-7 max-w-7 rounded-full object-fill"
+                />
+                <span class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
+                  {{ ticket.manager || '━' }}
+                </span>
               </div>
             </td>
             <td class="manager-td">
@@ -331,9 +339,15 @@ onBeforeUnmount(() => {
               <StatusBadge :status="ticket.status" size="md" />
             </td>
             <td class="manager-td">
-              <div class="flex items-center gap-2 ml-4">
-                <img class="h-7 min-w-7 rounded-full bg-pink-200" />
-                <span class="truncate">{{ ticket.manager }}</span>
+              <div class="flex items-center gap-2 ml-4 w-full">
+                <img
+                  v-if="ticket.manager !== null"
+                  :src="ticket.managerProfilePic"
+                  class="h-7 max-w-7 rounded-full object-fill"
+                />
+                <span class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
+                  {{ ticket.manager || '━' }}
+                </span>
               </div>
             </td>
             <td class="manager-td">

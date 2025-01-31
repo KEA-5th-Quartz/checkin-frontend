@@ -64,6 +64,18 @@ export const ticketApi = {
   getTicketComments(ticketId: number) {
     return api.get(`/tickets/${ticketId}/comments`);
   },
+  // [담당자, 사용자] 티켓 댓글 작성
+  postTicketComments(ticketId: number, data: { content: string }) {
+    return api.post(`/tickets/${ticketId}/comments`, data);
+  },
+  // [담당자, 사용자] 댓글 좋아요 토글
+  putCommentsLikes(ticketId: number, commentId: number) {
+    return api.put(`/tickets/${ticketId}/comments/${commentId}/likes`);
+  },
+  // [담당자, 사용자] 댓글 좋아요 누른 멤버 조회
+  getCommentsLikes(ticketId: number, commentId: number) {
+    return api.get(`/tickets/${ticketId}/comments/${commentId}/likes`);
+  },
   // [담당자] 티켓 상태 변경 (생성 -> 진행중)
   patchTicketInProgress(ticketId: number, data: { status: string }) {
     return api.patch(`/tickets/${ticketId}/assign`, data);

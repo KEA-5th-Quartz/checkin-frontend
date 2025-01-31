@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, SendIcon, XIcon } from '@/assets/icons/path';
+import { XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
-import StatusBadge from '../../common/Badges/StatusBadge.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
 import { BaseTicketOption } from '@/types/tickets';
-import { priority, firstCategory, secondCategory, managerOptions, ticket_status } from '../ticketOptionTest';
+import { priority, firstCategory, secondCategory, ticket_status } from '../ticketOptionTest';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useMemberStore } from '@/stores/memberStore';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
+import ManagerComments from './ManagerComments.vue';
+import { userApi } from '@/services/userService/userService';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -32,6 +33,13 @@ const handleClose = () => {
   }, 300);
 };
 
+// 초기값 설정
+const prioritySelected = ref<BaseTicketOption>(priority[2]);
+const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
+const firstCategorySelected = ref(firstCategory[0]);
+const secondCategorySelected = ref(secondCategory[0]);
+
+// 티켓 상세 페치
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
@@ -42,39 +50,58 @@ const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.t
   }
 });
 
-// 초기값 설정
-const prioritySelected = ref<BaseTicketOption>(priority[0]);
-const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
-const firstCategorySelected = ref(firstCategory[0]);
-const secondCategorySelected = ref(secondCategory[0]);
-const managerSelected = ref(managerOptions[0]);
-
-// API 데이터로 초기값 설정
-watch(
-  detailData,
-  (newData) => {
-    if (newData) {
-      prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[0];
-      statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
-      firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
-      secondCategorySelected.value =
-        secondCategory.find((s) => s.value === newData.secondCategory) || secondCategory[0];
-      managerSelected.value = managerOptions.find((m) => m.value === newData.manager) || managerOptions[0];
-    }
-  },
-  { immediate: true },
-);
-
-const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
+// 담당자 목록 페치
+const { data: managersData } = useCustomQuery(['manager-list'], async () => {
   try {
-    const response = await ticketApi.getTicketComments(props.ticketId);
-    return response.data.data;
+    const response = await userApi.getManagers('MANAGER', 1, 100);
+    return response;
   } catch (err) {
-    console.error('티켓 댓글 조회 실패:', err);
+    console.error('담당자 목록 조회 실패:', err);
     throw err;
   }
 });
 
+// managerOptions를 동적으로 생성하는 computed 속성 추가
+const managerOptions = computed(() => {
+  if (!managersData.value?.data?.data?.members) return [];
+
+  return [
+    {
+      id: 0,
+      value: null,
+      label: '-',
+      profilePic: null,
+    },
+    ...managersData.value.data.data.members.map(
+      (manager: { memberId: number; username: string; profilePic: string }) => ({
+        id: manager.memberId,
+        value: manager.username,
+        label: manager.username,
+        profilePic: manager.profilePic,
+      }),
+    ),
+  ];
+});
+
+// 초기값 설정 부분 수정
+const managerSelected = ref<BaseTicketOption>();
+
+// API 데이터로 초기값 설정
+watch(
+  [detailData, managerOptions],
+  ([newData, options]) => {
+    if (newData && options.length > 0) {
+      prioritySelected.value = priority.find((p) => p.value === newData.priority) || priority[2];
+      statusSelected.value = ticket_status.find((s) => s.value === newData.status) || ticket_status[0];
+      firstCategorySelected.value = firstCategory.find((f) => f.value === newData.firstCategory) || firstCategory[0];
+      secondCategorySelected.value =
+        secondCategory.find((s) => s.value === newData.secondCategory) || secondCategory[0];
+      // manager가 null일 경우 미지정 옵션 선택
+      managerSelected.value = newData.manager ? options.find((m) => m.value === newData.manager) : options[0]; // 미지정 옵션
+    }
+  },
+  { immediate: true },
+);
 // 본인인지 확인
 const isMe = computed(() => {
   if (!detailData.value) return false;
@@ -83,8 +110,12 @@ const isMe = computed(() => {
 
 // 완료된 티켓의 담당자 변경 불가능
 const isManagerChangeDisabled = computed(() => {
-  // isMe가 false면 무조건 disabled
-  if (!isMe.value) return true;
+  // 현재 manager가 null이면 변경 가능
+  if (!detailData.value?.manager) return false;
+
+  // isMe가 false면서 manager가 있으면 disabled
+  if (!isMe.value && detailData.value.manager) return true;
+
   // 상태가 CLOSED면 담당자 변경 불가
   return statusSelected.value.value === 'CLOSED';
 });
@@ -96,6 +127,7 @@ const invalidateTicketQueries = () => {
   queryClient.invalidateQueries({
     queryKey: ['ticket-detail', props.ticketId],
   });
+  queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
 // 중요도 변경 뮤테이션
@@ -268,7 +300,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
 <template>
   <Teleport to="body">
     <div v-if="ticketId" class="ticket-overlay">
-      <div v-if="isLoading" class="loading-spinner">Loading...</div>
+      <div v-if="isLoading" class="loading-spinner">로딩중...</div>
       <template v-else-if="detailData">
         <div class="ticket-click-outside" @click="handleClose" />
         <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
@@ -304,8 +336,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                 <div>
                   <label class="ticket-label">요청자</label>
                   <div class="manager-filter-btn w-full border-primary-2 justify-start gap-2">
-                    <div class="w-5 h-5 bg-green-500 rounded-full" />
-                    <p class="text-xs text-gray-1">{{ detailData.username }}</p>
+                    <p class="text-sm text-gray-1">{{ detailData.username }}</p>
                   </div>
                 </div>
                 <!-- 요청 일자 블록 -->
@@ -341,6 +372,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
                   :selected-option="managerSelected"
                   @select="handleManagerSelect"
                   :disabled="isManagerChangeDisabled"
+                  isManager
                 />
                 <!-- 마감 기한 블록 -->
                 <div>
@@ -363,48 +395,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
               <div class="ticket-attachment">Customer KYC</div>
             </div>
 
-            <!-- 댓글 창 -->
-            <div class="ticket-comment-container">
-              <!-- 로그 -->
-              <div v-if="commentData">
-                <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
-                  <!-- 로그 표시 -->
-                  <div v-if="item.type === 'LOG'" class="ticket-comment-log">
-                    <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                    <div>
-                      <p class="text-sm text-gray-1">
-                        {{ item.log_content }}
-                        {{ new Date(item.created_at).toLocaleString() }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <!-- 댓글 표시 -->
-                  <div v-else class="flex gap-2 mb-4">
-                    <div class="flex-stack gap-2">
-                      <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                      <p class="text-xs whitespace-nowrap">user{{ item.member_id }}</p>
-                    </div>
-                    <div class="ticket-comment-bubble">
-                      <p class="text-sm">{{ item.comment_content }}</p>
-                      <p class="text-xs text-gray-500 mt-1">
-                        {{ new Date(item.created_at).toLocaleString() }}
-                      </p>
-                    </div>
-                    <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 댓글 인풋 -->
-            <div class="ticket-comment-input-area">
-              <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
-              <div class="flex gap-2 w-full justify-end pb-1.5">
-                <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
-                <SvgIcon :icon="SendIcon" class="cursor-pointer" />
-              </div>
-            </div>
+            <ManagerComments :ticket-id="ticketId" />
           </div>
         </div>
       </template>

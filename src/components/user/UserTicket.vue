@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, PencilIcon, SendIcon, XIcon } from '@/assets/icons/path';
+import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import PriorityBadge from '../common/Badges/PriorityBadge.vue';
@@ -9,14 +9,10 @@ import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '../common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
-import { useMemberStore } from '@/stores/memberStore';
-import { useQueryClient } from '@tanstack/vue-query';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { formatMinusDate } from '@/utils/dateFormat';
-
-const memberStore = useMemberStore();
-const queryClient = useQueryClient();
+import UserComment from './UserComment.vue';
 
 const props = defineProps<{
   ticketId: number;
@@ -35,22 +31,13 @@ const handleClose = () => {
   }, 300);
 };
 
+// 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
     return response.data.data;
   } catch (err) {
     console.error('티켓 상세 조회 실패:', err);
-    throw err;
-  }
-});
-
-const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
-  try {
-    const response = await ticketApi.getTicketComments(props.ticketId);
-    return response.data.data;
-  } catch (err) {
-    console.error('티켓 댓글 조회 실패:', err);
     throw err;
   }
 });
@@ -193,8 +180,7 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">{{ detailData?.username }}</p>
+                  <p class="text-sm text-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
@@ -235,8 +221,14 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <div class="w-5 h-5 bg-green-500 rounded-full" />
-                  <p class="text-xs text-gray-1">{{ detailData?.manager }}</p>
+                  <img
+                    :src="
+                      detailData?.managerProfilePic ||
+                      'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
+                    "
+                    class="w-5 h-5 object-fill rounded-full mr-2"
+                  />
+                  <p class="text-xs text-gray-1">{{ detailData?.manager || '━' }}</p>
                 </div>
               </div>
               <!-- 마감 기한 블록 -->
@@ -275,48 +267,7 @@ const canEdit = computed(() => {
             <div class="ticket-attachment">Customer KYC</div>
           </div>
 
-          <!-- 댓글 입력창 -->
-          <div class="ticket-comment-container">
-            <!-- 로그 -->
-            <div v-if="commentData">
-              <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.comment_id">
-                <!-- 로그 표시 -->
-                <div v-if="item.type === 'LOG'" class="ticket-comment-log">
-                  <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                  <div>
-                    <p class="text-sm text-gray-1">
-                      {{ item.log_content }}
-                      {{ new Date(item.created_at).toLocaleString() }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- 댓글 표시 -->
-                <div v-else class="flex gap-2 mb-4">
-                  <div class="flex-stack gap-2">
-                    <div class="w-8 h-8 bg-blue-300 rounded-full" />
-                    <p class="text-xs whitespace-nowrap">user{{ item.member_id }}</p>
-                  </div>
-                  <div class="ticket-comment-bubble">
-                    <p class="text-sm">{{ item.comment_content }}</p>
-                    <p class="text-xs text-gray-500 mt-1">
-                      {{ new Date(item.created_at).toLocaleString() }}
-                    </p>
-                  </div>
-                  <SvgIcon :icon="LikeIcon" class-name="flex self-end cursor-pointer" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 댓글 인풋 -->
-          <div v-if="!ticketStore.isEditMode" class="ticket-comment-input-area">
-            <textarea placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
-            <div class="flex gap-2 w-full justify-end pb-1.5">
-              <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
-              <SvgIcon :icon="SendIcon" class="cursor-pointer" />
-            </div>
-          </div>
+          <UserComment :ticket-id="ticketId" />
         </div>
       </div>
     </div>
