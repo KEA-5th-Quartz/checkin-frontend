@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import UserTemplateBoard from '@/components/user/list/TemplateList.vue';
+import TicketForm from '@/components/user/create/TicketForm.vue';
+import CreateButton from '@/components/user/create/CreateButton.vue';
 </script>
 
 <template>
-  <article class="mx-auto">
-    <UserTemplateBoard />
-  </article>
+  <TicketForm />
+  <CreateButton />
 </template>
