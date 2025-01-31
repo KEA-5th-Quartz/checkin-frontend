@@ -79,6 +79,12 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Administrator/AdministratorStatisticsView.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
+      {
+        path: 'administrator/main',
+        name: 'administrator-main',
+        component: () => import('../views/Administrator/AdminMainView.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+      },
       // 사용자
       {
         path: 'user/tickets',
