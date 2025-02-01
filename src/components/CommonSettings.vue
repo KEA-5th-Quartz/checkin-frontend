@@ -90,7 +90,7 @@ const handleImageChange = async (event: Event) => {
         </label>
       </div>
       <div class="flex flex-col gap-5">
-        <p class="font-semibold text-2xl">stone.vue</p>
+        <p class="font-semibold text-2xl">{{ memberStore.username }}</p>
         <p class="text-2xl text-gray-1">stone@gmail.com</p>
       </div>
     </section>
@@ -122,55 +122,56 @@ const handleImageChange = async (event: Event) => {
         :success-message="checkPwd && !errors.checkPwd ? '비밀번호가 일치합니다.' : ''"
       />
 
-      <!-- 알림 조건부 렌더링 -->
-      <div class="flex-stack gap-5 mt-5">
-        <div class="flex items-center justify-between w-1/2">
-          <p class="font-bold">담당자 배정 알림</p>
-          <button
-            type="button"
-            class="relative inline-flex h-6 w-11 items-center rounded-full"
-            :class="assignmentNotification ? 'bg-blue-1' : 'bg-gray-1'"
-            @click="assignmentNotification = !assignmentNotification"
-          >
-            <div
-              class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-              :class="assignmentNotification ? 'translate-x-6' : 'translate-x-1'"
-            />
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between w-1/2">
-          <p class="font-bold">진행상태 변경 알림</p>
-          <button
-            type="button"
-            class="relative inline-flex h-6 w-11 items-center rounded-full"
-            :class="statusNotification ? 'bg-blue-1' : 'bg-gray-1'"
-            @click="statusNotification = !statusNotification"
-          >
-            <div
-              class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-              :class="statusNotification ? 'translate-x-6' : 'translate-x-1'"
-            />
-          </button>
-        </div>
-
-        <div class="flex items-center justify-between w-1/2">
-          <p class="font-bold">티켓 댓글 알림</p>
-          <button
-            type="button"
-            class="relative inline-flex h-6 w-11 items-center rounded-full"
-            :class="commentNotification ? 'bg-blue-1' : 'bg-gray-1'"
-            @click="commentNotification = !commentNotification"
-          >
-            <div
-              class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-              :class="commentNotification ? 'translate-x-6' : 'translate-x-1'"
-            />
-          </button>
-        </div>
-      </div>
-
       <button type="submit" class="btn-main max-w-fit self-end">저장</button>
     </form>
+
+    <!-- 알림 조건부 렌더링 -->
+    <div class="flex-stack gap-5 mt-5">
+      <h2 class="text-lg font-semibold">알림 수신 관리</h2>
+      <div class="flex items-center justify-between w-1/2">
+        <p class="font-bold">담당자 배정 알림</p>
+        <button
+          type="button"
+          class="relative inline-flex h-6 w-11 items-center rounded-full"
+          :class="assignmentNotification ? 'bg-blue-1' : 'bg-gray-1'"
+          @click="assignmentNotification = !assignmentNotification"
+        >
+          <div
+            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
+            :class="assignmentNotification ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between w-1/2">
+        <p class="font-bold">진행상태 변경 알림</p>
+        <button
+          type="button"
+          class="relative inline-flex h-6 w-11 items-center rounded-full"
+          :class="statusNotification ? 'bg-blue-1' : 'bg-gray-1'"
+          @click="statusNotification = !statusNotification"
+        >
+          <div
+            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
+            :class="statusNotification ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between w-1/2">
+        <p class="font-bold">티켓 댓글 알림</p>
+        <button
+          type="button"
+          class="relative inline-flex h-6 w-11 items-center rounded-full"
+          :class="commentNotification ? 'bg-blue-1' : 'bg-gray-1'"
+          @click="commentNotification = !commentNotification"
+        >
+          <div
+            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
+            :class="commentNotification ? 'translate-x-6' : 'translate-x-1'"
+          />
+        </button>
+      </div>
+    </div>
   </div>
 </template>
