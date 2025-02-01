@@ -29,6 +29,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: false },
       },
       {
+        path: 'password-reset',
+        name: 'password-reset',
+        component: () => import('../views/account/PasswordResetView.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
         path: '/password-reset-email',
         name: 'password-reset-email',
         component: () => import('../views/account/PasswordResetEmailView.vue'),

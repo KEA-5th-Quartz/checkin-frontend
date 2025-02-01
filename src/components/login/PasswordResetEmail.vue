@@ -31,10 +31,10 @@ const onSubmit = handleSubmit(async () => {
       open: true,
       isOneBtn: true,
       title: '가입한 계정의 이메일로 메일이 전송되었습니다.',
-      mainText: '확인',
+      mainText: '홈으로',
       onMainClick: () => {
         dialogState.value = { ...initialDialog };
-        // router.replace('/');
+        router.replace('/');
       },
     };
     resetForm();
@@ -56,7 +56,13 @@ const onSubmit = handleSubmit(async () => {
   <form class="login-form" @submit="onSubmit">
     <div class="relative">
       <label>아이디</label>
-      <input v-model="username" name="username" type="text" placeholder="아이디를 입력해주세요" class="login-input" />
+      <input
+        v-model="username"
+        name="username"
+        type="text"
+        placeholder="아이디를 입력해주세요"
+        class="login-input border-b-2 border-gray-0"
+      />
 
       <button
         :disabled="isDisabled"
