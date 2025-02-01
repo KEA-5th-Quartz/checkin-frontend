@@ -12,6 +12,7 @@ import {
   StatisticIcon,
   TemplateIcon,
   TimelineIcon,
+  LogIcon,
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
@@ -45,6 +46,7 @@ const adminNavItems = [
   { name: '회원 관리', icon: MemberIcon, path: '/admin/members' },
   { name: '카테고리 관리', icon: CategoryIcon, path: '/admin/categories' },
   { name: '통계', icon: StatisticIcon, path: '/admin/statistics' },
+  { name: '로그', icon: LogIcon, path: '/admin/log' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
 
