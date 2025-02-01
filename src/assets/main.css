@@ -77,6 +77,9 @@ body {
   .login-p {
     @apply absolute pt-1.5 text-sm font-bold;
   }
+  .login-password-reset {
+    @apply block mt-12 text-center text-sm text-gray-1 hover:text-gray-0;
+  }
 
   /* 사이드바 */
   .sidebar-nav-container {

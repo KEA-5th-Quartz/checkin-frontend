@@ -19,13 +19,19 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/',
         name: 'login',
-        component: () => import('../views/LoginView.vue'),
+        component: () => import('../views/account/LoginView.vue'),
         meta: { requiresAuth: false },
       },
       {
         path: 'first-login',
         name: 'first-login',
-        component: () => import('../views/FirstLoginView.vue'),
+        component: () => import('../views/account/FirstLoginView.vue'),
+        meta: { requiresAuth: false },
+      },
+      {
+        path: '/password-reset-email',
+        name: 'password-reset-email',
+        component: () => import('../views/account/PasswordResetEmailView.vue'),
         meta: { requiresAuth: false },
       },
     ],

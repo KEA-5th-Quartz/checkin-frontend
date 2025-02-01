@@ -91,8 +91,6 @@ const togglePwdVisibility = () => {
     </div>
 
     <button type="submit" class="login-btn mt-4">로그인</button>
-
-    <a href="#" class="block text-center text-sm text-gray-1 hover:text-gray-0">비밀번호 찾기</a>
   </form>
 
   <CommonDialog

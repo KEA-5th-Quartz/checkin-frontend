@@ -7,13 +7,13 @@ import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
 import { ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
-import axios from 'axios';
 import { userApi } from '@/services/userService/userService';
+import CommonDialog from '../common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
 
-const BASE_URL = process.env.VUE_APP_BASE_URL;
 const router = useRouter();
 const memberStore = useMemberStore();
-console.log('패스워드리셋토큰', memberStore.passwordResetToken);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // Form 설정
 const { handleSubmit, errors, meta } = useForm({
@@ -41,8 +41,16 @@ const resetForm = () => {
 const onSubmit = handleSubmit(async (values) => {
   try {
     if (!memberStore.passwordResetToken) {
-      alert('오류가 발생했습니다 다시 로그인해주세요.');
-      router.replace('/');
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '오류가 발생했습니다 다시 로그인해주세요.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+          router.replace('/');
+        },
+      };
     }
 
     await userApi.passwordReset(memberStore.memberId, {
@@ -50,10 +58,18 @@ const onSubmit = handleSubmit(async (values) => {
       newPassword: values.newPwd,
     });
 
-    alert('비밀번호가 변경되었습니다.');
-
     const redirectPath = getRedirectPath(memberStore.role);
-    router.replace(redirectPath);
+
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '비밀번호가 변경되었습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        router.replace(redirectPath);
+      },
+    };
 
     resetForm();
   } catch (error) {
@@ -160,4 +176,13 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
       변경
     </button>
   </form>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

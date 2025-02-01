@@ -13,6 +13,10 @@ export const userApi = {
   passwordReset(memberId: number | null, data: { passwordResetToken: string | null; newPassword: string }) {
     return api.put(`/members/${memberId}/password-reset`, data);
   },
+  // 비밀번호 찾기
+  passwordSearch(username: string | unknown) {
+    return api.post('/members/password-reset', { username: username });
+  },
   // refresh토큰으로 accessToken과 refreshToken 재발급
   refresh() {
     return api.post('/auth/refresh');

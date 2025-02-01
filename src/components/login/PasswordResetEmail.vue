@@ -1,0 +1,79 @@
+<script setup lang="ts">
+import { userApi } from '@/services/userService/userService';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { useField, useForm } from 'vee-validate';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import CommonDialog from '../common/CommonDialog.vue';
+
+const router = useRouter();
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
+// Form 설정
+const { handleSubmit } = useForm();
+// Field 설정
+const { value: username } = useField<string>('username');
+
+// username이 비어있는지 확인하는 computed 속성
+const isDisabled = computed(() => {
+  return !username.value || username.value.trim() === '';
+});
+
+const resetForm = () => {
+  username.value = '';
+};
+
+const onSubmit = handleSubmit(async () => {
+  try {
+    await userApi.passwordSearch(username.value);
+
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '가입한 계정의 이메일로 메일이 전송되었습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        // router.replace('/');
+      },
+    };
+    resetForm();
+  } catch (error: unknown) {
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '입력한 계정이 올바르지 않습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
+  }
+});
+</script>
+
+<template>
+  <form class="login-form" @submit="onSubmit">
+    <div class="relative">
+      <label>아이디</label>
+      <input v-model="username" name="username" type="text" placeholder="아이디를 입력해주세요" class="login-input" />
+
+      <button
+        :disabled="isDisabled"
+        type="submit"
+        class="login-btn mt-12 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        변경
+      </button>
+    </div>
+  </form>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
+</template>
