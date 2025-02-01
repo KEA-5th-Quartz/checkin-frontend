@@ -74,6 +74,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
         isManager && 'py-1 w-full justify-start',
         hasColor && hasColorStyle(selectedOption) && `${selectedOption.bg} ${selectedOption.text} max-w-fit`,
         disabled && 'border-gray-2 hover:border-gray-2 cursor-default hover:ring-0',
+        $attrs.class || '' /* 부모에서 전달한 class 적용 */,
       ]"
     >
       <img
