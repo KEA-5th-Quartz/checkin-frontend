@@ -76,6 +76,14 @@ export const ticketApi = {
   getCommentsLikes(ticketId: number, commentId: number) {
     return api.get(`/tickets/${ticketId}/comments/${commentId}/likes`);
   },
+  // [담당자, 사용자] 티켓 댓글에 파일 첨부
+  postTicketAttachment(ticketId: number, data: { file: string }) {
+    return api.post(`/tickets/${ticketId}/attachments`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   // [담당자] 티켓 상태 변경 (생성 -> 진행중)
   patchTicketInProgress(ticketId: number, data: { status: string }) {
     return api.patch(`/tickets/${ticketId}/assign`, data);

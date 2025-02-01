@@ -36,6 +36,7 @@ const selectedCommentLikes = ref<{
   totalLikes: number;
   likes: Array<{ memberId: number; username: string }>;
 } | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
@@ -132,6 +133,19 @@ const commentsMutation = useCustomMutation(
   },
 );
 
+// 파일 첨부 뮤테이션
+const attachmentMutation = useCustomMutation(
+  async ({ ticketId, formData }: { ticketId: number; formData: any }) => {
+    const response = await ticketApi.postTicketAttachment(ticketId, formData);
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
+    },
+  },
+);
+
 // 좋아요 토글 핸들러
 const handleLikeToggle = async (commentId: number) => {
   try {
@@ -159,6 +173,58 @@ const handleAddComments = async () => {
   }
 };
 
+// 파일 선택 트리거 함수
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+// 파일 변경 핸들러
+const handleFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files?.length) return;
+
+  const file = target.files[0];
+  const formData = new FormData();
+
+  // 서버가 기대하는 형식대로 데이터 구성
+  const requestData = {
+    ticketId: props.ticketId,
+    // 필요한 다른 데이터가 있다면 여기에 추가
+  };
+
+  // FormData에 파일과 데이터를 각각 추가
+  formData.append('file', file);
+  formData.append('data', new Blob([JSON.stringify(requestData)], { type: 'application/json' }));
+
+  // FormData 내용 확인
+  console.log('=== FormData 내용 확인 ===');
+  for (const pair of formData.entries()) {
+    console.log(pair[0] + ': ', pair[1]);
+  }
+
+  try {
+    console.log('=== 파일 정보 ===');
+    console.log('파일 이름:', file.name);
+    console.log('파일 타입:', file.type);
+    console.log('파일 크기:', file.size, 'bytes');
+
+    await attachmentMutation.mutateAsync({
+      ticketId: props.ticketId,
+      formData: formData,
+    });
+
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+  } catch (err: any) {
+    console.error('=== 에러 상세 정보 ===');
+    console.error('에러:', err);
+    if (err.response) {
+      console.error('응답 상태:', err.response.status);
+      console.error('응답 데이터:', err.response.data);
+    }
+  }
+};
 // 좋아요 목록 모달 표시 함수
 const handleShowLikes = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId);
@@ -259,8 +325,9 @@ const hasLiked = (commentId: number) => {
   <!-- 댓글 인풋 -->
   <div class="ticket-comment-input-area">
     <textarea v-model="commentContent" placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
+    <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">
-      <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
+      <SvgIcon :icon="ClipIcon" class="cursor-pointer" @click="triggerFileInput" />
       <SvgIcon :icon="SendIcon" class="cursor-pointer" @click="handleAddComments" />
     </div>
   </div>
