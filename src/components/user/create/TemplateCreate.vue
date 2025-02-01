@@ -4,15 +4,24 @@ import { validationSchema } from '@/utils/formValidation'; // 유효성 검증 �
 import { firstCategory, secondCategory } from '@/components/manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
-import { computed } from 'vue';
+import { computed, ref, nextTick } from 'vue';
 import { useTicketStore } from '@/stores/userTicketStore';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ClipIcon } from '@/assets/icons/path';
 import TemplateCreateButton from '@/components/user/create/TemplateCreateButton.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { watchEffect } from 'vue';
+
+const showDialog = ref(false);
 
 // Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
 const { handleSubmit, errors } = useForm({
   validationSchema,
+});
+
+// 현재 에러 상태 체크용 함수
+watchEffect(() => {
+  console.log('현재 에러 상태:', errors.value);
 });
 
 // 각 필드에 대한 useField 적용
@@ -53,13 +62,21 @@ const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: 
 
 // 템플릿 생성 버튼 클릭 시 실행될 함수
 const onSubmit = handleSubmit(() => {
-  alert('템플릿이 정상적으로 생성되었습니다.');
+  showDialog.value = true; // 다이얼로그 표시
 });
+
+// Dialog 안닫히는 문제해결용 함수
+const closeDialog = async () => {
+  console.log('버튼 클릭됨! showDialog 값 변경 전:', showDialog.value);
+  showDialog.value = false;
+  await nextTick(); // Vue의 상태 업데이트 보장
+  console.log('showDialog 값 변경 후:', showDialog.value);
+};
 </script>
 
 <template>
   <main class="ml-24">
-    <form @submit="onSubmit">
+    <form @submit.prevent="onSubmit">
       <section class="h-12 mt-24">
         <div class="ticket-label">템플릿 제목</div>
         <input v-model="title" class="title-form bg-[#fafafa]" placeholder="제목을 입력하세요" />
@@ -104,10 +121,22 @@ const onSubmit = handleSubmit(() => {
           <SvgIcon :icon="ClipIcon" />
         </div>
       </section>
-
       <section class="flex justify-center">
-        <TemplateCreateButton type="submit" />
+        <TemplateCreateButton type="onSubmit" />
       </section>
+      <CommonDialog
+        v-if="showDialog"
+        title="템플릿 생성 완료"
+        content="템플릿이 정상적으로 생성되었습니다."
+        :isOneBtn="true"
+        mainText="확인"
+        @onMainClick="
+          () => {
+            console.log('✅ 다이얼로그 버튼 클릭됨!');
+            closeDialog();
+          }
+        "
+      />
     </form>
   </main>
 </template>

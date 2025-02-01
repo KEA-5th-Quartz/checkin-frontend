@@ -14,7 +14,7 @@ export const validationSchema = yup.object({
     .object()
     .shape({
       id: yup.number().required(),
-      value: yup.number().required(),
+      value: yup.string().required(),
       label: yup.string().required('* 1차 카테고리를 선택하세요.'),
     })
     .nullable()
@@ -24,7 +24,7 @@ export const validationSchema = yup.object({
     .object()
     .shape({
       id: yup.number().required(),
-      value: yup.number().required(),
+      value: yup.string().required(),
       label: yup.string().required('* 2차 카테고리를 선택하세요.'),
     })
     .nullable()
