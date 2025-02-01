@@ -3,7 +3,6 @@ import api from '@/api/axios';
 export const categoryApi = {
   // 카테고리 전체 조회
   getCategories() {
-    console.log('카테고리 API 호출');
     return api.get('/categories');
   },
   // 1차 카테고리 생성
