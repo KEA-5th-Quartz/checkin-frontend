@@ -20,6 +20,15 @@
     </button>
 
     <AddMemberModal :isOpen="isAddMemberModalOpen" @close="closeAddMemberModal" @submit="addMember" />
+
+    <CommonDialog
+      v-if="isDialogOpen"
+      :title="dialogContent.title"
+      :content="dialogContent.content"
+      :mainText="dialogContent.mainText"
+      :onMainClick="closeDialog"
+      isOneBtn
+    />
   </div>
 </template>
 
@@ -31,6 +40,7 @@ import AddMemberModal from '@/components/Administrator/MemberManagement/AddMembe
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 
 const queryClient = useQueryClient();
 
@@ -42,9 +52,25 @@ const addMemberMutation = useCustomMutation(
     onSuccess: () => {
       console.log('회원 등록 성공');
       queryClient.invalidateQueries({ queryKey: ['members'] });
+
+      // 성공 다이얼로그 표시
+      dialogContent.value = {
+        title: '회원 등록 완료',
+        content: '새로운 회원이 성공적으로 등록되었습니다.',
+        mainText: '확인',
+      };
+      isDialogOpen.value = true;
     },
     onError: (error) => {
       console.error('회원 등록 실패:', error);
+
+      // 실패 다이얼로그 표시
+      dialogContent.value = {
+        title: '회원 등록 실패',
+        content: error?.message || '회원 등록 중 오류가 발생했습니다.',
+        mainText: '확인',
+      };
+      isDialogOpen.value = true;
     },
   },
 );
@@ -55,6 +81,10 @@ const searchText = ref('');
 // 모달 상태
 const isAddMemberModalOpen = ref(false);
 
+// 다이얼로그 상태
+const isDialogOpen = ref(false);
+const dialogContent = ref({ title: '', content: '', mainText: '확인' });
+
 // "인원 등록" 버튼 클릭 핸들러
 function openAddMemberModal() {
   isAddMemberModalOpen.value = true;
@@ -63,6 +93,11 @@ function openAddMemberModal() {
 // 모달 닫기 핸들러
 function closeAddMemberModal() {
   isAddMemberModalOpen.value = false;
+}
+
+// 다이얼로그 닫기 핸들러
+function closeDialog() {
+  isDialogOpen.value = false;
 }
 
 // 모달에서 등록 버튼 클릭 시 동작
