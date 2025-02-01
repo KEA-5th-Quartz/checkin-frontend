@@ -32,7 +32,7 @@
             placeholder="이메일을 입력해주세요"
           />
         </div>
-        <p v-if="emailError" class="text-red-1 text-sm mb-3">{{ emailError }}</p>
+        <p v-if="emailError" class="text-red-1 text-sm mb-3 whitespace-pre-line">{{ emailError }}</p>
         <p v-if="isEmailValid" class="text-green-1 text-sm mb-3">사용 가능한 이메일입니다.</p>
 
         <label class="block text-sm font-medium text-gray-0 mb-2">아이디</label>
@@ -46,7 +46,7 @@
             placeholder="아이디를 입력해주세요"
           />
         </div>
-        <p v-if="usernameError" class="text-red-1 text-sm mb-3">{{ usernameError }}</p>
+        <p v-if="usernameError" class="text-red-1 text-sm mb-3 whitespace-pre-line">{{ usernameError }}</p>
         <p v-if="isUsernameValid" class="text-green-1 text-sm mb-3">사용 가능한 아이디입니다.</p>
       </div>
 
@@ -107,11 +107,16 @@ async function validateUsername() {
   }
   try {
     await memberApi.checkUsername(formData.value.username);
-    usernameError.value = ''; // 중복되지 않음
+    usernameError.value = '';
     isUsernameValid.value = true;
-  } catch (err) {
-    console.error('아이디 중복 검사 실패 :', err);
-    usernameError.value = '이미 사용 중인 아이디입니다.';
+  } catch (error) {
+    if (error.code === 'COMMON_4000') {
+      usernameError.value = '아이디 규칙에 맞지 않습니다.\n[알파벳 소문자 3~10개] + . + [알파벳 소문자 1~5개]';
+    } else if (error.code === 'MEMBER_4090') {
+      usernameError.value = '이미 사용 중인 아이디입니다.';
+    } else {
+      usernameError.value = '아이디 중복 검사 중 오류가 발생했습니다.';
+    }
     isUsernameValid.value = false;
   }
 }
@@ -125,11 +130,16 @@ async function validateEmail() {
   }
   try {
     await memberApi.checkEmail(formData.value.email);
-    emailError.value = ''; // 중복되지 않음
+    emailError.value = '';
     isEmailValid.value = true;
-  } catch (err) {
-    console.error('이메일 중복 검사 실패 :', err);
-    emailError.value = '이미 사용 중인 이메일입니다.';
+  } catch (error) {
+    if (error.code === 'COMMON_4000') {
+      emailError.value = '이메일 형식에 맞지 않습니다.';
+    } else if (error.code === 'MEMBER_4091') {
+      emailError.value = '이미 사용 중인 이메일입니다.';
+    } else {
+      emailError.value = '이메일 중복 검사 중 오류가 발생했습니다.';
+    }
     isEmailValid.value = false;
   }
 }
