@@ -64,9 +64,9 @@ const userTemplateItems = [
 // 로그아웃
 const handleLogout = async () => {
   try {
-    const response = await userApi.logout();
-    console.log(response);
-    router.replace('/');
+    // const response = await userApi.logout();
+    // console.log(response);
+    router.replace('/'); // 임시로 홈으로만 가게 구현
   } catch (err) {
     console.error('로그아웃 실패:', err);
   }
