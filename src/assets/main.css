@@ -422,4 +422,32 @@ body {
   .statistics-flex-gap {
     @apply flex gap-4;
   }
+  /* 관리자 멤버 모달 스타일 */
+  .member-modal-overlay {
+    @apply fixed inset-0 flex-center bg-black-2 bg-opacity-50 backdrop-blur-[2px] cursor-default z-50;
+  }
+  .member-modal-container {
+    @apply card-base p-10 shadow-lg w-[90%] max-w-lg;
+  }
+  .member-modal-header {
+    @apply flex-between mb-12;
+  }
+  .member-modal-input {
+    @apply w-full border-b border-gray-2 rounded-md px-3 py-2 focus:outline-none focus:border-primary-0 placeholder-gray-1;
+  }
+  .member-modal-error {
+    @apply text-red-1 text-sm mb-3 whitespace-pre-line;
+  }
+  .member-modal-success {
+    @apply text-green-1 text-sm mb-3;
+  }
+  .member-modal-button {
+    @apply px-6 py-2 rounded-md hover:opacity-80 transition duration-300;
+  }
+  .member-modal-button-disabled {
+    @apply bg-gray-2 text-gray-1 cursor-not-allowed;
+  }
+  .member-modal-button-active {
+    @apply bg-primary-0 text-white-0;
+  }
 }
