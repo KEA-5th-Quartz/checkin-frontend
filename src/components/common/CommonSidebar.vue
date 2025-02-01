@@ -17,6 +17,7 @@ import {
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
 import { userApi } from '@/services/userService/userService';
+import { roleInKorean } from '@/utils/mapping';
 
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -86,7 +87,7 @@ const handleLogout = async () => {
         />
       </div>
       <p class="sidebar-p">{{ memberStore.username }}</p>
-      <p class="sidebar-p text-sm">{{ memberStore.role }}</p>
+      <p class="sidebar-p">{{ roleInKorean(memberStore.role) }}</p>
     </section>
 
     <!-- 담당자 -->
