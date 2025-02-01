@@ -32,6 +32,7 @@ const processQueue = (error: any = null) => {
 // Request 인터셉터
 api.interceptors.request.use((config) => {
   const memberStore = useMemberStore();
+  console.log('현재 accessToken: ', memberStore.accessToken); // accessToken 로그 확인
   if (memberStore.accessToken) {
     config.headers.Authorization = `Bearer ${memberStore.accessToken}`;
   }
