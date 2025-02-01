@@ -28,6 +28,26 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { SearchIcon } from '@/assets/icons/path';
 import { ref } from 'vue';
 import AddMemberModal from '@/components/Administrator/MemberManagement/AddMemberModal.vue';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { memberApi } from '@/services/memberService/memberService';
+import { useQueryClient } from '@tanstack/vue-query';
+
+const queryClient = useQueryClient();
+
+const addMemberMutation = useCustomMutation(
+  async (newMember) => {
+    return await memberApi.addMember(newMember);
+  },
+  {
+    onSuccess: () => {
+      console.log('회원 등록 성공');
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+    },
+    onError: (error) => {
+      console.error('회원 등록 실패:', error);
+    },
+  },
+);
 
 // 검색어 상태
 const searchText = ref('');
@@ -48,7 +68,7 @@ function closeAddMemberModal() {
 // 모달에서 등록 버튼 클릭 시 동작
 function addMember(newMember) {
   console.log('새로운 멤버:', newMember);
-  // 서버에 등록 요청 또는 상태 업데이트
+  addMemberMutation.mutate(newMember); // API 요청 실행
   isAddMemberModalOpen.value = false;
 }
 </script>
