@@ -32,7 +32,13 @@ const handleMainClick = () => {
     <section @click.stop class="dialog-container dialog-section">
       <p class="font-bold">{{ title }}</p>
 
+      <p v-if="content" class="mt-2 text-gray-0 text-sm">{{ content }}</p>
+
       <input v-if="hasInput" v-model="inputValue" :placeholder="placeholder" class="dialog-input" />
+
+      <div v-if="$slots.default" class="mt-4">
+        <slot></slot>
+      </div>
 
       <div class="flex w-full gap-6 mt-6">
         <button v-if="!isOneBtn" @click="onCancelClick" class="dialog-btn bg-gray-2">

@@ -56,27 +56,33 @@ const routes: Array<RouteRecordRaw> = [
       },
       // 관리자
       {
-        path: 'administrator/memberManagement',
+        path: '/admin/members',
         name: 'MemberManagement',
         component: () => import('../views/Administrator/MemberManagement.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
       {
-        path: 'administrator/CategoryManagement',
+        path: 'admin/categories',
         name: 'CategoryManagement',
         component: () => import('../views/Administrator/CategoryManagement.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
       {
-        path: 'administrator/LogPage',
+        path: 'admin/log',
         name: 'LogPage',
         component: () => import('../views/Administrator/LogPage.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
       {
-        path: 'administrator/statistics',
+        path: 'admin/statistics',
         name: 'administrator-statistics',
         component: () => import('../views/Administrator/AdministratorStatisticsView.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+      },
+      {
+        path: 'admin',
+        name: 'administrator-main',
+        component: () => import('../views/Administrator/AdminMainView.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
       // 사용자
