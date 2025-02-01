@@ -5,6 +5,9 @@ import { schema } from '@/utils/passwordSchema';
 import { useField, useForm } from 'vee-validate';
 import { ref } from 'vue';
 import PasswordInput from './common/PasswordInput.vue';
+import CommonDialog from './common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { ApiError } from '@/types/common/error';
 
 const assignmentNotification = ref(false);
 const statusNotification = ref(false);
@@ -12,17 +15,18 @@ const commentNotification = ref(false);
 
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const { handleSubmit, errors, meta } = useForm({
   validationSchema: schema,
 });
 
-const { value: originalpwd } = useField<string>('originalPwd');
+const { value: originalPwd } = useField<string>('originalPwd');
 const { value: newPwd } = useField<string>('newPwd');
 const { value: checkPwd } = useField<string>('checkPwd');
 
 const resetForm = () => {
-  originalpwd.value = '';
+  originalPwd.value = '';
   newPwd.value = '';
   checkPwd.value = '';
 };
@@ -30,13 +34,61 @@ const resetForm = () => {
 const onSubmit = handleSubmit(async (values) => {
   try {
     await userApi.changePassword(memberStore.memberId, {
-      originalpassword: values.originalpwd,
-      newpassword: values.newPwd,
+      originalPassword: values.originalPwd,
+      newPassword: values.newPwd,
     });
+
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '비밀번호가 변경되었습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        window.location.reload();
+      },
+    };
 
     resetForm();
   } catch (error) {
-    console.log('비밀번호 변경 실패:', error);
+    const err = error as ApiError;
+
+    switch (err.code) {
+      case 'MEMBER_4004':
+      case 'MEMBER_4003':
+      case 'MEMBER_4000':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: err.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
+      case 'MEMBER_4010':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '토큰이 만료되었습니다. 다시 로그인 해주십시오.',
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
+      default:
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '오류가 발생했습니다.',
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+    }
   }
 });
 
@@ -97,10 +149,10 @@ const handleImageChange = async (event: Event) => {
 
     <form class="flex-stack gap-10 mt-14" @submit="onSubmit">
       <PasswordInput
-        v-model="originalpwd"
+        v-model="originalPwd"
         label="현재 비밀번호"
         placeholder="현재 비밀번호를 입력해주세요"
-        :error="errors.originalpwd"
+        :error="errors.originalPwd"
       />
 
       <PasswordInput
@@ -174,4 +226,13 @@ const handleImageChange = async (event: Event) => {
       </div>
     </div>
   </div>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

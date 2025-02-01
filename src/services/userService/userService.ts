@@ -18,7 +18,7 @@ export const userApi = {
     return api.post('/auth/refresh');
   },
   // 비밀번호 변경(최초 로그인)
-  changePassword(memberId: number | null, data: { originalpassword: string; newpassword: string }) {
+  changePassword(memberId: number | null, data: { originalPassword: string; newPassword: string }) {
     return api.put(`/members/${memberId}/password`, data);
   },
   // 담당자 목록 조회
