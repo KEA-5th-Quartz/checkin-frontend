@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 flex items-center justify-center bg-black-0 bg-opacity-40 z-50">
+  <div v-if="isOpen" class="fixed inset-0 flex-center bg-black-2 bg-opacity-50 backdrop-blur-[2px] cursor-default z-50">
     <div ref="modalRef" class="card-base p-10 shadow-lg w-[90%] max-w-lg">
       <!-- 모달 헤더 -->
       <div class="flex-between mb-12">
@@ -26,15 +26,11 @@
           <input
             type="email"
             v-model="formData.email"
+            @input="resetEmailValidation"
+            @blur="validateEmail"
             class="w-full border-b border-gray-2 rounded-md px-3 py-2 focus:outline-none focus:border-primary-0 placeholder-gray-1"
             placeholder="이메일을 입력해주세요"
           />
-          <button
-            @click="validateEmail"
-            class="px-3 py-2 bg-primary-0 text-white-0 text-sm rounded-md hover:opacity-80 whitespace-nowrap"
-          >
-            중복 검사
-          </button>
         </div>
         <p v-if="emailError" class="text-red-1 text-sm mb-3">{{ emailError }}</p>
         <p v-if="isEmailValid" class="text-green-1 text-sm mb-3">사용 가능한 이메일입니다.</p>
@@ -44,18 +40,14 @@
           <input
             type="text"
             v-model="formData.username"
+            @input="resetUsernameValidation"
+            @blur="validateUsername"
             class="w-full border-b border-gray-2 rounded-md px-3 py-2 focus:outline-none focus:border-primary-0 placeholder-gray-1"
             placeholder="아이디를 입력해주세요"
           />
-          <button
-            @click="validateUsername"
-            class="px-3 py-2 bg-primary-0 text-white-0 text-sm rounded-md hover:opacity-80 whitespace-nowrap"
-          >
-            중복 검사
-          </button>
         </div>
-        <p v-if="usernameError" class="text-red-500 text-sm mb-3">{{ usernameError }}</p>
-        <p v-if="isUsernameValid" class="text-green-500 text-sm mb-3">사용 가능한 아이디입니다.</p>
+        <p v-if="usernameError" class="text-red-1 text-sm mb-3">{{ usernameError }}</p>
+        <p v-if="isUsernameValid" class="text-green-1 text-sm mb-3">사용 가능한 아이디입니다.</p>
       </div>
 
       <!-- 모달 푸터 -->
@@ -68,7 +60,7 @@
           class="px-6 py-2 rounded-md hover:opacity-80 transition duration-300"
           :class="{
             'bg-primary-0 text-white-0': isFormValid, // 모든 조건 충족 시 버튼 활성화되면서 색상이 들어옴
-            'bg-gray-2 text-gray-500 cursor-not-allowed': !isFormValid, // 조건 미충족 시 회색 배경 및 비활성화 스타일
+            'bg-gray-2 text-gray-1 cursor-not-allowed': !isFormValid, // 조건 미충족 시 회색 배경 및 비활성화 스타일
           }"
           :disabled="!isFormValid"
         >
@@ -151,10 +143,19 @@ onClickOutside(modalRef, () => {
   closeModal();
 });
 
+// 입력 변경 시 valid 상태 초기화
+function resetUsernameValidation() {
+  isUsernameValid.value = false;
+  usernameError.value = '';
+}
+
+function resetEmailValidation() {
+  isEmailValid.value = false;
+  emailError.value = '';
+}
+
 // 모든 조건 충족 시 "등록" 버튼 활성화
-const isFormValid = computed(() => {
-  return isUsernameValid.value && isEmailValid.value && formData.value.role;
-});
+const isFormValid = computed(() => isUsernameValid.value && isEmailValid.value && formData.value.role);
 
 // 폼 제출 핸들러 (회원 등록)
 function handleSubmit() {
