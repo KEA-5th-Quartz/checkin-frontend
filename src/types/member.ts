@@ -5,6 +5,7 @@ export interface MemberState {
   username: string;
   profilePic: string;
   role: string | MemberType;
+  email: string;
   accessToken: string;
   passwordResetToken: string | null;
 }

@@ -17,7 +17,7 @@ const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-const { handleSubmit, errors, meta } = useForm({
+const { handleSubmit, errors } = useForm({
   validationSchema: schema,
 });
 
@@ -143,7 +143,7 @@ const handleImageChange = async (event: Event) => {
       </div>
       <div class="flex flex-col gap-5">
         <p class="font-semibold text-2xl">{{ memberStore.username }}</p>
-        <p class="text-2xl text-gray-1">stone@gmail.com</p>
+        <p class="text-2xl text-gray-1">{{ memberStore.email }}</p>
       </div>
     </section>
 

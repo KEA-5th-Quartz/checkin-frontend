@@ -8,6 +8,7 @@ export const useMemberStore = defineStore('member', {
     username: '',
     profilePic: '',
     role: '',
+    email: '',
     accessToken: '',
     passwordResetToken: null,
   }),
@@ -18,6 +19,7 @@ export const useMemberStore = defineStore('member', {
       this.username = memberData.username;
       this.profilePic = memberData.profilePic;
       this.role = memberData.role;
+      this.email = memberData.email;
       this.accessToken = memberData.accessToken;
       this.passwordResetToken = memberData.passwordResetToken;
     },
@@ -27,6 +29,7 @@ export const useMemberStore = defineStore('member', {
       this.username = '';
       this.profilePic = '';
       this.role = '';
+      this.email = '';
       this.accessToken = '';
       this.passwordResetToken = null;
     },

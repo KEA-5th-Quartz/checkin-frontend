@@ -33,13 +33,13 @@ const handleLogin = async () => {
       password: password.value,
     });
     const memberData = response.data.data;
-    console.log(memberData);
 
     memberStore.setMemberInfo({
       memberId: memberData.memberId,
       username: memberData.username,
       profilePic: memberData.profilePic,
       role: memberData.role,
+      email: memberData.email,
       accessToken: memberData.accessToken,
       passwordResetToken: memberData.passwordResetToken,
     });
