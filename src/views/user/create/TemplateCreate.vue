@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import TicketForm from '@/components/user/create/TicketForm.vue';
-import CreateButton from '@/components/user/create/CreateButton.vue';
+import TemplateCreate from '@/components/user/create/TemplateCreate.vue';
 </script>
 
 <template>
-  <TicketForm />
-  <CreateButton />
+  <TemplateCreate />
 </template>
