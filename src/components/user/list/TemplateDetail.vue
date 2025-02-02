@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
-import SvgIcon from '../common/SvgIcon.vue';
+import SvgIcon from '@/components/common/SvgIcon.vue';
 import { computed, onMounted, ref } from 'vue';
-import PriorityBadge from '../common/Badges/PriorityBadge.vue';
-import StatusBadge from '../common/Badges/StatusBadge.vue';
-import { useTemplateStore } from '../../stores/userTemplateStore';
-import { firstCategory, secondCategory } from '../manager/ticketOptionTest';
+import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
+import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import { useTemplateStore } from '@/stores/userTemplateStore';
+import { firstCategory, secondCategory } from '@/components/manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
-import CustomDropdown from '../common/CustomDropdown.vue';
+import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
 
 defineProps<{

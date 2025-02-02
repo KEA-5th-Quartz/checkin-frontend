@@ -4,7 +4,7 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { computed, ref } from 'vue';
-import { status } from '../manager/ticketOptionTest';
+import { status } from '@/components/manager/ticketOptionTest';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { categoryApi } from '@/services/categoryService/categoryService';
 
