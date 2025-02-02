@@ -75,16 +75,16 @@ const closeDialog = async () => {
 </script>
 
 <template>
-  <main class="ml-24">
+  <main class="ml-24 max-w-[80%]">
     <form @submit.prevent="onSubmit">
-      <section class="h-12 mt-24">
+      <section class="w-full h-12 mt-24">
         <div class="ticket-label">템플릿 제목</div>
         <input v-model="title" class="title-form bg-[#fafafa]" placeholder="제목을 입력하세요" />
         <div class="text-red-500 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
       </section>
 
-      <section class="flex gap-x-48 mt-16">
-        <div class="w-[500px]">
+      <section class="w-full flex gap-x-32 mt-16">
+        <div class="max-w-[50%] w-full">
           <div class="ticket-label">1차 카테고리</div>
           <CustomDropdown
             class="h-12 py-1"
@@ -98,7 +98,7 @@ const closeDialog = async () => {
           <div class="text-red-500 text-sm mt-1" v-if="errors.firstCategory">{{ errors.firstCategorySelected }}</div>
         </div>
 
-        <div class="w-[500px]">
+        <div class="max-w-[50%] w-full">
           <div class="ticket-label">2차 카테고리</div>
           <CustomDropdown
             class="h-12 py-1"
@@ -113,11 +113,11 @@ const closeDialog = async () => {
         </div>
       </section>
 
-      <section class="mt-16">
-        <div class="ticket-label mt-24">설명</div>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-80 w-[1200px] bg-[#fafafa]" />
+      <section class="w-full mt-24">
+        <div class="ticket-label">설명</div>
+        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa]" />
         <div class="text-red-500 text-sm mt-1" v-if="errors.content">{{ errors.content }}</div>
-        <div class="flex w-[1200px] justify-end pr-2 cursor-pointer">
+        <div class="flex justify-end pr-2 cursor-pointer">
           <SvgIcon :icon="ClipIcon" />
         </div>
       </section>
