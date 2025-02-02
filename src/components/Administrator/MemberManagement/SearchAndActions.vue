@@ -6,7 +6,7 @@
         type="text"
         class="bg-transparent focus:outline-none pl-3 text-gray-0 w-full"
         placeholder="인원 검색..."
-        v-model="searchText"
+        v-model="searchQuery"
       />
       <SvgIcon :icon="SearchIcon" />
     </div>
@@ -19,7 +19,7 @@
       인원 등록
     </button>
 
-    <AddMemberModal :isOpen="isAddMemberModalOpen" @close="closeAddMemberModal" @submit="addMember" />
+    <AddMemberModal :isOpen="isAddMemberModalOpen" @close="closeAddMemberModal" @submit="handleAddMember" />
 
     <CommonDialog
       v-if="isDialogOpen"
@@ -35,17 +35,24 @@
 <script setup lang="ts">
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { SearchIcon } from '@/assets/icons/path';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AddMemberModal from '@/components/Administrator/MemberManagement/AddMemberModal.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import CommonDialog from '@/components/common/CommonDialog.vue';
+import { useMemberListStore } from '@/stores/useMemberListStore';
+
+const store = useMemberListStore();
 
 const queryClient = useQueryClient();
 
+const handleAddMember = (newMember: { username: string; email: string; role: string }) => {
+  addMemberMutation.mutate(newMember);
+};
+
 const addMemberMutation = useCustomMutation(
-  async (newMember) => {
+  async (newMember: { username: string; email: string; role: string }) => {
     return await memberApi.addMember(newMember);
   },
   {
@@ -76,7 +83,10 @@ const addMemberMutation = useCustomMutation(
 );
 
 // 검색어 상태
-const searchText = ref('');
+const searchQuery = computed({
+  get: () => store.searchQuery,
+  set: (value) => store.setSearchQuery(value),
+});
 
 // 모달 상태
 const isAddMemberModalOpen = ref(false);
@@ -100,12 +110,10 @@ function closeDialog() {
   isDialogOpen.value = false;
 }
 
-// 모달에서 등록 버튼 클릭 시 동작
-function addMember(newMember) {
-  console.log('새로운 멤버:', newMember);
-  addMemberMutation.mutate(newMember); // API 요청 실행
-  isAddMemberModalOpen.value = false;
-}
+// 검색어 변경 시 API 요청 트리거
+watch(searchQuery, () => {
+  queryClient.invalidateQueries({ queryKey: ['members'] });
+});
 </script>
 
 <style scoped></style>
