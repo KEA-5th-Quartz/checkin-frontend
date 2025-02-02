@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import UserBoard from '@/components/user/UserBoard.vue';
+import TicketList from '@/components/user/list/TicketList.vue';
 </script>
 
 <template>
   <article class="mx-auto">
-    <UserBoard />
+    <TicketList />
   </article>
 </template>

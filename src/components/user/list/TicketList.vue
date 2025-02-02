@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue';
-import StatusBadge from '../common/Badges/StatusBadge.vue';
-import UserTicket from './UserTicket.vue';
+import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import TicketDetail from './TicketDetail.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
-import SvgIcon from '../common/SvgIcon.vue';
+import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ArrowDownIcon, CreateTicketIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
-import { perPageOptions, status } from '../manager/ticketOptionTest';
+import { perPageOptions, status } from '@/components/manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import CommonDialog from '../common/CommonDialog.vue';
-import UserFilter from './UserFilter.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import TicketFilter from './TicketFilter.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
-import SkeletonTable from '../UI/SkeletonTable.vue';
-import CustomPagination from '../common/CustomPagination.vue';
+import SkeletonTable from '@/components/UI/SkeletonTable.vue';
+import CustomPagination from '@/components/common/CustomPagination.vue';
 import { UserFilterPayload, UserFilterState } from '@/types/user';
-import ErrorTable from '../UI/ErrorTable.vue';
+import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey } from '@tanstack/vue-query';
 
 const ticketStore = useUserTicketListStore();
@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
               필터
             </button>
             <!-- 필터 모달 -->
-            <UserFilter
+            <TicketFilter
               v-if="isFilterOpen"
               @applyFilters="handleApplyFilters"
               @closeFilter="isFilterOpen = false"
@@ -353,7 +353,7 @@ onBeforeUnmount(() => {
         </table>
       </div>
 
-      <UserTicket v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
+      <TicketDetail v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
     </article>
 
     <CustomPagination

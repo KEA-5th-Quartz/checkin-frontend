@@ -4,7 +4,7 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { ref } from 'vue';
-import { firstCategory, status } from '../manager/ticketOptionTest';
+import { firstCategory, status } from '@/components/manager/ticketOptionTest';
 
 const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
