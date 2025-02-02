@@ -21,7 +21,7 @@ const getRedirectPath = (role: MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
     ADMIN: '/admin',
     MANAGER: '/manager/dashboard',
-    USER: '/user/tickets',
+    USER: '/user/ticketlist',
   };
   return roleRedirectMap[role];
 };

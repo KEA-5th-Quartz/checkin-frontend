@@ -52,13 +52,13 @@ const adminNavItems = [
 ];
 
 const userNavItems = [
-  { name: '티켓 목록', icon: CategoryIcon, path: '/user/tickets' },
-  { name: '새 요청 티켓', icon: TemplateIcon, path: '/user/addticket' },
+  { name: '티켓 목록', icon: CategoryIcon, path: '/user/ticketlist' },
+  { name: '새 요청 티켓', icon: TemplateIcon, path: '/user/ticketcreate' },
 ];
 
 const userTemplateItems = [
-  { name: '티켓 템플릿', path: '/user/templates' },
-  { name: '새 티켓 템플릿', path: '/user/addtemplate' },
+  { name: '티켓 템플릿', path: '/user/templatelist' },
+  { name: '새 티켓 템플릿', path: '/user/templatecreate' },
 ];
 
 // 로그아웃
