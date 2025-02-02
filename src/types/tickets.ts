@@ -40,3 +40,19 @@ export interface CommentMember {
   username: string;
   profilePic: string;
 }
+
+// 파일 첨부
+export interface AttachedFile {
+  commentId: number;
+  attachmentUrl: string;
+  isImage: boolean;
+}
+
+export interface AttachmentMutationParams {
+  ticketId: number;
+  formData: FormData;
+}
+
+export interface AttachmentResponse {
+  data: AttachedFile;
+}

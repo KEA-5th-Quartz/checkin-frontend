@@ -6,16 +6,10 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
-import { CommentMember } from '@/types/tickets';
+import { AttachedFile, AttachmentMutationParams, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
-
-type AttachedFile = {
-  commentId: number;
-  attachmentUrl: string;
-  isImage: boolean;
-};
 
 const props = defineProps<{
   ticketId: number;
@@ -145,8 +139,8 @@ const commentsMutation = useCustomMutation(
 
 // 파일 첨부 뮤테이션
 const attachmentMutation = useCustomMutation(
-  async ({ ticketId, formData }: { ticketId: number; formData: any }) => {
-    const response = await ticketApi.postTicketAttachment(ticketId, formData);
+  async ({ ticketId, formData }: AttachmentMutationParams) => {
+    const response = await ticketApi.postTicketAttachment(ticketId, { file: formData });
     return response.data;
   },
   {
@@ -226,8 +220,10 @@ const handleFileChange = async (event: Event) => {
     if (fileInput.value) {
       fileInput.value.value = '';
     }
-  } catch (err: any) {
-    console.error('파일 첨부 실패:', err.response?.data || err);
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('파일 첨부 실패:', err.message);
+    }
     alert('파일 첨부에 실패했습니다.');
   }
 };
@@ -235,8 +231,7 @@ const handleFileChange = async (event: Event) => {
 // 파일 다운로드
 const handleFileDownload = (file: AttachedFile) => {
   try {
-    // 새 창에서 파일 URL 열기
-    window.open(file.attachmentUrl, '_blank');
+    window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
     alert('파일 다운로드에 실패했습니다.');
