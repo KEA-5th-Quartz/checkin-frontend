@@ -14,6 +14,7 @@
       </button>
     </div>
 
+    <div v-if="isLoading" class="text-center text-gray-0 py-10">로딩 중...</div>
     <div v-if="members.length > 0" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
       <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[20%]" />
     </div>
@@ -37,6 +38,7 @@ import { useMemberListStore } from '@/stores/useMemberListStore';
 import MemberCard from '../../../components/Administrator/MemberManagement/MemberCard.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { memberApi } from '@/services/memberService/memberService';
+import { useCustomQuery } from '@/composables/useCustomQuery';
 
 const store = useMemberListStore();
 
@@ -51,12 +53,22 @@ const roleLabels: Record<string, string> = {
 // 현재 선택된 역할
 const selectedRole = computed(() => store.selectedRole);
 
-// 멤버 목록
-const members = computed(() => store.members ?? []);
-
 // 현재 페이지
 const currentPage = computed(() => store.currentPage);
 const totalPages = computed(() => store.totalPages);
+
+// 멤버 목록 API 요청
+const { data, isLoading } = useCustomQuery(
+  ['members', selectedRole, currentPage],
+  () => memberApi.getMembers(selectedRole.value, currentPage.value, 10, store.searchQuery),
+  { keepPreviousData: true },
+);
+
+const members = computed(() => data.value?.members ?? []);
+
+watch(data, (newData) => {
+  if (newData) store.setMembers(newData.members, newData.totalPages);
+});
 
 // 탭 전환 함수
 const switchTab = async (role: string) => {
@@ -68,32 +80,6 @@ const switchTab = async (role: string) => {
 const handlePageChange = async (page: number) => {
   store.setCurrentPage(page);
 };
-
-// 멤버 목록 불러오기
-const fetchMembers = async (role = selectedRole.value, page = currentPage.value) => {
-  try {
-    console.log('MemberTabs.vue 안에서 fetchMembers api 호출 ');
-    console.log('역할:', role, '페이지:', page);
-    const { members, totalPages } = await memberApi.getMembers(role, page);
-
-    console.log('members: ', members);
-    console.log('totalPages: ', totalPages);
-
-    store.setMembers(members, totalPages);
-  } catch (error) {
-    console.error('멤버 목록 조회 실패:', error);
-  }
-};
-
-// 초기 데이터 불러오기
-onMounted(() => {
-  fetchMembers(selectedRole.value, currentPage.value);
-});
-
-// 역할 변경 시 자동 업데이트
-watch(selectedRole, (newRole) => {
-  fetchMembers(newRole, 1);
-});
 </script>
 
 <style scoped></style>
