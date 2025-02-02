@@ -233,18 +233,10 @@ const handleFileChange = async (event: Event) => {
 };
 
 // 파일 다운로드
-const handleFileDownload = async (file: AttachedFile) => {
+const handleFileDownload = (file: AttachedFile) => {
   try {
-    const response = await fetch(file.attachmentUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CheckIn_${file.commentId}`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    // 새 창에서 파일 URL 열기
+    window.open(file.attachmentUrl, '_blank');
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
     alert('파일 다운로드에 실패했습니다.');
