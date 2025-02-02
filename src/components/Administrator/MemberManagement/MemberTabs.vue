@@ -14,12 +14,12 @@
       </button>
     </div>
 
-    <div v-if="isLoading" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
-      <SkeletonCard v-for="n in 5" :key="n" class="w-[20%]" />
+    <div v-if="isLoading" class="flex flex-wrap gap-x-11 gap-y-6 h-[540px]">
+      <SkeletonCard v-for="n in 10" :key="n" class="w-[17%]" />
     </div>
 
-    <div v-else-if="members.length > 0" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
-      <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[20%]" />
+    <div v-else-if="members.length > 0" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
+      <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[17%]" />
     </div>
 
     <div v-else class="text-center text-gray-0 py-10">

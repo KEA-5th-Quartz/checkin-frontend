@@ -18,8 +18,15 @@
     </div>
 
     <div class="flex-stack items-center mt-4">
-      <p class="font-bold text-black-0">{{ member.username }}</p>
-      <p class="text-gray-1">{{ member.email }}</p>
+      <p
+        class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
+        :title="member.username"
+      >
+        {{ member.username }}
+      </p>
+      <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
+        {{ member.email }}
+      </p>
     </div>
     <div class="mt-8">
       <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
