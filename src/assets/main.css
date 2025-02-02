@@ -460,4 +460,36 @@ body {
   .member-modal-button-active {
     @apply bg-primary-0 text-white-0;
   }
+  /*관리자 홈 멤버 리스트 스타일*/
+  .member-list-container {
+    @apply w-full p-5 border-l-2 border-gray-2;
+  }
+
+  .member-list-section {
+    @apply mb-6;
+  }
+
+  .member-list-title {
+    @apply text-lg font-bold border-b pb-2;
+  }
+
+  .member-list-wrapper {
+    @apply flex flex-col gap-2 mt-3;
+  }
+
+  .member-list-item {
+    @apply flex items-center gap-4 ml-5;
+  }
+
+  .member-list-image {
+    @apply w-8 h-8 rounded-full object-cover border border-gray-2;
+  }
+
+  .member-list-name {
+    @apply text-sm font-medium truncate w-24;
+  }
+
+  .member-list-empty {
+    @apply text-sm text-gray-1 ml-5;
+  }
 }

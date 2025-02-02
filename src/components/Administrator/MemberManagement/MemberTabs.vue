@@ -14,7 +14,7 @@
       </button>
     </div>
 
-    <div v-if="isLoading" class="flex flex-wrap gap-x-11 gap-y-6 h-[540px]">
+    <div v-if="isLoading" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
       <SkeletonCard v-for="n in 10" :key="n" class="w-[17%]" />
     </div>
 

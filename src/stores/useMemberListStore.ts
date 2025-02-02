@@ -6,7 +6,7 @@ export const useMemberListStore = defineStore('member-list', {
     members: [] as MemberListItem[], // 멤버 목록
     currentPage: 1, // 현재 페이지
     totalPages: 0, // 총 페이지 수
-    selectedRole: 'USER' as MemberListItem['role'], // 선택된 역할
+    selectedRole: 'ADMIN' as MemberListItem['role'], // 선택된 역할
     searchQuery: '', // 검색어
   }),
   actions: {
