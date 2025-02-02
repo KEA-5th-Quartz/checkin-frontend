@@ -4,12 +4,12 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
-import { CommentMember } from '@/types/tickets';
+import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
 import SvgIcon from '../common/SvgIcon.vue';
-import { ClipIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
+import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
 import { useTicketStore } from '@/stores/userTicketStore';
 
 const props = defineProps<{
@@ -38,6 +38,11 @@ const selectedCommentLikes = ref<{
   totalLikes: number;
   likes: Array<{ memberId: number; username: string }>;
 } | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+// 첨부된 파일 정보를 저장할 ref
+const attachedFiles = ref<AttachedFile[]>([]);
+const previewUrl = ref<string | null>(null);
+const showPreview = ref(false);
 
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
@@ -134,6 +139,27 @@ const commentsMutation = useCustomMutation(
   },
 );
 
+// 파일 첨부 뮤테이션
+const attachmentMutation = useCustomMutation(
+  async ({ ticketId, formData }: { ticketId: number; formData: any }) => {
+    const response = await ticketApi.postTicketAttachment(ticketId, formData);
+
+    return response.data;
+  },
+  {
+    onSuccess: (response) => {
+      const newFile = response.data;
+      attachedFiles.value.push({
+        commentId: newFile.commentId,
+        attachmentUrl: newFile.attachmentUrl,
+        isImage: newFile.isImage,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
+    },
+  },
+);
+
 // 좋아요 토글 핸들러
 const handleLikeToggle = async (commentId: number) => {
   try {
@@ -158,6 +184,68 @@ const handleAddComments = async () => {
     commentContent.value = '';
   } catch (err) {
     console.error('댓글 작성 실패:', err);
+  }
+};
+
+// 파일 선택 트리거 함수
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+// 파일 변경 핸들러
+const handleFileChange = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  if (!target.files?.length) return;
+
+  const file = target.files[0];
+
+  // 파일 크기 검사 (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('파일 크기는 10MB를 초과할 수 없습니다.');
+    target.value = '';
+    return;
+  }
+
+  const formData = new FormData();
+  const requestData = {
+    ticketId: props.ticketId,
+  };
+
+  formData.append('file', file);
+  formData.append('data', new Blob([JSON.stringify(requestData)], { type: 'application/json' }));
+
+  try {
+    await attachmentMutation.mutateAsync({
+      ticketId: props.ticketId,
+      formData: formData,
+    });
+
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error('파일 첨부 실패:', err.message);
+    }
+    alert('파일 첨부에 실패했습니다.');
+  }
+};
+
+// 파일 다운로드
+const handleFileDownload = (file: AttachedFile) => {
+  try {
+    window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
+  } catch (err) {
+    console.error('파일 다운로드 실패:', err);
+    alert('파일 다운로드에 실패했습니다.');
+  }
+};
+
+// 이미지 미리보기
+const handlePreview = (file: AttachedFile) => {
+  if (file.isImage) {
+    previewUrl.value = file.attachmentUrl;
+    showPreview.value = true;
   }
 };
 
@@ -214,7 +302,50 @@ const hasLiked = (commentId: number) => {
               class="w-8 h-8 rounded-full object-cover"
             />
           </div>
-          <div class="ticket-comment-bubble">
+          <!-- 첨부 파일이 있는 경우 표시 -->
+          <div v-if="item.attachmentUrl">
+            <!-- 이미지인 경우 -->
+            <div
+              @click="
+                handleFileDownload({
+                  commentId: item.commentId,
+                  attachmentUrl: item.attachmentUrl,
+                  isImage: item.isImage,
+                })
+              "
+              v-if="item.isImage"
+              class="relative"
+            >
+              <img
+                :src="item.attachmentUrl"
+                class="max-h-32 rounded cursor-pointer"
+                @click="
+                  handlePreview({
+                    commentId: item.commentId,
+                    attachmentUrl: item.attachmentUrl,
+                    isImage: item.isImage,
+                  })
+                "
+              />
+            </div>
+            <!-- 이미지가 아닌 경우 -->
+            <div
+              v-else
+              @click="
+                handleFileDownload({
+                  commentId: item.commentId,
+                  attachmentUrl: item.attachmentUrl,
+                  isImage: item.isImage,
+                })
+              "
+              class="self-center flex mt-2 cursor-pointer"
+            >
+              <SvgIcon :icon="DownloadIcon" class="w-5 h-5 text-gray-500" />
+              <span class="text-sm text-gray-1">첨부파일</span>
+            </div>
+          </div>
+
+          <div v-else class="ticket-comment-bubble">
             <p class="text-sm">{{ item.commentContent }}</p>
           </div>
           <div class="flex-stack self-end">
@@ -261,8 +392,9 @@ const hasLiked = (commentId: number) => {
   <!-- 댓글 인풋 -->
   <div v-if="!ticketStore.isEditMode" class="ticket-comment-input-area">
     <textarea v-model="commentContent" placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
+    <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">
-      <SvgIcon :icon="ClipIcon" class="cursor-pointer" />
+      <SvgIcon :icon="ClipIcon" class="cursor-pointer" @click="triggerFileInput" />
       <SvgIcon :icon="SendIcon" class="cursor-pointer" @click="handleAddComments" />
     </div>
   </div>

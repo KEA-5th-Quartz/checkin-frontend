@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'; // 반응형 상태 생성
-import UserTemplateFilter from './UserTemplateFilter.vue'; // 템플리 목록 상단 컴포넌트
-import { TemplateDataTest } from '../user/dashboardVacantTest'; // 템플릿 목록 조회
-import UserTemplateTicket from './UserTemplateTicket.vue'; // 상세 템플릿 조회
+import TemplateFilter from './TemplateFilter.vue'; // 템플릿 목록 상단 컴포넌트
+import { TemplateDataTest } from '../data/dashboardVacantTest'; // 템플릿 목록 조회 데이터
+import TemplateDetail from './TemplateDetail.vue'; // 상세 템플릿 조회
 import { useUserTemplateListStore } from '@/stores/userTemplateListStore'; // 템플릿 상태관리
-import SvgIcon from '../common/SvgIcon.vue'; // 아이콘
+import SvgIcon from '@/components/common/SvgIcon.vue'; // 아이콘
 import { CreateTicketIcon } from '@/assets/icons/path';
 
 const templateStore = useUserTemplateListStore();
@@ -38,7 +38,7 @@ const handleCheckboxClick = (event: Event, id: number) => {
 
 <template>
   <section v-if="TemplateDataTest.length !== 0">
-    <UserTemplateFilter />
+    <TemplateFilter />
     <article class="overflow-x-auto mt-5 px-5 pb-20">
       <div class="min-h-[calc(100vh-300px)] h-full">
         <table class="min-w-full table-fixed">
@@ -106,7 +106,7 @@ const handleCheckboxClick = (event: Event, id: number) => {
         </table>
       </div>
 
-      <UserTemplateTicket v-if="selectedTemplateId" :template-id="selectedTemplateId" @close="handleCloseModal" />
+      <TemplateDetail v-if="selectedTemplateId" :template-id="selectedTemplateId" @close="handleCloseModal" />
     </article>
   </section>
   <section v-else class="w-full flex flex-col items-center pb-40">

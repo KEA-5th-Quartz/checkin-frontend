@@ -77,6 +77,9 @@ body {
   .login-p {
     @apply absolute pt-1.5 text-sm font-bold;
   }
+  .login-password-reset {
+    @apply block mt-12 text-center text-sm text-gray-1 hover:text-gray-0;
+  }
 
   /* 사이드바 */
   .sidebar-nav-container {
@@ -121,7 +124,7 @@ body {
 
   /* 드롭다운 */
   .dropdown-bar {
-    @apply min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200;
+    @apply min-w-0 inline-flex items-center justify-between px-3 rounded-lg transition-colors duration-200 line-clamp-1 whitespace-nowrap;
   }
   .dropdown-bar-hasColor {
     @apply inline-flex gap-2 py-1;
@@ -173,7 +176,7 @@ body {
 
   /* 대시보드 */
   .manager-thead {
-    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium sticky top-0 z-10 bg-white-0;
+    @apply border-b-2 border-gray-2 whitespace-nowrap font-medium sticky top-0 z-10 bg-primary-5;
   }
   .manager-th {
     @apply text-black-2 font-medium px-2 py-3.5;
@@ -217,7 +220,7 @@ body {
     @apply flex-between border border-gray-2 hover:border-gray-1 rounded-[10px] py-[5px] text-start px-3 cursor-pointer;
   }
   .filter-dropdown-ul {
-    @apply absolute z-10 top-9 mt-1 w-full card-base border border-gray-2 max-h-60 overflow-y-auto hide-scrollbar;
+    @apply absolute z-10 top-9 mt-1 w-full card-base border border-gray-2 max-h-52 overflow-y-auto hide-scrollbar;
   }
   .filter-dropdown-li {
     @apply flex px-3 py-2 hover:bg-gray-3 cursor-pointer;
@@ -293,7 +296,7 @@ body {
     @apply flex-center gap-5 w-full mb-5;
   }
   .ticket-comment-comment {
-    @apply flex gap-2 mb-6 items-center;
+    @apply flex gap-2 mb-6 items-start;
   }
   .ticket-comment-username {
     @apply absolute -top-5 text-xs whitespace-nowrap;
@@ -421,6 +424,13 @@ body {
   }
   .statistics-flex-gap {
     @apply flex gap-4;
+  }
+  /* 사용자 티켓 요청 폼*/
+  .title-form {
+    @apply w-full h-12 border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3;
+  }
+  .create-button {
+    @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-20;
   }
   /* 관리자 멤버 모달 스타일 */
   .member-modal-overlay {

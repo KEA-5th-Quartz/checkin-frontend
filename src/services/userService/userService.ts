@@ -5,12 +5,24 @@ export const userApi = {
   login(data: { username: string; password: string }) {
     return api.post('/auth/login', data);
   },
+  // 로그아웃
+  logout() {
+    return api.post('/auth/logout');
+  },
+  // 첫 로그인 비밀번호 초기화
+  passwordReset(memberId: number | null, data: { passwordResetToken: string | null; newPassword: string }) {
+    return api.put(`/members/${memberId}/password-reset`, data);
+  },
+  // 비밀번호 찾기
+  passwordSearch(username: string | unknown) {
+    return api.post('/members/password-reset', { username: username });
+  },
   // refresh토큰으로 accessToken과 refreshToken 재발급
   refresh() {
     return api.post('/auth/refresh');
   },
   // 비밀번호 변경(최초 로그인)
-  changePassword(memberId: number | null, data: { originalpassword: string; newpassword: string }) {
+  changePassword(memberId: number | null, data: { originalPassword: string; newPassword: string }) {
     return api.put(`/members/${memberId}/password`, data);
   },
   // 담당자 목록 조회

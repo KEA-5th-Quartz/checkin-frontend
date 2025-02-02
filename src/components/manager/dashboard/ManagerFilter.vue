@@ -4,9 +4,10 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
 import { computed, ref } from 'vue';
-import { firstCategory, status } from '../ticketOptionTest';
+import { status } from '../ticketOptionTest';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { userApi } from '@/services/userService/userService';
+import { categoryApi } from '@/services/categoryService/categoryService';
 
 const props = defineProps<{
   isMyTicket: boolean;
@@ -58,6 +59,27 @@ const managerOptions = computed(() => {
   );
 });
 
+// 카테고리 목록 페치
+const { data: categoryData } = useCustomQuery(['category-list'], async () => {
+  try {
+    const response = await categoryApi.getCategories();
+    return response;
+  } catch (err) {
+    console.error('카테고리 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+const categoryOptions = computed(() => {
+  if (!categoryData.value?.data?.data) return [];
+
+  return categoryData.value.data.data.map((category: { firstCategoryId: number; firstCategoryName: string }) => ({
+    id: category.firstCategoryId,
+    value: category.firstCategoryName,
+    label: category.firstCategoryName,
+  }));
+});
+
 // 필터 토글 함수들
 const toggleQuickFilter = (filterId: string) => {
   // 이미 선택된 필터를 다시 클릭하면 선택 해제
@@ -91,6 +113,16 @@ const toggleCategory = (category: string) => {
   } else {
     selectedCategories.value.push(category);
   }
+};
+
+const handleReset = () => {
+  emit('applyFilters', {
+    quickFilters: '',
+    managers: [],
+    statuses: [],
+    categories: [],
+  });
+  emit('closeFilter');
 };
 
 // 저장 버튼 클릭 핸들러
@@ -171,9 +203,9 @@ onClickOutside(modalRef, () => {
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isCategoryDropdownOpen ? 'rotate-180' : '']" />
         </div>
 
-        <ul v-if="isCategoryDropdownOpen" class="filter-dropdown-ul">
+        <ul v-if="isCategoryDropdownOpen" class="filter-dropdown-ul max-h-36">
           <li
-            v-for="category in firstCategory"
+            v-for="category in categoryOptions"
             :key="category.id"
             @click="toggleCategory(category.value)"
             class="filter-dropdown-li"
@@ -201,9 +233,9 @@ onClickOutside(modalRef, () => {
         />
       </div>
     </section>
-    <!-- 취소 저장 버튼 -->
+    <!-- 초기화 저장 버튼 -->
     <section class="filter-btn-section">
-      <button @click="emit('closeFilter')" class="btn-cancel">취소</button>
+      <button @click="handleReset" class="btn-cancel">초기화</button>
       <button @click="handleSave" class="btn-main">저장</button>
     </section>
   </div>
