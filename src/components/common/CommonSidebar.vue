@@ -63,12 +63,8 @@ const userTemplateItems = [
 
 // 로그아웃
 const handleLogout = async () => {
-  try {
-    await userApi.logout();
-    router.replace('/');
-  } catch (err) {
-    console.error('로그아웃 실패:', err);
-  }
+  await memberStore.logout();
+  router.push('/');
 };
 </script>
 

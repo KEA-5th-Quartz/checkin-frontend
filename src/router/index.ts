@@ -172,15 +172,8 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 2. 토큰이 없는 경우 토큰 복구 시도
-  if (!memberStore.accessToken) {
-    try {
-      const success = await memberStore.restoreAuth();
-      if (!success) {
-        return next('/');
-      }
-    } catch (error) {
-      return next('/');
-    }
+  if (!memberStore.accessToken && !memberStore.isLoggedOut) {
+    await memberStore.restoreAuth();
   }
 
   // 3. 인증이 필요한 페이지 체크

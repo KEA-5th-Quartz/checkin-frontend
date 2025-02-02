@@ -8,4 +8,5 @@ export interface MemberState {
   email: string;
   accessToken: string;
   passwordResetToken: string | null;
+  isLoggedOut?: boolean;
 }
