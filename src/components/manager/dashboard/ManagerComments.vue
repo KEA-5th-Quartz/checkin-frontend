@@ -11,6 +11,12 @@ import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
 
+type AttachedFile = {
+  commentId: number;
+  attachmentUrl: string;
+  isImage: boolean;
+};
+
 const props = defineProps<{
   ticketId: number;
 }>();
@@ -37,6 +43,10 @@ const selectedCommentLikes = ref<{
   likes: Array<{ memberId: number; username: string }>;
 } | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+// 첨부된 파일 정보를 저장할 ref
+const attachedFiles = ref<AttachedFile[]>([]);
+const previewUrl = ref<string | null>(null);
+const showPreview = ref(false);
 
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
@@ -140,7 +150,14 @@ const attachmentMutation = useCustomMutation(
     return response.data;
   },
   {
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const newFile = response.data;
+      attachedFiles.value.push({
+        commentId: newFile.commentId,
+        attachmentUrl: newFile.attachmentUrl,
+        isImage: newFile.isImage,
+      });
+
       queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
     },
   },
@@ -184,30 +201,23 @@ const handleFileChange = async (event: Event) => {
   if (!target.files?.length) return;
 
   const file = target.files[0];
-  const formData = new FormData();
 
-  // 서버가 기대하는 형식대로 데이터 구성
+  // 파일 크기 검사 (10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    alert('파일 크기는 10MB를 초과할 수 없습니다.');
+    target.value = '';
+    return;
+  }
+
+  const formData = new FormData();
   const requestData = {
     ticketId: props.ticketId,
-    // 필요한 다른 데이터가 있다면 여기에 추가
   };
 
-  // FormData에 파일과 데이터를 각각 추가
   formData.append('file', file);
   formData.append('data', new Blob([JSON.stringify(requestData)], { type: 'application/json' }));
 
-  // FormData 내용 확인
-  console.log('=== FormData 내용 확인 ===');
-  for (const pair of formData.entries()) {
-    console.log(pair[0] + ': ', pair[1]);
-  }
-
   try {
-    console.log('=== 파일 정보 ===');
-    console.log('파일 이름:', file.name);
-    console.log('파일 타입:', file.type);
-    console.log('파일 크기:', file.size, 'bytes');
-
     await attachmentMutation.mutateAsync({
       ticketId: props.ticketId,
       formData: formData,
@@ -217,14 +227,38 @@ const handleFileChange = async (event: Event) => {
       fileInput.value.value = '';
     }
   } catch (err: any) {
-    console.error('=== 에러 상세 정보 ===');
-    console.error('에러:', err);
-    if (err.response) {
-      console.error('응답 상태:', err.response.status);
-      console.error('응답 데이터:', err.response.data);
-    }
+    console.error('파일 첨부 실패:', err.response?.data || err);
+    alert('파일 첨부에 실패했습니다.');
   }
 };
+
+// 파일 다운로드
+const handleFileDownload = async (file: AttachedFile) => {
+  try {
+    const response = await fetch(file.attachmentUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CheckIn_${file.commentId}`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error('파일 다운로드 실패:', err);
+    alert('파일 다운로드에 실패했습니다.');
+  }
+};
+
+// 이미지 미리보기
+const handlePreview = (file: AttachedFile) => {
+  if (file.isImage) {
+    previewUrl.value = file.attachmentUrl;
+    showPreview.value = true;
+  }
+};
+
 // 좋아요 목록 모달 표시 함수
 const handleShowLikes = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId);
@@ -278,10 +312,45 @@ const hasLiked = (commentId: number) => {
               class="w-8 h-8 rounded-full object-cover"
             />
           </div>
-          <div class="ticket-comment-bubble">
+          <!-- 첨부 파일이 있는 경우 표시 -->
+          <div v-if="item.attachmentUrl">
+            <!-- 이미지인 경우 -->
+            <div v-if="item.isImage" class="relative">
+              <img
+                :src="item.attachmentUrl"
+                class="max-h-32 rounded cursor-pointer"
+                @click="
+                  handlePreview({
+                    commentId: item.commentId,
+                    attachmentUrl: item.attachmentUrl,
+                    isImage: item.isImage,
+                  })
+                "
+              />
+            </div>
+            <!-- 이미지가 아닌 경우 -->
+            <div v-else class="flex items-center gap-2">
+              <SvgIcon :icon="ClipIcon" class="w-5 h-5 text-gray-500" />
+              <span class="text-sm text-gray-1">첨부파일</span>
+            </div>
+            <!-- 다운로드 버튼 -->
+            <button
+              class="mt-0.5 text-xs text-blue-3 hover:text-blue-2"
+              @click="
+                handleFileDownload({
+                  commentId: item.commentId,
+                  attachmentUrl: item.attachmentUrl,
+                  isImage: item.isImage,
+                })
+              "
+            >
+              다운로드
+            </button>
+          </div>
+          <div v-else class="ticket-comment-bubble">
             <p class="text-sm">{{ item.commentContent }}</p>
           </div>
-          <div class="flex-stack self-end">
+          <div class="flex-stack self-end mt-2">
             <div class="flex gap-1 relative">
               <SvgIcon
                 :icon="LikeIcon"

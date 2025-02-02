@@ -77,8 +77,8 @@ export const ticketApi = {
     return api.get(`/tickets/${ticketId}/comments/${commentId}/likes`);
   },
   // [담당자, 사용자] 티켓 댓글에 파일 첨부
-  postTicketAttachment(ticketId: number, data: { file: string }) {
-    return api.post(`/tickets/${ticketId}/attachments`, data, {
+  postTicketAttachment(ticketId: number, data: { file: FormData }) {
+    return api.post(`/tickets/${ticketId}/comments/attachment`, data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

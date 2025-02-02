@@ -296,7 +296,7 @@ body {
     @apply flex-center gap-5 w-full mb-5;
   }
   .ticket-comment-comment {
-    @apply flex gap-2 mb-6 items-center;
+    @apply flex gap-2 mb-6 items-start;
   }
   .ticket-comment-username {
     @apply absolute -top-5 text-xs whitespace-nowrap;
