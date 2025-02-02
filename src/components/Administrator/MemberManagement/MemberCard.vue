@@ -3,23 +3,26 @@
     <div class="flex justify-end w-full">
       <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
       <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
-        <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-100">권한 변경</li>
-        <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-500 hover:bg-red-100">탈퇴</li>
+        <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">권한 변경</li>
+        <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">탈퇴</li>
       </ul>
     </div>
 
-    <div
-      class="w-[70px] h-[70px] rounded-full bg-gray-3 flex items-center justify-center overflow-hidden border border-gray-1"
-    >
-      <div class="w-[77px] h-[77px] rounded-full bg-gray-2" />
+    <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
+      <img
+        v-if="member.profilePic"
+        :src="member.profilePic"
+        alt="Profile"
+        class="w-full h-full object-cover rounded-full"
+      />
     </div>
 
     <div class="flex-stack items-center mt-4">
-      <p class="font-bold text-black-0">{{ member.name }}</p>
+      <p class="font-bold text-black-0">{{ member.username }}</p>
       <p class="text-gray-1">{{ member.email }}</p>
     </div>
     <div class="mt-8">
-      <p class="text-gray-1">{{ member.role }}</p>
+      <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
     </div>
 
     <CommonDialog
@@ -32,17 +35,17 @@
       :onCancelClick="closeRoleChangeModal"
     >
       <div ref="dropdownRef" class="relative mt-4">
-        <!-- ✅ 드롭다운 버튼 -->
+        <!-- 드롭다운 버튼 -->
         <button @click="toggleDropdown" class="manager-filter-btn w-full flex items-center justify-between">
-          <span class="font-medium">{{ selectedRole ? selectedRole.label : '권한 선택' }}</span>
+          <span class="font-medium">{{ selectedRole ? roleLabels[selectedRole] : '권한 선택' }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isDropdownOpen ? 'rotate-180' : '']" />
         </button>
 
-        <!-- ✅ 드롭다운 옵션 리스트 -->
+        <!-- 드롭다운 옵션 리스트 -->
         <div v-if="isDropdownOpen" class="manager-filter-menu w-full">
           <ul>
-            <li v-for="option in roleOptions" :key="option.id" @click="selectRole(option)" class="board-size-menu">
-              {{ option.label }}
+            <li v-for="option in roleOptions" :key="option" @click="selectRole(option)" class="board-size-menu">
+              {{ roleLabels[option] }}
             </li>
           </ul>
         </div>
@@ -52,7 +55,7 @@
     <CommonDialog
       v-if="isRemoveMemberModalOpen"
       :title="'멤버 탈퇴'"
-      :content="`${member.name}님을 정말로 탈퇴시키겠습니까?`"
+      :content="`${member.username}님을 정말로 탈퇴시키겠습니까?`"
       :isWarn="true"
       :mainText="'탈퇴'"
       :onMainClick="removeMember"
@@ -63,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import CommonDialog from '../../common/CommonDialog.vue';
 import SvgIcon from '../../common/SvgIcon.vue';
@@ -75,27 +78,29 @@ const isRemoveMemberModalOpen = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const roleOptions: Array<'ADMIN' | 'MANAGER' | 'USER'> = ['ADMIN', 'MANAGER', 'USER'];
+const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
+  ADMIN: '관리자',
+  MANAGER: '담당자',
+  USER: '사용자',
+};
 
-const roleOptions = ref([
-  { id: 'ADMIN', label: '관리자' },
-  { id: 'MANAGER', label: '담당자' },
-  { id: 'USER', label: '사용자' },
-]);
-const selectedRole = ref(null); // 선택된 권한
+const selectedRole = ref<'ADMIN' | 'MANAGER' | 'USER' | null>(null);
 
 // 멤버 데이터 (props로 전달받음)
 const props = defineProps({
   member: {
     type: Object as () => {
-      id: number;
-      name: string;
-      role: string;
+      memberId: number;
+      username: string;
+      role: 'ADMIN' | 'MANAGER' | 'USER';
       email: string;
-      profileImage: string;
+      profilePic: string;
     },
     required: true,
   },
 });
+
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
@@ -105,7 +110,7 @@ onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// b권한 변경 모달 열기/닫기
+// 권한 변경 모달 열기/닫기
 const openRoleChangeModal = () => {
   isRoleChangeModalOpen.value = true;
   isMenuOpen.value = false;
@@ -124,16 +129,16 @@ onClickOutside(dropdownRef, () => {
 });
 
 // 선택된 권한 변경
-const selectRole = (selectedOption) => {
-  selectedRole.value = selectedOption;
-  isDropdownOpen.value = false; // 드롭다운 닫기
-  console.log(`[권한 선택됨] ${props.member.name} → ${selectedOption.label}`);
+const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
+  selectedRole.value = role;
+  isDropdownOpen.value = false;
+  console.log(`[권한 선택됨] ${props.member.username} → ${roleLabels[role]}`);
 };
 
 // 권한 변경 확정 (콘솔 로그만 출력)
 const confirmRoleChange = () => {
   if (selectedRole.value) {
-    console.log(`[권한 변경 요청] ${props.member.name} → ${selectedRole.value.label}`);
+    console.log(`[권한 변경 요청] ${props.member.username} → ${roleLabels[selectedRole.value]}`);
   } else {
     console.warn('권한이 선택되지 않았습니다.');
   }
@@ -151,7 +156,7 @@ const closeRemoveMemberModal = () => {
 
 // 멤버 탈퇴 함수
 const removeMember = () => {
-  console.log(`멤버 탈퇴 요청: ${props.member.name}`);
+  console.log(`멤버 탈퇴 요청: ${props.member.username}`);
   closeRemoveMemberModal();
 };
 </script>
