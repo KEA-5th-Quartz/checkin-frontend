@@ -143,12 +143,9 @@ const router = createRouter({
 
 // router.beforeEach((to, from, next) => {
 //   const memberStore = useMemberStore();
-//   // const memberRole = memberStore.role as MemberType;
-//   // 임시로 항상 MANAGER
-//   const memberRole = 'MANAGER';
-//   // const isAuthenticated = !!memberStore.accessToken;
-//   // 임시로 항상 true
-//   const isAuthenticated = true;
+//   const memberRole = memberStore.role as MemberType;
+
+//   const isAuthenticated = !!memberStore.accessToken;
 
 //   // 로그인이 필요한 페이지인지 확인
 //   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
@@ -179,7 +176,7 @@ const router = createRouter({
 //   }
 
 //   // 첫 로그인 사용자의 경우 비밀번호 변경 페이지로 강제 이동
-//   if (memberStore.passwordChangedAt === null && to.path !== '/first-login' && to.path !== '/') {
+//   if (memberStore.passwordResetToken !== null && to.path !== '/first-login' && to.path !== '/') {
 //     return next('/first-login');
 //   }
 

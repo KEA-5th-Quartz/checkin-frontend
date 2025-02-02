@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { AxiosError } from 'axios';
 import { useMemberStore } from '@/stores/memberStore';
+import { userApi } from '@/services/userService/userService';
 
 const BASE_URL = process.env.VUE_APP_BASE_URL;
 
@@ -61,13 +62,8 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post(
-          '/auth/refresh',
-          {},
-          {
-            withCredentials: true,
-          },
-        );
+        const response = await userApi.refresh();
+        const newAccessToken = response.data.data.accessToken;
 
         const memberStore = useMemberStore();
         memberStore.setMemberInfo(response.data.data);
@@ -76,7 +72,7 @@ api.interceptors.response.use(
         processQueue();
 
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${memberStore.accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
         return api(originalRequest);
       } catch (refreshError) {
