@@ -14,8 +14,11 @@
       </button>
     </div>
 
-    <div v-if="isLoading" class="text-center text-gray-0 py-10">로딩 중...</div>
-    <div v-if="members.length > 0" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
+    <div v-if="isLoading" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
+      <SkeletonCard v-for="n in 5" :key="n" class="w-[20%]" />
+    </div>
+
+    <div v-else-if="members.length > 0" class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
       <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[20%]" />
     </div>
 
@@ -39,6 +42,7 @@ import MemberCard from '../../../components/Administrator/MemberManagement/Membe
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { memberApi } from '@/services/memberService/memberService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
+import SkeletonCard from '@/components/UI/SkeletonCard.vue';
 
 const store = useMemberListStore();
 
