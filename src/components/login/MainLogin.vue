@@ -32,7 +32,6 @@ const handleLogin = async () => {
       username: username.value,
       password: password.value,
     });
-    console.log('data:', response.data.data);
     const memberData = response.data.data;
 
     memberStore.setMemberInfo({
@@ -40,12 +39,13 @@ const handleLogin = async () => {
       username: memberData.username,
       profilePic: memberData.profilePic,
       role: memberData.role,
+      email: memberData.email,
       accessToken: memberData.accessToken,
-      passwordChangedAt: memberData.passwordChangedAt,
+      passwordResetToken: memberData.passwordResetToken,
     });
 
     // 최초로그인인지 검사
-    if (memberData.passwordChangedAt === null) {
+    if (memberData.passwordResetToken !== null) {
       router.push('/first-login');
     } else {
       const redirectPath = getRedirectPath(memberData.role);
@@ -91,8 +91,6 @@ const togglePwdVisibility = () => {
     </div>
 
     <button type="submit" class="login-btn mt-4">로그인</button>
-
-    <a href="#" class="block text-center text-sm text-gray-1 hover:text-gray-0">비밀번호 찾기</a>
   </form>
 
   <CommonDialog

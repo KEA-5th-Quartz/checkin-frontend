@@ -16,6 +16,8 @@ import {
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
+import { userApi } from '@/services/userService/userService';
+import { roleInKorean } from '@/utils/mapping';
 
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -58,6 +60,17 @@ const userTemplateItems = [
   { name: '티켓 템플릿', path: '/user/templates' },
   { name: '새 티켓 템플릿', path: '/user/addtemplate' },
 ];
+
+// 로그아웃
+const handleLogout = async () => {
+  try {
+    // const response = await userApi.logout();
+    // console.log(response);
+    router.replace('/'); // 임시로 홈으로만 가게 구현
+  } catch (err) {
+    console.error('로그아웃 실패:', err);
+  }
+};
 </script>
 
 <template>
@@ -74,7 +87,7 @@ const userTemplateItems = [
         />
       </div>
       <p class="sidebar-p">{{ memberStore.username }}</p>
-      <p class="sidebar-p text-sm">{{ memberStore.role }}</p>
+      <p class="sidebar-p">{{ roleInKorean(memberStore.role) }}</p>
     </section>
 
     <!-- 담당자 -->
@@ -163,7 +176,7 @@ const userTemplateItems = [
       </router-link>
     </ul>
 
-    <button class="absolute left-10 bottom-10" @click="router.push('/')">
+    <button class="absolute left-10 bottom-10" @click="handleLogout">
       <SvgIcon :icon="LogoutIcon" />
     </button>
   </nav>

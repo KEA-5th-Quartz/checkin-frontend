@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useMemberStore } from '@/stores/memberStore';
-import { MemberType } from '@/types/member';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
@@ -12,8 +10,12 @@ import CommonDialog from '../common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 
 const router = useRouter();
-const memberStore = useMemberStore();
+const route = useRoute();
 const dialogState = ref<DialogProps>({ ...initialDialog });
+
+// URL에서 memberId와 passwordResetToken 가져오기
+const memberId = route.query.memberId as string;
+const passwordResetToken = route.query.passwordResetToken as string;
 
 // Form 설정
 const { handleSubmit, errors, meta } = useForm({
@@ -24,15 +26,6 @@ const { handleSubmit, errors, meta } = useForm({
 const { value: newPwd } = useField('newPwd');
 const { value: checkPwd } = useField('checkPwd');
 
-const getRedirectPath = (role: string | MemberType): string => {
-  const roleRedirectMap: Record<MemberType, string> = {
-    ADMIN: '/administrator/memberManagement',
-    MANAGER: '/manager/dashboard',
-    USER: '/user/tickets',
-  };
-  return roleRedirectMap[role as MemberType];
-};
-
 const resetForm = () => {
   newPwd.value = '';
   checkPwd.value = '';
@@ -40,34 +33,19 @@ const resetForm = () => {
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    if (!memberStore.passwordResetToken) {
-      dialogState.value = {
-        open: true,
-        isOneBtn: true,
-        title: '오류가 발생했습니다 다시 로그인해주세요.',
-        mainText: '확인',
-        onMainClick: () => {
-          dialogState.value = { ...initialDialog };
-          router.replace('/');
-        },
-      };
-    }
-
-    await userApi.passwordReset(memberStore.memberId, {
-      passwordResetToken: memberStore.passwordResetToken,
+    await userApi.passwordReset(Number(memberId), {
+      passwordResetToken,
       newPassword: values.newPwd,
     });
-
-    const redirectPath = getRedirectPath(memberStore.role);
 
     dialogState.value = {
       open: true,
       isOneBtn: true,
       title: '비밀번호가 변경되었습니다.',
-      mainText: '확인',
+      mainText: '홈으로',
       onMainClick: () => {
         dialogState.value = { ...initialDialog };
-        router.replace(redirectPath);
+        router.replace('/');
       },
     };
 
