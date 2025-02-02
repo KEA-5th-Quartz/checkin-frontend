@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ClipIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
+import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
-import { AttachedFile, AttachmentMutationParams, CommentMember } from '@/types/tickets';
+import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
@@ -139,8 +139,9 @@ const commentsMutation = useCustomMutation(
 
 // 파일 첨부 뮤테이션
 const attachmentMutation = useCustomMutation(
-  async ({ ticketId, formData }: AttachmentMutationParams) => {
-    const response = await ticketApi.postTicketAttachment(ticketId, { file: formData });
+  async ({ ticketId, formData }: { ticketId: number; formData: any }) => {
+    const response = await ticketApi.postTicketAttachment(ticketId, formData);
+
     return response.data;
   },
   {
@@ -302,7 +303,17 @@ const hasLiked = (commentId: number) => {
           <!-- 첨부 파일이 있는 경우 표시 -->
           <div v-if="item.attachmentUrl">
             <!-- 이미지인 경우 -->
-            <div v-if="item.isImage" class="relative">
+            <div
+              @click="
+                handleFileDownload({
+                  commentId: item.commentId,
+                  attachmentUrl: item.attachmentUrl,
+                  isImage: item.isImage,
+                })
+              "
+              v-if="item.isImage"
+              class="relative"
+            >
               <img
                 :src="item.attachmentUrl"
                 class="max-h-32 rounded cursor-pointer"
@@ -316,13 +327,8 @@ const hasLiked = (commentId: number) => {
               />
             </div>
             <!-- 이미지가 아닌 경우 -->
-            <div v-else class="flex items-center gap-2">
-              <SvgIcon :icon="ClipIcon" class="w-5 h-5 text-gray-500" />
-              <span class="text-sm text-gray-1">첨부파일</span>
-            </div>
-            <!-- 다운로드 버튼 -->
-            <button
-              class="mt-0.5 text-xs text-blue-3 hover:text-blue-2"
+            <div
+              v-else
               @click="
                 handleFileDownload({
                   commentId: item.commentId,
@@ -330,9 +336,11 @@ const hasLiked = (commentId: number) => {
                   isImage: item.isImage,
                 })
               "
+              class="self-center flex mt-2 cursor-pointer"
             >
-              다운로드
-            </button>
+              <SvgIcon :icon="DownloadIcon" class="w-5 h-5 text-gray-500" />
+              <span class="text-sm text-gray-1">첨부파일</span>
+            </div>
           </div>
           <div v-else class="ticket-comment-bubble">
             <p class="text-sm">{{ item.commentContent }}</p>

@@ -48,11 +48,6 @@ export interface AttachedFile {
   isImage: boolean;
 }
 
-export interface AttachmentMutationParams {
-  ticketId: number;
-  formData: FormData;
-}
-
 export interface AttachmentResponse {
   data: AttachedFile;
 }
