@@ -38,15 +38,13 @@
 
 #### 라이브러리
 
-- Pinia (상태 관리)
-- vueRouter (라우팅)
-- TanStack Query (API 요청/ 캐싱) (페이지네이션, 무한스크롤 구현)
-- VeeValidate (폼 관리)
-- VueUse (유틸리티 함수 모음, 이미지 미리 보기, lazy loading)
-- apex-chart (차트 UI)
-- nanoid (key값 생성 및 관리)
-- js-token (유저 토큰 관리)
-- vis-timeline (타임라인 구현)
+- Pinia (클라이언트 상태 관리)
+- vueRouter (라우팅 라이브러리)
+- TanStack Query(VueQuery) (강력한 서버 상태 관리 및 데이터 동기화 라이브러리)
+- VeeValidate (폼 유효성 검사)
+- VueUse (Vue Composition API 유틸리티 컬렉션)
+- apex-chart (차트 UI) 
+- yup (스키마 기반 유효성 검증)
 
 ### 데이터 프로세싱
 
