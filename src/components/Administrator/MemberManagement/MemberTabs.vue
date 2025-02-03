@@ -6,19 +6,28 @@
         :key="tab"
         :class="[
           'px-12 py-2 text-sm font-semibold',
-          currentTab === tab ? 'border-b-4 border-primary-3 text-primary-3' : 'text-gray-0 hover:text-primary-3',
+          selectedRole === tab ? 'border-b-4 border-primary-3 text-primary-3' : 'text-gray-0 hover:text-primary-3',
         ]"
         @click="switchTab(tab)"
       >
-        {{ tab }}
+        {{ roleLabels[tab] }}
       </button>
     </div>
 
-    <div class="flex flex-wrap justify-between gap-7 mx-20 h-[540px]">
-      <MemberCard v-for="member in filteredMembers" :key="member.id" :member="member" class="w-[20%]" />
+    <div v-if="isLoading" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
+      <SkeletonCard v-for="n in 10" :key="n" class="w-[17%]" />
     </div>
+
+    <div v-else-if="members.length > 0" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
+      <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[17%]" />
+    </div>
+
+    <div v-else class="text-center text-gray-0 py-10">
+      <p>조회된 멤버가 없습니다.</p>
+    </div>
+
     <CustomPagination
-      :itemsPerPage="itemsPerPage"
+      :itemsPerPage="10"
       :currentPage="currentPage"
       :totalPages="totalPages"
       @pageChange="handlePageChange"
@@ -27,49 +36,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useMemberListStore } from '@/stores/useMemberListStore';
 import MemberCard from '../../../components/Administrator/MemberManagement/MemberCard.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
+import { memberApi } from '@/services/memberService/memberService';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import SkeletonCard from '@/components/UI/SkeletonCard.vue';
 
-// 샘플 멤버 데이터
-const members = ref([
-  { id: 1, name: 'King.js', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 2, name: 'Pixel.Master', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 3, name: 'Dev.Hero', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 4, name: 'Script.Ninja', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 5, name: 'Bug.Hunter', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image1.jpg' },
-  { id: 6, name: 'Cloud.Rider', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image2.jpg' },
-  { id: 7, name: 'Syntax.Guru', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
-  { id: 8, name: 'Logic.Wizard', role: '관리자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
-  { id: 9, name: 'Logic.Wizard', role: '담당자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
-  { id: 10, name: 'Logic.Wizard', role: '사용자', email: 'test@test.com', profileImage: '/path/to/image3.jpg' },
-]);
+const store = useMemberListStore();
 
 // 탭 목록
-const tabs = ['관리자', '담당자', '사용자'];
+const tabs = ['ADMIN', 'MANAGER', 'USER'];
+const roleLabels: Record<string, string> = {
+  ADMIN: '관리자',
+  MANAGER: '담당자',
+  USER: '사용자',
+};
 
-// 현재 선택된 탭
-const currentTab = ref('관리자');
+// 현재 선택된 역할
+const selectedRole = computed(() => store.selectedRole);
 
-// 현재 탭에 따른 필터링된 멤버 리스트
-const filteredMembers = computed(() => {
-  return members.value.filter((member) => member.role === currentTab.value);
+// 현재 페이지
+const currentPage = computed(() => store.currentPage);
+const totalPages = computed(() => store.totalPages);
+
+// 멤버 목록 API 요청
+const { data, isLoading } = useCustomQuery(
+  ['members', selectedRole, currentPage],
+  () => memberApi.getMembers(selectedRole.value, currentPage.value, 10, store.searchQuery),
+  { keepPreviousData: true },
+);
+
+const members = computed(() => data.value?.members ?? []);
+
+watch(data, (newData) => {
+  if (newData) store.setMembers(newData.members, newData.totalPages);
 });
 
 // 탭 전환 함수
-function switchTab(tab) {
-  currentTab.value = tab;
-}
+const switchTab = async (role: string) => {
+  store.setRole(role);
+  store.setCurrentPage(1); // 역할 변경 시 페이지 초기화
+};
 
-// 페이지 상태 관리
-const currentPage = ref(1);
-const itemsPerPage = 10;
-const totalPages = 20;
 // 페이지 변경 핸들러
-const handlePageChange = (page: number) => {
-  console.log(`페이지 변경: ${page}, 한 페이지에 표시할 데이터 수: ${itemsPerPage}`);
-  console.log('추후 api에 현재 페이지와 한 페이지에 표시할 데이터 수 담아서 호출? ');
-  currentPage.value = page; // 현재 페이지 업데이트
+const handlePageChange = async (page: number) => {
+  store.setCurrentPage(page);
 };
 </script>
 
