@@ -12,24 +12,22 @@ export const validationSchema = yup.object({
   dueDate: yup.string().required('* 날짜를 입력하세요'),
 
   firstCategory: yup
-    // .object()
-    // .shape({
-    //   id: yup.number().required(),
-    //   value: yup.string().required(),
-    //   label: yup.string().required('* 1차 카테고리를 선택하세요'),
-    // })
-    .string()
+    .object()
+    .shape({
+      id: yup.number().required(),
+      value: yup.string().required(),
+      label: yup.string().required('* 1차 카테고리를 선택하세요'),
+    })
     .nullable()
     .required('* 1차 카테고리를 선택하세요'),
 
   secondCategory: yup
-    // .object()
-    // .shape({
-    //   id: yup.number().required(),
-    //   value: yup.string().required(),
-    //   label: yup.string().required('* 2차 카테고리를 선택하세요'),
-    // })
-    .string()
+    .object()
+    .shape({
+      id: yup.number().required(),
+      value: yup.string().required(),
+      label: yup.string().required('* 2차 카테고리를 선택하세요'),
+    })
     .nullable()
     .required('* 2차 카테고리를 선택하세요'),
 

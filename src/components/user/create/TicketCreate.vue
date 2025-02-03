@@ -7,7 +7,7 @@ import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import { computed, ref, nextTick } from 'vue';
 import { useTicketStore } from '@/stores/userTicketStore';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { CalendarIcon, ClipIcon, PencilIcon } from '@/assets/icons/path';
+import { ClipIcon, PencilIcon } from '@/assets/icons/path';
 import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { watchEffect } from 'vue';
@@ -28,6 +28,7 @@ watchEffect(() => {
 // 각 필드에 대한 useField 적용
 const { value: title } = useField<string>('title');
 const { value: content } = useField<string>('content');
+const { value: due_Date } = useField<string>('dueDate');
 const { value: firstCategorySelected } = useField<BaseTicketOption>('firstCategory');
 const { value: secondCategorySelected } = useField<BaseTicketOption>('secondCategory');
 
@@ -77,6 +78,7 @@ const formattedDueDate = computed({
 
 // 템플릿 생성 버튼 클릭 시 실행될 함수
 const onSubmit = handleSubmit(() => {
+  console.log('생성 함수 실행');
   showDialog.value = true; // 다이얼로그 표시
 });
 
@@ -93,7 +95,7 @@ const closeDialog = async () => {
   <main class="ml-24 w-full max-w-[80%]">
     <form @submit.prevent="onSubmit">
       <section class="w-full h-12 mt-16">
-        <label class="ticket-label">템플릿 제목</label>
+        <label class="ticket-label">티켓 제목</label>
         <div class="relative w-full">
           <input v-model="title" class="title-form bg-[#fafafa] pr-10" placeholder="제목을 입력하세요" />
           <SvgIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-1" :icon="PencilIcon" />
@@ -132,7 +134,8 @@ const closeDialog = async () => {
       </section>
       <section class="w-full mt-16">
         <label class="ticket-label">마감 기한</label>
-        <input type="date" class="dueDate-form" v-model="formattedDueDate" />
+        <input type="date" class="dueDate-form" v-model="due_Date" />
+        <div class="text-red-500 text-sm mt-1" v-if="errors.due_Date">{{ errors.due_Date }}</div>
       </section>
 
       <section class="w-full mt-16">
