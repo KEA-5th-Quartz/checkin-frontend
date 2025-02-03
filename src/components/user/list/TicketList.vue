@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="ticketData?.length !== 0">
+  <section v-if="ticketData?.tickets?.length !== 0">
     <!-- 티켓 헤더 -->
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
       <!-- 검색 -->
