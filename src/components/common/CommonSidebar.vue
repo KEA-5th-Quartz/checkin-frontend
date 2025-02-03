@@ -63,13 +63,8 @@ const userTemplateItems = [
 
 // 로그아웃
 const handleLogout = async () => {
-  try {
-    // const response = await userApi.logout();
-    // console.log(response);
-    router.replace('/'); // 임시로 홈으로만 가게 구현
-  } catch (err) {
-    console.error('로그아웃 실패:', err);
-  }
+  await memberStore.logout();
+  router.push('/');
 };
 </script>
 
@@ -78,13 +73,16 @@ const handleLogout = async () => {
     <p class="sidebar-logo">CheckIn</p>
 
     <section class="sidebar-profile">
-      <div class="w-[77px] h-[77px] rounded-full bg-pink-200">
+      <div class="w-[77px] h-[77px] rounded-full">
         <img
           v-if="memberStore.profilePic"
           :src="memberStore.profilePic"
           alt="프로필"
           class="w-full h-full rounded-full object-cover"
         />
+        <div v-else class="w-full h-full rounded-full flex-center text-2xl text-white">
+          {{ memberStore.username?.[0] }}
+        </div>
       </div>
       <p class="sidebar-p">{{ memberStore.username }}</p>
       <p class="sidebar-p">{{ roleInKorean(memberStore.role) }}</p>

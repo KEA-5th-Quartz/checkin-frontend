@@ -44,6 +44,9 @@ const handleLogin = async () => {
       passwordResetToken: memberData.passwordResetToken,
     });
 
+    // 로그인 성공 시 isLoggedOut 플래그를 false로 설정
+    memberStore.isLoggedOut = false;
+
     // 최초로그인인지 검사
     if (memberData.passwordResetToken !== null) {
       router.push('/first-login');

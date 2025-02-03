@@ -151,7 +151,7 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
       :disabled="!meta.valid"
       class="login-btn mt-12 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      변경
+      재설정
     </button>
   </form>
 
