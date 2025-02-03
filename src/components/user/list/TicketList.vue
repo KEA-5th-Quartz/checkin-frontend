@@ -266,12 +266,12 @@ onBeforeUnmount(() => {
       :onMainClick="dialogState.onMainClick"
     />
 
-    <article class="overflow-x-auto mt-5 px-5 pb-20 hide-scrollbar">
+    <article class="overflow-x-auto mt-5 px-5 mb-10 hide-scrollbar">
       <SkeletonTable v-if="isLoading" />
       <ErrorTable v-else-if="error" :error="error" />
 
-      <div v-else class="h-[calc(100vh-300px)]">
-        <table class="min-w-full table-fixed">
+      <div v-else class="h-[calc(100vh-220px)]">
+        <table class="min-w-full">
           <thead class="manager-thead">
             <tr>
               <th v-if="ticketStore.isDeleteMode" class="manager-th w-[1%]">선택</th>

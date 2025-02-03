@@ -213,12 +213,12 @@ onBeforeUnmount(() => {
     </div>
   </header>
 
-  <section class="overflow-x-auto mt-4 px-5 pb-20 hide-scrollbar">
+  <section class="overflow-y-auto mt-4 px-5 mb-10 hide-scrollbar">
     <SkeletonTable v-if="isLoading" />
     <ErrorTable v-else-if="error" :error="error" />
 
-    <div v-else class="h-[calc(100vh-340px)]">
-      <table v-if="!isMyTicket" class="min-w-full table-fixed">
+    <div v-else class="h-[calc(100vh-290px)]">
+      <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
             <th class="manager-th w-[5%] pl-6">번호</th>
