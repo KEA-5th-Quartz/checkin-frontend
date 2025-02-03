@@ -14,16 +14,27 @@
       </button>
     </div>
 
-    <div v-if="isLoading" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
-      <SkeletonCard v-for="n in 10" :key="n" class="w-[17%]" />
-    </div>
+    <div class="flex flex-wrap overflow-y-auto hide-scrollbar">
+      <!-- 로딩 중 -->
+      <div
+        v-if="isLoading"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
+      >
+        <SkeletonCard v-for="n in 8" :key="n" class="w-[80%]" />
+      </div>
 
-    <div v-else-if="members.length > 0" class="flex flex-wrap gap-x-11 gap-y-6 h-[530px]">
-      <MemberCard v-for="member in members" :key="member.memberId" :member="member" class="w-[17%]" />
-    </div>
+      <!-- 멤버 카드 목록 -->
+      <div
+        v-else-if="members.length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
+      >
+        <MemberCard v-for="member in members" :key="member.memberId" :member="member" />
+      </div>
 
-    <div v-else class="text-center text-gray-0 py-10">
-      <p>조회된 멤버가 없습니다.</p>
+      <!-- 조회된 멤버가 없는 경우 -->
+      <div v-else class="text-center text-gray-0 py-10 w-full">
+        <p>조회된 멤버가 없습니다.</p>
+      </div>
     </div>
 
     <CustomPagination
