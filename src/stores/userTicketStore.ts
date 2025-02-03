@@ -6,6 +6,7 @@ export interface Ticket {
   secondCategory: string;
   due_date: string;
   content: string;
+  attachmentIds?: () => [];
 }
 
 const defaultTicket: Ticket = {

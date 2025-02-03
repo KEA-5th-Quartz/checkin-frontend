@@ -427,10 +427,13 @@ body {
   }
   /* 사용자 티켓 요청 폼*/
   .title-form{
-    @apply w-full h-12 border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3;
+    @apply w-full h-12 border border-gray-2 rounded-xl text-gray-1 text-sm px-3;
   }
   .create-button{
     @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-20;
+  }
+  .dueDate-form{
+    @apply w-full h-12 border rounded-xl border-gray-2 text-gray-1 text-sm bg-white-2 px-3; 
   }
 }
 /* flex py-2.5 px-8 gap-2.5 mt-20 */
