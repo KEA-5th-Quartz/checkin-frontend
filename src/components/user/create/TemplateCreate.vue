@@ -1,32 +1,43 @@
 <script setup lang="ts">
 import { useForm, useField } from 'vee-validate';
-import { validationSchema } from '@/utils/formValidation'; // 유효성 검증 스키마 가져오기
+import { templateValidationSchema } from '@/utils/formValidation'; // 유효성 검증 스키마 가져오기
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import { computed, ref, nextTick, watch } from 'vue';
-import { useTicketStore } from '@/stores/userTicketStore';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { ClipIcon } from '@/assets/icons/path';
-import TemplateCreateButton from '@/components/user/create/TemplateCreateButton.vue';
+import { ClipIcon, TemplateIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { useRouter } from 'vue-router';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { templateApi } from '@/services/templateService/templateService';
 
 const showDialog = ref(false);
+const router = useRouter();
+
+const initialValues = {
+  title: '',
+  content: '',
+  firstCategory: '',
+  secondCategory: '',
+};
 
 // Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
 const { handleSubmit, errors } = useForm({
-  validationSchema,
+  initialValues,
+  validationSchema: templateValidationSchema,
+  validateOnMount: true,
+  validateOnChange: true,
 });
 
 // 각 필드에 대한 useField 적용
-const { value: title } = useField<string>('title');
-const { value: content } = useField<string>('content');
+const { value: title, handleChange: titleChange } = useField('title');
+const { value: content, handleChange: contentChange } = useField('content');
+const { handleChange: firstCategoryChange } = useField('firstCategory');
+const { handleChange: secondCategoryChange } = useField('secondCategory');
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
-
-// Vue Store 사용
-const ticketStore = useTicketStore();
 
 // 카테고리 목록 페치
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
@@ -83,6 +94,8 @@ watch(
           value: firstCategory.firstCategoryName,
           label: firstCategory.firstCategoryName,
         };
+        // vee-validate 값도 업데이트
+        firstCategoryChange(firstCategory.firstCategoryName);
 
         // 선택된 1차 카테고리의 첫 번째 2차 카테고리 설정
         const secondCategory = firstCategory.secondCategories[0];
@@ -92,47 +105,24 @@ watch(
             value: secondCategory.name,
             label: secondCategory.name,
           };
+          // vee-validate 값도 업데이트
+          secondCategoryChange(secondCategory.name);
         }
       }
     }
   },
   { immediate: true },
 );
-// 카테고리 선택 로직
-const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof ticketStore.ticket) => {
-  return computed({
-    get: () => options.find((option) => option.label === ticketStore.ticket?.[field]) || options[0],
-    set: (newValue: BaseTicketOption) => {
-      if (ticketStore.ticket) {
-        ticketStore.updateTicket({
-          ...ticketStore.ticket,
-          [field]: newValue.label,
-        });
-      }
-    },
-  });
-};
 
-const handleOptionSelect = (field: keyof typeof ticketStore.ticket) => (option: BaseTicketOption) => {
-  if (ticketStore.ticket) {
-    ticketStore.updateTicket({
-      ...ticketStore.ticket,
-      [field]: option.label,
-    });
-  }
-};
-
-// 1차 카테고리 변경
 const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   try {
     firstCategorySelected.value = option;
+    firstCategoryChange(option.label); // vee-validate 값 업데이트
 
-    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
     const selectedFirstCategory = categoryData.value?.data?.data.find(
       (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
     );
 
-    // 2. 2차 카테고리를 첫 번째 요소로 설정
     if (selectedFirstCategory?.secondCategories?.length > 0) {
       const firstSecondCategoryOption = {
         id: selectedFirstCategory.secondCategories[0].secondCategoryId,
@@ -140,38 +130,98 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
         label: selectedFirstCategory.secondCategories[0].name,
       };
       secondCategorySelected.value = firstSecondCategoryOption;
+      secondCategoryChange(firstSecondCategoryOption.label); // vee-validate 값 업데이트
     }
   } catch (err) {
     console.error('1차 카테고리 변경 실패:', err);
   }
 };
-// 2차 카테고리 변경
+
 const handleSecondCategorySelect = async (option: BaseTicketOption) => {
   try {
     secondCategorySelected.value = option;
+    secondCategoryChange(option.label); // vee-validate 값 업데이트
   } catch (err) {
     console.error('2차 카테고리 변경 실패:', err);
   }
 };
 
-// 템플릿 생성 버튼 클릭 시 실행될 함수
-const onSubmit = handleSubmit(() => {
-  showDialog.value = true; // 다이얼로그 표시
+// mutation 추가
+const createTemplateMutation = useCustomMutation(
+  (data: { title: string; firstCategory: string; secondCategory: string; content: string; attachmentIds: number[] }) =>
+    templateApi.postTemplates(data),
+  {
+    onSuccess: () => {
+      showDialog.value = true;
+    },
+  },
+);
+
+// onSubmit 함수 수정
+const onSubmit = handleSubmit(async (formValues, { setErrors }) => {
+  try {
+    // 카테고리가 선택되지 않았을 경우 첫 번째 값을 사용
+    if (!firstCategorySelected.value && categoryData.value?.data?.data?.length > 0) {
+      const firstCategory = categoryData?.value.data.data[0];
+      firstCategorySelected.value = {
+        id: firstCategory.firstCategoryId,
+        value: firstCategory.firstCategoryName,
+        label: firstCategory.firstCategoryName,
+      };
+    }
+
+    if (!secondCategorySelected.value && categoryData.value?.data?.data?.[0]?.secondCategories?.length > 0) {
+      const secondCategory = categoryData?.value.data.data[0].secondCategories[0];
+      secondCategorySelected.value = {
+        id: secondCategory.secondCategoryId,
+        value: secondCategory.name,
+        label: secondCategory.name,
+      };
+    }
+
+    // 여전히 카테고리가 없다면 에러 처리
+    if (!firstCategorySelected.value || !secondCategorySelected.value) {
+      setErrors({
+        firstCategory: '카테고리 데이터를 찾을 수 없습니다',
+        secondCategory: '카테고리 데이터를 찾을 수 없습니다',
+      });
+      return;
+    }
+
+    const templateData = {
+      title: formValues.title,
+      firstCategory: firstCategorySelected.value.label,
+      secondCategory: secondCategorySelected.value.label,
+      content: formValues.content,
+      attachmentIds: [],
+    };
+
+    await createTemplateMutation.mutateAsync(templateData);
+  } catch (error) {
+    console.error('템플릿 생성 중 오류 발생:', error);
+  }
 });
 
-// Dialog 안닫히는 문제해결용 함수
 const closeDialog = async () => {
   showDialog.value = false;
-  await nextTick(); // Vue의 상태 업데이트 보장
+  await nextTick();
+
+  router.push('/user/templatelist');
 };
 </script>
 
 <template>
-  <main class="ml-24 max-w-[80%] pb-20">
+  <section class="ml-24 max-w-[80%] pb-20">
     <form @submit.prevent="onSubmit">
       <section class="w-full h-12 mt-24">
         <label class="ticket-label">템플릿 제목</label>
-        <input v-model="title" class="title-form bg-[#fafafa]" placeholder="제목을 입력하세요" />
+        <input
+          :value="title"
+          @input="titleChange"
+          name="title"
+          class="title-form bg-[#fafafa]"
+          placeholder="제목을 입력하세요"
+        />
         <div class="text-red-500 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
       </section>
 
@@ -183,11 +233,10 @@ const closeDialog = async () => {
             label=""
             :options="firstCategoryOptions"
             :selected-option="firstCategorySelected"
-            :onOptionSelect="handleOptionSelect('firstCategory')"
             @select="handleFirstCategorySelect"
             isEdit
           />
-          <div class="text-red-500 text-sm mt-1" v-if="errors.firstCategory">{{ errors.firstCategorySelected }}</div>
+          <!-- <div class="text-red-500 text-sm mt-1" v-if="errors.firstCategory">{{ errors.firstCategorySelected }}</div> -->
         </div>
 
         <div class="max-w-[50%] w-full">
@@ -197,37 +246,42 @@ const closeDialog = async () => {
             label=""
             :options="secondCategoryOptions"
             :selected-option="secondCategorySelected"
-            :onOptionSelect="handleOptionSelect('secondCategory')"
             @select="handleSecondCategorySelect"
             isEdit
           />
-          <div class="text-red-500 text-sm mt-1" v-if="errors.secondCategory">{{ errors.secondCategorySelected }}</div>
+          <!-- <div class="text-red-500 text-sm mt-1" v-if="errors.secondCategory">{{ errors.secondCategorySelected }}</div> -->
         </div>
       </section>
 
       <section class="w-full mt-24">
         <label class="ticket-label">설명</label>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa]" />
+        <textarea
+          :value="content"
+          @input="contentChange"
+          name="content"
+          class="ticket-desc-textarea min-h-80 bg-[#fafafa]"
+        />
         <div class="text-red-500 text-sm mt-1" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end pr-2 cursor-pointer">
           <SvgIcon :icon="ClipIcon" />
         </div>
       </section>
-      <section class="flex justify-center">
-        <TemplateCreateButton type="onSubmit" />
-      </section>
-      <CommonDialog
-        v-if="showDialog"
-        title="템플릿 생성 완료"
-        content="템플릿이 생성되었습니다."
-        :isOneBtn="true"
-        mainText="확인"
-        :onMainClick="
-          () => {
-            closeDialog();
-          }
-        "
-      />
+
+      <button class="create-button justify-self-center" type="submit">
+        <SvgIcon :icon="TemplateIcon" />템플릿 생성
+      </button>
     </form>
-  </main>
+    <CommonDialog
+      v-if="showDialog"
+      title="템플릿 생성 완료"
+      content="템플릿이 생성되었습니다."
+      :isOneBtn="true"
+      mainText="확인"
+      :onMainClick="
+        () => {
+          closeDialog();
+        }
+      "
+    />
+  </section>
 </template>

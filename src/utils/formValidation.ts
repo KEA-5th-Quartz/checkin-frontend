@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const validationSchema = yup.object({
+export const templateValidationSchema = yup.object({
   title: yup
     .string()
     .trim()
@@ -9,27 +9,9 @@ export const validationSchema = yup.object({
     .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
     .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다'),
 
-  dueDate: yup.string().required('* 날짜를 입력하세요'),
+  firstCategory: yup.string().required('* 1차 카테고리를 선택하세요'),
 
-  firstCategory: yup
-    .object()
-    .shape({
-      id: yup.number().required(),
-      value: yup.string().required(),
-      label: yup.string().required('* 1차 카테고리를 선택하세요'),
-    })
-    .nullable()
-    .required('* 1차 카테고리를 선택하세요'),
-
-  secondCategory: yup
-    .object()
-    .shape({
-      id: yup.number().required(),
-      value: yup.string().required(),
-      label: yup.string().required('* 2차 카테고리를 선택하세요'),
-    })
-    .nullable()
-    .required('* 2차 카테고리를 선택하세요'),
+  secondCategory: yup.string().required('* 2차 카테고리를 선택하세요'),
 
   content: yup
     .string()
