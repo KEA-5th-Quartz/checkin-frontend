@@ -34,6 +34,9 @@ api.interceptors.request.use((config) => {
   const memberStore = useMemberStore();
   if (memberStore.accessToken) {
     config.headers.Authorization = `Bearer ${memberStore.accessToken}`;
+    console.log('🚀 API 요청 Authorization 헤더:', config.headers.Authorization);
+  } else {
+    console.error('❌ accessToken이 존재하지 않습니다!');
   }
   return config;
 });
