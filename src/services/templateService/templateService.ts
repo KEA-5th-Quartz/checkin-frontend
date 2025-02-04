@@ -11,4 +11,12 @@ export const templateApi = {
   }) {
     return api.post('/members/templates', data);
   },
+  getTemplateList(membersId: number | null, page?: number, size?: number) {
+    const params = new URLSearchParams();
+
+    if (page) params.append('page', page.toString());
+    if (size) params.append('size', size.toString());
+
+    return api.get(`/members/${membersId}/templates?${params.toString()}`);
+  },
 };

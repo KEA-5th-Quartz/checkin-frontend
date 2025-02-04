@@ -16,14 +16,14 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <section v-if="!templateStore.isDeleteMode" class="flex justify-between mx-auto w-[95%] mt-[50px]">
+  <section v-if="!templateStore.isDeleteMode" class="">
     <!-- 필터 -->
     <div class="flex items-center gap-10 w-full">
       <SvgIcon :icon="TrashcanIcon" class="cursor-pointer ml-auto" @click="templateStore.toggleDeleteMode" />
     </div>
   </section>
 
-  <section v-else class="flex justify-between mx-auto w-[95%] mt-14">
+  <section v-else class="flex justify-end">
     <div class="flex items-center gap-4 ml-auto">
       <button @click="handleCancel" class="px-6 py-2 text-sm border border-gray-1 rounded-lg hover:bg-gray-100">
         취소

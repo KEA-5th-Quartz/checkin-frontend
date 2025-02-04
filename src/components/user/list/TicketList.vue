@@ -182,7 +182,7 @@ const handlePageChange = (page: number) => {
 };
 
 onBeforeUnmount(() => {
-  sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
+  sessionStorage.setItem('userCurrentPage', currentPage.value.toString());
 });
 </script>
 
