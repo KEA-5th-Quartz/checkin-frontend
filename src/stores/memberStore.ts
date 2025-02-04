@@ -11,6 +11,7 @@ export const useMemberStore = defineStore('member', {
     email: '',
     accessToken: '',
     passwordResetToken: null,
+    isLoggedOut: false,
   }),
 
   actions: {
@@ -32,6 +33,13 @@ export const useMemberStore = defineStore('member', {
       this.email = '';
       this.accessToken = '';
       this.passwordResetToken = null;
+    },
+
+    async logout() {
+      // 로그아웃 API 호출
+      await userApi.logout();
+      this.clearMemberInfo();
+      this.isLoggedOut = true; // 로그아웃 시 플래그 설정
     },
 
     async restoreAuth() {

@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { AxiosError } from 'axios';
 import { useMemberStore } from '@/stores/memberStore';
+import { userApi } from '@/services/userService/userService';
+import { useRouter } from 'vue-router';
 
 const BASE_URL = process.env.VUE_APP_BASE_URL;
+const router = useRouter();
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -47,30 +50,30 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
-    // 401 에러 처리 (토큰 관련)
-    if (error.response?.status === 401 && originalRequest) {
-      // 로그인 엔드포인트에서의 401 에러는 바로 반환
-      if (originalRequest.url === '/auth/login') {
-        return Promise.reject(error.response.data);
-      }
+    // refresh 토큰으로 새로운 토큰을 요청하는 API 자체가 401 에러를 반환하면,
+    // // 더 이상의 refresh 시도 없이 바로 로그아웃 처리
+    if (error.response?.status === 401 && originalRequest?.url?.includes('/auth/refresh')) {
+      const memberStore = useMemberStore();
+      memberStore.clearMemberInfo();
+      router.push('/');
+      return Promise.reject(error);
+    }
 
-      // 토큰 갱신 로직
+    // 로그인 요청(/auth/login)에서 발생하는 401 에러는 토큰 갱신 로직을 타지 않도록 제외
+    if (error.response?.status === 401 && originalRequest && !originalRequest.url?.includes('/auth/login')) {
+      // isRefreshing 플래그로 동시에 여러 refresh 요청이 발생하는 것을 방지
+      // 대기중인 요청들은 failedQueue에 저장했다가 나중에 한 번에 처리
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
+          failedQueue.push({ resolve, reject }); // 중복 refresh 방지
         });
       }
 
       isRefreshing = true;
 
       try {
-        const response = await api.post(
-          '/auth/refresh',
-          {},
-          {
-            withCredentials: true,
-          },
-        );
+        const response = await userApi.refresh();
+        const newAccessToken = response.data.data.accessToken;
 
         const memberStore = useMemberStore();
         memberStore.setMemberInfo(response.data.data);
@@ -79,27 +82,30 @@ api.interceptors.response.use(
         processQueue();
 
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${memberStore.accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
         return api(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
         processQueue(refreshError);
+
+        const memberStore = useMemberStore();
+        memberStore.clearMemberInfo();
+        router.push('/');
+
         return Promise.reject(refreshError);
       }
     }
 
-    // 다른 에러들의 처리
+    // 그 외 에러 처리
     if (error.response?.data) {
       return Promise.reject(error.response.data);
     }
-
-    // 네트워크 에러 등의 경우
+    // 네트워크 에러 처리
     return Promise.reject({
       message: '서버와의 통신에 실패했습니다.',
       status: 500,
     });
   },
 );
-
 export default api;

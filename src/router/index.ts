@@ -17,6 +17,11 @@ const routes: Array<RouteRecordRaw> = [
     component: BlankLayout,
     children: [
       {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('@/views/NotFound.vue'),
+      },
+      {
         path: '/',
         name: 'login',
         component: () => import('../views/account/LoginView.vue'),
@@ -126,64 +131,72 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
+// const router = createRouter({
+//   history: createWebHistory(),
+//   routes,
+// });
+// role에 따른 리다이렉트 경로 결정 함수
+const getRedirectPath = (role: MemberType): string => {
+  switch (role) {
+    case 'ADMIN':
+      return '/admin';
+    case 'MANAGER':
+      return '/manager/dashboard';
+    case 'USER':
+      return '/user/ticketlist';
+    default:
+      return '/';
+  }
+};
+
+// 권한 검사 함수
+const hasRequiredRole = (userRole: MemberType | '', requiredRoles?: MemberType[]): boolean => {
+  if (!requiredRoles) return true;
+  if (!userRole) return false;
+  return requiredRoles.includes(userRole);
+};
+
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: routes,
 });
 
-// // role에 따른 리다이렉트 경로 결정 함수
-// const getRedirectPath = (role: MemberType): string => {
-//   const roleRedirectMap: Record<MemberType, string> = {
-//     ADMIN: '/administrator/memberManagement',
-//     MANAGER: '/manager/dashboard',
-//     USER: '/user/tickets',
-//   };
-//   return roleRedirectMap[role];
-// };
+router.beforeEach(async (to, from, next) => {
+  const memberStore = useMemberStore();
+  const isLoginPage = to.path === '/';
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const requiredRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
 
-// router.beforeEach((to, from, next) => {
-//   const memberStore = useMemberStore();
-//   // const memberRole = memberStore.role as MemberType;
-//   // 임시로 항상 MANAGER
-//   const memberRole = 'MANAGER';
-//   // const isAuthenticated = !!memberStore.accessToken;
-//   // 임시로 항상 true
-//   const isAuthenticated = true;
+  // 1. 로그인 페이지로 가는 경우
+  if (isLoginPage) {
+    if (memberStore.accessToken) {
+      // 이미 로그인된 경우 역할에 맞는 페이지로 리다이렉트
+      return next(getRedirectPath(memberStore.role as MemberType));
+    }
+    return next();
+  }
 
-//   // 로그인이 필요한 페이지인지 확인
-//   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  // 2. 토큰이 없는 경우 토큰 복구 시도
+  if (!memberStore.accessToken && !memberStore.isLoggedOut) {
+    await memberStore.restoreAuth();
+  }
 
-//   // 특정 역할이 필요한 페이지인지 확인
-//   const requiredRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
+  // 3. 인증이 필요한 페이지 체크
+  if (requiresAuth && !memberStore.accessToken) {
+    return next('/');
+  }
 
-//   console.log('isAuthenticated', isAuthenticated);
+  // 4. 권한 체크
+  if (!hasRequiredRole(memberStore.role as MemberType, requiredRoles)) {
+    return next(getRedirectPath(memberStore.role as MemberType));
+  }
 
-//   if (to.path === '/') {
-//     // 이미 로그인한 사용자가 로그인 페이지로 가려고 할 때
-//     if (isAuthenticated && memberRole) {
-//       const redirectPath = getRedirectPath(memberRole as MemberType);
-//       return next(redirectPath);
-//     }
-//     return next();
-//   }
+  // 5. 첫 로그인 사용자의 비밀번호 변경 페이지 리다이렉트
+  if (memberStore.passwordResetToken && to.path !== '/first-login') {
+    return next('/first-login');
+  }
 
-//   if (requiresAuth && !isAuthenticated) {
-//     // 인증이 필요한 페이지인데 로그인하지 않은 경우
-//     return next('/');
-//   }
-
-//   if (requiredRoles && !requiredRoles.includes(memberRole)) {
-//     // 권한이 없는 페이지에 접근하려는 경우
-//     const redirectPath = getRedirectPath(memberRole);
-//     return next(redirectPath);
-//   }
-
-//   // 첫 로그인 사용자의 경우 비밀번호 변경 페이지로 강제 이동
-//   if (memberStore.passwordChangedAt === null && to.path !== '/first-login' && to.path !== '/') {
-//     return next('/first-login');
-//   }
-
-//   next();
-// });
+  next();
+});
 
 export default router;

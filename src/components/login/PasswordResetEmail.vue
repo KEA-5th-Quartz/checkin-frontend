@@ -69,7 +69,7 @@ const onSubmit = handleSubmit(async () => {
         type="submit"
         class="login-btn mt-12 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        변경
+        메일 전송
       </button>
     </div>
   </form>

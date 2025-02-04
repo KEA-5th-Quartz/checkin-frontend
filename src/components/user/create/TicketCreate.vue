@@ -159,7 +159,7 @@ watchEffect(() => {
       <section class="w-full h-12 mt-16">
         <label class="ticket-label">티켓 제목</label>
         <div class="relative w-full">
-          <input v-model="title" class="title-form bg-[#fafafa] pr-10" placeholder="제목을 입력하세요" />
+          <input v-model="title" class="title-form bg-[#fafafa] px-3 py-3 pr-10" placeholder="제목을 입력하세요" />
           <SvgIcon class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-1" :icon="PencilIcon" />
         </div>
         <div class="text-red-2 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
