@@ -130,4 +130,11 @@ export const ticketApi = {
   patchTickets(data: { ticketIds: number[] }) {
     return api.patch('/tickets', data);
   },
+  // [사용자] 티켓 수정
+  puTicket(
+    ticketId: number,
+    data: { title: string; first_category: string; second_category: string; content: string; due_data: string },
+  ) {
+    return api.put(`/tickets/${ticketId}`, data);
+  },
 };

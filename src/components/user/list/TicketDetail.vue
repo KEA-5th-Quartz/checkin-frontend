@@ -13,6 +13,10 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { formatMinusDate } from '@/utils/dateFormat';
 import UserComment from '../UserComment.vue';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useQueryClient } from '@tanstack/vue-query';
+
+const queryClient = useQueryClient();
 
 const props = defineProps<{
   ticketId: number;
@@ -61,13 +65,42 @@ watch(
   { immediate: true },
 );
 
+const updateMutation = useCustomMutation(
+  async () => {
+    if (!ticketStore.ticket || !props.ticketId) return;
+
+    const updateData = {
+      title: ticketStore.ticket.title,
+      first_category: ticketStore.ticket.firstCategory,
+      second_category: ticketStore.ticket.secondCategory,
+      content: ticketStore.ticket.content,
+      due_data: ticketStore.ticket.due_date,
+    };
+
+    const response = await ticketApi.puTicket(props.ticketId, updateData);
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      // 성공 시 상세 정보 쿼리 무효화하여 새로고침
+      queryClient.invalidateQueries(['ticket-detail', props.ticketId]);
+      // 편집 모드 종료
+      ticketStore.isEditMode = false;
+    },
+    onError: (error) => {
+      console.error('티켓 수정 실패:', error);
+      // 에러 처리 로직 추가 가능
+    },
+  },
+);
+
 const handleCancelEdit = () => {
   ticketStore.resetToOriginal();
   ticketStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
-  ticketStore.toggleEditMode();
+  updateMutation.mutate();
 };
 
 const startEdit = () => {
