@@ -50,7 +50,7 @@
 import { AdminIcon, ManagerIcon, UserIcon } from '@/assets/icons/path';
 import SvgIcon from '../../../components/common/SvgIcon.vue';
 
-const props = defineProps({
+defineProps({
   adminCount: {
     type: Number,
     required: true,
