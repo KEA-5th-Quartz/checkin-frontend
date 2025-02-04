@@ -25,7 +25,7 @@ const { value: checkPwd } = useField('checkPwd');
 
 const getRedirectPath = (role: string | MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
-    ADMIN: '/administrator/memberManagement',
+    ADMIN: '/admin',
     MANAGER: '/manager/dashboard',
     USER: '/user/ticketlist',
   };
