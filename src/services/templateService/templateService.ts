@@ -24,4 +24,8 @@ export const templateApi = {
   getTemplateDetail(templateId: number) {
     return api.get(`/members/templates/${templateId}`);
   },
+  // 템플릿 다중 삭제
+  deleteTemplates(data: { templateIds: number[] }) {
+    return api.delete('/members/templates', { data });
+  },
 };

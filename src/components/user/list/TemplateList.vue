@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'; // 반응형 상태 생성
-import TemplateFilter from './TemplateFilter.vue'; // 템플릿 목록 상단 컴포넌트
 import TemplateDetail from './TemplateDetail.vue'; // 상세 템플릿 조회
 import { useUserTemplateListStore } from '@/stores/userTemplateListStore'; // 템플릿 상태관리
 import SvgIcon from '@/components/common/SvgIcon.vue'; // 아이콘
@@ -13,9 +12,12 @@ import { useMemberStore } from '@/stores/memberStore';
 import { templateApi } from '@/services/templateService/templateService';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const templateStore = useUserTemplateListStore();
 const memberStore = useMemberStore();
+const queryClient = useQueryClient();
 
 const selectedTemplateId = ref<number | null>(null);
 const selectedPerPage = ref(perPageOptions[0]);
@@ -33,7 +35,7 @@ const selectOption = (
   selectedPerPage.value = option;
   pageSize.value = option.value;
   currentPage.value = 1;
-  sessionStorage.setItem('sizeCurrentPage', '1');
+  sessionStorage.setItem('templateCurrentPage', '1');
   isSizeOpen.value = false;
 };
 
@@ -46,11 +48,7 @@ const queryParams = computed(() => ({
 }));
 
 // 데이터 페칭
-const {
-  data: templateData,
-  isLoading,
-  error,
-} = useCustomQuery(['template-list', memberStore.memberId], async () => {
+const { data: templateData } = useCustomQuery(['template-list', memberStore.memberId], async () => {
   const response = await templateApi.getTemplateList(
     memberStore.memberId,
     queryParams.value.page,
@@ -58,6 +56,19 @@ const {
   );
   return response.data;
 });
+
+// 템플릿 삭제 뮤테이션
+const deleteMutation = useCustomMutation(
+  async ({ templateIds }: { templateIds: number[] }) => {
+    const response = await templateApi.deleteTemplates({ templateIds });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['template-list', memberStore.memberId] });
+    },
+  },
+);
 
 const handleDelete = () => {
   // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
@@ -74,7 +85,7 @@ const handleDelete = () => {
     },
     mainText: '삭제',
     onMainClick: () => {
-      console.log('삭제하는 id 배열: ', selectedTicketIds);
+      deleteMutation.mutate({ templateIds: selectedTicketIds });
 
       templateStore.clearSelectedTemplates(); // 선택된 티켓 초기화
       templateStore.toggleDeleteMode(); // 삭제 모드 종료
@@ -105,11 +116,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
   } else {
     templateStore.addSelectedTemplate(id);
   }
-  // 현재 선택된 모든 티켓 출력
-  console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(templateStore.selectedTemplates),
-    totalSelected: templateStore.selectedTemplates.size,
-  });
 };
 
 const handlePageChange = (page: number) => {
@@ -124,7 +130,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section v-if="templateData?.data.templates !== 0" class="pb-20">
-    <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-[50px] gap-10 mr-10">
+    <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-8 gap-10 mr-10">
       <div ref="dropdownRef" class="relative mt-1 flex items-center gap-10">
         <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
