@@ -11,6 +11,7 @@ export const templateApi = {
   }) {
     return api.post('/members/templates', data);
   },
+  // 템플릿 목록 조회
   getTemplateList(membersId: number | null, page?: number, size?: number) {
     const params = new URLSearchParams();
 
@@ -18,5 +19,9 @@ export const templateApi = {
     if (size) params.append('size', size.toString());
 
     return api.get(`/members/${membersId}/templates?${params.toString()}`);
+  },
+  // 템플릿 상세 조회
+  getTemplateDetail(templateId: number) {
+    return api.get(`/members/templates/${templateId}`);
   },
 };

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import { useTemplateStore } from '@/stores/userTemplateStore';
@@ -9,8 +9,10 @@ import { firstCategory, secondCategory } from '@/components/manager/ticketOption
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { templateApi } from '@/services/templateService/templateService';
 
-defineProps<{
+const props = defineProps<{
   templateId: number;
 }>();
 
@@ -23,26 +25,42 @@ const handleClose = () => {
   show.value = false;
   setTimeout(() => {
     emit('close');
+    handleCancelEdit();
   }, 300);
 };
 
-let templateDefaultTest = {
-  title: 'SSH 접속 확인',
-  firstCategory: 'VM1',
-  secondCategory: '생성',
-  due_date: '2025-02-22',
-  content: 'Github Repo가 접속이 되지 않습니다.',
-};
+// 티켓 상세 페치
+const { data: detailData } = useCustomQuery(['template-detail', props.templateId], async () => {
+  try {
+    const response = await templateApi.getTemplateDetail(props.templateId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 상세 조회 실패:', err);
+    throw err;
+  }
+});
 
 const templateStore = useTemplateStore();
 
-onMounted(() => {
-  templateStore.setTemplate(templateDefaultTest);
-});
+watch(
+  () => detailData.value,
+  (newData) => {
+    if (newData) {
+      const templateDefaultData = {
+        title: newData.title,
+        firstCategory: newData.firstCategory,
+        secondCategory: newData.secondCategory,
+        content: newData.content,
+      };
+      templateStore.setTemplate(templateDefaultData);
+    }
+  },
+  { immediate: true },
+);
 
 const handleCancelEdit = () => {
   templateStore.resetToOriginal();
-  templateStore.toggleEditMode();
+  templateStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
@@ -58,7 +76,7 @@ const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof
     get: () => options.find((option) => option.label === templateStore.template?.[field]) || options[0],
     set: (newValue: BaseTicketOption) => {
       if (templateStore.template) {
-        templateStore.updateTicket({
+        templateStore.updateTemplate({
           ...templateStore.template,
           [field]: newValue.label,
         });
@@ -72,69 +90,54 @@ const secondCategorySelected = createComputedProperty(secondCategory, 'secondCat
 
 const handleOptionSelect = (field: keyof typeof templateStore.template) => (option: BaseTicketOption) => {
   if (templateStore.template) {
-    templateStore.updateTicket({
+    templateStore.updateTemplate({
       ...templateStore.template,
       [field]: option.label,
     });
   }
 };
+
+const canEdit = computed(() => {
+  return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
+});
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="templateId && templateStore.template" class="fixed inset-0 z-10">
-      <div class="fixed inset-0 transition-opacity" @click="handleClose" />
-      <div
-        class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
-        :class="{ 'drawer-enter': show, 'drawer-leave': !show }"
-      >
+    <div v-if="templateId && templateStore.template && detailData" class="ticket-overlay">
+      <div class="ticket-click-outside" @click="handleClose" />
+      <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
-        <div class="flex items-center justify-between w-full gap-3">
+        <header class="ticket-header">
           <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
-          <input
-            v-else
-            v-model="templateStore.template.title"
-            class="w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none"
-          />
+          <input v-else v-model="templateStore.template.title" class="ticket-edit-input" />
           <div v-if="!templateStore.isEditMode" class="flex items-center gap-8">
-            <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
+            <SvgIcon
+              v-if="canEdit"
+              :icon="PencilIcon"
+              :iconOptions="{ fill: '#000' }"
+              class="cursor-pointer"
+              @click="startEdit"
+            />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
-          <div v-else class="flex items-center gap-4">
-            <button
-              @click="handleCancelEdit"
-              class="px-6 py-1.5 text-sm border border-gray-1 rounded-lg hover:bg-gray-100 whitespace-nowrap"
-            >
-              취소
-            </button>
-            <button
-              @click="handleConfirmEdit"
-              class="px-6 py-1.5 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0 whitespace-nowrap"
-            >
-              저장
-            </button>
+          <div v-else class="filter-btn-section pt-0">
+            <button @click="handleCancelEdit" class="btn-cancel">취소</button>
+            <button @click="handleConfirmEdit" class="btn-main">저장</button>
           </div>
-        </div>
+        </header>
 
         <!-- 컨텐츠 -->
-        <div class="mt-6 flex-1 overflow-y-auto hide-scrollbar">
+        <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
             <!-- 왼쪽 섹션 -->
-            <section class="flex flex-col w-full">
-              <!-- 중요도 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">중요도</p>
-                <div class="py-1">
-                  <PriorityBadge />
-                </div>
-              </div>
-
+            <section class="ticket-section">
               <!-- 1차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">1차 카테고리</p>
+              <div>
+                <label class="ticket-label">1차 카테고리</label>
                 <div
                   v-if="!templateStore.isEditMode"
-                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
+                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm line-clamp-1 overflow-scroll hide-scrollbar"
                 >
                   {{ templateStore.template.firstCategory }}
                 </div>
@@ -148,25 +151,13 @@ const handleOptionSelect = (field: keyof typeof templateStore.template) => (opti
                   isEdit
                 />
               </div>
-
-              <!-- 요청 일자 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">요청 일자</p>
-                <p class="text-xs text-blue-1">2025/01/20</p>
-              </div>
             </section>
 
             <!-- 오른쪽 섹션 -->
-            <section class="flex flex-col w-full">
-              <!-- 진행상태 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">진행상태</p>
-                <StatusBadge status="생성" size="xl" />
-              </div>
-
+            <section class="ticket-section">
               <!-- 2차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">2차 카테고리</p>
+              <div>
+                <label class="ticket-label">2차 카테고리</label>
                 <div
                   v-if="!templateStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
@@ -183,38 +174,17 @@ const handleOptionSelect = (field: keyof typeof templateStore.template) => (opti
                   isEdit
                 />
               </div>
-
-              <!-- 마감 기한 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">마감 기한</p>
-                <p v-if="!templateStore.isEditMode" class="text-xs text-blue-1">
-                  {{ templateStore.template.due_date }}
-                </p>
-                <input
-                  v-else
-                  type="date"
-                  :min="new Date().toISOString().split('T')[0]"
-                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
-                  v-model="templateStore.template.due_date"
-                />
-              </div>
             </section>
           </div>
 
           <!-- 설명 -->
           <div class="mt-11">
-            <p class="font-semibold mb-3">설명</p>
-            <div
-              v-if="!templateStore.isEditMode"
-              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
-            >
-              <p class="text-sm text-gray-1 break-words">{{ templateStore.template.content }}</p>
+            <label class="ticket-desc-label">설명</label>
+            <div v-if="!templateStore.isEditMode" class="ticket-desc-area">
+              <p class="ticket-desc-content">{{ templateStore.template.content }}</p>
             </div>
             <div v-else>
-              <textarea
-                v-model="templateStore.template.content"
-                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
-              />
+              <textarea v-model="templateStore.template.content" class="ticket-desc-textarea" />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
                 <SvgIcon :icon="ClipIcon" />
               </div>
