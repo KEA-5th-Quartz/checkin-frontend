@@ -137,4 +137,12 @@ export const ticketApi = {
   ) {
     return api.put(`/tickets/${ticketId}`, data);
   },
+  // [사용자] 티켓 생성시 파일 첨부
+  postAttachment(data: FormData) {
+    return api.post('/tickets/attachment', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
 };
