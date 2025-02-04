@@ -71,21 +71,21 @@ const deleteMutation = useCustomMutation(
 );
 
 const handleDelete = () => {
-  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
-  const selectedTicketIds = Array.from(templateStore.selectedTemplates);
-  const ticketCount = selectedTicketIds.length;
+  // Set을 배열로 변환하여 선택된 템플릿 ID들을 가져옴
+  const selectedTemplateIds = Array.from(templateStore.selectedTemplates);
+  const templateCount = selectedTemplateIds.length;
 
   dialogState.value = {
     open: true,
     isWarn: true,
-    title: `${ticketCount}개의 템플릿을 삭제하시겠습니까?`,
+    title: `${templateCount}개의 템플릿을 삭제하시겠습니까?`,
     cancelText: '취소',
     onCancelClick: () => {
       dialogState.value = { ...initialDialog };
     },
     mainText: '삭제',
     onMainClick: () => {
-      deleteMutation.mutate({ templateIds: selectedTicketIds });
+      deleteMutation.mutate({ templateIds: selectedTemplateIds });
 
       templateStore.clearSelectedTemplates(); // 선택된 티켓 초기화
       templateStore.toggleDeleteMode(); // 삭제 모드 종료
