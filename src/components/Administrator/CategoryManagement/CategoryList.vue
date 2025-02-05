@@ -73,6 +73,16 @@
       :onMainClick="closeDialog"
       isOneBtn
     />
+    <CommonDialog
+      v-if="isRemoveCategoryModalOpen"
+      :title="'카테고리 삭제'"
+      :content="`'${selectedCategoryName}' 카테고리를 삭제하겠습니까?`"
+      :isWarn="true"
+      :mainText="'삭제'"
+      :onMainClick="RemoveCategory"
+      :cancelText="'취소'"
+      :onCancelClick="closeRemoveCategoryModal"
+    />
   </div>
 </template>
 
@@ -332,12 +342,92 @@ function submitAddCategory(newCategory: { name: string; parentId?: number }) {
   createFirstCategory({ name: newCategory.name });
 }
 
-// 1차 카테고리 삭제
+// 카테고리 삭제 다이얼 상태
+const isRemoveCategoryModalOpen = ref(false);
+
+const closeRemoveCategoryModal = () => {
+  isRemoveCategoryModalOpen.value = false;
+};
+
+const selectedCategoryName = computed(() => {
+  if (!selectedCategory.value) return '선택된 카테고리';
+
+  if ('firstCategoryName' in selectedCategory.value) {
+    return selectedCategory.value.firstCategoryName;
+  }
+
+  if ('name' in selectedCategory.value) {
+    return selectedCategory.value.name;
+  }
+
+  return '이름 없음';
+});
+
+// 1차 카테고리 삭제 여부
+const isPrimaryDelete = ref(false);
+
+// 카테고리 삭제 mutation
+const { mutate: removeCategory } = useCustomMutation(
+  async () => {
+    if (!selectedCategory.value) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
+
+    // 1차 카테고리 삭제
+    if (isPrimaryDelete.value && 'firstCategoryId' in selectedCategory.value) {
+      return await categoryApi.deleteFirstCategory(selectedCategory.value.firstCategoryId);
+    }
+
+    // 2차 카테고리 삭제
+    if ('secondCategoryId' in selectedCategory.value && selectedPrimaryCategory.value) {
+      return await categoryApi.deleteSecondCategory(
+        selectedPrimaryCategory.value.firstCategoryId,
+        selectedCategory.value.secondCategoryId,
+      );
+    }
+
+    throw new Error('잘못된 카테고리 타입');
+  },
+  {
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ['category-list'] });
+      isRemoveCategoryModalOpen.value = false;
+      selectedCategory.value = null;
+      dialogContent.value = {
+        title: '카테고리 삭제',
+        content: '카테고리가 삭제 되었습니다.',
+        mainText: '확인',
+      };
+      isDialogOpen.value = true;
+    },
+    onError: (error: unknown) => {
+      console.error('카테고리 삭제 실패: ', error);
+      if (isApiError(error) && error.code === 'CATEGORY_4092') {
+        dialogContent.value = {
+          title: '삭제 불가',
+          content: '1차 카테고리에 속한 2차 카테고리가 있어 삭제할 수 없습니다.',
+          mainText: '확인',
+        };
+        isDialogOpen.value = true;
+        closeRemoveCategoryModal();
+      }
+    },
+  },
+);
+
+// 1차 카테고리 삭제 핸들러
 function handleDeletePrimaryCategory(category: FirstCategory) {
-  console.log('1차 카테고리 삭제:', category);
+  selectedCategory.value = category;
+  isPrimaryDelete.value = true;
+  isRemoveCategoryModalOpen.value = true;
+}
+// 2차 카테고리 삭제 핸들러
+function handleDeleteSecondaryCategory(category: SecondCategory) {
+  selectedCategory.value = category;
+  isPrimaryDelete.value = false;
+  isRemoveCategoryModalOpen.value = true;
 }
 
-function handleDeleteSecondaryCategory(category: FirstCategory) {
-  console.log('2차 카테고리 삭제:', category);
+function RemoveCategory() {
+  if (!selectedCategory.value) return;
+  removeCategory();
 }
 </script>
