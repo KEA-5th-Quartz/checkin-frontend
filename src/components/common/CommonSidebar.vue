@@ -37,7 +37,6 @@ const role = computed(() => memberStore.role as 'MANAGER' | 'ADMIN' | 'USER');
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
-  { name: '타임라인', icon: TimelineIcon, path: '/manager/timeline' },
   { name: '통계', icon: StatisticIcon, path: '/manager/statistics' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
