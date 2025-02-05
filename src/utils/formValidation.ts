@@ -34,8 +34,8 @@ export const validationSchema = yup.object({
     .required('* 설명을 입력하세요')
     .min(10, '* 설명은 최소 10자 이상이어야 합니다')
     .max(100, '* 설명은 최대 100자까지 입력 가능합니다')
-    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
-    .matches(/^(?!.*<script>).*$/, '* HTML 태그를 포함할 수 없습니다'),
+    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다'),
+  // .matches(/^(?!.*<script>).*$/, '* HTML 태그를 포함할 수 없습니다'),
 
   dueDate: yup
     .string()

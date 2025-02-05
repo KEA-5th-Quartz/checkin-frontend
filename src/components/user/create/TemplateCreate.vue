@@ -78,7 +78,7 @@ const closeDialog = async () => {
   <main class="ml-24 max-w-[80%]">
     <form @submit.prevent="onSubmit">
       <section class="w-full h-12 mt-24">
-        <label class="ticket-label">템플릿 제목</label>
+        <label class="ticket-label py-3">템플릿 제목</label>
         <input v-model="title" class="title-form bg-[#fafafa]" placeholder="제목을 입력하세요" />
         <div class="text-red-500 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
       </section>
