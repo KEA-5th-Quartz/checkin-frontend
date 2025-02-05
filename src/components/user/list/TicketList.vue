@@ -211,6 +211,7 @@ onBeforeUnmount(() => {
           <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
           <input
             v-model="keyword"
+            maxlength="20"
             placeholder="티켓 검색..."
             class="manager-search-input"
             @keyup.enter="handleSearch"

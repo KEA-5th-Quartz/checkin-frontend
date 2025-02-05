@@ -15,6 +15,7 @@
         <label class="category-modal-input-label">카테고리 이름</label>
         <input
           type="text"
+          maxlength="33"
           v-model="categoryName"
           class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"

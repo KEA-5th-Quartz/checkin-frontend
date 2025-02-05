@@ -155,7 +155,7 @@ const closeDialog = async () => {
         content="티켓이 정상적으로 요청되었습니다."
         :isOneBtn="true"
         mainText="확인"
-        @onMainClick="
+        :onMainClick="
           () => {
             console.log('✅ 다이얼로그 버튼 클릭됨!');
             closeDialog();

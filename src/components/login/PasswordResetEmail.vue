@@ -58,6 +58,7 @@ const onSubmit = handleSubmit(async () => {
       <label>아이디</label>
       <input
         v-model="username"
+        maxlength="14"
         name="username"
         type="text"
         placeholder="아이디를 입력해주세요"
