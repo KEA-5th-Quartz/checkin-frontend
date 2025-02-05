@@ -60,20 +60,21 @@
     </CommonDialog>
 
     <CommonDialog
-      v-if="isRemoveMemberModalOpen"
-      :title="'멤버 탈퇴'"
-      :content="`${member.username}님을 정말로 탈퇴시키겠습니까?`"
-      :isWarn="true"
-      :mainText="'탈퇴'"
-      :onMainClick="removeMember"
-      :cancelText="'취소'"
-      :onCancelClick="closeRemoveMemberModal"
+      v-if="dialogState.open"
+      :isOneBtn="dialogState.isOneBtn"
+      :isWarn="dialogState.isWarn"
+      :title="dialogState.title"
+      :content="dialogState.content"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onCancelClick"
+      :cancelText="dialogState.cancelText"
+      :onMainClick="dialogState.onMainClick"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import CommonDialog from '../../common/CommonDialog.vue';
 import SvgIcon from '../../common/SvgIcon.vue';
@@ -81,16 +82,20 @@ import { ArrowDownIcon } from '@/assets/icons/path';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
 
 const queryClient = useQueryClient();
 
 const isMenuOpen = ref(false);
-const isRoleChangeModalOpen = ref(false);
-const isRemoveMemberModalOpen = ref(false);
+const isRoleChangeModalOpen = ref(false); // 권한 변경 모달
+const dialogState = ref<DialogProps>({ ...initialDialog }); // 공통 모달
 const menuRef = ref<HTMLElement | null>(null);
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
-const roleOptions: Array<'ADMIN' | 'MANAGER' | 'USER'> = ['ADMIN', 'MANAGER', 'USER'];
+const roleOptions = computed(() => {
+  const allRoles: Array<'ADMIN' | 'MANAGER' | 'USER'> = ['ADMIN', 'MANAGER', 'USER'];
+  return allRoles.filter((role) => role !== props.member.role); // 본인 현재 권한 빼고
+});
 const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   ADMIN: '관리자',
   MANAGER: '담당자',
@@ -121,7 +126,17 @@ const updateRoleMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '권한 변경',
+        content: `${props.member.username}님의 권한이 변경되었습니다.`,
+        mainText: '확인',
+        onMainClick: () => {
+          closeRoleChangeModal();
+          queryClient.invalidateQueries();
+        },
+      };
     },
   },
 );
@@ -133,7 +148,6 @@ const handleUpdateRole = async () => {
       memberId: props.member.memberId,
       role: selectedRole.value,
     });
-    closeRoleChangeModal();
   } catch (err) {
     console.error('권한 변경 실패:', err);
   }
@@ -156,6 +170,7 @@ const openRoleChangeModal = () => {
 };
 const closeRoleChangeModal = () => {
   isRoleChangeModalOpen.value = false;
+  dialogState.value = { ...initialDialog };
 };
 
 // 드롭다운 열기/닫기
@@ -170,31 +185,29 @@ onClickOutside(dropdownRef, () => {
 const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   selectedRole.value = role;
   isDropdownOpen.value = false;
-  console.log(`[권한 선택됨] ${props.member.memberId} → ${roleLabels[role]}`);
-};
-
-// 권한 변경 확정 (콘솔 로그만 출력)
-const confirmRoleChange = () => {
-  if (selectedRole.value) {
-    console.log(`[권한 변경 요청] ${props.member.memberId} → ${roleLabels[selectedRole.value]}`);
-  } else {
-    console.warn('권한이 선택되지 않았습니다.');
-  }
 };
 
 // 멤버 탈퇴 모달 열기/닫기
 const openRemoveMemberModal = () => {
-  isRemoveMemberModalOpen.value = true;
+  // isRemoveMemberModalOpen.value = true;
+  dialogState.value = {
+    open: true,
+    isWarn: true,
+    title: '멤버 탈퇴',
+    content: `${props.member.username}님을 정말로 탈퇴시키겠습니까?`,
+    mainText: '탈퇴',
+    onMainClick: removeMember,
+    cancelText: '취소',
+    onCancelClick: () => {
+      dialogState.value = { ...initialDialog };
+    },
+  };
   isMenuOpen.value = false;
-};
-const closeRemoveMemberModal = () => {
-  isRemoveMemberModalOpen.value = false;
 };
 
 // 멤버 탈퇴 함수
 const removeMember = () => {
   console.log(`멤버 탈퇴 요청: ${props.member.username}`);
-  closeRemoveMemberModal();
 };
 </script>
 
