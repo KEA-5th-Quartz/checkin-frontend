@@ -36,4 +36,8 @@ export const memberApi = {
   putMemberRole(memberId: number, data: { role: string }) {
     return api.put(`/members/${memberId}/role`, data);
   },
+  // [담당자] 담당자 개인 데이터 조회
+  getManagerProgress() {
+    return api.get('/tickets/progress');
+  },
 };
