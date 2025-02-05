@@ -61,11 +61,6 @@ function closeModal() {
 
 // 수정된 이름 제출
 function submitEdit() {
-  if (!updatedName.value.trim()) {
-    return;
-  } else if (props.errorMessage) {
-    return;
-  }
   emit('submit', { ...props.category, name: updatedName.value });
 }
 </script>

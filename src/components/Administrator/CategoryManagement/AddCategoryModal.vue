@@ -58,11 +58,6 @@ function close() {
 
 // 카테고리 추가 제출
 function submit() {
-  if (!categoryName.value.trim()) {
-    return;
-  } else if (props.errorMessage) {
-    return; // 에러가 있을 경우 닫히지 않도록 함
-  }
   emit('submit', { name: categoryName.value, parentId: props.parentCategory?.firstCategoryId || null });
 }
 </script>
