@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, nextTick, onMounted } from 'vue';
 import { useForm, useField } from 'vee-validate';
-import { validationSchema } from '@/utils/formValidation';
+import { ticketValidationSchema } from '@/utils/ticketValidation';
 import { watchEffect } from 'vue';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
@@ -12,12 +12,13 @@ import { BaseTicketOption } from '@/types/tickets';
 import { useTicketStore } from '@/stores/userTicketStore';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
+import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AttachedFile } from '@/types/tickets';
 import { useMemberStore } from '@/stores/memberStore';
 
-const attachmentIds : = []; 
+const attachmentIds = [];
 const memberStore = useMemberStore();
 
 // Vue Store 사용
@@ -29,32 +30,6 @@ const showDialog = ref(false);
 // 티켓 템플릿 하드코딩
 const template = ref<string>(
   '  이 기능이 어떻게 동작해야 하나요?  상세한 요청 사항을 입력해주세요.  관련 정보(링크, 파일 등)를 포함해주세요.',
-);
-
-const createTicketMutation = useCustomMutation(
-  async ({
-    title,
-    firstCategory,
-    secondCategory,
-    content,
-    dueDate,
-    attachmentIds,
-  }: {
-    title: string;
-    firstCategory: string;
-    secondCategory: string;
-    content: string;
-    dueDate: string;
-    attachmentIds: number[];
-  }) => {
-    return ticketApi.postTicket(title, firstCategory, secondCategory, content, dueDate, attachmentIds);
-  },
-  {
-    onSuccess: () => {
-      showDialog.value = true;
-      queryClient.refetchQueries(['template-list']);
-    },
-  },
 );
 
 const props = defineProps<{
@@ -89,13 +64,9 @@ const attachmentMutation = useCustomMutation(
   },
 );
 
-// 서버에서 받아온 카테고리 리스트
-const firstCategoryList = ref<BaseTicketOption[]>([]);
-const secondCategoryList = ref<BaseTicketOption[]>([]);
-
 // Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
 const { handleSubmit, errors, validate } = useForm({
-  validationSchema, // ✅ 유효성 검증 스키마 적용
+  validationSchema: ticketValidationSchema,
   initialValues: {
     // ✅ 초기값 설정
     content: '', // ✅ content의 초기값을 빈 문자열로 설정
@@ -110,37 +81,7 @@ const { value: content } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
 const { value: attachment } = useField<number>('attachment');
 
-// interface Category {
-//   firstCategoryId :number;
-//   firstCategoryName :string;
-//   secondCategories : () => [];
-// }
-
-// 카테고리 데이터를 가져오는 API
-const fetchCategories = async () => {
-  try {
-    const response = await categoryApi.getCategories();
-
-    if (!response.data || !Array.isArray(response.data.data)) {
-      throw new Error('잘못된 API 응답 형식입니다.');
-    }
-
-    // 1차 카테고리 변환
-    firstCategoryList.value = response.data.data.map((category) => ({
-      id: category.firstCategoryId,
-      value: category.firstCategoryName,
-      label: category.firstCategoryName,
-      secondCategories: category.secondCategories.map((subCategory) => ({
-        id: subCategory.secondCategoryId,
-        value: subCategory.name,
-        label: subCategory.name,
-      })),
-    }));
-  } catch (error: any) {
-    console.error('📌 [API 오류] 카테고리 불러오기 실패:', error.message || error);
-  }
-};
-
+// 티켓 생성 버튼
 const onSubmit = handleSubmit(async () => {
   console.log('생성 함수 실행');
 
@@ -160,8 +101,44 @@ const onSubmit = handleSubmit(async () => {
   }
 });
 
-// ✅ 컴포넌트 마운트 시 카테고리 목록조회 API 호출
-onMounted(fetchCategories);
+// 카테고리 데이터 가져오는 API
+const fetchCategories = useCustomQuery(['category'], async () => {
+  try {
+    const response = await categoryApi.getCategories();
+    return response.data.data.map((category) => ({
+      id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
+      value: category.firstCategoryName,
+      label: category.firstCategoryName,
+      secondCategories: category.secondCategories.map((subCategory) => ({
+        id: subCategory.secondCategoryId,
+        value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
+        label: subCategory.name,
+      })),
+    }));
+  } catch (error) {
+    console.error('에러 처리:', error);
+    throw error;
+  }
+});
+
+// watch를 사용하여 fetchCategories에 데이터가 들어오면 firstCategoryList 업데이트
+watch(
+  () => fetchCategories.data.value,
+  (newData) => {
+    if (newData) {
+      firstCategoryList.value = newData;
+      console.log('📌 1차 카테고리 업데이트됨:', firstCategoryList.value);
+
+      // ✅ 1차 카테고리 업데이트 후 2차 카테고리 업데이트 실행
+      updateSecondCategoryList();
+    }
+  },
+  { immediate: true },
+);
+
+// 카테고리 옵션 리스트
+const firstCategoryList = ref<BaseTicketOption[]>([]);
+const secondCategoryList = ref<BaseTicketOption[]>([]);
 
 // ✅ 1차 카테고리 선택 시, 해당 2차 카테고리 리스트 변경
 const updateSecondCategoryList = () => {
@@ -188,6 +165,41 @@ const handleSecondCategorySelect = (option: BaseTicketOption) => {
   selectedSecondCategory.value = option;
 };
 
+const contentWithoutTemplate = computed(() => {
+  return content.value.replace(template.value, '').trim(); // ✅ 템플릿 부분 제거
+});
+
+// 티켓 생성 뮤테이션
+const createTicketMutation = useCustomMutation(
+  async ({
+    title,
+    firstCategory,
+    secondCategory,
+    content,
+    dueDate,
+    attachmentIds,
+  }: {
+    title: string;
+    firstCategory: string;
+    secondCategory: string;
+    content: string;
+    dueDate: string;
+    attachmentIds: number[];
+  }) => {
+    return ticketApi.postTicket(title, firstCategory, secondCategory, content, dueDate, attachmentIds);
+  },
+  {
+    onSuccess: (data) => {
+      showDialog.value = true;
+      queryClient.refetchQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
+      console.log('생성 티켓 번호:', data.data.data); // 티켓 번호 콘솔에 출력
+    },
+    onError: (error) => {
+      console.log('티켓 생성 실패:', error);
+    },
+  },
+);
+
 // Dialog 안닫히는 문제해결용 함수
 const closeDialog = async () => {
   console.log('버튼 클릭됨! showDialog 값 변경 전:', showDialog.value);
@@ -199,6 +211,7 @@ const closeDialog = async () => {
 // 현재 에러 상태 체크용 함수
 watchEffect(() => {
   console.log('현재 에러 상태:', errors.value);
+  console.log(content.value);
 });
 
 // ✅ 초기 렌더링 시 템플릿을 content에 추가

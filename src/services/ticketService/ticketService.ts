@@ -142,6 +142,8 @@ export const ticketApi = {
       content,
       dueDate,
       attachmentIds,
+    });
+  },
   // [사용자] 티켓 다중 삭제
   patchTickets(data: { ticketIds: number[] }) {
     return api.patch('/tickets', data);
