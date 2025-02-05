@@ -87,10 +87,10 @@ body {
     bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
-    @apply text-center text-white-0 font-extrabold text-2xl mt-12;
+    @apply text-center text-white-0 font-extrabold text-2xl mt-12 cursor-default;
   }
   .sidebar-profile {
-    @apply flex-stack items-center gap-5 w-full mt-12;
+    @apply flex-stack items-center gap-5 w-full mt-12 cursor-default;
   }
   .sidebar-p {
     @apply font-semibold text-white-0;
@@ -428,14 +428,14 @@ body {
 
   /* 사용자 티켓 요청 폼*/
   .title-form {
-    @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3;
+    @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3;
   }
   .dueDate-form {
     @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3 bg-[#fafafa];
   }
 }
 .create-button {
-  @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-20;
+  @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-10;
 }
 
 /* 관리자 멤버 모달 스타일 */

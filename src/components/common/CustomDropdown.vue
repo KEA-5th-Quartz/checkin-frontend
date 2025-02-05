@@ -67,6 +67,7 @@ const hasColorStyle = (option: BaseTicketOption | null | undefined): option is S
 
     <!-- 드롭다운 -->
     <button
+      type="button"
       @click.stop="toggleDropdown"
       :class="[
         'dropdown-bar',

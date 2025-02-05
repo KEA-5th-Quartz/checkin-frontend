@@ -8,7 +8,7 @@
       <div>
         <p class="text-gray-1 pb-1.5 whitespace-nowrap">관리자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ adminCount }}</p>
+          <p class="text-lg lg:text-xl pr-2">{{ stats.admins }}</p>
           <p class="text-black-0">명</p>
         </div>
       </div>
@@ -22,7 +22,7 @@
       <div>
         <p class="text-gray-1 pb-1.5 whitespace-nowrap">담당자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ managerCount }}</p>
+          <p class="text-lg lg:text-xl pr-2">{{ stats.managers }}</p>
           <p class="text-black-0">명</p>
         </div>
       </div>
@@ -36,32 +36,29 @@
       <div>
         <p class="text-gray-1 pb-1.5 whitespace-nowrap">사용자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ userCount }}</p>
+          <p class="text-lg lg:text-xl pr-2">{{ stats.users }}</p>
           <p class="text-black-0">명</p>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- </div> -->
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { AdminIcon, ManagerIcon, UserIcon } from '@/assets/icons/path';
 import SvgIcon from '../../../components/common/SvgIcon.vue';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { memberApi } from '@/services/memberService/memberService';
 
-defineProps({
-  adminCount: {
-    type: Number,
-    required: true,
-  },
-  managerCount: {
-    type: Number,
-    required: true,
-  },
-  userCount: {
-    type: Number,
-    required: true,
-  },
+const { data: memberStatsData } = useCustomQuery(['member-stats'], async () => {
+  const response = await memberApi.getMemberStatsRole();
+  return response.data;
 });
+
+const stats = computed(() => ({
+  admins: memberStatsData.value?.data?.totalAdmins ?? 0,
+  managers: memberStatsData.value?.data?.totalManagers ?? 0,
+  users: memberStatsData.value?.data?.totalUsers ?? 0,
+}));
 </script>

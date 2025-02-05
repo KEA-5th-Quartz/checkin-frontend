@@ -11,7 +11,6 @@ import { userApi } from '@/services/userService/userService';
 import CommonDialog from '../common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 
-const router = useRouter();
 const memberStore = useMemberStore();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
@@ -30,7 +29,7 @@ const getRedirectPath = (role: string | MemberType): string => {
     MANAGER: '/manager/dashboard',
     USER: '/user/ticketlist',
   };
-  return roleRedirectMap[role as MemberType];
+  return roleRedirectMap[role as MemberType] || '/'; // 기본값으로 홈으로 리다이렉트
 };
 
 const resetForm = () => {
@@ -48,7 +47,7 @@ const onSubmit = handleSubmit(async (values) => {
         mainText: '확인',
         onMainClick: () => {
           dialogState.value = { ...initialDialog };
-          router.replace('/');
+          window.location.replace('/');
         },
       };
     }
@@ -57,7 +56,6 @@ const onSubmit = handleSubmit(async (values) => {
       passwordResetToken: memberStore.passwordResetToken,
       newPassword: values.newPwd,
     });
-
     const redirectPath = getRedirectPath(memberStore.role);
 
     dialogState.value = {
@@ -67,13 +65,13 @@ const onSubmit = handleSubmit(async (values) => {
       mainText: '확인',
       onMainClick: () => {
         dialogState.value = { ...initialDialog };
-        router.replace(redirectPath);
+        window.location.replace(redirectPath);
       },
     };
 
     resetForm();
   } catch (error) {
-    console.log('비밀번호 변경 실패:', error);
+    console.error('비밀번호 변경 실패:', error);
   }
 });
 

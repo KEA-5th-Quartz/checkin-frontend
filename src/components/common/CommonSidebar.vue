@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import {
   CategoryIcon,
@@ -16,7 +16,6 @@ import {
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
-import { userApi } from '@/services/userService/userService';
 import { roleInKorean } from '@/utils/mapping';
 
 const router = useRouter();
@@ -31,13 +30,13 @@ onMounted(async () => {
   }
 });
 
+const isTicketOpen = ref(false);
 const isTemplateOpen = ref(false);
 
 const role = computed(() => memberStore.role as 'MANAGER' | 'ADMIN' | 'USER');
 
 const managerNavItems = [
   { name: '대시보드', icon: DashboardIcon, path: '/manager/dashboard' },
-  { name: '타임라인', icon: TimelineIcon, path: '/manager/timeline' },
   { name: '통계', icon: StatisticIcon, path: '/manager/statistics' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
@@ -51,7 +50,7 @@ const adminNavItems = [
   { name: '설정', icon: SettingIcon, path: '/settings' },
 ];
 
-const userNavItems = [
+const userTicketItems = [
   { name: '티켓 목록', icon: CategoryIcon, path: '/user/ticketlist' },
   { name: '새 요청 티켓', icon: TemplateIcon, path: '/user/ticketcreate' },
 ];
@@ -61,10 +60,37 @@ const userTemplateItems = [
   { name: '새 티켓 템플릿', path: '/user/templatecreate' },
 ];
 
+const checkCurrentPath = () => {
+  const currentPath = router.currentRoute.value.path;
+
+  // 티켓 관련 경로 체크
+  if (currentPath.includes('/user/ticket')) {
+    isTicketOpen.value = true;
+  }
+
+  // 템플릿 관련 경로 체크
+  if (currentPath.includes('/user/template')) {
+    isTemplateOpen.value = true;
+  }
+};
+
+// 초기 마운트 시 경로 체크
+onMounted(() => {
+  checkCurrentPath();
+});
+
+// route 변경 시 경로 체크
+watch(
+  () => router.currentRoute.value.path,
+  () => {
+    checkCurrentPath();
+  },
+);
+
 // 로그아웃
 const handleLogout = async () => {
   await memberStore.logout();
-  router.push('/');
+  window.location.replace('/');
 };
 </script>
 
@@ -127,13 +153,30 @@ const handleLogout = async () => {
 
     <!-- 사용자 -->
     <ul v-else-if="role === 'USER'" class="sidebar-ul">
-      <router-link v-for="item in userNavItems" :key="item.path" :to="item.path" custom v-slot="{ isActive, navigate }">
-        <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
-          <div v-if="isActive" class="sidebar-active" />
-          <SvgIcon :icon="item.icon" />
-          {{ item.name }}
-        </li>
-      </router-link>
+      <!-- 티켓 -->
+      <li class="relative">
+        <div class="sidebar-li cursor-pointer" :class="{ active: isTicketOpen }" @click="isTicketOpen = !isTicketOpen">
+          <SvgIcon :icon="CategoryIcon" />티켓
+        </div>
+
+        <!-- 하위 메뉴 -->
+        <transition name="submenu">
+          <ul v-show="isTicketOpen" class="sidebar-sub-menu">
+            <router-link
+              v-for="item in userTicketItems"
+              :key="item.path"
+              :to="item.path"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <li class="relative pr-6 lg:pr-12 whitespace-nowrap" :class="{ active: isActive }" @click="navigate">
+                <div v-if="isActive" class="sidebar-active -left-8" />
+                {{ item.name }}
+              </li>
+            </router-link>
+          </ul>
+        </transition>
+      </li>
 
       <!-- 템플릿 -->
       <li class="relative">
