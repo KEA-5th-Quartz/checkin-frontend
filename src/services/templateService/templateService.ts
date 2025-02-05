@@ -28,4 +28,11 @@ export const templateApi = {
   deleteTemplates(data: { templateIds: number[] }) {
     return api.delete('/members/templates', { data });
   },
+  // 템플릿 수정
+  putTemplate(
+    templateId: number,
+    data: { title: string; firstCategory: string; secondCategory: string; content: string; attachmentIds: number[] },
+  ) {
+    return api.put(`/members/templates/${templateId}`, data);
+  },
 };

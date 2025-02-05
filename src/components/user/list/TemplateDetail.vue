@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { computed, onMounted, ref, watch } from 'vue';
-import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
-import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import { computed, ref, watch } from 'vue';
 import { useTemplateStore } from '@/stores/userTemplateStore';
-import { firstCategory, secondCategory } from '@/components/manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { templateApi } from '@/services/templateService/templateService';
+import { useQueryClient } from '@tanstack/vue-query';
+import { categoryApi } from '@/services/categoryService/categoryService';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useMemberStore } from '@/stores/memberStore';
+
+const queryClient = useQueryClient();
+const firstCategorySelected = ref();
+const secondCategorySelected = ref();
+
+const templateStore = useTemplateStore();
+const memberStore = useMemberStore();
 
 const props = defineProps<{
   templateId: number;
@@ -40,7 +48,73 @@ const { data: detailData } = useCustomQuery(['template-detail', props.templateId
   }
 });
 
-const templateStore = useTemplateStore();
+// 카테고리 목록 페치
+const { data: categoryData } = useCustomQuery(['category-list'], async () => {
+  try {
+    const response = await categoryApi.getCategories();
+    return response;
+  } catch (err) {
+    console.error('카테고리 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+// 1차 카테고리 옵션 동적 생성
+const firstCategoryOptions = computed(() => {
+  if (!categoryData.value?.data?.data) return [];
+  // categoryData에서 1차 카테고리 목록을 변환하여 반환
+  return categoryData.value.data.data.map((category: { firstCategoryId: number; firstCategoryName: string }) => ({
+    id: category.firstCategoryId,
+    value: category.firstCategoryName,
+    label: category.firstCategoryName,
+  }));
+});
+// 2차 카테고리 옵션 동적 생성
+const secondCategoryOptions = computed(() => {
+  if (!categoryData.value?.data?.data || !firstCategorySelected.value) return [];
+  // 선택된 1차 카테고리에 해당하는 객체를 찾음
+  const selectedFirstCategory = categoryData.value.data.data.find(
+    // 현재 선택된 1차 카테고리의 ID와 일치하는 카테고리를 찾음
+    (category: { firstCategoryId: number }) => category.firstCategoryId === firstCategorySelected.value.id,
+  );
+
+  return (
+    selectedFirstCategory?.secondCategories.map((category: { secondCategoryId: number; name: string }) => ({
+      id: category.secondCategoryId,
+      value: category.name,
+      label: category.name,
+    })) || []
+  );
+});
+
+watch(
+  [detailData, categoryData],
+  ([newDetailData, newCategoryData]) => {
+    if (newDetailData && newCategoryData?.data?.data) {
+      const firstCategory = newCategoryData.data.data.find(
+        (category: { firstCategoryName: string }) => category.firstCategoryName === newDetailData.firstCategory,
+      );
+      if (firstCategory) {
+        firstCategorySelected.value = {
+          id: firstCategory.firstCategoryId,
+          value: firstCategory.firstCategoryName,
+          label: firstCategory.firstCategoryName,
+        };
+        const secondCategory = firstCategory.secondCategories.find(
+          (category: { name: string }) => category.name === newDetailData.secondCategory,
+        );
+        if (secondCategory) {
+          secondCategorySelected.value = {
+            id: secondCategory.secondCategoryId,
+            value: secondCategory.name,
+            label: secondCategory.name,
+          };
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => detailData.value,
@@ -58,42 +132,93 @@ watch(
   { immediate: true },
 );
 
+const updateMutation = useCustomMutation(
+  async () => {
+    if (!templateStore.template || !props.templateId) return;
+
+    const updateData = {
+      title: templateStore.template.title,
+      firstCategory: firstCategorySelected.value.label,
+      secondCategory: secondCategorySelected.value.label,
+      content: templateStore.template.content,
+      attachmentIds: [],
+    };
+
+    const response = await templateApi.putTemplate(props.templateId, updateData);
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['template-detail', props.templateId]);
+      queryClient.invalidateQueries({ queryKey: ['template-list', memberStore.memberId] });
+      templateStore.isEditMode = false;
+    },
+    onError: (error) => {
+      console.error('템플릿 수정 실패:', error);
+    },
+  },
+);
+
 const handleCancelEdit = () => {
   templateStore.resetToOriginal();
   templateStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
-  templateStore.toggleEditMode();
+  updateMutation.mutate();
 };
 
 const startEdit = () => {
   templateStore.toggleEditMode();
 };
 
-const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof templateStore.template) => {
-  return computed({
-    get: () => options.find((option) => option.label === templateStore.template?.[field]) || options[0],
-    set: (newValue: BaseTicketOption) => {
-      if (templateStore.template) {
-        templateStore.updateTemplate({
-          ...templateStore.template,
-          [field]: newValue.label,
-        });
-      }
-    },
-  });
-};
+// 1차 카테고리 변경
+const handleFirstCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    firstCategorySelected.value = option;
 
-const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
-const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
-
-const handleOptionSelect = (field: keyof typeof templateStore.template) => (option: BaseTicketOption) => {
-  if (templateStore.template) {
+    // ticketStore 업데이트
     templateStore.updateTemplate({
       ...templateStore.template,
-      [field]: option.label,
+      firstCategory: option.label,
     });
+
+    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
+    const selectedFirstCategory = categoryData.value?.data?.data.find(
+      (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
+    );
+
+    // 2차 카테고리를 첫 번째 요소로 설정
+    if (selectedFirstCategory?.secondCategories?.length > 0) {
+      const firstSecondCategoryOption = {
+        id: selectedFirstCategory.secondCategories[0].secondCategoryId,
+        value: selectedFirstCategory.secondCategories[0].name,
+        label: selectedFirstCategory.secondCategories[0].name,
+      };
+      secondCategorySelected.value = firstSecondCategoryOption;
+
+      // 2차 카테고리도 ticketStore에 업데이트
+      templateStore.updateTemplate({
+        ...templateStore.template,
+        secondCategory: firstSecondCategoryOption.label,
+      });
+    }
+  } catch (err) {
+    console.error('1차 카테고리 변경 실패:', err);
+  }
+};
+
+const handleSecondCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    secondCategorySelected.value = option;
+
+    // ticketStore 업데이트
+    templateStore.updateTemplate({
+      ...templateStore.template,
+      secondCategory: option.label,
+    });
+  } catch (err) {
+    console.error('2차 카테고리 변경 실패:', err);
   }
 };
 
@@ -144,10 +269,9 @@ const canEdit = computed(() => {
                 <CustomDropdown
                   v-else
                   label=""
-                  :options="firstCategory"
+                  :options="firstCategoryOptions"
                   :selected-option="firstCategorySelected"
-                  :onOptionSelect="handleOptionSelect('firstCategory')"
-                  @select="(option: BaseTicketOption) => (firstCategorySelected = option)"
+                  @select="handleFirstCategorySelect"
                   isEdit
                 />
               </div>
@@ -167,10 +291,9 @@ const canEdit = computed(() => {
                 <CustomDropdown
                   v-else
                   label=""
-                  :options="secondCategory"
+                  :options="secondCategoryOptions"
                   :selected-option="secondCategorySelected"
-                  :onOptionSelect="handleOptionSelect('secondCategory')"
-                  @select="(option: BaseTicketOption) => (secondCategorySelected = option)"
+                  @select="handleSecondCategorySelect"
                   isEdit
                 />
               </div>
