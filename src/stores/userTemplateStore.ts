@@ -4,7 +4,6 @@ export interface Template {
   title: string;
   firstCategory: string;
   secondCategory: string;
-  due_date: string;
   content: string;
 }
 
@@ -12,7 +11,6 @@ const defaultTemplate: Template = {
   title: '',
   firstCategory: '',
   secondCategory: '',
-  due_date: '',
   content: '',
 };
 
@@ -29,8 +27,8 @@ export const useTemplateStore = defineStore('template', {
       this.originalTicket = { ...template }; // 원본 데이터 저장
     },
 
-    updateTicket(updatedTicket: Template) {
-      this.template = { ...updatedTicket };
+    updateTemplate(updateTemplate: Template) {
+      this.template = { ...updateTemplate };
     },
 
     toggleEditMode() {

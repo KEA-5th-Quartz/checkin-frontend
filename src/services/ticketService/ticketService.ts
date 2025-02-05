@@ -142,6 +142,30 @@ export const ticketApi = {
       content,
       dueDate,
       attachmentIds,
+  // [사용자] 티켓 다중 삭제
+  patchTickets(data: { ticketIds: number[] }) {
+    return api.patch('/tickets', data);
+  },
+  // [사용자] 티켓 수정
+  puTicket(
+    ticketId: number,
+    data: {
+      title: string;
+      firstCategory: string;
+      secondCategory: string;
+      content: string;
+      dueDate: string;
+      attachmentIds: number[];
+    },
+  ) {
+    return api.put(`/tickets/${ticketId}`, data);
+  },
+  // [사용자] 티켓 생성시 파일 첨부
+  postAttachment(data: FormData) {
+    return api.post('/tickets/attachment', data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
   },
 };

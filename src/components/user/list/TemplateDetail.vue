@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { computed, onMounted, ref } from 'vue';
-import PriorityBadge from '@/components/common/Badges/PriorityBadge.vue';
-import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import { computed, ref, watch } from 'vue';
 import { useTemplateStore } from '@/stores/userTemplateStore';
-import { firstCategory, secondCategory } from '@/components/manager/ticketOptionTest';
 import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import '@/assets/slideAnimation.css';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { templateApi } from '@/services/templateService/templateService';
+import { useQueryClient } from '@tanstack/vue-query';
+import { categoryApi } from '@/services/categoryService/categoryService';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useMemberStore } from '@/stores/memberStore';
 
-defineProps<{
+const queryClient = useQueryClient();
+const firstCategorySelected = ref();
+const secondCategorySelected = ref();
+
+const templateStore = useTemplateStore();
+const memberStore = useMemberStore();
+
+const props = defineProps<{
   templateId: number;
 }>();
 
@@ -23,150 +33,255 @@ const handleClose = () => {
   show.value = false;
   setTimeout(() => {
     emit('close');
+    handleCancelEdit();
   }, 300);
 };
 
-let templateDefaultTest = {
-  title: 'SSH 접속 확인',
-  firstCategory: 'VM1',
-  secondCategory: '생성',
-  due_date: '2025-02-22',
-  content: 'Github Repo가 접속이 되지 않습니다.',
-};
-
-const templateStore = useTemplateStore();
-
-onMounted(() => {
-  templateStore.setTemplate(templateDefaultTest);
+// 티켓 상세 페치
+const { data: detailData } = useCustomQuery(['template-detail', props.templateId], async () => {
+  try {
+    const response = await templateApi.getTemplateDetail(props.templateId);
+    return response.data.data;
+  } catch (err) {
+    console.error('티켓 상세 조회 실패:', err);
+    throw err;
+  }
 });
+
+// 카테고리 목록 페치
+const { data: categoryData } = useCustomQuery(['category-list'], async () => {
+  try {
+    const response = await categoryApi.getCategories();
+    return response;
+  } catch (err) {
+    console.error('카테고리 목록 조회 실패:', err);
+    throw err;
+  }
+});
+
+// 1차 카테고리 옵션 동적 생성
+const firstCategoryOptions = computed(() => {
+  if (!categoryData.value?.data?.data) return [];
+  // categoryData에서 1차 카테고리 목록을 변환하여 반환
+  return categoryData.value.data.data.map((category: { firstCategoryId: number; firstCategoryName: string }) => ({
+    id: category.firstCategoryId,
+    value: category.firstCategoryName,
+    label: category.firstCategoryName,
+  }));
+});
+// 2차 카테고리 옵션 동적 생성
+const secondCategoryOptions = computed(() => {
+  if (!categoryData.value?.data?.data || !firstCategorySelected.value) return [];
+  // 선택된 1차 카테고리에 해당하는 객체를 찾음
+  const selectedFirstCategory = categoryData.value.data.data.find(
+    // 현재 선택된 1차 카테고리의 ID와 일치하는 카테고리를 찾음
+    (category: { firstCategoryId: number }) => category.firstCategoryId === firstCategorySelected.value.id,
+  );
+
+  return (
+    selectedFirstCategory?.secondCategories.map((category: { secondCategoryId: number; name: string }) => ({
+      id: category.secondCategoryId,
+      value: category.name,
+      label: category.name,
+    })) || []
+  );
+});
+
+watch(
+  [detailData, categoryData],
+  ([newDetailData, newCategoryData]) => {
+    if (newDetailData && newCategoryData?.data?.data) {
+      const firstCategory = newCategoryData.data.data.find(
+        (category: { firstCategoryName: string }) => category.firstCategoryName === newDetailData.firstCategory,
+      );
+      if (firstCategory) {
+        firstCategorySelected.value = {
+          id: firstCategory.firstCategoryId,
+          value: firstCategory.firstCategoryName,
+          label: firstCategory.firstCategoryName,
+        };
+        const secondCategory = firstCategory.secondCategories.find(
+          (category: { name: string }) => category.name === newDetailData.secondCategory,
+        );
+        if (secondCategory) {
+          secondCategorySelected.value = {
+            id: secondCategory.secondCategoryId,
+            value: secondCategory.name,
+            label: secondCategory.name,
+          };
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => detailData.value,
+  (newData) => {
+    if (newData) {
+      const templateDefaultData = {
+        title: newData.title,
+        firstCategory: newData.firstCategory,
+        secondCategory: newData.secondCategory,
+        content: newData.content,
+      };
+      templateStore.setTemplate(templateDefaultData);
+    }
+  },
+  { immediate: true },
+);
+
+const updateMutation = useCustomMutation(
+  async () => {
+    if (!templateStore.template || !props.templateId) return;
+
+    const updateData = {
+      title: templateStore.template.title,
+      firstCategory: firstCategorySelected.value.label,
+      secondCategory: secondCategorySelected.value.label,
+      content: templateStore.template.content,
+      attachmentIds: [],
+    };
+
+    const response = await templateApi.putTemplate(props.templateId, updateData);
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['template-detail', props.templateId]);
+      queryClient.invalidateQueries({ queryKey: ['template-list', memberStore.memberId] });
+      templateStore.isEditMode = false;
+    },
+    onError: (error) => {
+      console.error('템플릿 수정 실패:', error);
+    },
+  },
+);
 
 const handleCancelEdit = () => {
   templateStore.resetToOriginal();
-  templateStore.toggleEditMode();
+  templateStore.isEditMode = false;
 };
 
 const handleConfirmEdit = () => {
-  templateStore.toggleEditMode();
+  updateMutation.mutate();
 };
 
 const startEdit = () => {
   templateStore.toggleEditMode();
 };
 
-const createComputedProperty = (options: BaseTicketOption[], field: keyof typeof templateStore.template) => {
-  return computed({
-    get: () => options.find((option) => option.label === templateStore.template?.[field]) || options[0],
-    set: (newValue: BaseTicketOption) => {
-      if (templateStore.template) {
-        templateStore.updateTicket({
-          ...templateStore.template,
-          [field]: newValue.label,
-        });
-      }
-    },
-  });
-};
+// 1차 카테고리 변경
+const handleFirstCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    firstCategorySelected.value = option;
 
-const firstCategorySelected = createComputedProperty(firstCategory, 'firstCategory');
-const secondCategorySelected = createComputedProperty(secondCategory, 'secondCategory');
-
-const handleOptionSelect = (field: keyof typeof templateStore.template) => (option: BaseTicketOption) => {
-  if (templateStore.template) {
-    templateStore.updateTicket({
+    // ticketStore 업데이트
+    templateStore.updateTemplate({
       ...templateStore.template,
-      [field]: option.label,
+      firstCategory: option.label,
     });
+
+    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
+    const selectedFirstCategory = categoryData.value?.data?.data.find(
+      (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
+    );
+
+    // 2차 카테고리를 첫 번째 요소로 설정
+    if (selectedFirstCategory?.secondCategories?.length > 0) {
+      const firstSecondCategoryOption = {
+        id: selectedFirstCategory.secondCategories[0].secondCategoryId,
+        value: selectedFirstCategory.secondCategories[0].name,
+        label: selectedFirstCategory.secondCategories[0].name,
+      };
+      secondCategorySelected.value = firstSecondCategoryOption;
+
+      // 2차 카테고리도 ticketStore에 업데이트
+      templateStore.updateTemplate({
+        ...templateStore.template,
+        secondCategory: firstSecondCategoryOption.label,
+      });
+    }
+  } catch (err) {
+    console.error('1차 카테고리 변경 실패:', err);
   }
 };
+
+const handleSecondCategorySelect = async (option: BaseTicketOption) => {
+  try {
+    secondCategorySelected.value = option;
+
+    // ticketStore 업데이트
+    templateStore.updateTemplate({
+      ...templateStore.template,
+      secondCategory: option.label,
+    });
+  } catch (err) {
+    console.error('2차 카테고리 변경 실패:', err);
+  }
+};
+
+const canEdit = computed(() => {
+  return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
+});
 </script>
 
 <template>
   <Teleport to="body">
-    <div v-if="templateId && templateStore.template" class="fixed inset-0 z-10">
-      <div class="fixed inset-0 transition-opacity" @click="handleClose" />
-      <div
-        class="fixed top-0 right-0 w-[490px] h-screen bg-white-0 flex flex-col py-9 px-6 rounded-[10px] shadow-md translate-x-full z-10"
-        :class="{ 'drawer-enter': show, 'drawer-leave': !show }"
-      >
+    <div v-if="templateId && templateStore.template && detailData" class="ticket-overlay">
+      <div class="ticket-click-outside" @click="handleClose" />
+      <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
-        <div class="flex items-center justify-between w-full gap-3">
+        <header class="ticket-header">
           <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
-          <input
-            v-else
-            v-model="templateStore.template.title"
-            class="w-full rounded-xl px-1 py-1 mb-1 border border-gray-2 focus:outline-none"
-          />
+          <input v-else v-model="templateStore.template.title" class="ticket-edit-input" />
           <div v-if="!templateStore.isEditMode" class="flex items-center gap-8">
-            <SvgIcon :icon="PencilIcon" :iconOptions="{ fill: '#000' }" class="cursor-pointer" @click="startEdit" />
+            <SvgIcon
+              v-if="canEdit"
+              :icon="PencilIcon"
+              :iconOptions="{ fill: '#000' }"
+              class="cursor-pointer"
+              @click="startEdit"
+            />
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
-          <div v-else class="flex items-center gap-4">
-            <button
-              @click="handleCancelEdit"
-              class="px-6 py-1.5 text-sm border border-gray-1 rounded-lg hover:bg-gray-100 whitespace-nowrap"
-            >
-              취소
-            </button>
-            <button
-              @click="handleConfirmEdit"
-              class="px-6 py-1.5 text-sm text-white bg-primary-0 rounded-lg hover:bg-opacity-80 text-white-0 whitespace-nowrap"
-            >
-              저장
-            </button>
+          <div v-else class="filter-btn-section pt-0">
+            <button @click="handleCancelEdit" class="btn-cancel">취소</button>
+            <button @click="handleConfirmEdit" class="btn-main">저장</button>
           </div>
-        </div>
+        </header>
 
         <!-- 컨텐츠 -->
-        <div class="mt-6 flex-1 overflow-y-auto hide-scrollbar">
+        <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
             <!-- 왼쪽 섹션 -->
-            <section class="flex flex-col w-full">
-              <!-- 중요도 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">중요도</p>
-                <div class="py-1">
-                  <PriorityBadge />
-                </div>
-              </div>
-
+            <section class="ticket-section">
               <!-- 1차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">1차 카테고리</p>
+              <div>
+                <label class="ticket-label">1차 카테고리</label>
                 <div
                   v-if="!templateStore.isEditMode"
-                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
+                  class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm line-clamp-1 overflow-scroll hide-scrollbar"
                 >
                   {{ templateStore.template.firstCategory }}
                 </div>
                 <CustomDropdown
                   v-else
                   label=""
-                  :options="firstCategory"
+                  :options="firstCategoryOptions"
                   :selected-option="firstCategorySelected"
-                  :onOptionSelect="handleOptionSelect('firstCategory')"
-                  @select="(option: BaseTicketOption) => (firstCategorySelected = option)"
+                  @select="handleFirstCategorySelect"
                   isEdit
                 />
-              </div>
-
-              <!-- 요청 일자 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">요청 일자</p>
-                <p class="text-xs text-blue-1">2025/01/20</p>
               </div>
             </section>
 
             <!-- 오른쪽 섹션 -->
-            <section class="flex flex-col w-full">
-              <!-- 진행상태 블록 -->
-              <div class="flex flex-col items-start">
-                <p class="text-sm pb-2">진행상태</p>
-                <StatusBadge status="생성" size="xl" />
-              </div>
-
+            <section class="ticket-section">
               <!-- 2차 카테고리 블록 -->
-              <div class="flex flex-col mt-7">
-                <p class="text-sm pb-2">2차 카테고리</p>
+              <div>
+                <label class="ticket-label">2차 카테고리</label>
                 <div
                   v-if="!templateStore.isEditMode"
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm"
@@ -176,26 +291,10 @@ const handleOptionSelect = (field: keyof typeof templateStore.template) => (opti
                 <CustomDropdown
                   v-else
                   label=""
-                  :options="secondCategory"
+                  :options="secondCategoryOptions"
                   :selected-option="secondCategorySelected"
-                  :onOptionSelect="handleOptionSelect('secondCategory')"
-                  @select="(option: BaseTicketOption) => (secondCategorySelected = option)"
+                  @select="handleSecondCategorySelect"
                   isEdit
-                />
-              </div>
-
-              <!-- 마감 기한 블록 -->
-              <div class="mt-7">
-                <p class="text-sm pb-2">마감 기한</p>
-                <p v-if="!templateStore.isEditMode" class="text-xs text-blue-1">
-                  {{ templateStore.template.due_date }}
-                </p>
-                <input
-                  v-else
-                  type="date"
-                  :min="new Date().toISOString().split('T')[0]"
-                  class="text-xs text-blue-1 border border-gray-2 rounded-xl w-full px-1 py-2"
-                  v-model="templateStore.template.due_date"
                 />
               </div>
             </section>
@@ -203,18 +302,12 @@ const handleOptionSelect = (field: keyof typeof templateStore.template) => (opti
 
           <!-- 설명 -->
           <div class="mt-11">
-            <p class="font-semibold mb-3">설명</p>
-            <div
-              v-if="!templateStore.isEditMode"
-              class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar"
-            >
-              <p class="text-sm text-gray-1 break-words">{{ templateStore.template.content }}</p>
+            <label class="ticket-desc-label">설명</label>
+            <div v-if="!templateStore.isEditMode" class="ticket-desc-area">
+              <p class="ticket-desc-content">{{ templateStore.template.content }}</p>
             </div>
             <div v-else>
-              <textarea
-                v-model="templateStore.template.content"
-                class="min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar w-full resize-none text-sm text-gray-1 break-words focus:outline-none"
-              />
+              <textarea v-model="templateStore.template.content" class="ticket-desc-textarea" />
               <div class="flex w-full justify-end pr-2 cursor-pointer">
                 <SvgIcon :icon="ClipIcon" />
               </div>

@@ -16,9 +16,11 @@ import SkeletonTable from '@/components/UI/SkeletonTable.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { UserFilterPayload, UserFilterState } from '@/types/user';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
-import { QueryKey } from '@tanstack/vue-query';
+import { QueryKey, useQueryClient } from '@tanstack/vue-query';
+import { useCustomMutation } from '@/composables/useCustomMutation';
 
 const ticketStore = useUserTicketListStore();
+const queryClient = useQueryClient();
 
 const selectedTicketId = ref<number | null>(null);
 const selectedPerPage = ref(perPageOptions[0]);
@@ -124,6 +126,19 @@ const {
     .then((response) => response.data.data);
 });
 
+// 티켓 삭제 뮤테이션
+const deleteMutation = useCustomMutation(
+  async ({ ticketIds }: { ticketIds: number[] }) => {
+    const response = await ticketApi.patchTickets({ ticketIds });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-tickets'] });
+    },
+  },
+);
+
 const handleDelete = () => {
   // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
   const selectedTicketIds = Array.from(ticketStore.selectedTickets);
@@ -139,7 +154,7 @@ const handleDelete = () => {
     },
     mainText: '삭제',
     onMainClick: () => {
-      console.log('삭제하는 id 배열: ', selectedTicketIds);
+      deleteMutation.mutate({ ticketIds: selectedTicketIds });
 
       ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
       ticketStore.toggleDeleteMode(); // 삭제 모드 종료
@@ -182,7 +197,7 @@ const handlePageChange = (page: number) => {
 };
 
 onBeforeUnmount(() => {
-  sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
+  sessionStorage.setItem('userCurrentPage', currentPage.value.toString());
 });
 </script>
 

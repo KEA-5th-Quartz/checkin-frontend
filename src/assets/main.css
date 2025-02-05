@@ -87,10 +87,10 @@ body {
     bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
-    @apply text-center text-white-0 font-extrabold text-2xl mt-12;
+    @apply text-center text-white-0 font-extrabold text-2xl mt-12 cursor-default;
   }
   .sidebar-profile {
-    @apply flex-stack items-center gap-5 w-full mt-12;
+    @apply flex-stack items-center gap-5 w-full mt-12 cursor-default;
   }
   .sidebar-p {
     @apply font-semibold text-white-0;
@@ -437,64 +437,63 @@ body {
     @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-20;
   }
 
-  /* 관리자 멤버 모달 스타일 */
-  .member-modal-overlay {
-    @apply fixed inset-0 flex-center bg-black-2 bg-opacity-50 backdrop-blur-[2px] cursor-default z-50;
-  }
-  .member-modal-container {
-    @apply card-base p-10 shadow-lg w-[90%] max-w-lg;
-  }
-  .member-modal-header {
-    @apply flex-between mb-12;
-  }
-  .member-modal-input {
-    @apply w-full border-b border-gray-2 rounded-md px-3 py-2 focus:outline-none focus:border-primary-0 placeholder-gray-1;
-  }
-  .member-modal-error {
-    @apply text-red-1 text-sm mb-3 whitespace-pre-line;
-  }
-  .member-modal-success {
-    @apply text-green-1 text-sm mb-3;
-  }
-  .member-modal-button {
-    @apply px-6 py-2 rounded-md hover:opacity-80 transition duration-300;
-  }
-  .member-modal-button-disabled {
-    @apply bg-gray-2 text-gray-1 cursor-not-allowed;
-  }
-  .member-modal-button-active {
-    @apply bg-primary-0 text-white-0;
-  }
-  /*관리자 홈 멤버 리스트 스타일*/
-  .member-list-container {
-    @apply w-full p-5 border-l-2 border-gray-2;
-  }
+/* 관리자 멤버 모달 스타일 */
+.member-modal-overlay {
+  @apply fixed inset-0 flex-center bg-black-2 bg-opacity-50 backdrop-blur-[2px] cursor-default z-50;
+}
+.member-modal-container {
+  @apply card-base p-10 shadow-lg w-[90%] max-w-lg;
+}
+.member-modal-header {
+  @apply flex-between mb-12;
+}
+.member-modal-input {
+  @apply w-full border-b border-gray-2 rounded-md px-3 py-2 focus:outline-none focus:border-primary-0 placeholder-gray-1;
+}
+.member-modal-error {
+  @apply text-red-1 text-sm mb-3 whitespace-pre-line;
+}
+.member-modal-success {
+  @apply text-green-1 text-sm mb-3;
+}
+.member-modal-button {
+  @apply px-6 py-2 rounded-md hover:opacity-80 transition duration-300;
+}
+.member-modal-button-disabled {
+  @apply bg-gray-2 text-gray-1 cursor-not-allowed;
+}
+.member-modal-button-active {
+  @apply bg-primary-0 text-white-0;
+}
+/*관리자 홈 멤버 리스트 스타일*/
+.member-list-container {
+  @apply w-full p-5 border-l-2 border-gray-2;
+}
 
-  .member-list-section {
-    @apply mb-6;
-  }
+.member-list-section {
+  @apply mb-6;
+}
 
-  .member-list-title {
-    @apply text-lg font-bold border-b pb-2;
-  }
+.member-list-title {
+  @apply text-lg font-bold border-b pb-2;
+}
 
-  .member-list-wrapper {
-    @apply flex flex-col gap-2 mt-3;
-  }
+.member-list-wrapper {
+  @apply flex flex-col gap-2 mt-3;
+}
 
-  .member-list-item {
-    @apply flex items-center gap-4 ml-5;
-  }
+.member-list-item {
+  @apply flex items-center gap-4 ml-5;
+}
 
-  .member-list-image {
-    @apply w-8 h-8 rounded-full object-cover border border-gray-2;
-  }
+.member-list-image {
+  @apply w-8 h-8 rounded-full object-cover border border-gray-2;
+}
 
-  .member-list-name {
-    @apply text-sm font-medium truncate w-24;
-  }
+.member-list-name {
+  @apply text-sm font-medium truncate w-24;
+}
 
-  .member-list-empty {
-    @apply text-sm text-gray-1 ml-5;
-  }
+.member-list-empty {
+  @apply text-sm text-gray-1 ml-5;
 }

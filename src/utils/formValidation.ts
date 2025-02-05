@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import { addMonths } from 'date-fns';
 
-export const validationSchema = yup.object({
+export const templateValidationSchema = yup.object({
   title: yup
     .string()
     .trim()
