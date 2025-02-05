@@ -133,7 +133,14 @@ export const ticketApi = {
   // [사용자] 티켓 수정
   puTicket(
     ticketId: number,
-    data: { title: string; firstCategory: string; secondCategory: string; content: string; due_data: string },
+    data: {
+      title: string;
+      firstCategory: string;
+      secondCategory: string;
+      content: string;
+      dueDate: string;
+      attachmentIds: number[];
+    },
   ) {
     return api.put(`/tickets/${ticketId}`, data);
   },

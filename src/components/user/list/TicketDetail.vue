@@ -150,7 +150,8 @@ const updateMutation = useCustomMutation(
       firstCategory: firstCategorySelected.value.label, // 선택된 1차 카테고리
       secondCategory: secondCategorySelected.value.label, // 선택된 2차 카테고리
       content: ticketStore.ticket.content,
-      due_data: ticketStore.ticket.due_date,
+      dueDate: formatMinusDate(ticketStore.ticket.due_date),
+      attachmentIds: [],
     };
 
     const response = await ticketApi.puTicket(props.ticketId, updateData);
@@ -159,6 +160,7 @@ const updateMutation = useCustomMutation(
   {
     onSuccess: () => {
       queryClient.invalidateQueries(['ticket-detail', props.ticketId]);
+      queryClient.invalidateQueries(['user-tickets']);
       ticketStore.isEditMode = false;
     },
     onError: (error) => {

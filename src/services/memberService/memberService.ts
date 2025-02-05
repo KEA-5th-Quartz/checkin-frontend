@@ -28,4 +28,16 @@ export const memberApi = {
 
     return response.data.data;
   },
+  // [관리자] 사용자, 담당자, 관리자 수 전체 조회
+  getMemberStatsRole() {
+    return api.get('/members/stats/role');
+  },
+  // [관리자] 회원 권한 변경
+  putMemberRole(memberId: number, data: { role: string }) {
+    return api.put(`/members/${memberId}/role`, data);
+  },
+  // [담당자] 담당자 개인 데이터 조회
+  getManagerProgress() {
+    return api.get('/tickets/progress');
+  },
 };
