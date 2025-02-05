@@ -7,7 +7,7 @@ import { useMemberStore } from '@/stores/memberStore';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import SvgIcon from '../common/SvgIcon.vue';
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
 import { useTicketStore } from '@/stores/userTicketStore';
@@ -20,6 +20,7 @@ const memberStore = useMemberStore();
 const ticketStore = useTicketStore();
 const queryClient = useQueryClient();
 
+const chatContainer = ref<HTMLElement | null>(null);
 // 댓글 작성자 정보를 저장할 Map
 const commentUserMap = ref(new Map<number, CommentMember>());
 const commentContent = ref('');
@@ -43,6 +44,19 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const attachedFiles = ref<AttachedFile[]>([]);
 const previewUrl = ref<string | null>(null);
 const showPreview = ref(false);
+
+const scrollToBottom = async () => {
+  await nextTick();
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+    // 확실히 하기 위해 약간의 지연 후 다시 시도
+    setTimeout(() => {
+      if (chatContainer.value) {
+        chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+      }
+    }, 50);
+  }
+};
 
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
@@ -182,6 +196,7 @@ const handleAddComments = async () => {
     });
     // 성공적으로 댓글이 작성되면 textarea 비우기
     commentContent.value = '';
+    scrollToBottom();
   } catch (err) {
     console.error('댓글 작성 실패:', err);
   }
@@ -223,6 +238,7 @@ const handleFileChange = async (event: Event) => {
     if (fileInput.value) {
       fileInput.value.value = '';
     }
+    scrollToBottom();
   } catch (err) {
     if (err instanceof Error) {
       console.error('파일 첨부 실패:', err.message);
@@ -274,7 +290,7 @@ const hasLiked = (commentId: number) => {
 
 <template>
   <!-- 댓글 입력창 -->
-  <div class="ticket-comment-container">
+  <div ref="chatContainer" class="ticket-comment-container">
     <!-- 로그 -->
     <div v-if="commentData">
       <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
