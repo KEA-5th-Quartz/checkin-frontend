@@ -147,8 +147,8 @@ const updateMutation = useCustomMutation(
 
     const updateData = {
       title: ticketStore.ticket.title,
-      first_category: firstCategorySelected.value.label, // 선택된 1차 카테고리
-      second_category: secondCategorySelected.value.label, // 선택된 2차 카테고리
+      firstCategory: firstCategorySelected.value.label, // 선택된 1차 카테고리
+      secondCategory: secondCategorySelected.value.label, // 선택된 2차 카테고리
       content: ticketStore.ticket.content,
       due_data: ticketStore.ticket.due_date,
     };
