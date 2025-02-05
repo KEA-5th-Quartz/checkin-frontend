@@ -13,16 +13,18 @@ export const validationSchema = yup.object({
   firstCategory: yup
     .object()
     .shape({
-      firstCategoryId: yup.number().required(), // 실제 API 요청에 필요
-      firstCategoryName: yup.string().required('* 1차 카테고리를 선택하세요'), // 사용자에게 보이는 값
+      id: yup.number().required(), // 실제 API 요청에 필요
+      value: yup.string().required('* 1차 카테고리를 선택하세요'),
+      label: yup.string().required(),
     })
     .required('* 1차 카테고리를 선택하세요'),
 
   secondCategory: yup
     .object()
     .shape({
-      secondCategoryId: yup.number().required(),
-      secondCategoryName: yup.string().required('* 2차 카테고리를 선택하세요'),
+      id: yup.number().required(),
+      value: yup.string().required('* 2차 카테고리를 선택하세요'),
+      label: yup.string().required(),
     })
     .required('* 2차 카테고리를 선택하세요'),
 
