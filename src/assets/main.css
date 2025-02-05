@@ -427,9 +427,8 @@ body {
   }
 
   /* 사용자 티켓 요청 폼*/
-
   .title-form{
-    @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3;
+    @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3;
   }  
   .dueDate-form{
     @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3 bg-[#fafafa];
@@ -499,5 +498,3 @@ body {
     @apply text-sm text-gray-1 ml-5;
   }
 }
-
-
