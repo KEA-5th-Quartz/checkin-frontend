@@ -28,4 +28,8 @@ export const memberApi = {
 
     return response.data.data;
   },
+  // [관리자] 사용자, 담당자, 관리자 수 전체 조회
+  getMemberStatsRole() {
+    return api.get('/members/stats/role');
+  },
 };

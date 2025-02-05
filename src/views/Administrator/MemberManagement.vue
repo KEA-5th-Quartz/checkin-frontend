@@ -1,6 +1,6 @@
 <template>
   <div>
-    <HeaderStats :adminCount="3" :managerCount="30" :userCount="120" />
+    <HeaderStats />
     <SearchAndActions />
     <MemberTabs />
   </div>
