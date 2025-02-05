@@ -32,4 +32,8 @@ export const memberApi = {
   getMemberStatsRole() {
     return api.get('/members/stats/role');
   },
+  // [관리자] 회원 권한 변경
+  putMemberRole(memberId: number, data: { role: string }) {
+    return api.put(`/members/${memberId}/role`, data);
+  },
 };

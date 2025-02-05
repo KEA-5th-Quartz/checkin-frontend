@@ -37,7 +37,7 @@
       :title="'권한 변경'"
       :content="'변경할 권한을 선택하세요.'"
       :mainText="'확인'"
-      :onMainClick="confirmRoleChange"
+      :onMainClick="handleUpdateRole"
       :cancelText="'취소'"
       :onCancelClick="closeRoleChangeModal"
     >
@@ -78,6 +78,11 @@ import { onClickOutside } from '@vueuse/core';
 import CommonDialog from '../../common/CommonDialog.vue';
 import SvgIcon from '../../common/SvgIcon.vue';
 import { ArrowDownIcon } from '@/assets/icons/path';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { memberApi } from '@/services/memberService/memberService';
+import { useQueryClient } from '@tanstack/vue-query';
+
+const queryClient = useQueryClient();
 
 const isMenuOpen = ref(false);
 const isRoleChangeModalOpen = ref(false);
@@ -107,6 +112,32 @@ const props = defineProps({
     required: true,
   },
 });
+
+// 권한 변경 뮤테이션
+const updateRoleMutation = useCustomMutation(
+  async ({ memberId, role }: { memberId: number; role: string }) => {
+    const response = await memberApi.putMemberRole(memberId, { role });
+    return response.data;
+  },
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  },
+);
+
+const handleUpdateRole = async () => {
+  try {
+    if (!selectedRole.value) return;
+    await updateRoleMutation.mutateAsync({
+      memberId: props.member.memberId,
+      role: selectedRole.value,
+    });
+    closeRoleChangeModal();
+  } catch (err) {
+    console.error('권한 변경 실패:', err);
+  }
+};
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
@@ -139,17 +170,16 @@ onClickOutside(dropdownRef, () => {
 const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   selectedRole.value = role;
   isDropdownOpen.value = false;
-  console.log(`[권한 선택됨] ${props.member.username} → ${roleLabels[role]}`);
+  console.log(`[권한 선택됨] ${props.member.memberId} → ${roleLabels[role]}`);
 };
 
 // 권한 변경 확정 (콘솔 로그만 출력)
 const confirmRoleChange = () => {
   if (selectedRole.value) {
-    console.log(`[권한 변경 요청] ${props.member.username} → ${roleLabels[selectedRole.value]}`);
+    console.log(`[권한 변경 요청] ${props.member.memberId} → ${roleLabels[selectedRole.value]}`);
   } else {
     console.warn('권한이 선택되지 않았습니다.');
   }
-  closeRoleChangeModal();
 };
 
 // 멤버 탈퇴 모달 열기/닫기
