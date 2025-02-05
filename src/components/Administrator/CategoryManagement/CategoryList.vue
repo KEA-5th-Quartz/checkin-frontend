@@ -12,7 +12,7 @@
           v-for="category in primaryCategories"
           :key="category.firstCategoryId"
           class="category-list-item"
-          :class="{ 'bg-blue-4 text-primary-3': selectedPrimaryCategory === category.firstCategoryId }"
+          :class="{ 'bg-blue-4 text-primary-3': selectedPrimaryCategory?.firstCategoryId === category.firstCategoryId }"
           @click="selectPrimaryCategory(category)"
         >
           <span>{{ category.firstCategoryName }}</span>
@@ -205,6 +205,7 @@ const { mutate: editCategory } = useCustomMutation(
   },
 );
 
+// 카테고리 수정 제출
 function submitEditCategory(updatedCategory: { id: number; name: string }) {
   if (!selectedCategory.value) {
     console.error('선택된 카테고리가 없습니다.');
