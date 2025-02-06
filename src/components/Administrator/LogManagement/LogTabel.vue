@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
-import LogStatusBadge from '@/components/common/Badges/LogStatusBadge.vue';
 import { perPageOptions } from '@/components/manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -56,6 +55,13 @@ const handlePageChange = (page: number) => {
   sessionStorage.setItem('logCurrentPage', page.toString());
 };
 
+const toggleOrder = () => {
+  order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
+  // 정렬이 변경될 때 첫 페이지로 이동
+  currentPage.value = 1;
+  sessionStorage.setItem('logCurrentPage', '1');
+};
+
 onBeforeUnmount(() => {
   sessionStorage.setItem('logCurrentPage', currentPage.value.toString());
 });
@@ -84,7 +90,15 @@ onBeforeUnmount(() => {
         <table class="min-w-full table-fixed">
           <thead class="administrator-thead sticky top-0 bg-primary-2 z-10">
             <tr>
-              <th class="administrator-th text-start w-1/6">시간</th>
+              <th @click="toggleOrder" class="administrator-th text-start w-1/6 cursor-pointer duration-200">
+                <div class="flex items-center gap-2">
+                  시간
+                  <SvgIcon
+                    :icon="ArrowDownIcon"
+                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                  />
+                </div>
+              </th>
               <th class="administrator-th w-1/6">이름</th>
               <th class="administrator-th w-1/6">이메일</th>
               <th class="administrator-th w-1/6">상태</th>
@@ -104,7 +118,14 @@ onBeforeUnmount(() => {
                 <p class="truncate">{{ item.email }}</p>
               </td>
               <td class="administrator-td max-w-0">
-                <p class="truncate">{{ item.accessLogType }}</p>
+                <div
+                  :class="[
+                    'px-3 py-1 rounded-full inline-flex items-center justify-center',
+                    item.accessLogType === '로그인 성공' ? 'bg-green-0 text-green-1' : 'bg-red-0 text-red-1',
+                  ]"
+                >
+                  <span class="text-sm font-medium">{{ item.accessLogType }}</span>
+                </div>
               </td>
               <td class="administrator-td max-w-0">
                 <p class="truncate">{{ item.role }}</p>
