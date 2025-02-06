@@ -19,7 +19,7 @@ export const categoryApi = {
   },
   // 2차 카테고리 생성
   postSecondCategory(firstCategoryId: number, data: { name: string }) {
-    return api.post(`/categories/${firstCategoryId}`, data);
+    return api.post(`/categories/${firstCategoryId}/second-categories`, data);
   },
   // 2차 카테고리 수정
   putSecondCategory(firsteCategoryId: number, secondCategoryId: number, data: { secondCategory: string }) {

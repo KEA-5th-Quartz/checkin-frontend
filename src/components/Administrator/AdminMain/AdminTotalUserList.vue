@@ -7,7 +7,7 @@
         <template v-if="adminLoading">
           <SkeletonList />
         </template>
-        <template v-else-if="adminData?.members.length > 0">
+        <template v-else-if="adminData && adminData?.members.length > 0">
           <div v-for="member in adminData.members" :key="member.memberId" class="flex items-center gap-4 ml-5">
             <img :src="member.profilePic" alt="프로필" class="member-list-image" />
             <span class="member-list-name">{{ member.username }}</span>
@@ -26,7 +26,7 @@
         <template v-if="managerLoading">
           <SkeletonList />
         </template>
-        <template v-else-if="managerData?.members.length > 0">
+        <template v-else-if="managerData && managerData?.members.length > 0">
           <div v-for="member in managerData.members" :key="member.memberId" class="flex items-center gap-4 ml-5">
             <img :src="member.profilePic" alt="프로필" class="member-list-image" />
             <span class="member-list-name">{{ member.username }}</span>
@@ -45,7 +45,7 @@
         <template v-if="userLoading">
           <SkeletonList />
         </template>
-        <template v-else-if="userData?.members.length > 0">
+        <template v-else-if="userData && userData?.members.length > 0">
           <div v-for="member in userData.members" :key="member.memberId" class="flex items-center gap-4 ml-5">
             <img :src="member.profilePic" alt="프로필" class="member-list-image" />
             <span class="member-list-name">{{ member.username }}</span>

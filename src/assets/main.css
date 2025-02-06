@@ -341,7 +341,7 @@ body {
     @apply border-b border-2 border-primary-0 mb-3;
   }
   .category-list {
-    @apply space-y-2 text-gray-0;
+    @apply space-y-2 text-gray-0 max-h-[80vh] overflow-y-auto hide-scrollbar;
   }
 
   .category-list-item {

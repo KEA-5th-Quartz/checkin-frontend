@@ -71,6 +71,7 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { XIcon } from '@/assets/icons/path';
 import { onClickOutside } from '@vueuse/core';
 import { memberApi } from '@/services/memberService/memberService';
+import { isApiError } from '@/types/common/error';
 
 const modalRef = ref(null);
 
@@ -103,13 +104,17 @@ async function validateUsername() {
     await memberApi.checkUsername(formData.value.username);
     usernameError.value = '';
     isUsernameValid.value = true;
-  } catch (error) {
-    if (error.code === 'COMMON_4000') {
-      usernameError.value = '아이디 규칙에 맞지 않습니다.\n[알파벳 소문자 3~10개] + . + [알파벳 소문자 1~5개]';
-    } else if (error.code === 'MEMBER_4090') {
-      usernameError.value = '이미 사용 중인 아이디입니다.';
+  } catch (error: unknown) {
+    if (isApiError(error)) {
+      if (error.code === 'COMMON_4000') {
+        usernameError.value = '아이디 규칙에 맞지 않습니다.\n[알파벳 소문자 3~10개] + . + [알파벳 소문자 1~5개]';
+      } else if (error.code === 'MEMBER_4090') {
+        usernameError.value = '이미 사용 중인 아이디입니다.';
+      } else {
+        usernameError.value = '아이디 중복 검사 중 오류가 발생했습니다.';
+      }
     } else {
-      usernameError.value = '아이디 중복 검사 중 오류가 발생했습니다.';
+      usernameError.value = '알 수 없는 오류가 발생했습니다.';
     }
     isUsernameValid.value = false;
   }
@@ -126,13 +131,17 @@ async function validateEmail() {
     await memberApi.checkEmail(formData.value.email);
     emailError.value = '';
     isEmailValid.value = true;
-  } catch (error) {
-    if (error.code === 'COMMON_4000') {
-      emailError.value = '이메일 형식에 맞지 않습니다.';
-    } else if (error.code === 'MEMBER_4091') {
-      emailError.value = '이미 사용 중인 이메일입니다.';
+  } catch (error: unknown) {
+    if (isApiError(error)) {
+      if (error.code === 'COMMON_4000') {
+        emailError.value = '이메일 형식에 맞지 않습니다.';
+      } else if (error.code === 'MEMBER_4091') {
+        emailError.value = '이미 사용 중인 이메일입니다.';
+      } else {
+        emailError.value = '이메일 중복 검사 중 오류가 발생했습니다.';
+      }
     } else {
-      emailError.value = '이메일 중복 검사 중 오류가 발생했습니다.';
+      emailError.value = '알 수 없는 오류가 발생했습니다.';
     }
     isEmailValid.value = false;
   }
