@@ -131,7 +131,7 @@ export const ticketApi = {
     return api.patch('/tickets', data);
   },
   // [사용자] 휴지통 목록 조회
-  getTrashTickets(page?: number, size?: number) {
+  getTrashTickets({ page, size }: { page: number; size: number }) {
     return api.get(`/tickets/trash?page=${page}&size=${size}`);
   },
   // [사용자] 휴지통 티켓 다중 복구

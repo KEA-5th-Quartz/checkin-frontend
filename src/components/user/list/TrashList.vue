@@ -8,9 +8,9 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useUserTrashListStore } from '@/stores/userTrashStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import { useQueryClient } from '@tanstack/vue-query';
+import { QueryKey, useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
-import { onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 
 const trashStore = useUserTrashListStore();
@@ -40,9 +40,17 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isOpen.value = false;
 };
 
-const { data: trashData } = useCustomQuery(['trash-list'], async () => {
+const queryParams = computed(() => ({
+  page: currentPage.value,
+  size: pageSize.value,
+}));
+
+const { data: trashData } = useCustomQuery(['trash-list', queryParams], async () => {
   try {
-    const response = await ticketApi.getTrashTickets();
+    const response = await ticketApi.getTrashTickets({
+      page: currentPage.value,
+      size: pageSize.value,
+    });
     return response.data.data;
   } catch (err) {
     console.error('휴지통 목록 조회 실패:', err);
