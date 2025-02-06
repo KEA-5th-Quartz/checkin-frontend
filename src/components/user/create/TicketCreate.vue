@@ -364,7 +364,7 @@ watch(content, (newValue) => {
       </section>
 
       <section class="w-full mt-12">
-        <label class="ticket-label">요청 내용</label>
+        <label class="ticket-label">요청 사항</label>
         <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa]" />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
