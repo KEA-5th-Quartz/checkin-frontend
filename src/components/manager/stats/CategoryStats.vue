@@ -157,7 +157,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 p-5 pb-20">
+  <section class="overflow-x-auto mt-5 pb-20">
     <div class="statistics-section">
       <div v-if="series.length">
         <apexchart type="bar" height="450" :options="chartOptions" :series="series" />

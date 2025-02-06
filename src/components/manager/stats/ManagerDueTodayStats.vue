@@ -23,7 +23,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 p-5 pb-20">
+  <section class="overflow-x-auto mt-5 pr-5 pb-20 w-1/5">
     <div class="statistics-section">
       <h2 class="statistics-section-title">오늘까지인 티켓</h2>
       <div class="text-2xl font-bold text-blue-3">{{ ticketCount }} 건</div>

@@ -154,7 +154,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 p-5 pb-20">
+  <section class="overflow-x-auto mt-5 shadow-md">
     <div class="statistics-section">
       <div class="flex justify-between items-center mb-4">
         <h2 class="statistics-section-title">각 담당자의 상태별 티켓 수</h2>
