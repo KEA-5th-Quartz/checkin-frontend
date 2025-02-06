@@ -174,13 +174,17 @@ function closeDialog() {
 
 // 카테고리 수정 Mutation
 const { mutate: editCategory } = useCustomMutation(
-  async (updatedCategory: { id: number; name: string }) => {
+  async (updatedCategory: { id: number; name: string; alias?: string; contentGuide?: string }) => {
     if (!selectedCategory.value) {
       throw new Error('수정할 카테고리가 선택되지 않았습니다.');
     }
     // 1차 카테고리 수정
     if ('firstCategoryId' in selectedCategory.value) {
-      return await categoryApi.putFirstCategory(updatedCategory.id, { firstCategory: updatedCategory.name });
+      return await categoryApi.putFirstCategory(updatedCategory.id, {
+        name: updatedCategory.name,
+        alias: updatedCategory.alias || '',
+        contentGuide: updatedCategory.contentGuide || '',
+      });
     }
     // 2차 카테고리 수정
     if ('secondCategoryId' in selectedCategory.value && selectedPrimaryCategory.value) {
@@ -216,7 +220,7 @@ const { mutate: editCategory } = useCustomMutation(
 );
 
 // 카테고리 수정 제출
-function submitEditCategory(updatedCategory: { id: number; name: string }) {
+function submitEditCategory(updatedCategory: { id: number; name: string; alias: string; contentGuide?: string }) {
   if (!selectedCategory.value) {
     console.error('선택된 카테고리가 없습니다.');
     return;
@@ -226,7 +230,12 @@ function submitEditCategory(updatedCategory: { id: number; name: string }) {
       ? selectedCategory.value.firstCategoryId
       : selectedCategory.value.secondCategoryId;
 
-  editCategory({ id: categoryId, name: updatedCategory.name });
+  editCategory({
+    id: categoryId,
+    name: updatedCategory.name,
+    alias: updatedCategory.alias,
+    contentGuide: updatedCategory.contentGuide,
+  });
 }
 
 // 1차 카테고리 생성 모달 열기
@@ -261,8 +270,8 @@ function closeAddModal() {
 
 // 카테고리 생성 Mutation
 const { mutate: createFirstCategory } = useCustomMutation(
-  async (data: { name: string }) => {
-    return await categoryApi.postFirstCategory({ name: data.name });
+  async (data: { name: string; alias: string; contentGuide: string }) => {
+    return await categoryApi.postFirstCategory(data);
   },
   {
     onSuccess: () => {
@@ -320,7 +329,7 @@ const { mutate: createSecondCategory } = useCustomMutation(
 );
 
 // 카테고리 추가 제출
-function submitAddCategory(newCategory: { name: string; parentId?: number }) {
+function submitAddCategory(newCategory: { name: string; alias?: string; contentGuide?: string; parentId?: number }) {
   if (!newCategory.name.trim()) {
     errorMessage.value = '카테고리 이름을 입력해주세요.';
     return;
@@ -338,8 +347,11 @@ function submitAddCategory(newCategory: { name: string; parentId?: number }) {
 
     return;
   }
-
-  createFirstCategory({ name: newCategory.name });
+  createFirstCategory({
+    name: newCategory.name,
+    alias: newCategory.alias || '',
+    contentGuide: newCategory.contentGuide || '',
+  });
 }
 
 // 카테고리 삭제 다이얼 상태

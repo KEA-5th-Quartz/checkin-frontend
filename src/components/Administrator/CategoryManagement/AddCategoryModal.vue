@@ -19,6 +19,19 @@
           class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"
         />
+        <!-- Alias 입력란 -->
+        <label v-if="!isSecondaryCategory" class="category-modal-input-label">Alias (2~4글자 대문자)</label>
+        <input
+          v-if="!isSecondaryCategory"
+          type="text"
+          v-model="alias"
+          class="category-modal-input"
+          placeholder="예: INFS"
+        />
+
+        <!-- Content Guide 입력란 -->
+        <label v-if="!isSecondaryCategory" class="category-modal-input-label">Content Guide</label>
+        <textarea v-if="!isSecondaryCategory" v-model="contentGuide" class="category-modal-input"></textarea>
         <!-- 경고 메시지 -->
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
@@ -32,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineProps } from 'vue';
+import { ref, defineEmits, defineProps, computed } from 'vue';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -43,11 +56,20 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'submit']);
 
+const isSecondaryCategory = computed(() => {
+  return props.parentCategory !== null;
+});
+
 const categoryName = ref('');
+const alias = ref('');
+const contentGuide = ref('');
+const errorMessage = ref('');
 
 // 입력 상태 초기화
 function resetState() {
   categoryName.value = '';
+  alias.value = '';
+  contentGuide.value = '';
 }
 
 // 모달 닫기
@@ -58,6 +80,15 @@ function close() {
 
 // 카테고리 추가 제출
 function submit() {
-  emit('submit', { name: categoryName.value, parentId: props.parentCategory?.firstCategoryId || null });
+  if (!isSecondaryCategory.value && !alias.value.match(/^[A-Z]{2,4}$/)) {
+    errorMessage.value = 'Alias는 2~4자의 대문자 영문이어야 합니다.';
+    return;
+  }
+  emit('submit', {
+    name: categoryName.value,
+    alias: alias.value,
+    contentGuide: contentGuide.value,
+    parentId: props.parentCategory?.firstCategoryId || null,
+  });
 }
 </script>

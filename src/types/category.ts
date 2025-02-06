@@ -7,6 +7,8 @@ export interface SecondCategory {
 export interface FirstCategory {
   firstCategoryId: number;
   firstCategoryName: string;
+  alias: string | null;
+  contentGuide: string | null;
   secondCategories: SecondCategory[];
 }
 
