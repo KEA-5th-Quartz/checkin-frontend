@@ -76,7 +76,13 @@
     <CommonDialog
       v-if="isRemoveCategoryModalOpen"
       :title="'카테고리 삭제'"
-      :content="`'${selectedCategoryName}' 카테고리를 삭제하겠습니까?`"
+      :content="`'${
+        selectedCategoryForDelete
+          ? 'firstCategoryId' in selectedCategoryForDelete
+            ? selectedCategoryForDelete.firstCategoryName
+            : selectedCategoryForDelete.name
+          : '선택된 카테고리'
+      }' 카테고리를 삭제하겠습니까?`"
       :isWarn="true"
       :mainText="'삭제'"
       :onMainClick="RemoveCategory"
@@ -143,10 +149,12 @@ const filteredSecondaryCategories = computed(() => {
 
 // 수정 모달 열기
 function handleEditPrimaryCategory(category: FirstCategory) {
+  if (isRemoveCategoryModalOpen.value) return;
   selectedCategory.value = category;
 }
 
 function handleEditSecondaryCategory(category: SecondCategory) {
+  if (isRemoveCategoryModalOpen.value) return;
   selectedCategory.value = category;
 }
 
@@ -198,45 +206,35 @@ function closeAddModal() {
   isAddModalOpen.value = false;
 }
 
+// 삭제 전용 상태
+const selectedCategoryForDelete = ref<FirstCategory | SecondCategory | null>(null);
+
 // 카테고리 삭제 다이얼 상태
 const isRemoveCategoryModalOpen = ref(false);
 
-const closeRemoveCategoryModal = () => {
+function closeRemoveCategoryModal() {
   isRemoveCategoryModalOpen.value = false;
-};
-
-const selectedCategoryName = computed(() => {
-  if (!selectedCategory.value) return '선택된 카테고리';
-
-  if ('firstCategoryName' in selectedCategory.value) {
-    return selectedCategory.value.firstCategoryName;
-  }
-
-  if ('name' in selectedCategory.value) {
-    return selectedCategory.value.name;
-  }
-
-  return '이름 없음';
-});
+  selectedCategoryForDelete.value = null;
+}
 
 // 1차 카테고리 삭제 여부
 const isPrimaryDelete = ref(false);
 
 // 카테고리 삭제 mutation
 const { mutate: removeCategory } = useCustomMutation(
-  async () => {
-    if (!selectedCategory.value) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
+  async (category: FirstCategory | SecondCategory) => {
+    if (!category) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
 
     // 1차 카테고리 삭제
-    if (isPrimaryDelete.value && 'firstCategoryId' in selectedCategory.value) {
-      return await categoryApi.deleteFirstCategory(selectedCategory.value.firstCategoryId);
+    if ('firstCategoryId' in category) {
+      return await categoryApi.deleteFirstCategory(category.firstCategoryId);
     }
 
     // 2차 카테고리 삭제
-    if ('secondCategoryId' in selectedCategory.value && selectedPrimaryCategory.value) {
+    if ('secondCategoryId' in category && selectedPrimaryCategory.value) {
       return await categoryApi.deleteSecondCategory(
         selectedPrimaryCategory.value.firstCategoryId,
-        selectedCategory.value.secondCategoryId,
+        category.secondCategoryId,
       );
     }
 
@@ -246,16 +244,16 @@ const { mutate: removeCategory } = useCustomMutation(
     onSuccess: () => {
       queryClient.refetchQueries({ queryKey: ['category-list'] });
       isRemoveCategoryModalOpen.value = false;
-      selectedCategory.value = null;
+      selectedCategoryForDelete.value = null;
       dialogContent.value = {
         title: '카테고리 삭제',
-        content: '카테고리가 삭제 되었습니다.',
+        content: '카테고리가 삭제되었습니다.',
         mainText: '확인',
       };
       isDialogOpen.value = true;
     },
     onError: (error: unknown) => {
-      console.error('카테고리 삭제 실패: ', error);
+      console.error('카테고리 삭제 실패:', error);
       if (isApiError(error) && error.code === 'CATEGORY_4092') {
         dialogContent.value = {
           title: '삭제 불가',
@@ -271,19 +269,21 @@ const { mutate: removeCategory } = useCustomMutation(
 
 // 1차 카테고리 삭제 핸들러
 function handleDeletePrimaryCategory(category: FirstCategory) {
-  selectedCategory.value = category;
+  if (isRemoveCategoryModalOpen.value) return;
+  selectedCategoryForDelete.value = category;
   isPrimaryDelete.value = true;
   isRemoveCategoryModalOpen.value = true;
 }
 // 2차 카테고리 삭제 핸들러
 function handleDeleteSecondaryCategory(category: SecondCategory) {
-  selectedCategory.value = category;
+  if (isRemoveCategoryModalOpen.value) return;
+  selectedCategoryForDelete.value = category;
   isPrimaryDelete.value = false;
   isRemoveCategoryModalOpen.value = true;
 }
 
 function RemoveCategory() {
-  if (!selectedCategory.value) return;
-  removeCategory();
+  if (!selectedCategoryForDelete.value) return;
+  removeCategory(selectedCategoryForDelete.value);
 }
 </script>
