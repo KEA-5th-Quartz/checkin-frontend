@@ -20,13 +20,16 @@
           placeholder="카테고리 이름을 입력하세요"
         />
         <!-- Alias 입력란 -->
-        <label v-if="!isSecondaryCategory" class="category-modal-input-label">Alias (2~4글자 대문자)</label>
+        <label v-if="isFirstCategory" class="category-modal-input-label"> Alias (2~4글자 대문자) </label>
+        <input v-if="isFirstCategory" type="text" v-model="alias" class="category-modal-input" placeholder="예: INFS" />
+
+        <label v-if="isSecondaryCategory" class="category-modal-input-label"> Alias (3글자 대문자) </label>
         <input
-          v-if="!isSecondaryCategory"
+          v-if="isSecondaryCategory"
           type="text"
           v-model="alias"
           class="category-modal-input"
-          placeholder="예: INFS"
+          placeholder="예: CRM"
         />
 
         <!-- Content Guide 입력란 -->
@@ -58,9 +61,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'updateCategories', 'showDialog']);
 
-const isSecondaryCategory = computed(() => {
-  return props.parentCategory !== null;
-});
+const isFirstCategory = computed(() => !props.parentCategory);
+const isSecondaryCategory = computed(() => !!props.parentCategory);
 
 const categoryName = ref('');
 const alias = ref('');
@@ -68,9 +70,12 @@ const contentGuide = ref('');
 const errorMessage = ref('');
 
 const { mutate: createCategory } = useCustomMutation(
-  async (data: { name: string; alias?: string; contentGuide?: string }) => {
+  async (data: { name: string; alias: string; contentGuide?: string }) => {
     return isSecondaryCategory.value
-      ? await categoryApi.postSecondCategory(props.parentCategory?.firstCategoryId ?? 0, { name: data.name })
+      ? await categoryApi.postSecondCategory(props.parentCategory?.firstCategoryId ?? 0, {
+          name: data.name,
+          alias: data.alias || '',
+        })
       : await categoryApi.postFirstCategory({
           name: data.name,
           alias: data.alias || '',
@@ -124,10 +129,17 @@ function close() {
 // 카테고리 추가 제출
 function submit() {
   errorMessage.value = '';
-  if (!isSecondaryCategory.value && !alias.value.match(/^[A-Z]{2,4}$/)) {
+
+  if (isFirstCategory.value && !alias.value.match(/^[A-Z]{2,4}$/)) {
     errorMessage.value = 'Alias는 2~4자의 대문자 영문이어야 합니다.';
     return;
   }
+
+  if (isSecondaryCategory.value && !alias.value.match(/^[A-Z]{3}$/)) {
+    errorMessage.value = 'Alias는 3자의 대문자 영문이어야 합니다.';
+    return;
+  }
+
   createCategory({ name: categoryName.value, alias: alias.value, contentGuide: contentGuide.value });
 }
 </script>

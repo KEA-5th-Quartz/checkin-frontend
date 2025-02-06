@@ -53,6 +53,7 @@
     <EditCategoryModal
       :isOpen="!!selectedCategory"
       :category="selectedCategory"
+      :parentCategory="selectedPrimaryCategory"
       @close="closeEditModal"
       @updateCategories="refreshCategories"
       @showDialog="openDialog"
@@ -78,9 +79,11 @@
       :title="'카테고리 삭제'"
       :content="`'${
         selectedCategoryForDelete
-          ? 'firstCategoryId' in selectedCategoryForDelete
+          ? isFirstCategory(selectedCategoryForDelete)
             ? selectedCategoryForDelete.firstCategoryName
-            : selectedCategoryForDelete.name
+            : isSecondCategory(selectedCategoryForDelete)
+            ? selectedCategoryForDelete.name
+            : '선택된 카테고리'
           : '선택된 카테고리'
       }' 카테고리를 삭제하겠습니까?`"
       :isWarn="true"
@@ -144,7 +147,13 @@ const filteredSecondaryCategories = computed(() => {
   const selected = primaryCategories.value.find(
     (category: FirstCategory) => category.firstCategoryId === selectedPrimaryCategory.value?.firstCategoryId,
   );
-  return selected ? selected.secondCategories : [];
+
+  return selected
+    ? selected.secondCategories.map((second: SecondCategory) => ({
+        ...second,
+        alias: second.alias || '',
+      }))
+    : [];
 });
 
 // 수정 모달 열기
@@ -220,18 +229,26 @@ function closeRemoveCategoryModal() {
 // 1차 카테고리 삭제 여부
 const isPrimaryDelete = ref(false);
 
+function isFirstCategory(category: FirstCategory | SecondCategory): category is FirstCategory {
+  return 'firstCategoryId' in category;
+}
+
+function isSecondCategory(category: FirstCategory | SecondCategory): category is SecondCategory {
+  return 'secondCategoryId' in category;
+}
+
 // 카테고리 삭제 mutation
 const { mutate: removeCategory } = useCustomMutation(
   async (category: FirstCategory | SecondCategory) => {
     if (!category) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
 
     // 1차 카테고리 삭제
-    if ('firstCategoryId' in category) {
+    if (isFirstCategory(category)) {
       return await categoryApi.deleteFirstCategory(category.firstCategoryId);
     }
 
     // 2차 카테고리 삭제
-    if ('secondCategoryId' in category && selectedPrimaryCategory.value) {
+    if (isSecondCategory(category) && selectedPrimaryCategory.value) {
       return await categoryApi.deleteSecondCategory(
         selectedPrimaryCategory.value.firstCategoryId,
         category.secondCategoryId,
@@ -242,7 +259,7 @@ const { mutate: removeCategory } = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['category-list'] });
+      refreshCategories();
       isRemoveCategoryModalOpen.value = false;
       selectedCategoryForDelete.value = null;
       dialogContent.value = {

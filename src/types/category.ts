@@ -1,7 +1,9 @@
 // types/category.ts
 export interface SecondCategory {
   secondCategoryId: number;
+  firstCategoryId: number;
   name: string;
+  alias: string | null;
 }
 
 export interface FirstCategory {
