@@ -291,14 +291,13 @@ onBeforeUnmount(() => {
           <thead class="manager-thead">
             <tr>
               <th v-if="ticketStore.isDeleteMode" class="manager-th w-[1%]">선택</th>
-              <th :class="['manager-th w-[5%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
-              <th class="manager-th text-start w-[25%]">제목</th>
-              <th class="manager-th w-[10%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
+              <th :class="['manager-th w-[10%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
+              <th class="manager-th text-start w-[30%]">제목</th>
+              <th class="manager-th w-[15%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
-              <th class="manager-th w-[25%]">설명</th>
               <th class="manager-th w-[7.5%]">진행 상태</th>
-              <th class="manager-th w-[10%]">담당자</th>
-              <th class="manager-th w-[5%]">마감일</th>
+              <th class="manager-th w-[15%] text-start pl-6">담당자</th>
+              <th class="manager-th w-[10%]">마감일</th>
             </tr>
           </thead>
 
@@ -337,11 +336,6 @@ onBeforeUnmount(() => {
               <td class="manager-td max-w-0">
                 <p class="truncate">
                   {{ item.secondCategory }}
-                </p>
-              </td>
-              <td class="manager-td max-w-0 text-start">
-                <p class="truncate" :title="item.content">
-                  {{ item.content }}
                 </p>
               </td>
               <td class="manager-td text-center">

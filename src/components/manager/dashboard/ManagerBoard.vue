@@ -227,13 +227,12 @@ onBeforeUnmount(() => {
       <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th w-[5%] pl-6">번호</th>
-            <th class="manager-th text-start w-[25%]">제목</th>
-            <th class="manager-th w-[10%]">1차 카테고리</th>
+            <th class="manager-th w-[10%] pl-6">번호</th>
+            <th class="manager-th text-start w-[30%]">제목</th>
+            <th class="manager-th w-[12.5%]">1차 카테고리</th>
             <th class="manager-th w-[7.5%]">2차 카테고리</th>
-            <th class="manager-th w-[25%]">설명</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
-            <th class="manager-th w-[10%]">담당자</th>
+            <th class="manager-th w-[12.5%] text-start pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
           </tr>
         </thead>
@@ -263,11 +262,6 @@ onBeforeUnmount(() => {
             <td class="manager-td max-w-0">
               <p class="truncate">
                 {{ ticket.secondCategory }}
-              </p>
-            </td>
-            <td class="manager-td max-w-0 text-start">
-              <p class="truncate" :title="ticket.content">
-                {{ ticket.content }}
               </p>
             </td>
             <td class="manager-td text-center">
@@ -297,15 +291,14 @@ onBeforeUnmount(() => {
       <table v-else class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th w-[5%] pl-6">번호</th>
-            <th class="manager-th text-start w-[25%]">제목</th>
+            <th class="manager-th w-[10%] pl-6">번호</th>
+            <th class="manager-th text-start w-[35%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
-            <th class="manager-th w-[7.5%]">2차 카테고리</th>
-            <th class="manager-th w-[25%]">설명</th>
+            <th class="manager-th w-[12.5%]">2차 카테고리</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
-            <th class="manager-th w-[10%]">담당자</th>
+            <th class="manager-th w-[12.5%] text-start pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
-            <th class="manager-th w-[5%] pr-6">중요도</th>
+            <th class="manager-th w-[12.5%] pr-6">중요도</th>
           </tr>
         </thead>
 
@@ -334,11 +327,6 @@ onBeforeUnmount(() => {
             <td class="manager-td max-w-0">
               <p class="truncate">
                 {{ ticket.secondCategory }}
-              </p>
-            </td>
-            <td class="manager-td max-w-0 text-start">
-              <p class="truncate" :title="ticket.content">
-                {{ ticket.content }}
               </p>
             </td>
             <td class="manager-td text-center">

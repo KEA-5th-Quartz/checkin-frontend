@@ -371,9 +371,9 @@ const canEdit = computed(() => {
             </section>
           </div>
 
-          <!-- 설명 -->
+          <!-- 요청사항 -->
           <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
+            <label class="ticket-desc-label">요청사항</label>
             <div v-if="!ticketStore.isEditMode" class="ticket-desc-area">
               <p class="ticket-desc-content">{{ ticketStore.ticket.content }}</p>
             </div>

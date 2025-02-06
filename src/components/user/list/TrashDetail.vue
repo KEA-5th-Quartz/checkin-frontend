@@ -117,9 +117,9 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
             </section>
           </div>
 
-          <!-- 설명 -->
+          <!-- 요청사항 -->
           <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
+            <label class="ticket-desc-label">요청사항</label>
             <div class="ticket-desc-area">
               <p class="ticket-desc-content">{{ detailData.ticket.content }}</p>
             </div>

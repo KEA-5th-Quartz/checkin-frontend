@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="templateData?.data.templates !== 0" class="pb-20">
+  <section v-if="templateData?.data.templates !== 0" class="pb-10 mt-12">
     <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-8 gap-10 mr-10">
       <div ref="dropdownRef" class="relative mt-1 flex items-center gap-10">
         <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
@@ -164,7 +164,7 @@ onBeforeUnmount(() => {
               <th class="manager-th text-start w-[25%]">제목</th>
               <th class="manager-th w-[10%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
-              <th class="manager-th w-[32.5%] text-start">설명</th>
+              <th class="manager-th w-[32.5%] text-start">요청사항</th>
             </tr>
           </thead>
 

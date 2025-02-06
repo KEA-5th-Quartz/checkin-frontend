@@ -188,7 +188,7 @@ body {
     @apply manager-td border-none cursor-default;
   }
   .board-header {
-    @apply flex justify-between mx-auto w-[95%] mt-8;
+    @apply flex justify-between mx-auto w-[95%] mt-12;
   }
   .board-size-menu {
     @apply px-3 py-2 hover:bg-gray-3 cursor-pointer;

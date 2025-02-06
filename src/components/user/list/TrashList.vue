@@ -159,7 +159,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <article class="py-10 relative">
+  <article class="py-10 relative mt-5">
     <header class="w-full flex justify-between gap-6">
       <div>
         <p class="pl-12 text-xl font-semibold">삭제된 항목은 30일간 휴지통에 보관됩니다.</p>
