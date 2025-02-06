@@ -12,6 +12,7 @@ import {
   StatisticIcon,
   TemplateIcon,
   LogIcon,
+  TrashIcon,
 } from '@/assets/icons/path';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
@@ -210,7 +211,7 @@ const handleLogout = async () => {
       <router-link to="/user/trash" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />
-          <SvgIcon :icon="SettingIcon" />
+          <SvgIcon :icon="TrashIcon" />
           휴지통
         </li>
       </router-link>

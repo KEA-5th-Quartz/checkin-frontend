@@ -249,8 +249,22 @@ export const CreateTicketIcon: IconPathTypes = {
   width: 25,
   height: 24,
   options: {
-    stroke: '#959393',
+    stroke: '#fff',
     strokeWidth: 4,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+};
+
+// 휴지통 아이콘
+export const TrashIcon: IconPathTypes = {
+  path: 'M4.66663 8.16667H23.3333M11.6666 12.8333V19.8333M16.3333 12.8333V19.8333M5.83329 8.16667L6.99996 22.1667C6.99996 22.7855 7.24579 23.379 7.68338 23.8166C8.12096 24.2542 8.71445 24.5 9.33329 24.5H18.6666C19.2855 24.5 19.879 24.2542 20.3165 23.8166C20.7541 23.379 21 22.7855 21 22.1667L22.1666 8.16667M10.5 8.16667V4.66667C10.5 4.35725 10.6229 4.0605 10.8417 3.84171C11.0605 3.62292 11.3572 3.5 11.6666 3.5H16.3333C16.6427 3.5 16.9395 3.62292 17.1582 3.84171C17.377 4.0605 17.5 4.35725 17.5 4.66667V8.16667',
+  fill: 'transparent',
+  width: 28,
+  height: 28,
+  options: {
+    stroke: '#fff',
+    strokeWidth: 2.33333,
     strokeLinecap: 'round',
     strokeLinejoin: 'round',
   },
