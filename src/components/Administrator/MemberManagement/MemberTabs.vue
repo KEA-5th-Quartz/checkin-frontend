@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { useMemberListStore } from '@/stores/useMemberListStore';
 import MemberCard from '../../../components/Administrator/MemberManagement/MemberCard.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
@@ -58,7 +58,7 @@ import SkeletonCard from '@/components/UI/SkeletonCard.vue';
 const store = useMemberListStore();
 
 // 탭 목록
-const tabs = ['ADMIN', 'MANAGER', 'USER'];
+const tabs = ['ADMIN', 'MANAGER', 'USER'] as const;
 const roleLabels: Record<string, string> = {
   ADMIN: '관리자',
   MANAGER: '담당자',
@@ -86,7 +86,7 @@ watch(data, (newData) => {
 });
 
 // 탭 전환 함수
-const switchTab = async (role: string) => {
+const switchTab = async (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   store.setRole(role);
   store.setCurrentPage(1); // 역할 변경 시 페이지 초기화
 };

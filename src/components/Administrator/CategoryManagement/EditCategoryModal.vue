@@ -28,49 +28,39 @@
 
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch } from 'vue';
+import { FirstCategory, SecondCategory } from '@/types/category';
 
-// Props 정의
 const props = defineProps({
   isOpen: Boolean,
   category: {
-    type: Object as () => { id: number; name: string },
+    type: Object as () => FirstCategory | SecondCategory | null,
     required: true,
-    default: () => ({ id: 0, name: '' }), // 기본값 추가
   },
+  errorMessage: String,
 });
 
 // Emits 정의
 const emit = defineEmits(['close', 'submit']);
 
 const updatedName = ref('');
-const errorMessage = ref('');
 
 // 모달이 열릴 때마다 updatedName을 업데이트
 watch(
   () => props.category,
   (newCategory) => {
-    updatedName.value = newCategory?.name || ''; // 카테고리 이름이 없으면 빈 문자열로 설정
+    if (!newCategory) return;
+    updatedName.value = 'firstCategoryId' in newCategory ? newCategory.firstCategoryName : newCategory.name;
   },
   { immediate: true },
 );
 
-function resetState() {
-  errorMessage.value = '';
-}
-
 // 모달 닫기
 function closeModal() {
   emit('close');
-  resetState();
 }
 
 // 수정된 이름 제출
 function submitEdit() {
-  if (!updatedName.value.trim()) {
-    errorMessage.value = '카테고리 이름을 입력해주세요.';
-    return;
-  }
   emit('submit', { ...props.category, name: updatedName.value });
-  closeModal();
 }
 </script>

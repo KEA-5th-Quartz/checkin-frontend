@@ -1,7 +1,7 @@
 <template>
   <div class="flex-center mb-5">
     <button @click="handleAddCategory" class="bg-primary-5 text-primary-3 p-3 rounded-md hover:opacity-80 w-full">
-      {{ buttonText }}
+      {{ props.buttonText }}
     </button>
   </div>
 </template>

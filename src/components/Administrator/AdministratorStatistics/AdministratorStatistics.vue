@@ -47,11 +47,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { timeFilterTickets, chartData, updateChartData } from '../StatisticsTest.ts';
+import { ref, watch, Ref } from 'vue';
+import { timeFilterTickets, chartData, updateChartData } from '../StatisticsTest';
+import { ChartSeries, ChartOptions } from '@/types/adminChart';
 
-const series = ref([]);
-const chartOptions = ref({
+const series: Ref<ChartSeries[]> = ref([]);
+
+const chartOptions = ref<ChartOptions>({
   chart: {
     type: 'bar',
     stacked: true,
