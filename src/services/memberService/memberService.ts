@@ -40,4 +40,8 @@ export const memberApi = {
   getManagerProgress() {
     return api.get('/tickets/progress');
   },
+  // [관리자] 관리자가 사용자 접속 로그 조회
+  getMemberLog(page: number, size: number, order: string) {
+    return api.get(`/members/access-logs?page=${page}&size=${size}&order=${order}`);
+  },
 };

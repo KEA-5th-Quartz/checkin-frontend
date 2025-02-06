@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isSizeOpen ? 'rotate-180' : '']" />
         </button>
 
-        <div v-if="isSizeOpen" class="manager-filter-menu">
+        <div v-if="isSizeOpen" class="manager-filter-menu mt-44 w-[112px]">
           <ul>
             <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
               {{ option.label }}

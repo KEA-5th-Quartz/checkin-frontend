@@ -127,14 +127,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/user/create/TemplateCreate.vue'),
         meta: { requiresAuth: true, roles: ['USER'] },
       },
+      {
+        path: 'user/trash',
+        name: 'user-trash',
+        component: () => import('../views/user/list/TrashListView.vue'),
+        meta: { requiresAuth: true, roles: ['USER'] },
+      },
     ],
   },
 ];
 
-// const router = createRouter({
-//   history: createWebHistory(),
-//   routes,
-// });
 // role에 따른 리다이렉트 경로 결정 함수
 const getRedirectPath = (role: MemberType): string => {
   switch (role) {

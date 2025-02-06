@@ -5,10 +5,16 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { memberApi } from '@/services/memberService/memberService';
 import { computed } from 'vue';
 
-const { data: managerProgressData } = useCustomQuery(['manager-progress'], async () => {
-  const response = await memberApi.getManagerProgress();
-  return response.data;
-});
+const { data: managerProgressData } = useCustomQuery(
+  ['manager-progress'],
+  async () => {
+    const response = await memberApi.getManagerProgress();
+    return response.data;
+  },
+  {
+    refetchInterval: 1000 * 60, // 60초마다 갱신
+  },
+);
 
 const progress = computed(() => ({
   dueTodayCount: managerProgressData.value?.data?.dueTodayCount ?? 0,

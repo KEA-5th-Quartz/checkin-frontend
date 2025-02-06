@@ -32,6 +32,13 @@ const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
 const isSearch = ref(false);
 
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
+const UserfilterState = ref<UserFilterState>({
+  statuses: [],
+  categories: [],
+});
+
 // 검색 쿼리 파라미터
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
@@ -68,13 +75,6 @@ const selectOption = (
   sessionStorage.setItem('sizeCurrentPage', '1');
   isSizeOpen.value = false;
 };
-
-const dialogState = ref<DialogProps>({ ...initialDialog });
-
-const UserfilterState = ref<UserFilterState>({
-  statuses: [],
-  categories: [],
-});
 
 // 필터 적용 핸들러
 const handleApplyFilters = (filters: UserFilterPayload) => {
@@ -211,6 +211,7 @@ onBeforeUnmount(() => {
           <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
           <input
             v-model="keyword"
+            maxlength="20"
             placeholder="티켓 검색..."
             class="manager-search-input"
             @keyup.enter="handleSearch"

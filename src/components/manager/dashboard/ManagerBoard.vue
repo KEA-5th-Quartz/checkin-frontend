@@ -166,7 +166,13 @@ onBeforeUnmount(() => {
     <div class="flex w-1/4">
       <div class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
-        <input v-model="keyword" placeholder="티켓 검색..." class="manager-search-input" @keyup.enter="handleSearch" />
+        <input
+          v-model="keyword"
+          maxlength="20"
+          placeholder="티켓 검색..."
+          class="manager-search-input"
+          @keyup.enter="handleSearch"
+        />
         <div class="flex items-center gap-2">
           <SvgIcon :icon="SearchIcon" class="cursor-pointer pl-1" @click="handleSearch" />
         </div>

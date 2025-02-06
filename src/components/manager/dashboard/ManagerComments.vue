@@ -404,7 +404,12 @@ const hasLiked = (commentId: number) => {
 
   <!-- 댓글 인풋 -->
   <div class="ticket-comment-input-area">
-    <textarea v-model="commentContent" placeholder="댓글을 작성하세요" class="ticket-comment-textarea" />
+    <textarea
+      v-model="commentContent"
+      maxlength="128"
+      placeholder="댓글을 작성하세요"
+      class="ticket-comment-textarea"
+    />
     <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">
       <SvgIcon :icon="ClipIcon" class="cursor-pointer" @click="triggerFileInput" />
