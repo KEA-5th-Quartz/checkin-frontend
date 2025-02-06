@@ -6,11 +6,11 @@ export const categoryApi = {
     return api.get('/categories');
   },
   // 1차 카테고리 생성
-  postFirstCategory(data: { name: string }) {
+  postFirstCategory(data: { name: string; alias: string; contentGuide: string }) {
     return api.post('/categories', data);
   },
   // 1차 카테고리 수정
-  putFirstCategory(firstCategoryId: number, data: { firstCategory: string }) {
+  putFirstCategory(firstCategoryId: number, data: { name: string; alias: string; contentGuide: string }) {
     return api.put(`/categories/${firstCategoryId}`, data);
   },
   // 1차 카테고리 삭제
@@ -18,12 +18,16 @@ export const categoryApi = {
     return api.delete(`/categories/${firstCategoryId}`);
   },
   // 2차 카테고리 생성
-  postSecondCategory(firstCategoryId: number, data: { name: string }) {
+  postSecondCategory(firstCategoryId: number, data: { name: string; alias: string }) {
     return api.post(`/categories/${firstCategoryId}/second-categories`, data);
   },
   // 2차 카테고리 수정
-  putSecondCategory(firsteCategoryId: number, secondCategoryId: number, data: { secondCategory: string }) {
-    return api.put(`/categories/${firsteCategoryId}/second-categories/${secondCategoryId}`, data);
+  putSecondCategory(
+    firstCategoryId: number,
+    secondCategoryId: number,
+    data: { secondCategory: string; alias: string },
+  ) {
+    return api.put(`/categories/${firstCategoryId}/second-categories/${secondCategoryId}`, data);
   },
   // 2차 카테고리 삭제
   deleteSecondCategory(firsteCategoryId: number, secondCategoryId: number) {

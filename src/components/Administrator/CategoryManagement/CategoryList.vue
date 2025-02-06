@@ -51,19 +51,20 @@
       </div>
     </div>
     <EditCategoryModal
-      :isOpen="isEditModalOpen"
+      :isOpen="!!selectedCategory"
       :category="selectedCategory"
-      :errorMessage="errorMessage"
+      :parentCategory="selectedPrimaryCategory"
       @close="closeEditModal"
-      @submit="submitEditCategory"
+      @updateCategories="refreshCategories"
+      @showDialog="openDialog"
     />
     <AddCategoryModal
       :isOpen="isAddModalOpen"
-      :parentCategory="modalParentCategory"
-      :modalTitle="modalTitle"
-      :errorMessage="errorMessage"
+      :parentCategory="selectedPrimaryCategory"
+      :modalTitle="addModalTitle"
       @close="closeAddModal"
-      @submit="submitAddCategory"
+      @updateCategories="refreshCategories"
+      @showDialog="openDialog"
     />
     <CommonDialog
       v-if="isDialogOpen"
@@ -76,7 +77,15 @@
     <CommonDialog
       v-if="isRemoveCategoryModalOpen"
       :title="'카테고리 삭제'"
-      :content="`'${selectedCategoryName}' 카테고리를 삭제하겠습니까?`"
+      :content="`'${
+        selectedCategoryForDelete
+          ? isFirstCategory(selectedCategoryForDelete)
+            ? selectedCategoryForDelete.firstCategoryName
+            : isSecondCategory(selectedCategoryForDelete)
+            ? selectedCategoryForDelete.name
+            : '선택된 카테고리'
+          : '선택된 카테고리'
+      }' 카테고리를 삭제하겠습니까?`"
       :isWarn="true"
       :mainText="'삭제'"
       :onMainClick="RemoveCategory"
@@ -117,15 +126,15 @@ const {
 
 const queryClient = useQueryClient();
 
-// 에러 메시지 상태
-const errorMessage = ref('');
+function refreshCategories() {
+  queryClient.refetchQueries({ queryKey: ['category-list'] });
+}
 
 // 1차 카테고리 리스트
 const primaryCategories = computed(() => categoryData.value?.data ?? []);
 
 // 선택된 카테고리 상태
 const selectedPrimaryCategory = ref<FirstCategory | null>(null);
-const isEditModalOpen = ref(false);
 const selectedCategory = ref<FirstCategory | SecondCategory | null>(null);
 
 // 1차 카테고리 선택 핸들러
@@ -138,249 +147,111 @@ const filteredSecondaryCategories = computed(() => {
   const selected = primaryCategories.value.find(
     (category: FirstCategory) => category.firstCategoryId === selectedPrimaryCategory.value?.firstCategoryId,
   );
-  return selected ? selected.secondCategories : [];
-});
 
-// AddCategoryModal 관련 상태
-const isAddModalOpen = ref(false);
-const modalParentCategory = ref<FirstCategory | null>(null);
-const modalTitle = ref('');
+  return selected
+    ? selected.secondCategories.map((second: SecondCategory) => ({
+        ...second,
+        alias: second.alias || '',
+      }))
+    : [];
+});
 
 // 수정 모달 열기
 function handleEditPrimaryCategory(category: FirstCategory) {
+  if (isRemoveCategoryModalOpen.value) return;
   selectedCategory.value = category;
-  isEditModalOpen.value = true;
 }
 
 function handleEditSecondaryCategory(category: SecondCategory) {
+  if (isRemoveCategoryModalOpen.value) return;
   selectedCategory.value = category;
-  isEditModalOpen.value = true;
 }
 
 // 수정 모달 닫기
 function closeEditModal() {
-  isEditModalOpen.value = false;
-  errorMessage.value = '';
+  selectedCategory.value = null;
 }
 
 // 다이얼 로그 상태
 const isDialogOpen = ref(false);
 const dialogContent = ref({ title: '', content: '', mainText: '확인' });
 
+// 다이얼로그 표시 함수
+function openDialog(dialogData: { title: string; content: string; mainText: string }) {
+  dialogContent.value = dialogData;
+  isDialogOpen.value = true;
+}
+
 // 다이얼 닫기
 function closeDialog() {
   isDialogOpen.value = false;
 }
 
-// 카테고리 수정 Mutation
-const { mutate: editCategory } = useCustomMutation(
-  async (updatedCategory: { id: number; name: string }) => {
-    if (!selectedCategory.value) {
-      throw new Error('수정할 카테고리가 선택되지 않았습니다.');
-    }
-    // 1차 카테고리 수정
-    if ('firstCategoryId' in selectedCategory.value) {
-      return await categoryApi.putFirstCategory(updatedCategory.id, { firstCategory: updatedCategory.name });
-    }
-    // 2차 카테고리 수정
-    if ('secondCategoryId' in selectedCategory.value && selectedPrimaryCategory.value) {
-      return await categoryApi.putSecondCategory(selectedPrimaryCategory.value.firstCategoryId, updatedCategory.id, {
-        secondCategory: updatedCategory.name,
-      });
-    }
-  },
-  {
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['category-list'] });
-      selectedCategory.value = null;
-      closeEditModal();
-
-      dialogContent.value = {
-        title: '카테고리 수정 완료',
-        content: '카테고리가 수정 되었습니다.',
-        mainText: '확인',
-      };
-      isDialogOpen.value = true;
-    },
-    onError: (error: unknown) => {
-      console.error('카테고리 수정 실패:', error);
-      if (isApiError(error)) {
-        if (error.code === 'CATEGORY_4090') {
-          errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
-        } else {
-          errorMessage.value = '카테고리 수정 중 오류가 발생했습니다.';
-        }
-      }
-    },
-  },
-);
-
-// 카테고리 수정 제출
-function submitEditCategory(updatedCategory: { id: number; name: string }) {
-  if (!selectedCategory.value) {
-    console.error('선택된 카테고리가 없습니다.');
-    return;
-  }
-  const categoryId =
-    'firstCategoryId' in selectedCategory.value
-      ? selectedCategory.value.firstCategoryId
-      : selectedCategory.value.secondCategoryId;
-
-  editCategory({ id: categoryId, name: updatedCategory.name });
-}
+// AddCategoryModal 관련 상태
+const isAddModalOpen = ref(false);
+const addModalTitle = ref('');
 
 // 1차 카테고리 생성 모달 열기
 function handleAddPrimaryCategory() {
-  modalTitle.value = '1차 카테고리 추가';
-  modalParentCategory.value = null;
+  addModalTitle.value = '1차 카테고리 추가';
+  selectedPrimaryCategory.value = null;
   isAddModalOpen.value = true;
 }
 
-// 2차 카테고리 생성 모달 열기
 function handleAddSecondaryCategory() {
   if (!selectedPrimaryCategory.value) {
-    dialogContent.value = {
+    openDialog({
       title: '2차 카테고리 생성',
       content: '1차 카테고리를 선택해주세요.',
       mainText: '확인',
-    };
-    isDialogOpen.value = true;
+    });
     return;
   }
-
-  modalTitle.value = '2차 카테고리 추가';
-  modalParentCategory.value = selectedPrimaryCategory.value;
+  addModalTitle.value = '2차 카테고리 추가';
   isAddModalOpen.value = true;
 }
-
 // 카테고리 생성 모달 닫기
 function closeAddModal() {
   isAddModalOpen.value = false;
-  errorMessage.value = '';
 }
 
-// 카테고리 생성 Mutation
-const { mutate: createFirstCategory } = useCustomMutation(
-  async (data: { name: string }) => {
-    return await categoryApi.postFirstCategory({ name: data.name });
-  },
-  {
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['category-list'] });
-      closeAddModal();
-
-      dialogContent.value = {
-        title: '1차 카테고리 추가 완료',
-        content: '1차 카테고리가 추가되었습니다.',
-        mainText: '확인',
-      };
-      isDialogOpen.value = true;
-    },
-    onError: (error: unknown) => {
-      console.error('[1차 카테고리 API 요청 실패]', error);
-      if (isApiError(error)) {
-        if (error.code === 'CATEGORY_4090') {
-          errorMessage.value = '동일한 이름의 1차 카테고리가 존재합니다.';
-        } else {
-          errorMessage.value = '1차 카테고리 생성 중 오류가 발생했습니다.';
-        }
-      }
-    },
-  },
-);
-
-const { mutate: createSecondCategory } = useCustomMutation(
-  async (data: { firstCategoryId: number; name: string }) => {
-    return await categoryApi.postSecondCategory(data.firstCategoryId, { name: data.name });
-  },
-  {
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['category-list'] });
-      errorMessage.value = '';
-      closeAddModal();
-
-      dialogContent.value = {
-        title: '2차 카테고리 추가 완료',
-        content: '2차 카테고리가 추가되었습니다.',
-        mainText: '확인',
-      };
-      isDialogOpen.value = true;
-    },
-    onError: (error: unknown) => {
-      console.error('[2차 카테고리 API 요청 실패]', error);
-      if (isApiError(error)) {
-        if (error.code === 'CATEGORY_4091') {
-          errorMessage.value = '동일한 이름의 2차 카테고리가 존재합니다.';
-        } else {
-          errorMessage.value = '2차 카테고리 생성 중 오류가 발생했습니다.';
-        }
-      }
-    },
-  },
-);
-
-// 카테고리 추가 제출
-function submitAddCategory(newCategory: { name: string; parentId?: number }) {
-  if (!newCategory.name.trim()) {
-    errorMessage.value = '카테고리 이름을 입력해주세요.';
-    return;
-  }
-  // 1차 카테고리 선택 없이 2차 카테고리 생성 안되도록
-  if (newCategory.parentId) {
-    if (!selectedPrimaryCategory.value) {
-      return;
-    }
-
-    createSecondCategory({
-      firstCategoryId: selectedPrimaryCategory.value.firstCategoryId,
-      name: newCategory.name,
-    });
-
-    return;
-  }
-
-  createFirstCategory({ name: newCategory.name });
-}
+// 삭제 전용 상태
+const selectedCategoryForDelete = ref<FirstCategory | SecondCategory | null>(null);
 
 // 카테고리 삭제 다이얼 상태
 const isRemoveCategoryModalOpen = ref(false);
 
-const closeRemoveCategoryModal = () => {
+function closeRemoveCategoryModal() {
   isRemoveCategoryModalOpen.value = false;
-};
-
-const selectedCategoryName = computed(() => {
-  if (!selectedCategory.value) return '선택된 카테고리';
-
-  if ('firstCategoryName' in selectedCategory.value) {
-    return selectedCategory.value.firstCategoryName;
-  }
-
-  if ('name' in selectedCategory.value) {
-    return selectedCategory.value.name;
-  }
-
-  return '이름 없음';
-});
+  selectedCategoryForDelete.value = null;
+}
 
 // 1차 카테고리 삭제 여부
 const isPrimaryDelete = ref(false);
 
+function isFirstCategory(category: FirstCategory | SecondCategory): category is FirstCategory {
+  return 'firstCategoryId' in category;
+}
+
+function isSecondCategory(category: FirstCategory | SecondCategory): category is SecondCategory {
+  return 'secondCategoryId' in category;
+}
+
 // 카테고리 삭제 mutation
 const { mutate: removeCategory } = useCustomMutation(
-  async () => {
-    if (!selectedCategory.value) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
+  async (category: FirstCategory | SecondCategory) => {
+    if (!category) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
 
     // 1차 카테고리 삭제
-    if (isPrimaryDelete.value && 'firstCategoryId' in selectedCategory.value) {
-      return await categoryApi.deleteFirstCategory(selectedCategory.value.firstCategoryId);
+    if (isFirstCategory(category)) {
+      return await categoryApi.deleteFirstCategory(category.firstCategoryId);
     }
 
     // 2차 카테고리 삭제
-    if ('secondCategoryId' in selectedCategory.value && selectedPrimaryCategory.value) {
+    if (isSecondCategory(category) && selectedPrimaryCategory.value) {
       return await categoryApi.deleteSecondCategory(
         selectedPrimaryCategory.value.firstCategoryId,
-        selectedCategory.value.secondCategoryId,
+        category.secondCategoryId,
       );
     }
 
@@ -388,18 +259,18 @@ const { mutate: removeCategory } = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ['category-list'] });
+      refreshCategories();
       isRemoveCategoryModalOpen.value = false;
-      selectedCategory.value = null;
+      selectedCategoryForDelete.value = null;
       dialogContent.value = {
         title: '카테고리 삭제',
-        content: '카테고리가 삭제 되었습니다.',
+        content: '카테고리가 삭제되었습니다.',
         mainText: '확인',
       };
       isDialogOpen.value = true;
     },
     onError: (error: unknown) => {
-      console.error('카테고리 삭제 실패: ', error);
+      console.error('카테고리 삭제 실패:', error);
       if (isApiError(error) && error.code === 'CATEGORY_4092') {
         dialogContent.value = {
           title: '삭제 불가',
@@ -415,19 +286,21 @@ const { mutate: removeCategory } = useCustomMutation(
 
 // 1차 카테고리 삭제 핸들러
 function handleDeletePrimaryCategory(category: FirstCategory) {
-  selectedCategory.value = category;
+  if (isRemoveCategoryModalOpen.value) return;
+  selectedCategoryForDelete.value = category;
   isPrimaryDelete.value = true;
   isRemoveCategoryModalOpen.value = true;
 }
 // 2차 카테고리 삭제 핸들러
 function handleDeleteSecondaryCategory(category: SecondCategory) {
-  selectedCategory.value = category;
+  if (isRemoveCategoryModalOpen.value) return;
+  selectedCategoryForDelete.value = category;
   isPrimaryDelete.value = false;
   isRemoveCategoryModalOpen.value = true;
 }
 
 function RemoveCategory() {
-  if (!selectedCategory.value) return;
-  removeCategory();
+  if (!selectedCategoryForDelete.value) return;
+  removeCategory(selectedCategoryForDelete.value);
 }
 </script>
