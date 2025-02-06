@@ -42,6 +42,9 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch, computed } from 'vue';
 import { FirstCategory, SecondCategory } from '@/types/category';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { categoryApi } from '@/services/categoryService/categoryService';
+import { isApiError } from '@/types/common/error';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -49,19 +52,57 @@ const props = defineProps({
     type: Object as () => FirstCategory | SecondCategory | null,
     required: true,
   },
-  errorMessage: String,
 });
 
-const isFirstCategory = computed(() => {
-  return props.category && 'firstCategoryId' in props.category;
+const isFirstCategory = computed((): boolean => {
+  return props.category !== null && (props.category as FirstCategory).firstCategoryId !== undefined;
 });
 
 // Emits 정의
-const emit = defineEmits(['close', 'submit']);
+const emit = defineEmits(['close', 'updateCategories', 'showDialog']);
 
 const updatedName = ref('');
 const updatedAlias = ref('');
 const updatedContentGuide = ref('');
+const errorMessage = ref('');
+
+const { mutate: updateCategory } = useCustomMutation(
+  async (data: { id: number; name: string; alias?: string; contentGuide?: string }) => {
+    if (!props.category) throw new Error('수정할 카테고리가 선택되지 않았습니다.');
+
+    return isFirstCategory.value
+      ? await categoryApi.putFirstCategory(data.id, {
+          name: data.name,
+          alias: data.alias || '',
+          contentGuide: data.contentGuide || '',
+        })
+      : await categoryApi.putSecondCategory((props.category as SecondCategory).secondCategoryId, data.id, {
+          secondCategory: data.name,
+        });
+  },
+  {
+    onSuccess: () => {
+      resetState(); // ✅ 입력값 초기화
+      emit('updateCategories'); // ✅ 리스트 갱신 요청
+      emit('showDialog', {
+        title: '카테고리 수정 완료',
+        content: '카테고리가 성공적으로 수정되었습니다.',
+        mainText: '확인',
+      }); // ✅ 다이얼로그 표시 요청
+      closeModal();
+    },
+    onError: (error: unknown) => {
+      console.error('카테고리 수정 실패:', error);
+      if (isApiError(error)) {
+        if (error.code === 'CATEGORY_4090') {
+          errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
+        } else {
+          errorMessage.value = '카테고리 수정 중 오류가 발생했습니다.';
+        }
+      }
+    },
+  },
+);
 
 // 모달이 열릴 때마다 updatedName을 업데이트
 watch(
@@ -89,22 +130,37 @@ function closeModal() {
   emit('close');
 }
 
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    if (!newVal) resetState();
+  },
+);
+
+// 입력 상태 초기화
+function resetState() {
+  updatedName.value = '';
+  updatedAlias.value = '';
+  updatedContentGuide.value = '';
+  errorMessage.value = '';
+}
+
 // 수정된 이름 제출
 function submitEdit() {
-  if (!props.category) return;
+  errorMessage.value = ''; // ✅ 이전 오류 메시지 초기화
 
-  if ('firstCategoryId' in props.category) {
-    emit('submit', {
-      firstCategoryId: props.category.firstCategoryId,
-      name: updatedName.value,
-      alias: updatedAlias.value,
-      contentGuide: updatedContentGuide.value,
-    });
-  } else {
-    emit('submit', {
-      secondCategoryId: props.category.secondCategoryId,
-      name: updatedName.value,
-    });
+  if (!props.category) {
+    console.error('카테고리 정보가 없습니다.');
+    return;
   }
+
+  updateCategory({
+    id: isFirstCategory.value
+      ? (props.category as FirstCategory).firstCategoryId
+      : (props.category as SecondCategory).secondCategoryId,
+    name: updatedName.value,
+    alias: updatedAlias.value,
+    contentGuide: updatedContentGuide.value,
+  });
 }
 </script>
