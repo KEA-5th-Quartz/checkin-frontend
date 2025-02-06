@@ -10,7 +10,7 @@ import { useUserTrashListStore } from '@/stores/userTrashStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 
 const trashStore = useUserTrashListStore();
@@ -40,15 +40,9 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isOpen.value = false;
 };
 
-// 쿼리 파라미터
-const queryParams = computed(() => ({
-  page: currentPage.value,
-  size: pageSize.value,
-}));
-
 const { data: trashData } = useCustomQuery(['trash-list'], async () => {
   try {
-    const response = await ticketApi.getTrashTickets(queryParams.value.page, queryParams.value.size);
+    const response = await ticketApi.getTrashTickets();
     return response.data.data;
   } catch (err) {
     console.error('휴지통 목록 조회 실패:', err);
@@ -158,25 +152,35 @@ onBeforeUnmount(() => {
 
 <template>
   <article class="py-10 relative">
-    <header class="w-full flex justify-end gap-6">
-      <div ref="dropdownRef" class="relative">
-        <button @click="isOpen = !isOpen" class="manager-filter-btn">
-          <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
-        </button>
-
-        <div v-if="isOpen" class="manager-filter-menu w-[112px]">
-          <ul>
-            <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
-              {{ option.label }}
-            </li>
-          </ul>
-        </div>
+    <header class="w-full flex justify-between gap-6">
+      <div>
+        <p class="pl-12 text-xl font-semibold">삭제된 항목은 30일간 휴지통에 보관됩니다.</p>
       </div>
+      <div class="flex gap-8">
+        <div ref="dropdownRef" class="relative">
+          <button @click="isOpen = !isOpen" class="manager-filter-btn">
+            <span class="font-medium">{{ selectedPerPage.label }}</span>
+            <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
+          </button>
 
-      <div class="flex items-center gap-4 pr-10">
-        <button @click="handleRestore" class="btn-cancel py-2">복구</button>
-        <button @click="handleDelete" class="btn-main py-2">삭제</button>
+          <div v-if="isOpen" class="manager-filter-menu w-[112px]">
+            <ul>
+              <li
+                v-for="option in perPageOptions"
+                :key="option.id"
+                @click="selectOption(option)"
+                class="board-size-menu"
+              >
+                {{ option.label }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 pr-10">
+          <button @click="handleRestore" class="btn-cancel py-2">복구</button>
+          <button @click="handleDelete" class="btn-main py-2">삭제</button>
+        </div>
       </div>
     </header>
 
