@@ -15,31 +15,36 @@
         <label class="category-modal-input-label">카테고리 이름</label>
         <input
           type="text"
-          maxlength="33"
           v-model="categoryName"
           class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"
         />
         <!-- Alias 입력란 -->
-        <label v-if="isFirstCategory" class="category-modal-input-label"> 카테고리 약어 (영문 2~4글자 대문자) </label>
-        <input v-if="isFirstCategory" type="text" v-model="alias" class="category-modal-input" placeholder="예: INFR" />
+        <label v-if="isFirstCategory" class="category-modal-input-label"> 카테고리 약어 </label>
+        <input
+          v-if="isFirstCategory"
+          type="text"
+          v-model="alias"
+          class="category-modal-input"
+          placeholder="영문 2~4글자 대문자 ex> INFR"
+        />
 
-        <label v-if="isSecondaryCategory" class="category-modal-input-label"> Alias (영문 3글자 대문자) </label>
+        <label v-if="isSecondaryCategory" class="category-modal-input-label"> 카테고리 약어 </label>
         <input
           v-if="isSecondaryCategory"
           type="text"
           v-model="alias"
           class="category-modal-input"
-          placeholder="예: CRM"
+          placeholder="영문 3글자 대문자 ex> NFS"
         />
 
         <!-- Content Guide 입력란 -->
-        <label v-if="!isSecondaryCategory" class="category-modal-input-label">Content Guide</label>
+        <label v-if="!isSecondaryCategory" class="category-modal-input-label">카테고리 요청 가이드</label>
         <textarea
           v-if="!isSecondaryCategory"
           v-model="contentGuide"
           class="category-modal-input"
-          placeholder="예: 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+          placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
         ></textarea>
         <!-- 경고 메시지 -->
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
@@ -100,12 +105,14 @@ const { mutate: createCategory } = useCustomMutation(
       close();
     },
     onError: (error: unknown) => {
-      console.error('카테고리 수정 실패:', error);
+      console.error('카테고리 추가 실패:', error);
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
+        } else if (error.code === 'COMMON_4000') {
+          errorMessage.value = '요청 본문에 필수적인 필드가 없거나 유효하지 않습니다.';
         } else {
-          errorMessage.value = '카테고리 수정 중 오류가 발생했습니다.';
+          errorMessage.value = '카테고리 생성 중 알 수 없는 오류가 발생했습니다.';
         }
       }
     },
@@ -136,6 +143,16 @@ function close() {
 function submit() {
   errorMessage.value = '';
 
+  const missingFields = [];
+  if (!categoryName.value.trim()) missingFields.push('카테고리 이름');
+  if (!alias.value.trim()) missingFields.push('Alias');
+  if (isFirstCategory.value && !contentGuide.value?.trim()) missingFields.push('Content Guide');
+
+  //  누락된 필드가 있으면 메시지 표시
+  if (missingFields.length > 0) {
+    errorMessage.value = `다음 필드를 입력해주세요: ${missingFields.join(', ')}`;
+    return;
+  }
   if (isFirstCategory.value && !alias.value.match(/^[A-Z]{2,4}$/)) {
     errorMessage.value = 'Alias는 2~4자의 대문자 영문이어야 합니다.';
     return;

@@ -11,18 +11,22 @@
         <label class="category-modal-input-label">카테고리 이름</label>
         <input
           type="text"
-          maxlength="33"
           v-model="updatedName"
           class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"
         />
         <!-- Alias 입력란 -->
-        <label class="category-modal-input-label">{{ aliasLabel }}</label>
-        <input type="text" v-model="updatedAlias" class="category-modal-input" placeholder="예: INFS" />
+        <label class="category-modal-input-label">카테고리 약어</label>
+        <input type="text" v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
 
         <!-- Content Guide 입력란 -->
-        <label v-if="isFirstCategoryComputed" class="category-modal-input-label">Content Guide</label>
-        <textarea v-if="isFirstCategoryComputed" v-model="updatedContentGuide" class="category-modal-input"></textarea>
+        <label v-if="isFirstCategoryComputed" class="category-modal-input-label">카테고리 요청 가이드</label>
+        <textarea
+          v-if="isFirstCategoryComputed"
+          v-model="updatedContentGuide"
+          class="category-modal-input"
+          placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+        ></textarea>
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
       <!-- 모달 푸터 -->
@@ -63,8 +67,8 @@ function isSecondCategory(category: FirstCategory | SecondCategory | null): cate
 
 const isFirstCategoryComputed = computed(() => isFirstCategory(props.category));
 
-const aliasLabel = computed(() => {
-  return isFirstCategoryComputed.value ? 'Alias (2~4글자 대문자)' : 'Alias (3글자 대문자)';
+const aliasPlaceholder = computed(() => {
+  return isFirstCategoryComputed.value ? '영문 2~4글자 대문자 ex> INFR' : '영문 3글자 대문자 ex> NFS';
 });
 
 // Emits 정의
@@ -114,8 +118,10 @@ const { mutate: updateCategory } = useCustomMutation(
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
+        } else if (error.code === 'COMMON_4000') {
+          errorMessage.value = '요청 본문에 필수적인 필드가 없거나 유효하지 않습니다.';
         } else {
-          errorMessage.value = '카테고리 수정 중 오류가 발생했습니다.';
+          errorMessage.value = '카테고리 수정 중 알 수 없는 오류가 발생했습니다.';
         }
       }
     },
