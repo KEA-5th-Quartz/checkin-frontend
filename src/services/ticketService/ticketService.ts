@@ -130,6 +130,18 @@ export const ticketApi = {
   patchTickets(data: { ticketIds: number[] }) {
     return api.patch('/tickets', data);
   },
+  // [사용자] 휴지통 목록 조회
+  getTrashTickets(page?: number, size?: number) {
+    return api.get(`/tickets/trash?page=${page}&size=${size}`);
+  },
+  // [사용자] 휴지통 티켓 복구
+  patchTrashTicket(data: { ticketIds: number }) {
+    return api.patch('/tickets/patch', data);
+  },
+  // [사용자] 휴지통 티켓 삭제
+  deleteTrashTickets(data: { ticketIds: number[] }) {
+    return api.delete('/tickets/delete', { data });
+  },
   // [사용자] 티켓 수정
   puTicket(
     ticketId: number,
