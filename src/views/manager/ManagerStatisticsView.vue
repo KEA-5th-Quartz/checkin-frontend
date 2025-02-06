@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import ManagerStatistic from '@/components/manager/ManagerStatistic.vue';
+import ManagerHeader from '@/components/manager/ManagerHeader.vue';
+import CategoryStats from '@/components/manager/stats/CategoryStats.vue';
+import ManagerCategoryStats from '@/components/manager/stats/ManagerCategoryStats.vue';
+import ManagerDueTodayStats from '@/components/manager/stats/ManagerDueTodayStats.vue';
+import ManagersStats from '@/components/manager/stats/ManagersStats.vue';
 </script>
 
 <template>
   <article class="mx-auto">
-    <ManagerStatistic />
+    <ManagerHeader />
+    <ManagerCategoryStats />
+    <ManagerDueTodayStats />
+    <ManagersStats />
+    <CategoryStats />
   </article>
 </template>
