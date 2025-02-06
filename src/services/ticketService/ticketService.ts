@@ -136,11 +136,11 @@ export const ticketApi = {
   },
   // [사용자] 휴지통 티켓 다중 복구
   patchTrashTicket(data: { ticketIds: number[] }) {
-    return api.patch('/tickets/patch', data);
+    return api.patch('/tickets/trash/recover', data);
   },
   // [사용자] 휴지통 티켓 다중 삭제
   deleteTrashTickets(data: { ticketIds: number[] }) {
-    return api.delete('/tickets/delete', { data });
+    return api.delete('/tickets', { data });
   },
   // [사용자] 티켓 수정
   puTicket(
