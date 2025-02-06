@@ -20,10 +20,10 @@
           placeholder="카테고리 이름을 입력하세요"
         />
         <!-- Alias 입력란 -->
-        <label v-if="isFirstCategory" class="category-modal-input-label"> Alias (2~4글자 대문자) </label>
-        <input v-if="isFirstCategory" type="text" v-model="alias" class="category-modal-input" placeholder="예: INFS" />
+        <label v-if="isFirstCategory" class="category-modal-input-label"> 카테고리 약어 (영문 2~4글자 대문자) </label>
+        <input v-if="isFirstCategory" type="text" v-model="alias" class="category-modal-input" placeholder="예: INFR" />
 
-        <label v-if="isSecondaryCategory" class="category-modal-input-label"> Alias (3글자 대문자) </label>
+        <label v-if="isSecondaryCategory" class="category-modal-input-label"> Alias (영문 3글자 대문자) </label>
         <input
           v-if="isSecondaryCategory"
           type="text"
@@ -34,7 +34,12 @@
 
         <!-- Content Guide 입력란 -->
         <label v-if="!isSecondaryCategory" class="category-modal-input-label">Content Guide</label>
-        <textarea v-if="!isSecondaryCategory" v-model="contentGuide" class="category-modal-input"></textarea>
+        <textarea
+          v-if="!isSecondaryCategory"
+          v-model="contentGuide"
+          class="category-modal-input"
+          placeholder="예: 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+        ></textarea>
         <!-- 경고 메시지 -->
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
@@ -143,3 +148,21 @@ function submit() {
   createCategory({ name: categoryName.value, alias: alias.value, contentGuide: contentGuide.value });
 }
 </script>
+
+<style scoped>
+.category-modal-container {
+  animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: bottom;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+</style>

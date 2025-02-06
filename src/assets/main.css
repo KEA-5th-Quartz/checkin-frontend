@@ -375,11 +375,11 @@ body {
   }
 
   .category-modal-input-label {
-    @apply block text-sm text-gray-0 mb-2;
+    @apply block text-gray-0 my-3;
   }
 
   .category-modal-input {
-    @apply w-full border-b border-gray-2 focus:outline-none focus:border-primary-3 px-2 py-1;
+    @apply w-full border-b border-gray-2 focus:outline-none focus:border-primary-3 px-2 py-1 text-sm;
   }
 
   .category-modal-error-message {
@@ -390,11 +390,10 @@ body {
   }
 
   .category-modal-cancel-button {
-    @apply px-4 py-2 mr-3 bg-gray-2 text-black-0 rounded-md hover:opacity-80;
+    @apply mr-3 bg-gray-2 text-black-0  w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80;
   }
-
   .category-modal-submit-button {
-    @apply px-4 py-2 bg-primary-0 text-white-0 rounded-md hover:opacity-80;
+    @apply bg-primary-0 text-white-0  w-full rounded-lg font-bold px-12 py-3 hover:bg-opacity-80;
   }
   /* 관리자 로그 테이블 스타일 */
   .administrator-thead {
