@@ -51,3 +51,9 @@ export interface AttachedFile {
 export interface AttachmentResponse {
   data: AttachedFile;
 }
+
+// 티켓 생성 파일첨부 응답
+export interface AttachedResponse {
+  attachmentid :string;
+  id :number;
+}
