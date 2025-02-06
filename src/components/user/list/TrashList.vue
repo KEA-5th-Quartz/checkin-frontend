@@ -45,9 +45,12 @@ const queryParams = computed(() => ({
   size: pageSize.value,
 }));
 
-const { data: trashData } = useCustomQuery(['trash-list'], async () => {
+const { data: trashData } = useCustomQuery(['trash-list', queryParams], async () => {
   try {
-    const response = await ticketApi.getTrashTickets(queryParams as unknown as number);
+    const response = await ticketApi.getTrashTickets({
+      page: currentPage.value,
+      size: pageSize.value,
+    });
     return response.data.data;
   } catch (err) {
     console.error('휴지통 목록 조회 실패:', err);
