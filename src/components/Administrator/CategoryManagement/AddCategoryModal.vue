@@ -45,16 +45,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, defineProps, computed } from 'vue';
+import { ref, defineEmits, defineProps, computed, watch } from 'vue';
+import { useCustomMutation } from '@/composables/useCustomMutation';
+import { categoryApi } from '@/services/categoryService/categoryService';
+import { isApiError } from '@/types/common/error';
 
 const props = defineProps<{
   isOpen: boolean;
   modalTitle: string;
-  errorMessage: string;
   parentCategory?: { firstCategoryId: number; firstCategoryName: string } | null;
 }>();
 
-const emit = defineEmits(['close', 'submit']);
+const emit = defineEmits(['close', 'updateCategories', 'showDialog']);
 
 const isSecondaryCategory = computed(() => {
   return props.parentCategory !== null;
@@ -65,30 +67,67 @@ const alias = ref('');
 const contentGuide = ref('');
 const errorMessage = ref('');
 
+const { mutate: createCategory } = useCustomMutation(
+  async (data: { name: string; alias?: string; contentGuide?: string }) => {
+    return isSecondaryCategory.value
+      ? await categoryApi.postSecondCategory(props.parentCategory?.firstCategoryId ?? 0, { name: data.name })
+      : await categoryApi.postFirstCategory({
+          name: data.name,
+          alias: data.alias || '',
+          contentGuide: data.contentGuide || '',
+        });
+  },
+  {
+    onSuccess: () => {
+      resetState(); // 성공 시 입력값 초기화
+      emit('updateCategories'); // 리스트 갱신 요청
+      emit('showDialog', {
+        title: '카테고리 추가 완료',
+        content: '새로운 카테고리가 추가되었습니다.',
+        mainText: '확인',
+      }); // 다이얼로그 표시 요청
+      close();
+    },
+    onError: (error: unknown) => {
+      console.error('카테고리 수정 실패:', error);
+      if (isApiError(error)) {
+        if (error.code === 'CATEGORY_4090') {
+          errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
+        } else {
+          errorMessage.value = '카테고리 수정 중 오류가 발생했습니다.';
+        }
+      }
+    },
+  },
+);
+
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    if (!newVal) resetState();
+  },
+);
+
 // 입력 상태 초기화
 function resetState() {
   categoryName.value = '';
   alias.value = '';
   contentGuide.value = '';
+  errorMessage.value = '';
 }
 
 // 모달 닫기
 function close() {
   emit('close');
-  resetState();
 }
 
 // 카테고리 추가 제출
 function submit() {
+  errorMessage.value = '';
   if (!isSecondaryCategory.value && !alias.value.match(/^[A-Z]{2,4}$/)) {
     errorMessage.value = 'Alias는 2~4자의 대문자 영문이어야 합니다.';
     return;
   }
-  emit('submit', {
-    name: categoryName.value,
-    alias: alias.value,
-    contentGuide: contentGuide.value,
-    parentId: props.parentCategory?.firstCategoryId || null,
-  });
+  createCategory({ name: categoryName.value, alias: alias.value, contentGuide: contentGuide.value });
 }
 </script>
