@@ -9,7 +9,11 @@
         </template>
         <template v-else-if="adminData && adminData?.members.length > 0">
           <div v-for="member in adminData.members" :key="member.memberId" class="flex items-center gap-4 ml-5">
-            <img :src="member.profilePic" alt="프로필" class="member-list-image" />
+            <img
+              :src="member.profilePic"
+              alt="프로필"
+              class="w-8 h-8 rounded-full object-cover border border-gray-2;"
+            />
             <span class="member-list-name">{{ member.username }}</span>
           </div>
         </template>
