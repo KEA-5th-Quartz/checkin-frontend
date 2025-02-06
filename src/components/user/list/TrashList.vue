@@ -142,15 +142,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <article class="py-10">
+  <article class="py-10 relative">
     <header class="w-full flex justify-end gap-6">
-      <div ref="dropdownRef" class="relative max-w-fit">
+      <div ref="dropdownRef" class="relative">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
         </button>
 
-        <div v-if="isOpen" class="manager-filter-menu max-w-fit">
+        <div v-if="isOpen" class="manager-filter-menu w-[112px]">
           <ul>
             <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
               {{ option.label }}
