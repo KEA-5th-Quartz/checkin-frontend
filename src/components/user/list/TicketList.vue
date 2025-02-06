@@ -291,8 +291,8 @@ onBeforeUnmount(() => {
           <thead class="manager-thead">
             <tr>
               <th v-if="ticketStore.isDeleteMode" class="manager-th w-[1%]">선택</th>
-              <th :class="['manager-th w-[10%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
-              <th class="manager-th text-start w-[30%]">제목</th>
+              <th :class="['manager-th text-start w-[15%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
+              <th class="manager-th text-start w-[25%]">제목</th>
               <th class="manager-th w-[15%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">진행 상태</th>
@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
                   />
                 </div>
               </td>
-              <td :class="['manager-td max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
+              <td :class="['manager-td text-start max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
                 <p :title="item.ticketId as unknown as string">
                   {{ item.ticketId }}
                 </p>

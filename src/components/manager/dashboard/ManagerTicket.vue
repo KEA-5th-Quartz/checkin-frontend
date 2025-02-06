@@ -373,8 +373,11 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
         <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
           <!-- 헤더 -->
           <header class="ticket-header">
-            <p class="text-2xl">{{ detailData.title }}</p>
-            <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
+            <div class="flex-stack justify-center">
+              <p class="text-2xl">{{ detailData.title }}</p>
+              <p class="text-sm text-gray-1">{{ detailData.ticketId }}</p>
+            </div>
+            <SvgIcon :icon="XIcon" class="cursor-pointer self-start" @click="handleClose" />
           </header>
 
           <!-- 컨텐츠 -->

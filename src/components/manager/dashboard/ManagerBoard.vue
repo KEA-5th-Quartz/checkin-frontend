@@ -227,12 +227,12 @@ onBeforeUnmount(() => {
       <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th w-[10%] pl-6">번호</th>
-            <th class="manager-th text-start w-[30%]">제목</th>
-            <th class="manager-th w-[12.5%]">1차 카테고리</th>
+            <th class="manager-th w-[17.5%] text-start pl-6">번호</th>
+            <th class="manager-th text-start w-[27.5%]">제목</th>
+            <th class="manager-th w-[10%]">1차 카테고리</th>
             <th class="manager-th w-[7.5%]">2차 카테고리</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
-            <th class="manager-th w-[12.5%] text-start pl-6">담당자</th>
+            <th class="manager-th w-[10%] text-start pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
           </tr>
         </thead>
@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
             class="hover:bg-white-1"
             @click="handleRowClick(ticket.ticketId)"
           >
-            <td class="manager-td max-w-0 pl-6">
+            <td class="manager-td text-start max-w-0 pl-6">
               <p :title="ticket.ticketId.toString()">
                 {{ ticket.ticketId }}
               </p>
@@ -291,7 +291,7 @@ onBeforeUnmount(() => {
       <table v-else class="min-w-full table-fixed">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th w-[10%] pl-6">번호</th>
+            <th class="manager-th w-[10%] text-start pl-6">번호</th>
             <th class="manager-th text-start w-[35%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
             <th class="manager-th w-[12.5%]">2차 카테고리</th>
@@ -309,7 +309,7 @@ onBeforeUnmount(() => {
             class="hover:bg-white-1"
             @click="handleRowClick(ticket.ticketId)"
           >
-            <td class="manager-td max-w-0 pl-6">
+            <td class="manager-td text-start pl-6">
               <p :title="ticket.ticketId.toString()">
                 {{ ticket.ticketId }}
               </p>

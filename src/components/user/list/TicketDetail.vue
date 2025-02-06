@@ -259,7 +259,10 @@ const canEdit = computed(() => {
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
         <header class="ticket-header">
-          <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
+          <div v-if="!ticketStore.isEditMode">
+            <p>{{ ticketStore.ticket.title }}</p>
+            <p class="text-sm text-gray-1">{{ detailData.ticketId }}</p>
+          </div>
           <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon
