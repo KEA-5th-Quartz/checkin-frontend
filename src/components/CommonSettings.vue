@@ -179,7 +179,7 @@ const handleImageChange = async (event: Event) => {
     </form>
 
     <!-- 알림 조건부 렌더링 -->
-    <div class="flex-stack gap-5 mt-5">
+    <!-- <div class="flex-stack gap-5 mt-5">
       <h2 class="text-lg font-semibold">알림 수신 관리</h2>
       <div class="flex items-center justify-between w-1/2">
         <p class="font-bold">담당자 배정 알림</p>
@@ -225,7 +225,7 @@ const handleImageChange = async (event: Event) => {
           />
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <CommonDialog
