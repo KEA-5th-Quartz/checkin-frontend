@@ -426,16 +426,15 @@ body {
   }
 
   /* 사용자 티켓 요청 폼*/
-  .title-form {
+  .title-form{
     @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3;
-  }
-  .dueDate-form {
+  }  
+  .dueDate-form{
     @apply w-full border border-gray-2 rounded-xl text-gray-1 text-sm px-3 py-3 bg-[#fafafa];
   }
-}
-.create-button {
-  @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-10;
-}
+  .create-button {
+    @apply bg-primary-0 rounded items-center text-white-0 text-sm font-semibold flex py-2.5 px-8 gap-2.5 mt-20;
+  }
 
 /* 관리자 멤버 모달 스타일 */
 .member-modal-overlay {
@@ -496,4 +495,5 @@ body {
 
 .member-list-empty {
   @apply text-sm text-gray-1 ml-5;
+}
 }
