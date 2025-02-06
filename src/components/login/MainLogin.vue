@@ -9,11 +9,13 @@ import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
 import { ApiError } from '@/types/common/error';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const router = useRouter();
 const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
+const queryClient = useQueryClient();
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
@@ -46,6 +48,7 @@ const handleLogin = async () => {
 
     // 로그인 성공 시 isLoggedOut 플래그를 false로 설정
     memberStore.isLoggedOut = false;
+    queryClient.clear();
 
     // 최초로그인인지 검사
     if (memberData.passwordResetToken !== null) {

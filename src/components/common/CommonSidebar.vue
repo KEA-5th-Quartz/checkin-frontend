@@ -17,9 +17,11 @@ import {
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
 import { roleInKorean } from '@/utils/mapping';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const router = useRouter();
 const memberStore = useMemberStore();
+const queryClient = useQueryClient();
 
 onMounted(async () => {
   if (!memberStore.accessToken) {
@@ -90,6 +92,7 @@ watch(
 // 로그아웃
 const handleLogout = async () => {
   await memberStore.logout();
+  queryClient.clear();
   window.location.replace('/');
 };
 </script>
