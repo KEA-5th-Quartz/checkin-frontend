@@ -11,6 +11,7 @@ import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import { onBeforeUnmount, ref } from 'vue';
+import TrashDetail from './TrashDetail.vue';
 
 const trashStore = useUserTrashListStore();
 const queryClient = useQueryClient();
@@ -24,6 +25,7 @@ const handlePageChange = (page: number) => {
   sessionStorage.setItem('trashCurrentPage', page.toString());
 };
 
+const selectedTicketId = ref<number | null>(null);
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
@@ -56,7 +58,7 @@ const restoreMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['trash-list'] });
+      queryClient.refetchQueries();
     },
   },
 );
@@ -136,6 +138,13 @@ const handleCheckboxClick = (event: Event, id: number) => {
   });
 };
 
+const handleRowClick = (id: number) => {
+  selectedTicketId.value = id;
+};
+const handleCloseModal = () => {
+  selectedTicketId.value = null;
+};
+
 onBeforeUnmount(() => {
   sessionStorage.setItem('trashCurrentPage', currentPage.value.toString());
 });
@@ -180,7 +189,12 @@ onBeforeUnmount(() => {
           </thead>
 
           <tbody class="whitespace-nowrap">
-            <tr v-for="ticket in trashData?.tickets" :key="ticket.ticketId" class="hover:bg-white-1">
+            <tr
+              v-for="ticket in trashData?.tickets"
+              :key="ticket.ticketId"
+              class="hover:bg-white-1"
+              @click="handleRowClick(ticket.ticketId)"
+            >
               <td class="manager-td">
                 <div class="flex-center">
                   <input
@@ -240,6 +254,8 @@ onBeforeUnmount(() => {
           </tbody>
         </table>
       </div>
+
+      <TrashDetail v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
     </section>
 
     <CustomPagination
