@@ -10,7 +10,7 @@ import { useUserTrashListStore } from '@/stores/userTrashStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
-import { onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 
 const trashStore = useUserTrashListStore();
@@ -40,9 +40,15 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isOpen.value = false;
 };
 
+// 쿼리 파라미터
+const queryParams = computed(() => ({
+  page: currentPage.value,
+  size: pageSize.value,
+}));
+
 const { data: trashData } = useCustomQuery(['trash-list'], async () => {
   try {
-    const response = await ticketApi.getTrashTickets();
+    const response = await ticketApi.getTrashTickets(queryParams.value.page, queryParams.value.size);
     return response.data.data;
   } catch (err) {
     console.error('휴지통 목록 조회 실패:', err);

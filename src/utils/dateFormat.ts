@@ -25,3 +25,15 @@ export const formatShortDateTime = (dateString: string): string => {
 
   return `${month}/${day} ${hours}:${minutes}`;
 };
+
+// 2025-01-30T15:50:25.205637 -> 2025-01-30 15:50
+export const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
+};
