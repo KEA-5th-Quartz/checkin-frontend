@@ -330,7 +330,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       // 3. 2차 카테고리 변경 API 호출
       await secondCategoryMutation.mutateAsync({
         ticketId: props.ticketId,
-        firstCategoryId: option.id,
+        firstCategoryId: option.id as number,
         secondCategory: firstSecondCategoryOption.value,
       });
     }
@@ -367,22 +367,35 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
 // 파일 다운로드 처리 함수
 const handleFileDownload = async (fileUrl: string) => {
   try {
-    // URL에서 파일명 추출
-    const fileName = fileUrl.split('/').pop() || 'download';
+    // URL에서 파일명(attachmentId) 추출
+    const attachmentId = fileUrl.split('/').pop() || '';
+
+    // API 호출
+    const response = await ticketApi.getTicketAttachment(String(props.ticketId), '1');
+
+    // Blob 생성
+    const blob = new Blob([response.data]);
 
     // 이미지 파일인 경우 새 창에서 열기
-    if (isImageFile(fileName)) {
-      window.open(fileUrl, '_blank');
+    if (isImageFile(attachmentId)) {
+      const objectUrl = URL.createObjectURL(blob);
+      window.open(objectUrl, '_blank');
+      // cleanup
+      URL.revokeObjectURL(objectUrl);
       return;
     }
 
-    // 파일 다운로드를 위한 임시 링크 생성
+    // 다운로드 처리
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = fileName;
+    link.href = url;
+    link.download = attachmentId; // 또는 서버에서 제공하는 실제 파일명
     document.body.appendChild(link);
     link.click();
+
+    // cleanup
     document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
   }
