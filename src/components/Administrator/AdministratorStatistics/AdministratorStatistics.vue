@@ -1,5 +1,5 @@
 <template>
-  <section class="overflow-x-auto mt-5 p-5 pb-20">
+  <div class="w-full p-5">
     <!-- 담당자별 티켓 진행 상황 -->
     <div class="statistics-section">
       <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
@@ -16,13 +16,13 @@
           {{ filter }}
         </button>
       </div>
-      <apexchart type="bar" height="400" :options="chartOptions" :series="series" />
+      <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
     </div>
 
     <!-- 카테고리별 티켓 수-->
     <div class="statistics-section">
       <h2 class="statistics-section-title">카테고리별 티켓 수</h2>
-      <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
+      <apexchart type="bar" height="380" :options="chartOptions2" :series="series2" />
     </div>
 
     <!-- 작업 완성률 -->
@@ -41,15 +41,15 @@
           {{ filter }}
         </button>
       </div>
-      <apexchart type="donut" height="400" :options="chartOptions3" :series="series3" />
+      <apexchart type="donut" height="380" :options="chartOptions3" :series="series3" />
     </div>
 
     <!-- 전체 작업상태 분포-->
     <div class="statistics-section">
       <h2 class="statistics-section-title">전체 작업 상태 분포</h2>
-      <apexchart type="donut" height="400" :options="chartOptions4" :series="series4" />
+      <apexchart type="donut" height="380" :options="chartOptions4" :series="series4" />
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup lang="ts">

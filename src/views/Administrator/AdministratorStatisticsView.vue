@@ -3,7 +3,7 @@ import AdministratorStatistics from '@/components/Administrator/AdministratorSta
 </script>
 
 <template>
-  <article class="mx-auto">
-    <AdministratorStatistics />
-  </article>
+  <div class="mx-auto h-screen">
+    <AdministratorStatistics class="h-full overflow-y-auto hide-scrollbar" />
+  </div>
 </template>

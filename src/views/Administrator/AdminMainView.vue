@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-5 p-5 h-screen">
+  <div class="flex gap-5 px-5 h-screen">
     <AdminMainStatistics class="flex-[4] h-full overflow-y-auto hide-scrollbar" />
     <AdminTotalUserList class="flex-[1] h-full sticky top-0" />
   </div>
