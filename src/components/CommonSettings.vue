@@ -9,10 +9,6 @@ import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
 
-const assignmentNotification = ref(false);
-const statusNotification = ref(false);
-const commentNotification = ref(false);
-
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
 const dialogState = ref<DialogProps>({ ...initialDialog });

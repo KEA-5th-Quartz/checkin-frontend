@@ -58,12 +58,13 @@ const handleLogin = async () => {
       router.replace(redirectPath);
     }
   } catch (error: unknown) {
-    const { message } = error as ApiError;
+    const { message, data } = error as ApiError;
 
     dialogState.value = {
       open: true,
       isOneBtn: true,
       title: message,
+      content: '남은시간 ' + data?.blockTime,
       mainText: '확인',
       onMainClick: () => {
         dialogState.value = { ...initialDialog };
@@ -103,6 +104,7 @@ const togglePwdVisibility = () => {
     v-if="dialogState.open"
     :isOneBtn="dialogState.isOneBtn"
     :title="dialogState.title"
+    :content="dialogState.content"
     :mainText="dialogState.mainText"
     :onCancelClick="dialogState.onMainClick"
     :onMainClick="dialogState.onMainClick"
