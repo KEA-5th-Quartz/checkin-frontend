@@ -319,8 +319,8 @@ onBeforeUnmount(() => {
                 </div>
               </td>
               <td :class="['manager-td text-start max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
-                <p :title="item.ticketId as unknown as string">
-                  {{ item.ticketId }}
+                <p :title="item.customId as unknown as string">
+                  {{ item.customId }}
                 </p>
               </td>
               <td class="manager-td max-w-0 text-start">

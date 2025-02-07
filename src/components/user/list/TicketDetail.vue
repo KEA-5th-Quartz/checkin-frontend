@@ -261,7 +261,7 @@ const canEdit = computed(() => {
         <header class="ticket-header">
           <div v-if="!ticketStore.isEditMode">
             <p>{{ ticketStore.ticket.title }}</p>
-            <p class="text-sm text-gray-1">{{ detailData.ticketId }}</p>
+            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
           </div>
           <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">

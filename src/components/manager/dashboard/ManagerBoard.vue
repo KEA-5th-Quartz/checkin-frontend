@@ -245,8 +245,8 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start max-w-0 pl-6">
-              <p :title="ticket.ticketId.toString()">
-                {{ ticket.ticketId }}
+              <p :title="ticket.customId.toString()">
+                {{ ticket.customId }}
               </p>
             </td>
             <td class="manager-td max-w-0 text-start">
@@ -310,8 +310,8 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start pl-6">
-              <p :title="ticket.ticketId.toString()">
-                {{ ticket.ticketId }}
+              <p :title="ticket.customId.toString()">
+                {{ ticket.customId }}
               </p>
             </td>
             <td class="manager-td max-w-0 text-start">

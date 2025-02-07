@@ -375,7 +375,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
           <header class="ticket-header">
             <div class="flex-stack justify-center">
               <p class="text-2xl">{{ detailData.title }}</p>
-              <p class="text-sm text-gray-1">{{ detailData.ticketId }}</p>
+              <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
             </div>
             <SvgIcon :icon="XIcon" class="cursor-pointer self-start" @click="handleClose" />
           </header>

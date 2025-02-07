@@ -3,10 +3,7 @@ import { XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
-import { useQueryClient } from '@tanstack/vue-query';
 import { ref } from 'vue';
-
-const queryClient = useQueryClient();
 
 const props = defineProps<{
   ticketId: number;
@@ -44,7 +41,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
         <!-- 헤더 -->
         <header class="ticket-header">
           <p>{{ detailData.ticket.title }}</p>
-
+          <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
           <div class="flex items-center gap-8">
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
