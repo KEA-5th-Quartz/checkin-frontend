@@ -48,8 +48,6 @@ const handleDelete = () => {
     },
     mainText: '삭제',
     onMainClick: () => {
-      console.log('삭제하는 id 배열: ', selectedTicketIds);
-
       ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
       ticketStore.toggleDeleteMode(); // 삭제 모드 종료
       dialogState.value = { ...initialDialog }; // 다이얼로그 닫기

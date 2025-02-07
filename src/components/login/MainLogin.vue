@@ -9,11 +9,13 @@ import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
 import { ApiError } from '@/types/common/error';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const router = useRouter();
 const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
+const queryClient = useQueryClient();
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
@@ -46,6 +48,7 @@ const handleLogin = async () => {
 
     // 로그인 성공 시 isLoggedOut 플래그를 false로 설정
     memberStore.isLoggedOut = false;
+    queryClient.clear();
 
     // 최초로그인인지 검사
     if (memberData.passwordResetToken !== null) {
@@ -55,12 +58,13 @@ const handleLogin = async () => {
       router.replace(redirectPath);
     }
   } catch (error: unknown) {
-    const { message } = error as ApiError;
+    const { message, data } = error as ApiError;
 
     dialogState.value = {
       open: true,
       isOneBtn: true,
       title: message,
+      content: '남은시간 ' + data?.blockTime,
       mainText: '확인',
       onMainClick: () => {
         dialogState.value = { ...initialDialog };
@@ -100,6 +104,7 @@ const togglePwdVisibility = () => {
     v-if="dialogState.open"
     :isOneBtn="dialogState.isOneBtn"
     :title="dialogState.title"
+    :content="dialogState.content"
     :mainText="dialogState.mainText"
     :onCancelClick="dialogState.onMainClick"
     :onMainClick="dialogState.onMainClick"

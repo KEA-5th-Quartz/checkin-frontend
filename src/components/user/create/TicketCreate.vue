@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
-import { watchEffect } from 'vue';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ClipIcon, PencilIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue';
-import { AttachedResponse, BaseTicketOption } from '@/types/tickets';
+import { BaseTicketOption } from '@/types/tickets';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -16,7 +15,7 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
 
 // 알림창 상태 체크
-const showDialog = ref(false);
+const showDialog = ref<boolean>(false);
 
 // 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
@@ -33,7 +32,12 @@ const template = ref<string>(
 const { handleSubmit, errors, validate } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
-    content: '', // ✅ content의 초기값을 빈 문자열로 설정
+    title: '',
+    content: '',
+    firstCategory: null as BaseTicketOption | null,
+    secondCategory: null as BaseTicketOption | null,
+    dueDate: '',
+    attachmentIds: [] as number[],
   },
 });
 
@@ -58,20 +62,14 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const attachmentMutation = useCustomMutation(
   async ({ attachment }: { attachment: FormData }) => {
     const response = await ticketApi.postAttachment(attachment); // 서버 전체 응답 데이터
-    for (let [key, value] of attachment.entries()) {
-      console.log(`📂 FormData Key: ${key}, Value:`, value);
-    }
-    console.log('📌 ticketApi.postAttachment 응답:', response); // 전체 서버 응답 데이터를 반환
-    console.log('📌 ticketApi.postAttachment 응답 데이터:', response.data); // 백엔드 응답 데이터 반환
-    console.log('📌 `response.data`가 배열인가?:', Array.isArray(response.data)); // 백엔드 응답 데이터이므로 객체임
 
     return response.data; // 백엔드 응답 데이터를 반환
   },
   {
     onSuccess: (response) => {
-      const uploadedAttachmentIds = response.data.map((file) => file.attachmentid); //attachmentId 배열 반환
+      const uploadedAttachmentIds = response.data.map((file: { attachmentid: string }) => file.attachmentid); //attachmentId 배열 반환
       attachmentIds.value.push(uploadedAttachmentIds);
-      const uploadedAttachmentUrl = response.data.map((file) => file.url); // url 배열 반환
+      const uploadedAttachmentUrl = response.data.map((file: { url: string; attachmentid: string }) => file.url); // url 배열 반환
       previewUrl.value.push(...uploadedAttachmentUrl);
     },
     onError: (error) => {
@@ -83,8 +81,8 @@ const attachmentMutation = useCustomMutation(
 /*
   1. 사용자가 클립 아이콘 클릭 시 파일 탐색기 열기 O
   2. 사용자가 첨부한 파일 데이터 받아와서 attachement 객체(FormData)에 저장 O
-  3. attachment(useField로 선언) 유효성 검사 진행 후 통과되면 프리뷰 렌더링, 아니면 에러 메시지 렌더링 X 
-  4. 프리뷰 렌더링되면 첨부파일 뮤테이션 불러와서 attachement를 인자로 넘기는 함수 실행 
+  3. attachment(useField로 선언) 유효성 검사 진행 후 통과되면 프리뷰 렌더링, 아니면 에러 메시지 렌더링 X
+  4. 프리뷰 렌더링되면 첨부파일 뮤테이션 불러와서 attachement를 인자로 넘기는 함수 실행
   5. 성공하면 응답 데이터(attachmentRes[])중 attachmentIds 배열(number[])에 push, url은 previewUrl(string[] | null)에 push O
   */
 
@@ -108,11 +106,19 @@ const handleFileChange = async (event: Event) => {
     console.error('📌 파일이 선택되지 않았습니다.');
     return;
   }
+
   // 파일 업로드 시 isUploading 상태 true로 전환
   isUploading.value = true; // ✅ 업로드 시작
 
   // 타겟 파일 배열로 변환해서 files에 저장
   const files = Array.from(target.files);
+
+  const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
+  if (oversizedFiles.length > 0) {
+    alert(`파일 크기는 10MB를 초과할 수 없습니다.\n초과된 파일: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    target.value = '';
+    return;
+  }
 
   // 기존 FormData 초기화
   const formData = new FormData(); // formData는 객체임
@@ -122,13 +128,6 @@ const handleFileChange = async (event: Event) => {
     // files 중 개별 요소를 file이란 이름으로 초기화
     formData.append('files', file); // file 값들을 formData에 채우기
   });
-
-  console.log('📁 선택된 파일:', files); // 티켓 파일들(선택 파일들) console에 띄우기
-  console.log('📂 FormData 객체:', formData); // ???
-
-  for (let [key, value] of formData.entries()) {
-    console.log(`📂 FormData Key: ${key}, Value:`, value);
-  }
 
   // 선택된 files의 개별 값인 file을 담은 formData 객체값으로 attachment 상태값 초기화
   attachment.value = formData; // 기존 attachment 값이 FormData 배열이지만 초기값이 null이기 때문에 null이 사라지지않음
@@ -141,24 +140,20 @@ const handleFileChange = async (event: Event) => {
     const response = await attachmentMutation.mutateAsync({ attachment: attachment.value }); // response값은 백엔드 응답데이터
 
     // attachmentId 필터링해서 숫자인 경우만 배열에 저장
-    const uploadedAttachmentIds = response.data.map((file) => file.attachmentId).filter((id) => Number.isInteger(id));
-
-    console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
+    const uploadedAttachmentIds = response.data
+      .map((file: { attachmentId: string }) => file.attachmentId)
+      .filter((id: unknown) => Number.isInteger(id));
 
     // attachmentIds가 배열인지 확인 후 처리
     if (!Array.isArray(attachmentIds.value)) {
       attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
     }
 
-    console.log('📌 Before:', JSON.stringify(attachmentIds.value));
-
     // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
     attachmentIds.value = [...uploadedAttachmentIds];
 
-    console.log('📌 After:', JSON.stringify(attachmentIds.value));
-
     // ✅ 업로드된 파일 URL 저장
-    const uploadedAttachmentUrl = response.data.map((file) => file.url);
+    const uploadedAttachmentUrl = response.data.map((file: { url: string }) => file.url);
     previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
   } catch (error) {
     console.error('파일 업로드 실패:', error);
@@ -169,7 +164,6 @@ const handleFileChange = async (event: Event) => {
 
 // 티켓 생성 버튼
 const onSubmit = handleSubmit(async () => {
-  console.log('생성 함수 실행');
   try {
     await createTicketMutation.mutateAsync({
       title: title.value,
@@ -189,16 +183,18 @@ const onSubmit = handleSubmit(async () => {
 const fetchCategories = useCustomQuery(['category'], async () => {
   try {
     const response = await categoryApi.getCategories();
-    return response.data.data.map((category) => ({
-      id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
-      value: category.firstCategoryName,
-      label: category.firstCategoryName,
-      secondCategories: category.secondCategories.map((subCategory) => ({
-        id: subCategory.secondCategoryId,
-        value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
-        label: subCategory.name,
-      })),
-    }));
+    return response.data.data.map(
+      (category: { firstCategoryId: string; firstCategoryName: string; secondCategories: any[] }) => ({
+        id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
+        value: category.firstCategoryName,
+        label: category.firstCategoryName,
+        secondCategories: category.secondCategories.map((subCategory) => ({
+          id: subCategory.secondCategoryId,
+          value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
+          label: subCategory.name,
+        })),
+      }),
+    );
   } catch (error) {
     console.error('에러 처리:', error);
     throw error;
@@ -240,7 +236,6 @@ watch(
   (newData) => {
     if (newData) {
       firstCategoryList.value = newData;
-      console.log('📌 1차 카테고리 업데이트됨:', firstCategoryList.value);
 
       // ✅ 1차 카테고리 업데이트 후 2차 카테고리 업데이트 실행
       updateSecondCategoryList();
@@ -248,10 +243,6 @@ watch(
   },
   { immediate: true },
 );
-
-const contentWithoutTemplate = computed(() => {
-  return content.value.replace(template.value, '').trim(); // ✅ 템플릿 부분 제거
-});
 
 // 티켓 생성 뮤테이션
 const createTicketMutation = useCustomMutation(
@@ -274,29 +265,15 @@ const createTicketMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      showDialog.value = true;
       queryClient.refetchQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
-      console.log('생성 티켓 번호:', createTicketMutation.data); // 티켓 번호 콘솔에 출력
-    },
-    onError: () => {
-      console.log('티켓 생성 실패:', createTicketMutation.error);
     },
   },
 );
 
 // Dialog 안닫히는 문제해결용 함수
-const closeDialog = async () => {
-  console.log('버튼 클릭됨! showDialog 값 변경 전:', showDialog.value);
+const closeDialog = () => {
   showDialog.value = false;
-  await nextTick(); // Vue의 상태 업데이트 보장
-  console.log('showDialog 값 변경 후:', showDialog.value);
 };
-
-// 현재 에러 상태 체크용 함수
-watchEffect(() => {
-  console.log('현재 에러 상태:', errors.value);
-  console.log(content.value);
-});
 
 // ✅ 초기 렌더링 시 템플릿을 content에 추가
 onMounted(() => {
@@ -320,7 +297,7 @@ watch(content, (newValue) => {
       <section class="w-full h-12 mt-12">
         <label class="ticket-label">티켓 제목</label>
         <div class="relative w-full">
-          <input v-model="title" class="title-form bg-[#fafafa] pr-10" placeholder="제목을 입력하세요" />
+          <input v-model="title" class="title-form bg-[#fafafa] pr-10 text-black-2" placeholder="제목을 입력하세요" />
           <SvgIcon
             class="absolute right-3 top-1/2 tran sform -translate-y-1/2 w-4 h-4 text-gray-1"
             :icon="PencilIcon"
@@ -333,7 +310,7 @@ watch(content, (newValue) => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">1차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 text-black-2"
             :options="firstCategoryList"
             :selectedOption="selectedFirstCategory"
             label=""
@@ -347,7 +324,7 @@ watch(content, (newValue) => {
           <label class="ticket-label">2차 카테고리</label>
           <CustomDropdown
             v-if="fetchCategories.data?.value"
-            class="h-12 py-1"
+            class="h-12 py-1 text-black-2"
             :options="secondCategoryList"
             :selectedOption="selectedSecondCategory"
             label=""
@@ -365,7 +342,7 @@ watch(content, (newValue) => {
 
       <section class="w-full mt-12">
         <label class="ticket-label">요청 사항</label>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa]" />
+        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa] text-black-2" />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->
@@ -382,12 +359,7 @@ watch(content, (newValue) => {
         content="티켓이 정상적으로 요청되었습니다."
         :isOneBtn="true"
         mainText="확인"
-        :onMainClick="
-          () => {
-            console.log('다이얼로그 버튼 클릭됨');
-            closeDialog();
-          }
-        "
+        :onMainClick="closeDialog"
       />
     </form>
   </main>

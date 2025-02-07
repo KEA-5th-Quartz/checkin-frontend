@@ -31,6 +31,7 @@ const currentPage = ref(parseInt(sessionStorage.getItem('userCurrentPage') || '1
 const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
 const isSearch = ref(false);
+const order = ref('DESC');
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
@@ -43,6 +44,7 @@ const UserfilterState = ref<UserFilterState>({
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
+  order: order.value,
 }));
 
 // 검색 함수
@@ -93,6 +95,7 @@ const handleApplyFilters = (filters: UserFilterPayload) => {
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
+  order: order.value,
   statuses: Array.isArray(UserfilterState.value.statuses) ? UserfilterState.value.statuses : [],
   categories: Array.isArray(UserfilterState.value.categories) ? UserfilterState.value.categories : [],
 }));
@@ -100,7 +103,7 @@ const queryParams = computed(() => ({
 // 검색 쿼리 키 computed
 const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
-    return ['search-user-tickets', keyword.value, currentPage.value, pageSize.value] as const;
+    return ['search-user-tickets', keyword.value, currentPage.value, pageSize.value, order.value] as const;
   }
   return ['user-tickets', queryParams.value] as const;
 });
@@ -122,6 +125,7 @@ const {
       queryParams.value.categories,
       queryParams.value.page,
       queryParams.value.size,
+      queryParams.value.order,
     )
     .then((response) => response.data.data);
 });
@@ -184,16 +188,18 @@ const handleCheckboxClick = (event: Event, id: number) => {
   } else {
     ticketStore.addSelectedTicket(id);
   }
-  // 현재 선택된 모든 티켓 출력
-  console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(ticketStore.selectedTickets),
-    totalSelected: ticketStore.selectedTickets.size,
-  });
 };
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
   sessionStorage.setItem('userCurrentPage', page.toString());
+};
+
+const toggleOrder = () => {
+  order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
+  // 정렬이 변경될 때 첫 페이지로 이동
+  currentPage.value = 1;
+  sessionStorage.setItem('logCurrentPage', '1');
 };
 
 onBeforeUnmount(() => {
@@ -291,14 +297,27 @@ onBeforeUnmount(() => {
           <thead class="manager-thead">
             <tr>
               <th v-if="ticketStore.isDeleteMode" class="manager-th w-[1%]">선택</th>
-              <th :class="['manager-th w-[5%]', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">번호</th>
+              <th
+                @click="toggleOrder"
+                :class="[
+                  'manager-th text-start w-[15%] cursor-pointer duration-200',
+                  ticketStore.isDeleteMode ? 'pl-0' : 'pl-6',
+                ]"
+              >
+                <div class="flex items-center gap-2">
+                  번호
+                  <SvgIcon
+                    :icon="ArrowDownIcon"
+                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                  />
+                </div>
+              </th>
               <th class="manager-th text-start w-[25%]">제목</th>
-              <th class="manager-th w-[10%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
+              <th class="manager-th w-[15%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
-              <th class="manager-th w-[25%]">설명</th>
               <th class="manager-th w-[7.5%]">진행 상태</th>
-              <th class="manager-th w-[10%]">담당자</th>
-              <th class="manager-th w-[5%]">마감일</th>
+              <th class="manager-th w-[15%] text-start pl-6">담당자</th>
+              <th class="manager-th w-[10%]">마감일</th>
             </tr>
           </thead>
 
@@ -319,9 +338,9 @@ onBeforeUnmount(() => {
                   />
                 </div>
               </td>
-              <td :class="['manager-td max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
-                <p :title="item.ticketId as unknown as string">
-                  {{ item.ticketId }}
+              <td :class="['manager-td text-start max-w-0', ticketStore.isDeleteMode ? 'pl-0' : 'pl-6']">
+                <p :title="item.customId as unknown as string">
+                  {{ item.customId }}
                 </p>
               </td>
               <td class="manager-td max-w-0 text-start">
@@ -337,11 +356,6 @@ onBeforeUnmount(() => {
               <td class="manager-td max-w-0">
                 <p class="truncate">
                   {{ item.secondCategory }}
-                </p>
-              </td>
-              <td class="manager-td max-w-0 text-start">
-                <p class="truncate" :title="item.content">
-                  {{ item.content }}
                 </p>
               </td>
               <td class="manager-td text-center">

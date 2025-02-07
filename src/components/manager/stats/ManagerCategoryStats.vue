@@ -196,13 +196,63 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 w-full shadow-md">
+  <section class="overflow-x-auto mt-5 w-full">
     <div class="statistics-section">
       <h2 class="statistics-section-title">담당자 카테고리별 티켓 수</h2>
-      <div v-if="series2.length">
-        <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
+      <div>
+        <!-- 차트 영역 -->
+        <div v-if="series2.length">
+          <apexchart type="bar" height="400" :options="chartOptions2" :series="series2" />
+        </div>
+        <div v-else>데이터를 불러오는 중...</div>
+
+        <!-- 테이블 영역 -->
+        <div class="w-full" v-if="series2.length">
+          <table class="table-auto">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="table-header min-w-[120px]">담당자</th>
+                <th v-for="series in series2" :key="series.name" class="table-header min-w-[100px] text-center">
+                  {{ series.name }}
+                </th>
+                <th class="table-header min-w-[100px] text-center">합계</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(userName, userIndex) in chartOptions2.xaxis.categories"
+                :key="userIndex"
+                :class="userIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+              >
+                <td class="table-cell font-medium">{{ userName }}</td>
+                <td v-for="series in series2" :key="series.name" class="table-cell text-center">
+                  {{ series.data[userIndex] }}
+                </td>
+                <td class="table-cell text-center font-semibold">
+                  {{ series2.reduce((sum, series) => sum + series.data[userIndex], 0) }}
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="table-footer font-bold bg-blue-50">합계</td>
+                <td v-for="series in series2" :key="series.name" class="table-footer font-bold text-center bg-blue-50">
+                  <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+                    {{ series.data.reduce((sum, val) => sum + val, 0) }}
+                  </span>
+                </td>
+                <td class="table-footer font-bold text-center bg-blue-50">
+                  <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-800">
+                    {{
+                      series2.reduce((sum, series) => sum + series.data.reduce((innerSum, val) => innerSum + val, 0), 0)
+                    }}
+                  </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
-      <div v-else>데이터를 불러오는 중...</div>
     </div>
   </section>
 </template>

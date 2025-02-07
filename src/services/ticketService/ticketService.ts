@@ -10,6 +10,7 @@ export const ticketApi = {
     dueThisWeek?: boolean,
     page?: number,
     size?: number,
+    order?: string,
   ) {
     const params = new URLSearchParams();
 
@@ -33,11 +34,12 @@ export const ticketApi = {
     if (dueThisWeek) params.append('dueThisWeek', dueThisWeek.toString());
     if (page) params.append('page', page.toString());
     if (size) params.append('size', size.toString());
+    if (order) params.append('order', order.toString());
 
     return api.get(`/tickets?${params.toString()}`);
   },
   // [사용자] 전체 사용자 티켓 목록 조회
-  getUserTickets(statuses?: string[], categories?: string[], page?: number, size?: number) {
+  getUserTickets(statuses?: string[], categories?: string[], page?: number, size?: number, order?: string) {
     const params = new URLSearchParams();
 
     if (statuses?.length) {
@@ -53,6 +55,7 @@ export const ticketApi = {
     }
     if (page) params.append('page', page.toString());
     if (size) params.append('size', size.toString());
+    if (order) params.append('order', order.toString());
 
     return api.get(`/tickets/my-tickets?${params.toString()}`);
   },
@@ -154,7 +157,7 @@ export const ticketApi = {
   },
   // [사용자] 휴지통 티켓 다중 복구
   patchTrashTicket(data: { ticketIds: number[] }) {
-    return api.patch('/tickets/trash/recover', data);
+    return api.patch('/tickets/trash/restore', data);
   },
   // [사용자] 휴지통 티켓 다중 삭제
   deleteTrashTickets(data: { ticketIds: number[] }) {
@@ -181,5 +184,9 @@ export const ticketApi = {
         'Content-Type': 'multipart/form-data',
       },
     });
+  },
+  // [담당자, 사용자] 티켓 첨부 파일 다운로드
+  getTicketAttachment(ticketId: string, attachmentId: string) {
+    return api.get(`/tickets/${ticketId}/{attachmentUrl}?attachmentUrl=${attachmentId}`);
   },
 };

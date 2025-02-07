@@ -159,8 +159,47 @@ onMounted(() => {
 <template>
   <section class="overflow-x-auto mt-5 pb-20">
     <div class="statistics-section">
-      <div v-if="series.length">
-        <apexchart type="bar" height="450" :options="chartOptions" :series="series" />
+      <div class="flex-center" v-if="series.length">
+        <apexchart class="w-full" type="bar" height="450" :options="chartOptions" :series="series" />
+
+        <!-- 테이블 추가 -->
+        <div class="mt-8 flex justify-center">
+          <table class="w-fit table-auto">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="table-header min-w-[200px]">카테고리</th>
+                <th class="table-header min-w-[150px] text-center">티켓 수</th>
+                <th class="table-header min-w-[150px] text-center">비율</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(category, index) in chartOptions.xaxis.categories"
+                :key="category"
+                :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+              >
+                <td class="table-cell font-medium">{{ category }}</td>
+                <td class="table-cell text-center">{{ series[0].data[index] }}</td>
+                <td class="table-cell text-center">
+                  {{ ((series[0].data[index] / series[0].data.reduce((sum, val) => sum + val, 0)) * 100).toFixed(1) }}%
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td class="table-footer font-bold bg-blue-50">합계</td>
+                <td class="table-footer text-center font-bold bg-blue-50">
+                  <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+                    {{ series[0].data.reduce((sum, val) => sum + val, 0) }}
+                  </span>
+                </td>
+                <td class="table-footer text-center font-bold bg-blue-50">
+                  <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-800"> 100% </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
       <div v-else class="flex justify-center items-center h-64 text-gray-500">데이터를 불러오는 중...</div>
     </div>

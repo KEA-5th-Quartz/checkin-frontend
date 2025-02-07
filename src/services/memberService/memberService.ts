@@ -28,6 +28,20 @@ export const memberApi = {
 
     return response.data.data;
   },
+  // [관리자] 삭제된 멤버 목록 조회 API
+  async getDeletedMembers(role: MemberListItem['role'], page = 1, size = 10, username = '') {
+    const params = new URLSearchParams();
+    params.append('role', role);
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    if (username) {
+      params.append('username', username);
+    }
+
+    const response = await api.get<MemberListResponse>(`/members?${params.toString()}`);
+
+    return response.data.data;
+  },
   // [관리자] 사용자, 담당자, 관리자 수 전체 조회
   getMemberStatsRole() {
     return api.get('/members/stats/role');

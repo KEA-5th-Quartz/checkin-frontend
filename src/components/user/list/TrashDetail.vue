@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
-import { useQueryClient } from '@tanstack/vue-query';
 import { ref } from 'vue';
-
-const queryClient = useQueryClient();
 
 const props = defineProps<{
   ticketId: number;
@@ -38,14 +36,16 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
 
 <template>
   <Teleport to="body">
-    <div v-if="ticketId && detailData" class="ticket-overlay">
+    <div v-if="props.ticketId && detailData" class="ticket-overlay">
       <div class="ticket-click-outside" @click="handleClose" />
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
         <header class="ticket-header">
-          <p>{{ detailData.ticket.title }}</p>
-
-          <div class="flex items-center gap-8">
+          <div>
+            <p>{{ detailData.title }}</p>
+            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+          </div>
+          <div class="flex items-center gap-8 self-start">
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
         </header>
@@ -58,7 +58,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <!-- 진행상태 블록 -->
               <div class="flex-stack items-start">
                 <label class="ticket-label">진행상태</label>
-                <StatusBadge :status="detailData?.status" size="xl" />
+                <StatusBadge :status="detailData.status" size="xl" />
               </div>
 
               <!-- 1차 카테고리 블록 -->
@@ -67,20 +67,20 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
                 <div
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm line-clamp-1 overflow-scroll hide-scrollbar"
                 >
-                  {{ detailData.ticket.firstCategory }}
+                  {{ detailData.firstCategory }}
                 </div>
               </div>
               <!-- 요청자 블록 -->
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <p class="text-sm text-gray-1">{{ detailData?.username }}</p>
+                  <p class="text-sm text-gray-1">{{ detailData.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
               <div>
                 <label class="ticket-label">요청 일자</label>
-                <p class="ticket-date">{{ detailData?.createdAt }}</p>
+                <p class="ticket-date">{{ detailData.createdAt }}</p>
               </div>
             </section>
 
@@ -90,7 +90,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <div class="mt-[76px]">
                 <label class="ticket-label">2차 카테고리</label>
                 <div class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm">
-                  {{ detailData.ticket.secondCategory }}
+                  {{ detailData.secondCategory }}
                 </div>
               </div>
               <!-- 담당자 블록 -->
@@ -98,56 +98,30 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <img
-                    :src="
-                      detailData?.managerProfilePic ||
-                      'https://qaurtz-bucket.s3.ap-northeast-2.amazonaws.com/profile/565ba116-f192-4866-9886-09def9216eaf.jpeg'
-                    "
+                    v-if="detailData.managerProfilePic"
+                    :src="detailData.managerProfilePic"
                     class="w-5 h-5 object-fill rounded-full mr-2"
                   />
-                  <p class="text-xs text-gray-1">{{ detailData?.manager || '━' }}</p>
+                  <p class="text-xs text-gray-1">{{ detailData.manager || '━' }}</p>
                 </div>
               </div>
               <!-- 마감 기한 블록 -->
               <div>
                 <label class="ticket-label">마감 기한</label>
-                <p class="ticket-date">
-                  {{ detailData.ticket.due_date }}
-                </p>
+                <p class="ticket-date">{{ detailData.dueDate }}</p>
               </div>
             </section>
           </div>
 
-          <!-- 설명 -->
+          <!-- 요청사항 -->
           <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
+            <label class="ticket-desc-label">요청사항</label>
             <div class="ticket-desc-area">
-              <p class="ticket-desc-content">{{ detailData.ticket.content }}</p>
+              <p class="ticket-desc-content">{{ detailData.content }}</p>
             </div>
           </div>
-
-          <!-- 첨부 파일 -->
-          <div class="mt-4">
-            <div class="ticket-attachment">Customer KYC</div>
-          </div>
-
-          <UserComment :ticket-id="ticketId" />
         </div>
       </div>
     </div>
   </Teleport>
 </template>
-
-<style scoped>
-input[type='date']::-webkit-calendar-picker-indicator {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-input[type='date'] {
-  position: relative;
-  background-color: white;
-}
-</style>

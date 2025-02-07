@@ -9,7 +9,7 @@ export const statsApi = {
   getManagerDueTodayStats(managerId: number | null) {
     return api.get(`/stats/${managerId}/due-today`);
   },
-  // [담당자, 관리자] 각 담당자의 상태별 티켓 수 (현재 수정 필요)
+  // [담당자, 관리자] 각 담당자의 상태별 티켓 수
   getManagersStats(type: string) {
     return api.get('/stats/managers', {
       params: { type },
