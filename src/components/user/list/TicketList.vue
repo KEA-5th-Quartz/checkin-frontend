@@ -184,11 +184,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
   } else {
     ticketStore.addSelectedTicket(id);
   }
-  // 현재 선택된 모든 티켓 출력
-  console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(ticketStore.selectedTickets),
-    totalSelected: ticketStore.selectedTickets.size,
-  });
 };
 
 const handlePageChange = (page: number) => {

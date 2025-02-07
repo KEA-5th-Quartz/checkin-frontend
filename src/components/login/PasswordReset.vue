@@ -51,7 +51,7 @@ const onSubmit = handleSubmit(async (values) => {
 
     resetForm();
   } catch (error) {
-    console.log('비밀번호 변경 실패:', error);
+    console.error('비밀번호 변경 실패:', error);
   }
 });
 

@@ -141,11 +141,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
   } else {
     trashStore.addSelectedTicket(id);
   }
-  // 현재 선택된 모든 티켓 출력
-  console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(trashStore.selectedTickets),
-    totalSelected: trashStore.selectedTickets.size,
-  });
 };
 
 const handleRowClick = (id: number) => {

@@ -120,7 +120,7 @@ const handleImageChange = async (event: Event) => {
       await userApi.changeProfileImg(memberStore.memberId, formData);
       window.location.replace(window.location.href);
     } catch (error) {
-      console.log('프로필 이미지 변경 실패:', error);
+      console.error('프로필 이미지 변경 실패:', error);
     }
   }
 };
