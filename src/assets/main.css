@@ -497,3 +497,9 @@ body {
     @apply text-sm text-gray-1 ml-5;
   }
 }
+
+/* 사용자 템플릿 불러오기 버튼 */
+.template-list-button{
+  @apply border rounded bg-gray-1 text-sm text-white-0 font-semibold flex items-center px-8 gap-2.5 mt-20;
+}
+}

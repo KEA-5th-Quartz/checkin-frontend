@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted, computed } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
@@ -7,15 +7,32 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ClipIcon, PencilIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue';
+import TicketTemplateButton from './TicketTemplateButton.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { templateApi } from '@/services/templateService/templateService';
 import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useMemberStore } from '@/stores/memberStore';
+import { useRouter } from 'vue-router';
+import { nextTick } from 'vue';
+
+const router = useRouter();
+
+const memberStore = useMemberStore();
+
+const templateOptions = ref<
+  { id: number; value: string; label: string; content: string; firstCategory: string; secondCategory: string }[]
+>([]);
 
 // 알림창 상태 체크
 const showDialog = ref<boolean>(false);
+const showTemplateDialog = ref<boolean>(false);
+
+// 템플릿 목록을 불러올때 map함수 두번 돌리기 위해 잠시 저장할 객체
+const response = ref<any>(null);
 
 // 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
@@ -42,11 +59,15 @@ const { handleSubmit, errors, validate } = useForm({
 });
 
 // useField로 각 필드 생성
-const { value: title } = useField<string>('title');
+const { value: title } = useField<any>('title');
 const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCategory');
 const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
 const { value: content } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
+const { value: selectedTitle } = useField<BaseTicketOption>('title');
+
+// 선택된 템플릿을 저장하는 객체
+const selectedTemplate = ref<{ title: string; firstCategory: any; secondCategory: any; content: string } | null>(null);
 
 // 첨부파일 ID 요청을 위해 파일이름을 담을 값 생성 O
 const attachment = ref<FormData | null>(null);
@@ -61,19 +82,30 @@ const fileInput = ref<HTMLInputElement | null>(null);
 // 파일 첨부요청 뮤테이션
 const attachmentMutation = useCustomMutation(
   async ({ attachment }: { attachment: FormData }) => {
-    const response = await ticketApi.postAttachment(attachment); // 서버 전체 응답 데이터
-
-    return response.data; // 백엔드 응답 데이터를 반환
+    const response = await ticketApi.postAttachment(attachment);
+    return response.data;
   },
   {
     onSuccess: (response) => {
-      const uploadedAttachmentIds = response.data.map((file: { attachmentid: string }) => file.attachmentid); //attachmentId 배열 반환
-      attachmentIds.value.push(uploadedAttachmentIds);
-      const uploadedAttachmentUrl = response.data.map((file: { url: string; attachmentid: string }) => file.url); // url 배열 반환
-      previewUrl.value.push(...uploadedAttachmentUrl);
+      console.log('📌 파일 업로드 응답 데이터:', response.data);
+
+      // ✅ attachmentId를 올바르게 추출하여 기존 배열과 병합 (중복 제거)
+      const uploadedAttachmentIds = response.data
+        .map((file: { attachmentId: number }) => file.attachmentId)
+        .filter((id) => Number.isInteger(id)); // 숫자 값만 남기기
+
+      console.log('📌 올바르게 추출된 attachmentIds:', uploadedAttachmentIds);
+
+      // ✅ 기존 배열을 직접 변경하지 않고 새로운 배열을 할당 (불필요한 중첩 방지)
+      attachmentIds.value = [...new Set([...attachmentIds.value, ...uploadedAttachmentIds])];
+      console.log('📌 최종 attachmentIds:', attachmentIds.value);
+
+      // ✅ 업로드된 파일 URL 저장
+      const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
+      previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
     },
     onError: (error) => {
-      console.error('파일 첨부에 실패했습니다', error);
+      console.error('파일 첨부 실패:', error);
     },
   },
 );
@@ -104,6 +136,7 @@ const handleFileChange = async (event: Event) => {
   // 파일이 없는 경우 처리
   if (!target.files || target.files.length === 0) {
     console.error('📌 파일이 선택되지 않았습니다.');
+    // isUploading.value = false;
     return;
   }
 
@@ -117,6 +150,7 @@ const handleFileChange = async (event: Event) => {
   if (oversizedFiles.length > 0) {
     alert(`파일 크기는 10MB를 초과할 수 없습니다.\n초과된 파일: ${oversizedFiles.map((f) => f.name).join(', ')}`);
     target.value = '';
+    isUploading.value = false;
     return;
   }
 
@@ -138,44 +172,169 @@ const handleFileChange = async (event: Event) => {
   try {
     // 유효성 검사 통과시 첨부파일 요청 뮤테이션 실행
     const response = await attachmentMutation.mutateAsync({ attachment: attachment.value }); // response값은 백엔드 응답데이터
+    const uploadedAttachmentIds = response.data.map((file: { attachmentId: string }) => file.attachmentId);
+    attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
-    // attachmentId 필터링해서 숫자인 경우만 배열에 저장
-    const uploadedAttachmentIds = response.data
-      .map((file: { attachmentId: string }) => file.attachmentId)
-      .filter((id: unknown) => Number.isInteger(id));
 
-    // attachmentIds가 배열인지 확인 후 처리
-    if (!Array.isArray(attachmentIds.value)) {
-      attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
-    }
+    const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
+    previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
+    // // attachmentId 필터링해서 숫자인 경우만 배열에 저장
+    // const uploadedAttachmentIds = response.data.map((file) => file.attachmentId).filter((id) => Number.isInteger(id));
 
-    // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
-    attachmentIds.value = [...uploadedAttachmentIds];
+    // console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
 
-    // ✅ 업로드된 파일 URL 저장
-    const uploadedAttachmentUrl = response.data.map((file: { url: string }) => file.url);
-    previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
+
+    // // attachmentIds가 배열인지 확인 후 처리
+    // if (!Array.isArray(attachmentIds.value)) {
+    //   attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
+    // }
+
+
+    // console.log('📌 Before:', JSON.stringify(attachmentIds.value));
+
+    // // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
+    // attachmentIds.value = [...uploadedAttachmentIds];
+
+    // console.log('📌 After:', JSON.stringify(attachmentIds.value));
+
+    // // ✅ 업로드된 파일 URL 저장
+    // const uploadedAttachmentUrl = response.data.map((file) => file.url);
+    // previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
+
   } catch (error) {
     console.error('파일 업로드 실패:', error);
   } finally {
     isUploading.value = false; // ✅ 업로드 완료 후 상태 초기화
+    target.value = '';
   }
 };
 
+// 템플릿 불러오기 api 재사용을 위한 요청값 하드코딩
+const pages = 1;
+const size = 100;
+
+// 템플릿 불러오기 api을 위한 사용자 id값 불러오기
+const memberId = ref<number | null>(null);
+
+// memberStore의 memberId가 변경될 때마다 memberId 값 업데이트
+watch(
+  () => memberStore.memberId,
+  (newMemberId) => {
+    memberId.value = newMemberId;
+  },
+);
+
+// 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
+const fetchTemplates = useCustomQuery(['templates', memberId], async () => {
+  try {
+    const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
+    return response.data.data.templates.map((template: any) => ({
+      templateId: template.templateId,
+      title: template.title,
+      firstCategory: template.firstCategory,
+      secondCategory: template.secondCategory,
+      content: template.content,
+    })); // 뮤테이션 호출시 [ {제목, 1차 카테고리, 2차 카테고리, 요청 사항}, ... , ] 객체들의 배열이 반환됨
+  } catch (error) {
+    console.error('템플릿 불러오기 API 에러:', error);
+  }
+});
+
+// 템플릿 목록 조회 api 받아서 title에[ {id: value: label:} ]배열로 값 저장하는 로직
+const handleTemplateClick = async (event: Event) => {
+  event.preventDefault();
+  console.log('📌 TicketTemplateButton 클릭됨!');
+
+  try {
+    response.value = fetchTemplates.data.value ?? [];
+    console.log(fetchTemplates.data.value);
+    if (Array.isArray(response.value)) {
+      templateOptions.value = response.value.map((template: any) => ({
+        id: template.templateId,
+        value: template.title, // ✅ 제목
+        label: template.title,
+        firstCategory: template.firstCategory, // ✅ 1차 카테고리 추가
+        secondCategory: template.secondCategory, // ✅ 2차 카테고리 추가
+        content: template.content, // ✅ 요청 사항 추가
+      }));
+    } else {
+      templateOptions.value = [];
+    }
+
+    console.log('📌 templateOptions 업데이트됨:', templateOptions.value);
+    showTemplateDialog.value = true;
+  } catch (error) {
+    console.error('📌 템플릿 목록 불러오기 실패!', error);
+  }
+};
+
+// watchEffect(() => {
+//   if (fetchTemplates.data.value) {
+//     console.log('📌 API에서 가져온 템플릿 데이터:', fetchTemplates.data.value);
+
+//     templateOptions.value = fetchTemplates.data.value.map((template: any) => ({
+//       id: template.templateId,
+//       value: template.title,
+//       label: template.title,
+//     }));
+
+//     console.log('📌 변환된 templateOptions:', JSON.stringify(templateOptions.value, null, 2));
+//   }
+// });
+
+// 확인 버튼 클릭시 title, firstCategory, secondCategory, content 값으로 화면에 자동 채워넣기
+
 // 티켓 생성 버튼
+// ✅ 요청 중복 방지 플래그
+const isSubmitting = ref(false);
+
+// ✅ 티켓 생성 버튼 (무한 요청 방지)
 const onSubmit = handleSubmit(async () => {
+  if (isSubmitting.value) {
+    console.warn('🚨 이미 요청 중입니다. 중복 요청 방지!');
+    return;
+  }
+
+  isSubmitting.value = true; // ✅ 요청 시작
+  console.log('🚀 티켓 생성 요청 실행');
+
+
   try {
     await createTicketMutation.mutateAsync({
       title: title.value,
-      firstCategory: selectedFirstCategory.value.label,
-      secondCategory: selectedSecondCategory.value.label,
+      firstCategory: selectedFirstCategory.value?.label || '',
+      secondCategory: selectedSecondCategory.value?.label || '',
       content: content.value,
       dueDate: dueDate.value,
-      attachmentIds: attachmentIds.value, // .value 사용
+      attachmentIds: attachmentIds.value,
     });
-    showDialog.value = true;
+
+    console.log('✅ 티켓 생성 성공');
+    showDialog.value = true; // ✅ 요청 성공 후 다이얼로그 표시
   } catch (error) {
-    console.error('티켓 생성 실패:', error);
+    console.error('❌ 티켓 생성 실패:', error);
+    isSubmitting.value = false; // 요청 실패 시 즉시 상태 초기화
+  }
+});
+
+// ✅ 티켓 생성 완료 후 정상적인 이동 처리
+const handleMain = async () => {
+  if (!showDialog.value) return;
+
+  console.log('🔄 티켓 리스트로 이동');
+  showDialog.value = false; // ✅ 다이얼로그 닫기
+  isSubmitting.value = false; // ✅ 상태 초기화
+
+  await nextTick(); // ✅ UI 업데이트 이후 실행
+  router.push('/user/ticketlist'); // ✅ 정상적으로 페이지 이동
+};
+
+// ✅ 다이얼로그 상태 변경을 감지하여 불필요한 onSubmit 재실행 방지
+watch(showDialog, (newValue) => {
+  if (newValue) {
+    console.log('📌 티켓 생성 완료 다이얼로그가 열림');
+  } else {
+    console.log('📌 티켓 생성 완료 다이얼로그가 닫힘');
   }
 });
 
@@ -214,6 +373,16 @@ const updateSecondCategoryList = () => {
   } else {
     secondCategoryList.value = [];
   }
+};
+
+const handleTitleSelect = (option: any) => {
+  selectedTitle.value = option;
+  selectedTemplate.value = {
+    title: option.value,
+    firstCategory: option.firstCategory,
+    secondCategory: option.secondCategory,
+    content: option.content,
+  };
 };
 
 // ✅ 1차 카테고리 선택 및 2차 카테고리 초기화
@@ -270,9 +439,45 @@ const createTicketMutation = useCustomMutation(
   },
 );
 
-// Dialog 안닫히는 문제해결용 함수
-const closeDialog = () => {
-  showDialog.value = false;
+// 취소, 확인 버튼 클릭
+const computedContent = computed(() => content.value);
+
+const styledContent = computed(() => {
+  return `<span style="color: gray;">${template.value}</span><br><br><span style="color: black;">${
+    selectedTemplate.value?.content || ''
+  }</span>`;
+});
+
+const tempContent = ref(''); // ✅ 임시 content 변수
+
+const handleConfirm = async () => {
+  if (selectedTemplate.value) {
+    console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
+
+    // ✅ 제목, 카테고리 반영
+    title.value = selectedTemplate.value.title;
+
+    selectedFirstCategory.value =
+      firstCategoryList.value.find((category) => category.value === selectedTemplate.value?.firstCategory) || null;
+
+    if (selectedFirstCategory.value) {
+      updateSecondCategoryList();
+      watchEffect(() => {
+        selectedSecondCategory.value =
+          secondCategoryList.value.find((category) => category.value === selectedTemplate.value?.secondCategory) ||
+          null;
+      });
+    }
+
+    // ✅ 기존 템플릿 유지하면서 새 요청 사항 추가
+    if (selectedTemplate.value.content) {
+      await nextTick(); // Vue가 UI 업데이트할 시간을 줌
+      content.value = `${template.value}\n\n${selectedTemplate.value.content}`; // ✅ 기존 템플릿 + 새 내용 추가
+      console.log('📌 최종 요청 사항:', content.value);
+    }
+  }
+
+  showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
 };
 
 // ✅ 초기 렌더링 시 템플릿을 content에 추가
@@ -289,6 +494,24 @@ watch(content, (newValue) => {
     content.value = template.value + '\n\n' + newValue.slice(template.value.length).trim(); // ✅ 템플릿 중복 방지
   }
 });
+
+const isImage = (url: string) => /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
+
+const getFileExtensionLabel = (url: string) => {
+  try {
+    const decodedUrl = decodeURIComponent(url); // URL 디코딩
+    const filename = decodedUrl.split('/').pop(); // 파일명 추출
+    const extension = filename?.split('.').pop()?.toLowerCase(); // 확장자 소문자로 변환
+
+    return extension ? `${extension.toUpperCase()} 파일` : '알 수 없는 파일';
+  } catch (error) {
+    return '알 수 없는 파일';
+  }
+};
+
+const removeFile = (index: number) => {
+  previewUrl.value.splice(index, 1);
+};
 </script>
 
 <template>
@@ -342,7 +565,9 @@ watch(content, (newValue) => {
 
       <section class="w-full mt-12">
         <label class="ticket-label">요청 사항</label>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa] text-black-2" />
+
+        <textarea v-model="content" class="ticket-desc-textarea min-h-60 bg-[#fafafa] text-black-2" />
+
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->
@@ -350,8 +575,25 @@ watch(content, (newValue) => {
           <SvgIcon :icon="ClipIcon" class="text-gray-1" @click="triggerFileInput" />
         </div>
       </section>
+      <section class="w-full mt-4">
+        <label class="ticket-label">첨부된 파일</label>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <div
+            v-for="(url, index) in previewUrl"
+            :key="index"
+            class="relative w-24 h-24 border border-gray-2 rounded-lg overflow-hidden flex-center bg-gray-100"
+          >
+            <img v-if="isImage(url)" :src="url" alt="첨부된 이미지" class="w-full h-full object-cover" />
+            <div v-else class="text-xs text-gray-700 text-center px-2">{{ getFileExtensionLabel(url) }}</div>
+            <button @click="removeFile(index)" class="absolute top-1 right-1 w-5 h-5 flex-center rounded-full text-xs">
+              ❌
+            </button>
+          </div>
+        </div>
+      </section>
       <section class="flex justify-center">
-        <TicketCreateButton type="onSubmit" />
+        <TicketTemplateButton type="button" @click="handleTemplateClick" />
+        <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
       <CommonDialog
         v-if="showDialog"
@@ -359,8 +601,26 @@ watch(content, (newValue) => {
         content="티켓이 정상적으로 요청되었습니다."
         :isOneBtn="true"
         mainText="확인"
-        :onMainClick="closeDialog"
+        :onMainClick="handleMain"
       />
+      <CommonDialog
+        v-if="showTemplateDialog"
+        title="템플릿 선택"
+        mainText="확인"
+        cancel-text="취소"
+        :onMainClick="handleConfirm"
+        :onCancelClick="handleCancel"
+      >
+        <CustomDropdown
+          v-if="templateOptions.length > 0"
+          class="h-12 py-1"
+          :options="templateOptions"
+          :selectedOption="selectedTitle"
+          label=""
+          @select="handleTitleSelect"
+          isEdit
+        />
+      </CommonDialog>
     </form>
   </main>
 </template>
