@@ -15,7 +15,7 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
 
 // 알림창 상태 체크
-const showDialog = ref(false);
+const showDialog = ref<boolean>(false);
 
 // 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
@@ -81,8 +81,8 @@ const attachmentMutation = useCustomMutation(
 /*
   1. 사용자가 클립 아이콘 클릭 시 파일 탐색기 열기 O
   2. 사용자가 첨부한 파일 데이터 받아와서 attachement 객체(FormData)에 저장 O
-  3. attachment(useField로 선언) 유효성 검사 진행 후 통과되면 프리뷰 렌더링, 아니면 에러 메시지 렌더링 X 
-  4. 프리뷰 렌더링되면 첨부파일 뮤테이션 불러와서 attachement를 인자로 넘기는 함수 실행 
+  3. attachment(useField로 선언) 유효성 검사 진행 후 통과되면 프리뷰 렌더링, 아니면 에러 메시지 렌더링 X
+  4. 프리뷰 렌더링되면 첨부파일 뮤테이션 불러와서 attachement를 인자로 넘기는 함수 실행
   5. 성공하면 응답 데이터(attachmentRes[])중 attachmentIds 배열(number[])에 push, url은 previewUrl(string[] | null)에 push O
   */
 
@@ -265,16 +265,14 @@ const createTicketMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      showDialog.value = true;
       queryClient.refetchQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
     },
   },
 );
 
 // Dialog 안닫히는 문제해결용 함수
-const closeDialog = async () => {
+const closeDialog = () => {
   showDialog.value = false;
-  await nextTick(); // Vue의 상태 업데이트 보장
 };
 
 // ✅ 초기 렌더링 시 템플릿을 content에 추가
@@ -361,11 +359,7 @@ watch(content, (newValue) => {
         content="티켓이 정상적으로 요청되었습니다."
         :isOneBtn="true"
         mainText="확인"
-        :onMainClick="
-          () => {
-            closeDialog();
-          }
-        "
+        :onMainClick="closeDialog"
       />
     </form>
   </main>
