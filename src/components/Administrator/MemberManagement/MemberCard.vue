@@ -207,7 +207,9 @@ const openRemoveMemberModal = () => {
 
 // 멤버 탈퇴 함수
 const removeMember = () => {
-  console.log(`멤버 탈퇴 요청: ${props.member.username}`);
+  memberApi.deleteMember(props.member.memberId);
+  dialogState.value = { ...initialDialog };
+  queryClient.invalidateQueries();
 };
 </script>
 

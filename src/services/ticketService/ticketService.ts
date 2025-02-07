@@ -10,7 +10,7 @@ export const ticketApi = {
     dueThisWeek?: boolean,
     page?: number,
     size?: number,
-    order?: string,
+    sortByCreatedAt?: string,
   ) {
     const params = new URLSearchParams();
 
@@ -34,12 +34,12 @@ export const ticketApi = {
     if (dueThisWeek) params.append('dueThisWeek', dueThisWeek.toString());
     if (page) params.append('page', page.toString());
     if (size) params.append('size', size.toString());
-    if (order) params.append('order', order.toString());
+    if (sortByCreatedAt) params.append('sortByCreatedAt', sortByCreatedAt.toString());
 
     return api.get(`/tickets?${params.toString()}`);
   },
   // [사용자] 전체 사용자 티켓 목록 조회
-  getUserTickets(statuses?: string[], categories?: string[], page?: number, size?: number, order?: string) {
+  getUserTickets(statuses?: string[], categories?: string[], page?: number, size?: number, sortByCreatedAt?: string) {
     const params = new URLSearchParams();
 
     if (statuses?.length) {
@@ -55,7 +55,7 @@ export const ticketApi = {
     }
     if (page) params.append('page', page.toString());
     if (size) params.append('size', size.toString());
-    if (order) params.append('order', order.toString());
+    if (sortByCreatedAt) params.append('sortByCreatedAt', sortByCreatedAt.toString());
 
     return api.get(`/tickets/my-tickets?${params.toString()}`);
   },

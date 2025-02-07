@@ -3,7 +3,7 @@
     <div class="flex justify-end w-full">
       <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
       <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
-        <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">복구</li>
+        <li @click="openRestoreModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">복구</li>
         <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">영구삭제</li>
       </ul>
     </div>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import CommonDialog from '../../common/CommonDialog.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
@@ -58,11 +58,8 @@ import { DialogProps, initialDialog } from '@/types/common/dialog';
 const queryClient = useQueryClient();
 
 const isMenuOpen = ref(false);
-const isRoleChangeModalOpen = ref(false); // 권한 변경 모달
-const dialogState = ref<DialogProps>({ ...initialDialog }); // 공통 모달
+const dialogState = ref<DialogProps>({ ...initialDialog });
 const menuRef = ref<HTMLElement | null>(null);
-const isDropdownOpen = ref(false);
-const dropdownRef = ref<HTMLElement | null>(null);
 
 const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   ADMIN: '관리자',
@@ -70,9 +67,6 @@ const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   USER: '사용자',
 };
 
-const selectedRole = ref<'ADMIN' | 'MANAGER' | 'USER' | null>(null);
-
-// 멤버 데이터 (props로 전달받음)
 const props = defineProps({
   member: {
     type: Object as () => {
@@ -86,10 +80,10 @@ const props = defineProps({
   },
 });
 
-// 권한 변경 뮤테이션
-const updateRoleMutation = useCustomMutation(
-  async ({ memberId, role }: { memberId: number; role: string }) => {
-    const response = await memberApi.putMemberRole(memberId, { role });
+// 회원 복구 뮤테이션
+const restoreMemberMutation = useCustomMutation(
+  async (memberId: number) => {
+    const response = await memberApi.patchRestoreMember(memberId);
     return response.data;
   },
   {
@@ -97,14 +91,27 @@ const updateRoleMutation = useCustomMutation(
       dialogState.value = {
         open: true,
         isOneBtn: true,
-        title: '권한 변경',
+        title: '회원 복구',
         content: `${props.member.username}님이 복구되었습니다.`,
         mainText: '확인',
         onMainClick: () => {
-          closeRoleChangeModal();
+          dialogState.value = { ...initialDialog };
           queryClient.invalidateQueries();
         },
       };
+    },
+    onError: (error) => {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '오류',
+        content: '회원 복구 중 오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+      console.error('회원 복구 실패:', error);
     },
   },
 );
@@ -118,34 +125,26 @@ onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// 권한 변경 모달 열기/닫기
-const openRoleChangeModal = () => {
-  isRoleChangeModalOpen.value = true;
+// 복구 모달 열기
+const openRestoreModal = () => {
+  dialogState.value = {
+    open: true,
+    title: '회원 복구',
+    content: `${props.member.username}님을 복구하시겠습니까?`,
+    mainText: '복구',
+    onMainClick: () => {
+      restoreMemberMutation.mutate(props.member.memberId);
+    },
+    cancelText: '취소',
+    onCancelClick: () => {
+      dialogState.value = { ...initialDialog };
+    },
+  };
   isMenuOpen.value = false;
-  selectedRole.value = null; // 초기화
-};
-const closeRoleChangeModal = () => {
-  isRoleChangeModalOpen.value = false;
-  dialogState.value = { ...initialDialog };
 };
 
-// 드롭다운 열기/닫기
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value;
-};
-onClickOutside(dropdownRef, () => {
-  isDropdownOpen.value = false;
-});
-
-// 선택된 권한 변경
-const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
-  selectedRole.value = role;
-  isDropdownOpen.value = false;
-};
-
-// 멤버 탈퇴 모달 열기/닫기
+// 멤버 탈퇴 모달 열기
 const openRemoveMemberModal = () => {
-  // isRemoveMemberModalOpen.value = true;
   dialogState.value = {
     open: true,
     isWarn: true,
@@ -163,6 +162,6 @@ const openRemoveMemberModal = () => {
 
 // 멤버 탈퇴 함수
 const removeMember = () => {
-  console.log(`멤버 탈퇴 요청: ${props.member.username}`);
+  alert(`멤버 영구삭제 요청: ${props.member.username}`);
 };
 </script>
