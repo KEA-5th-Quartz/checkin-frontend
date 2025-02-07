@@ -126,6 +126,24 @@ export const ticketApi = {
 
     return api.get(`/tickets/my-tickets/search?keyword=${keyword}&${params.toString()}`);
   },
+  // [사용자] 티켓 생성 요청
+  postTicket(
+    title: string,
+    firstCategory: string,
+    secondCategory: string,
+    content: string,
+    dueDate: string,
+    attachmentIds: number[],
+  ) {
+    return api.post(`/tickets`, {
+      title,
+      firstCategory,
+      secondCategory,
+      content,
+      dueDate,
+      attachmentIds,
+    });
+  },
   // [사용자] 티켓 다중 삭제
   patchTickets(data: { ticketIds: number[] }) {
     return api.patch('/tickets', data);
