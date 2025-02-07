@@ -1,30 +1,49 @@
 import api from '@/api/axios';
-import type { User, LoginRequest, LoginResponse } from '@/types/user';
 
-// 임시 유저 CRUD
 export const userApi = {
   // 로그인
-  login(data: LoginRequest) {
-    return api.post<LoginResponse>('/auth/login', data);
+  login(data: { username: string; password: string }) {
+    return api.post('/auth/login', data);
   },
-
-  // 사용자 목록 조회
-  getUsers() {
-    return api.get<User[]>('/users');
+  // 로그아웃
+  logout() {
+    return api.post('/auth/logout');
   },
-
-  // 특정 사용자 조회
-  getUser(id: number) {
-    return api.get<User>(`/users/${id}`);
+  // 첫 로그인 비밀번호 초기화
+  passwordReset(memberId: number | null, data: { passwordResetToken: string | null; newPassword: string }) {
+    return api.put(`/members/${memberId}/password-reset`, data);
   },
-
-  // 사용자 정보 수정
-  updateUser(id: number, data: Partial<User>) {
-    return api.put<User>(`/users/${id}`, data);
+  // 비밀번호 찾기
+  passwordSearch(username: string | unknown) {
+    return api.post('/members/password-reset', { username: username });
   },
+  // refresh토큰으로 accessToken과 refreshToken 재발급
+  refresh() {
+    return api.post('/auth/refresh');
+  },
+  // 비밀번호 변경(최초 로그인)
+  changePassword(memberId: number | null, data: { originalPassword: string; newPassword: string }) {
+    return api.put(`/members/${memberId}/password`, data);
+  },
+  // 담당자 목록 조회
+  getManagers(role: string, page: number, size: number, username?: string) {
+    const params = new URLSearchParams();
 
-  // 사용자 삭제
-  deleteUser(id: number) {
-    return api.delete(`/users/${id}`);
+    if (page) params.append('page', page.toString());
+    if (size) params.append('size', size.toString());
+    if (username) params.append('username', username.toString());
+    return api.get(`/members?role=${role}&${params.toString()}`);
+  },
+  // 회원 ID로 회원 정보 조회
+  getMemberId(memberId: number) {
+    return api.get(`/members/${memberId}`);
+  },
+  // 회원의 프로필 사진 변경
+  changeProfileImg(memberId: number | null, data: FormData) {
+    return api.put(`/members/${memberId}/profile-pic`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
 };

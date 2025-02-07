@@ -1,5 +1,5 @@
 {
-  "name": "vue-setting",
+  "name": "quartz",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,13 +14,15 @@
     "apexcharts": "^4.3.0",
     "axios": "^1.7.9",
     "core-js": "^3.8.3",
+    "date-fns": "^2.30.0",
     "jwt-decode": "^4.0.0",
     "pinia": "^2.3.0",
     "vee-validate": "^4.15.0",
     "vis-timeline": "^7.7.3",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
-    "vue3-apexcharts": "^1.8.0"
+    "vue3-apexcharts": "^1.8.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
