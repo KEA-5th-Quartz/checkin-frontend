@@ -4,5 +4,5 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 </script>
 
 <template>
-  <button class="create-button"><SvgIcon :icon="FolderIcon" />템플릿 불러오기</button>
+  <button class="template-list-button"><SvgIcon :icon="FolderIcon" />템플릿 불러오기</button>
 </template>

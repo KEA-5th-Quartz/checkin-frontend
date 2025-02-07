@@ -379,7 +379,7 @@ watch(content, (newValue) => {
         </div>
       </section>
       <section class="flex justify-center">
-        <TicketTemplateButton type="onSubmit" />
+        <TicketTemplateButton />
         <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
       <CommonDialog
