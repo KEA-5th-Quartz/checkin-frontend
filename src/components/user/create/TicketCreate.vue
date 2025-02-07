@@ -106,11 +106,19 @@ const handleFileChange = async (event: Event) => {
     console.error('📌 파일이 선택되지 않았습니다.');
     return;
   }
+
   // 파일 업로드 시 isUploading 상태 true로 전환
   isUploading.value = true; // ✅ 업로드 시작
 
   // 타겟 파일 배열로 변환해서 files에 저장
   const files = Array.from(target.files);
+
+  const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
+  if (oversizedFiles.length > 0) {
+    alert(`파일 크기는 10MB를 초과할 수 없습니다.\n초과된 파일: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    target.value = '';
+    return;
+  }
 
   // 기존 FormData 초기화
   const formData = new FormData(); // formData는 객체임
