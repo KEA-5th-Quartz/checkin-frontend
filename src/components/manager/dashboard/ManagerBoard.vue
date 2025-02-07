@@ -25,6 +25,7 @@ const isMyTicket = ref(false);
 const memberStore = useMemberStore();
 const keyword = ref('');
 const isSearch = ref(false);
+const order = ref('DESC');
 
 const ManagerfilterState = ref<ManagerFilterState>({
   statuses: [],
@@ -47,12 +48,14 @@ const queryParams = computed(() => ({
   categories: Array.isArray(ManagerfilterState.value.categories) ? ManagerfilterState.value.categories : [],
   dueToday: ManagerfilterState.value.dueToday,
   dueThisWeek: ManagerfilterState.value.dueThisWeek,
+  order: order.value,
 }));
 
 // 검색 쿼리 파라미터
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
+  order: order.value,
 }));
 
 // 검색 함수
@@ -98,7 +101,7 @@ const toggleMyTicket = () => {
 // 검색 쿼리 키 computed
 const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
-    return ['search-tickets', keyword.value, currentPage.value, pageSize.value];
+    return ['search-tickets', keyword.value, currentPage.value, pageSize.value, order.value];
   }
   return ['tickets', queryParams.value];
 });
@@ -122,6 +125,7 @@ const {
       queryParams.value.dueThisWeek,
       queryParams.value.page,
       queryParams.value.size,
+      queryParams.value.order,
     )
     .then((response) => response.data.data);
 });
@@ -153,6 +157,13 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   currentPage.value = 1;
   sessionStorage.setItem('managerCurrentPage', '1');
   isOpen.value = false;
+};
+
+const toggleOrder = () => {
+  order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
+  // 정렬이 변경될 때 첫 페이지로 이동
+  currentPage.value = 1;
+  sessionStorage.setItem('logCurrentPage', '1');
 };
 
 onBeforeUnmount(() => {
@@ -227,7 +238,15 @@ onBeforeUnmount(() => {
       <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
-            <th class="manager-th w-[17.5%] text-start pl-6">번호</th>
+            <th @click="toggleOrder" class="manager-th w-[17.5%] text-start pl-6 cursor-pointer duration-200">
+              <div class="flex items-center gap-2">
+                번호
+                <SvgIcon
+                  :icon="ArrowDownIcon"
+                  :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                />
+              </div>
+            </th>
             <th class="manager-th text-start w-[27.5%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
             <th class="manager-th w-[7.5%]">2차 카테고리</th>
