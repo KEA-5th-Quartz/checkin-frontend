@@ -78,25 +78,30 @@ const fileInput = ref<HTMLInputElement | null>(null);
 // 파일 첨부요청 뮤테이션
 const attachmentMutation = useCustomMutation(
   async ({ attachment }: { attachment: FormData }) => {
-    const response = await ticketApi.postAttachment(attachment); // 서버 전체 응답 데이터
-    for (let [key, value] of attachment.entries()) {
-      console.log(`📂 FormData Key: ${key}, Value:`, value);
-    }
-    console.log('📌 ticketApi.postAttachment 응답:', response); // 전체 서버 응답 데이터를 반환
-    console.log('📌 ticketApi.postAttachment 응답 데이터:', response.data); // 백엔드 응답 데이터 반환
-    console.log('📌 `response.data`가 배열인가?:', Array.isArray(response.data)); // 백엔드 응답 데이터이므로 객체임
-
-    return response.data; // 백엔드 응답 데이터를 반환
+    const response = await ticketApi.postAttachment(attachment);
+    return response.data;
   },
   {
     onSuccess: (response) => {
-      const uploadedAttachmentIds = response.data.map((file) => file.attachmentid); //attachmentId 배열 반환
-      attachmentIds.value.push(uploadedAttachmentIds);
-      const uploadedAttachmentUrl = response.data.map((file) => file.url); // url 배열 반환
-      previewUrl.value.push(...uploadedAttachmentUrl);
+      console.log('📌 파일 업로드 응답 데이터:', response.data);
+
+      // ✅ attachmentId를 올바르게 추출하여 기존 배열과 병합 (중복 제거)
+      const uploadedAttachmentIds = response.data
+        .map((file: { attachmentId: number }) => file.attachmentId)
+        .filter((id) => Number.isInteger(id)); // 숫자 값만 남기기
+
+      console.log('📌 올바르게 추출된 attachmentIds:', uploadedAttachmentIds);
+
+      // ✅ 기존 배열을 직접 변경하지 않고 새로운 배열을 할당 (불필요한 중첩 방지)
+      attachmentIds.value = [...new Set([...attachmentIds.value, ...uploadedAttachmentIds])];
+      console.log('📌 최종 attachmentIds:', attachmentIds.value);
+
+      // ✅ 업로드된 파일 URL 저장
+      const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
+      previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
     },
     onError: (error) => {
-      console.error('파일 첨부에 실패했습니다', error);
+      console.error('파일 첨부 실패:', error);
     },
   },
 );
@@ -127,6 +132,7 @@ const handleFileChange = async (event: Event) => {
   // 파일이 없는 경우 처리
   if (!target.files || target.files.length === 0) {
     console.error('📌 파일이 선택되지 않았습니다.');
+    // isUploading.value = false;
     return;
   }
   // 파일 업로드 시 isUploading 상태 true로 전환
@@ -134,6 +140,14 @@ const handleFileChange = async (event: Event) => {
 
   // 타겟 파일 배열로 변환해서 files에 저장
   const files = Array.from(target.files);
+
+  const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
+  if (oversizedFiles.length > 0) {
+    alert(`파일 크기는 10MB를 초과할 수 없습니다.\n초과된 파일: ${oversizedFiles.map((f) => f.name).join(', ')}`);
+    target.value = '';
+    isUploading.value = false;
+    return;
+  }
 
   // 기존 FormData 초기화
   const formData = new FormData(); // formData는 객체임
@@ -160,31 +174,36 @@ const handleFileChange = async (event: Event) => {
   try {
     // 유효성 검사 통과시 첨부파일 요청 뮤테이션 실행
     const response = await attachmentMutation.mutateAsync({ attachment: attachment.value }); // response값은 백엔드 응답데이터
+    const uploadedAttachmentIds = response.data.map((file: { attachmentId: string }) => file.attachmentId);
+    attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
-    // attachmentId 필터링해서 숫자인 경우만 배열에 저장
-    const uploadedAttachmentIds = response.data.map((file) => file.attachmentId).filter((id) => Number.isInteger(id));
+    const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
+    previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
+    // // attachmentId 필터링해서 숫자인 경우만 배열에 저장
+    // const uploadedAttachmentIds = response.data.map((file) => file.attachmentId).filter((id) => Number.isInteger(id));
 
-    console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
+    // console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
 
-    // attachmentIds가 배열인지 확인 후 처리
-    if (!Array.isArray(attachmentIds.value)) {
-      attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
-    }
+    // // attachmentIds가 배열인지 확인 후 처리
+    // if (!Array.isArray(attachmentIds.value)) {
+    //   attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
+    // }
 
-    console.log('📌 Before:', JSON.stringify(attachmentIds.value));
+    // console.log('📌 Before:', JSON.stringify(attachmentIds.value));
 
-    // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
-    attachmentIds.value = [...uploadedAttachmentIds];
+    // // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
+    // attachmentIds.value = [...uploadedAttachmentIds];
 
-    console.log('📌 After:', JSON.stringify(attachmentIds.value));
+    // console.log('📌 After:', JSON.stringify(attachmentIds.value));
 
-    // ✅ 업로드된 파일 URL 저장
-    const uploadedAttachmentUrl = response.data.map((file) => file.url);
-    previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
+    // // ✅ 업로드된 파일 URL 저장
+    // const uploadedAttachmentUrl = response.data.map((file) => file.url);
+    // previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
   } catch (error) {
     console.error('파일 업로드 실패:', error);
   } finally {
     isUploading.value = false; // ✅ 업로드 완료 후 상태 초기화
+    target.value = '';
   }
 };
 
@@ -264,20 +283,55 @@ const handleTemplateClick = async (event: Event) => {
 // 확인 버튼 클릭시 title, firstCategory, secondCategory, content 값으로 화면에 자동 채워넣기
 
 // 티켓 생성 버튼
+// ✅ 요청 중복 방지 플래그
+const isSubmitting = ref(false);
+
+// ✅ 티켓 생성 버튼 (무한 요청 방지)
 const onSubmit = handleSubmit(async () => {
-  console.log('생성 함수 실행');
+  if (isSubmitting.value) {
+    console.warn('🚨 이미 요청 중입니다. 중복 요청 방지!');
+    return;
+  }
+
+  isSubmitting.value = true; // ✅ 요청 시작
+  console.log('🚀 티켓 생성 요청 실행');
+
   try {
     await createTicketMutation.mutateAsync({
       title: title.value,
-      firstCategory: selectedFirstCategory.value.label,
-      secondCategory: selectedSecondCategory.value.label,
+      firstCategory: selectedFirstCategory.value?.label || '',
+      secondCategory: selectedSecondCategory.value?.label || '',
       content: content.value,
       dueDate: dueDate.value,
-      attachmentIds: attachmentIds.value, // .value 사용
+      attachmentIds: attachmentIds.value,
     });
-    showDialog.value = true;
+
+    console.log('✅ 티켓 생성 성공');
+    showDialog.value = true; // ✅ 요청 성공 후 다이얼로그 표시
   } catch (error) {
-    console.error('티켓 생성 실패:', error);
+    console.error('❌ 티켓 생성 실패:', error);
+    isSubmitting.value = false; // 요청 실패 시 즉시 상태 초기화
+  }
+});
+
+// ✅ 티켓 생성 완료 후 정상적인 이동 처리
+const handleMain = async () => {
+  if (!showDialog.value) return;
+
+  console.log('🔄 티켓 리스트로 이동');
+  showDialog.value = false; // ✅ 다이얼로그 닫기
+  isSubmitting.value = false; // ✅ 상태 초기화
+
+  await nextTick(); // ✅ UI 업데이트 이후 실행
+  router.push('/user/ticketlist'); // ✅ 정상적으로 페이지 이동
+};
+
+// ✅ 다이얼로그 상태 변경을 감지하여 불필요한 onSubmit 재실행 방지
+watch(showDialog, (newValue) => {
+  if (newValue) {
+    console.log('📌 티켓 생성 완료 다이얼로그가 열림');
+  } else {
+    console.log('📌 티켓 생성 완료 다이얼로그가 닫힘');
   }
 });
 
@@ -399,6 +453,7 @@ const styledContent = computed(() => {
 });
 
 const tempContent = ref(''); // ✅ 임시 content 변수
+
 const handleConfirm = async () => {
   if (selectedTemplate.value) {
     console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
@@ -457,6 +512,24 @@ watch(content, (newValue) => {
     content.value = template.value + '\n\n' + newValue.slice(template.value.length).trim(); // ✅ 템플릿 중복 방지
   }
 });
+
+const isImage = (url: string) => /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
+
+const getFileExtensionLabel = (url: string) => {
+  try {
+    const decodedUrl = decodeURIComponent(url); // URL 디코딩
+    const filename = decodedUrl.split('/').pop(); // 파일명 추출
+    const extension = filename?.split('.').pop()?.toLowerCase(); // 확장자 소문자로 변환
+
+    return extension ? `${extension.toUpperCase()} 파일` : '알 수 없는 파일';
+  } catch (error) {
+    return '알 수 없는 파일';
+  }
+};
+
+const removeFile = (index: number) => {
+  previewUrl.value.splice(index, 1);
+};
 </script>
 
 <template>
@@ -510,12 +583,28 @@ watch(content, (newValue) => {
 
       <section class="w-full mt-12">
         <label class="ticket-label">요청 사항</label>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-80 bg-[#fafafa]" />
+        <textarea v-model="content" class="ticket-desc-textarea min-h-60 bg-[#fafafa]" />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->
           <input type="file" ref="fileInput" @change="handleFileChange" multiple class="hidden" />
           <SvgIcon :icon="ClipIcon" class="text-gray-1" @click="triggerFileInput" />
+        </div>
+      </section>
+      <section class="w-full mt-4">
+        <label class="ticket-label">첨부된 파일</label>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <div
+            v-for="(url, index) in previewUrl"
+            :key="index"
+            class="relative w-24 h-24 border border-gray-2 rounded-lg overflow-hidden flex-center bg-gray-100"
+          >
+            <img v-if="isImage(url)" :src="url" alt="첨부된 이미지" class="w-full h-full object-cover" />
+            <div v-else class="text-xs text-gray-700 text-center px-2">{{ getFileExtensionLabel(url) }}</div>
+            <button @click="removeFile(index)" class="absolute top-1 right-1 w-5 h-5 flex-center rounded-full text-xs">
+              ❌
+            </button>
+          </div>
         </div>
       </section>
       <section class="flex justify-center">
