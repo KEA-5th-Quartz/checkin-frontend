@@ -1,8 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { AxiosError } from 'axios';
 import { useMemberStore } from '@/stores/memberStore';
 import { userApi } from '@/services/userService/userService';
 import { useRouter } from 'vue-router';
+
+interface QueueItem {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}
 
 const BASE_URL = process.env.VUE_APP_BASE_URL;
 const router = useRouter();
@@ -18,10 +23,10 @@ const api = axios.create({
 // 토큰 갱신 중인지 체크하는 플래그
 let isRefreshing = false;
 // 갱신 중에 실패한 요청들을 저장하는 배열
-let failedQueue: any[] = [];
+let failedQueue: QueueItem[] = [];
 
 // 실패한 요청들 재시도
-const processQueue = (error: any = null) => {
+const processQueue = (error: Error | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -33,11 +38,10 @@ const processQueue = (error: any = null) => {
 };
 
 // Request 인터셉터
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const memberStore = useMemberStore();
   if (memberStore.accessToken) {
     config.headers.Authorization = `Bearer ${memberStore.accessToken}`;
-    console.log('🚀 API 요청 Authorization 헤더:', config.headers.Authorization);
   } else {
     console.error('❌ accessToken이 존재하지 않습니다!');
   }
@@ -46,7 +50,7 @@ api.interceptors.request.use((config) => {
 
 // Response 인터셉터
 api.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config;
 
@@ -87,7 +91,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
-        processQueue(refreshError);
+        processQueue();
 
         const memberStore = useMemberStore();
         memberStore.clearMemberInfo();

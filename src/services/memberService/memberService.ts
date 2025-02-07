@@ -28,9 +28,39 @@ export const memberApi = {
 
     return response.data.data;
   },
+  // [관리자] 삭제된 멤버 목록 조회 API
+  async getDeletedMembers(role: MemberListItem['role'], page = 1, size = 10, username = '') {
+    const params = new URLSearchParams();
+    params.append('role', role);
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+    if (username) {
+      params.append('username', username);
+    }
+
+    const response = await api.get<MemberListResponse>(`/members?${params.toString()}`);
+
+    return response.data.data;
+  },
   // [관리자] 사용자, 담당자, 관리자 수 전체 조회
   getMemberStatsRole() {
     return api.get('/members/stats/role');
+  },
+  // [관리자] 삭제된 회원 목록 조회
+  getDeletedMember(page: number, size: number) {
+    return api.get(`/members/trash?page=${page}&size=${size}`);
+  },
+  // [관리자] 회원 삭제
+  deleteMember(memberId: number) {
+    return api.delete(`/members/${memberId}`);
+  },
+  // [관리자] 삭제된 회원 복구
+  patchRestoreMember(memberId: number) {
+    return api.patch(`/members/trash/${memberId}/restore`);
+  },
+  // [관리자] 회원 영구 삭제
+  deleteMemberDelete(memberId: number) {
+    return api.delete(`/members/trash/${memberId}`);
   },
   // [관리자] 회원 권한 변경
   putMemberRole(memberId: number, data: { role: string }) {

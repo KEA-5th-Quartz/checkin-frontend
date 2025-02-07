@@ -1,6 +1,15 @@
-export type ApiError = { status: number; code: string; message: string };
+export interface ApiErrorData {
+  blockTime?: string;
+  [key: string]: unknown;
+}
 
-// api 오류가 아닐 경우를 대비해 타입 가드 함수 추가
+export interface ApiError {
+  status: number;
+  code: string;
+  message: string;
+  data?: ApiErrorData;
+}
+
 export function isApiError(error: unknown): error is ApiError {
   return (
     typeof error === 'object' &&

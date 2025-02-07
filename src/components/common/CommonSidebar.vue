@@ -17,9 +17,11 @@ import {
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
 import { roleInKorean } from '@/utils/mapping';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const router = useRouter();
 const memberStore = useMemberStore();
+const queryClient = useQueryClient();
 
 onMounted(async () => {
   if (!memberStore.accessToken) {
@@ -30,6 +32,7 @@ onMounted(async () => {
   }
 });
 
+const isMemberOpen = ref(false);
 const isTicketOpen = ref(false);
 const isTemplateOpen = ref(false);
 
@@ -42,12 +45,15 @@ const managerNavItems = [
 ];
 
 const adminNavItems = [
-  { name: '홈', icon: HomeIcon, path: '/admin' },
-  { name: '회원 관리', icon: MemberIcon, path: '/admin/members' },
   { name: '카테고리 관리', icon: CategoryIcon, path: '/admin/categories' },
   { name: '통계', icon: StatisticIcon, path: '/admin/statistics' },
   { name: '로그', icon: LogIcon, path: '/admin/log' },
   { name: '설정', icon: SettingIcon, path: '/settings' },
+];
+
+const adminMemberItems = [
+  { name: '회원 목록', path: '/admin/members' },
+  { name: '삭제된 회원', path: '/admin/deletedMembers' },
 ];
 
 const userTicketItems = [
@@ -72,6 +78,10 @@ const checkCurrentPath = () => {
   if (currentPath.includes('/user/template')) {
     isTemplateOpen.value = true;
   }
+  // 회원 관리 경로 체크 추가
+  if (currentPath.includes('/admin/members')) {
+    isMemberOpen.value = true;
+  }
 };
 
 // 초기 마운트 시 경로 체크
@@ -90,6 +100,7 @@ watch(
 // 로그아웃
 const handleLogout = async () => {
   await memberStore.logout();
+  queryClient.clear();
   window.location.replace('/');
 };
 </script>
@@ -136,6 +147,41 @@ const handleLogout = async () => {
 
     <!-- 관리자 -->
     <ul v-else-if="role === 'ADMIN'" class="sidebar-ul">
+      <!-- 홈 메뉴 -->
+      <router-link :to="'/admin'" custom v-slot="{ isActive, navigate }">
+        <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
+          <div v-if="isActive" class="sidebar-active" />
+          <SvgIcon :icon="HomeIcon" />
+          홈
+        </li>
+      </router-link>
+
+      <!-- 회원 관리 메뉴 -->
+      <li class="relative">
+        <div class="sidebar-li cursor-pointer" :class="{ active: isMemberOpen }" @click="isMemberOpen = !isMemberOpen">
+          <SvgIcon :icon="MemberIcon" />회원 관리
+        </div>
+
+        <!-- 회원 관리 하위 메뉴 -->
+        <transition name="submenu">
+          <ul v-show="isMemberOpen" class="sidebar-sub-menu">
+            <router-link
+              v-for="item in adminMemberItems"
+              :key="item.path"
+              :to="item.path"
+              custom
+              v-slot="{ isActive, navigate }"
+            >
+              <li class="relative pr-6 lg:pr-12 whitespace-nowrap" :class="{ active: isActive }" @click="navigate">
+                <div v-if="isActive" class="sidebar-active -left-8" />
+                {{ item.name }}
+              </li>
+            </router-link>
+          </ul>
+        </transition>
+      </li>
+
+      <!-- 나머지 관리자 메뉴 -->
       <router-link
         v-for="item in adminNavItems"
         :key="item.path"

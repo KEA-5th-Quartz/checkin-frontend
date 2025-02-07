@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { XIcon } from '@/assets/icons/path';
+import { DownloadIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import ManagerComments from './ManagerComments.vue';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { getFileType, isImageFile } from '@/utils/getFileType';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -329,7 +330,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       // 3. 2차 카테고리 변경 API 호출
       await secondCategoryMutation.mutateAsync({
         ticketId: props.ticketId,
-        firstCategoryId: option.id,
+        firstCategoryId: option.id as number,
         secondCategory: firstSecondCategoryOption.value,
       });
     }
@@ -362,6 +363,48 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
     console.error('담당자 변경 실패:', err);
   }
 };
+
+// 파일 다운로드 처리 함수
+const handleFileDownload = async (fileUrl: string) => {
+  try {
+    // 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
+
+    // 이미지 파일인 경우
+    if (isImageFile(fileName)) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    // 일반 파일인 경우 API 호출
+    const response = await ticketApi.getTicketAttachment(String(props.ticketId), fileUrl);
+
+    // response 타입에 따른 처리
+    const blob =
+      response.data instanceof Blob
+        ? response.data
+        : new Blob([response.data], {
+            type: response.headers['content-type'] || 'application/octet-stream',
+          });
+
+    // 다운로드 링크 생성 및 클릭
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+
+    // cleanup
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, 100);
+  } catch (err) {
+    console.error('파일 다운로드 실패:', err);
+    alert('파일 다운로드에 실패했습니다.');
+  }
+};
 </script>
 
 <template>
@@ -373,8 +416,11 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
         <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
           <!-- 헤더 -->
           <header class="ticket-header">
-            <p class="text-2xl">{{ detailData.title }}</p>
-            <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
+            <div class="flex-stack justify-center">
+              <p class="text-2xl">{{ detailData.title }}</p>
+              <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+            </div>
+            <SvgIcon :icon="XIcon" class="cursor-pointer self-start" @click="handleClose" />
           </header>
 
           <!-- 컨텐츠 -->
@@ -458,8 +504,19 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
             </div>
 
             <!-- 첨부파일 -->
-            <div class="mt-4">
-              <div class="ticket-attachment">Customer KYC</div>
+            <div v-if="detailData.ticketAttachmentUrls?.length > 0" class="mt-4 space-y-2">
+              <label class="ticket-label">첨부파일</label>
+              <div class="space-y-2">
+                <button
+                  v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
+                  :key="index"
+                  @click="handleFileDownload(fileUrl)"
+                  class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+                >
+                  <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
+                  <span>{{ getFileType(fileUrl) }} 다운</span>
+                </button>
+              </div>
             </div>
 
             <ManagerComments :ticket-id="ticketId" />

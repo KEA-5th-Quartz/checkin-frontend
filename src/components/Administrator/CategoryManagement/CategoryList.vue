@@ -15,7 +15,9 @@
           :class="{ 'bg-blue-4 text-primary-3': selectedPrimaryCategory?.firstCategoryId === category.firstCategoryId }"
           @click="selectPrimaryCategory(category)"
         >
-          <span>{{ category.firstCategoryName }}</span>
+          <div class="flex gap-4">
+            <span class="text-gray-1 min-w-16">[ {{ category.alias }} ] </span>{{ category.firstCategoryName }}
+          </div>
           <CategoryDropdown
             :category="category"
             @edit="handleEditPrimaryCategory"
@@ -38,7 +40,9 @@
       <CategoryAddButton buttonText="+ 2차 카테고리 추가하기" @addCategory="handleAddSecondaryCategory" />
       <ul v-if="filteredSecondaryCategories.length > 0" class="category-list">
         <li v-for="category in filteredSecondaryCategories" :key="category.secondCategoryId" class="category-list-item">
-          <span>{{ category.name }}</span>
+          <div class="flex gap-4">
+            <span class="text-gray-1">[ {{ category.alias }} ] </span>{{ category.name }}
+          </div>
           <CategoryDropdown
             :category="category"
             @edit="handleEditSecondaryCategory"

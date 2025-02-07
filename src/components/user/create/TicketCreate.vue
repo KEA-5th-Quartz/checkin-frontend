@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, watch, nextTick, onMounted, computed } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
-import { watchEffect } from 'vue';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ClipIcon, PencilIcon } from '@/assets/icons/path';
@@ -50,7 +49,12 @@ const template = ref<string>(
 const { handleSubmit, errors, validate } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
-    content: '', // ✅ content의 초기값을 빈 문자열로 설정
+    title: '',
+    content: '',
+    firstCategory: null as BaseTicketOption | null,
+    secondCategory: null as BaseTicketOption | null,
+    dueDate: '',
+    attachmentIds: [] as number[],
   },
 });
 
@@ -135,6 +139,7 @@ const handleFileChange = async (event: Event) => {
     // isUploading.value = false;
     return;
   }
+
   // 파일 업로드 시 isUploading 상태 true로 전환
   isUploading.value = true; // ✅ 업로드 시작
 
@@ -158,13 +163,6 @@ const handleFileChange = async (event: Event) => {
     formData.append('files', file); // file 값들을 formData에 채우기
   });
 
-  console.log('📁 선택된 파일:', files); // 티켓 파일들(선택 파일들) console에 띄우기
-  console.log('📂 FormData 객체:', formData); // ???
-
-  for (let [key, value] of formData.entries()) {
-    console.log(`📂 FormData Key: ${key}, Value:`, value);
-  }
-
   // 선택된 files의 개별 값인 file을 담은 formData 객체값으로 attachment 상태값 초기화
   attachment.value = formData; // 기존 attachment 값이 FormData 배열이지만 초기값이 null이기 때문에 null이 사라지지않음
 
@@ -177,6 +175,7 @@ const handleFileChange = async (event: Event) => {
     const uploadedAttachmentIds = response.data.map((file: { attachmentId: string }) => file.attachmentId);
     attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
+
     const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
     previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
     // // attachmentId 필터링해서 숫자인 경우만 배열에 저장
@@ -184,10 +183,12 @@ const handleFileChange = async (event: Event) => {
 
     // console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
 
+
     // // attachmentIds가 배열인지 확인 후 처리
     // if (!Array.isArray(attachmentIds.value)) {
     //   attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
     // }
+
 
     // console.log('📌 Before:', JSON.stringify(attachmentIds.value));
 
@@ -199,6 +200,7 @@ const handleFileChange = async (event: Event) => {
     // // ✅ 업로드된 파일 URL 저장
     // const uploadedAttachmentUrl = response.data.map((file) => file.url);
     // previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
+
   } catch (error) {
     console.error('파일 업로드 실패:', error);
   } finally {
@@ -296,6 +298,7 @@ const onSubmit = handleSubmit(async () => {
   isSubmitting.value = true; // ✅ 요청 시작
   console.log('🚀 티켓 생성 요청 실행');
 
+
   try {
     await createTicketMutation.mutateAsync({
       title: title.value,
@@ -339,16 +342,18 @@ watch(showDialog, (newValue) => {
 const fetchCategories = useCustomQuery(['category'], async () => {
   try {
     const response = await categoryApi.getCategories();
-    return response.data.data.map((category) => ({
-      id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
-      value: category.firstCategoryName,
-      label: category.firstCategoryName,
-      secondCategories: category.secondCategories.map((subCategory) => ({
-        id: subCategory.secondCategoryId,
-        value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
-        label: subCategory.name,
-      })),
-    }));
+    return response.data.data.map(
+      (category: { firstCategoryId: string; firstCategoryName: string; secondCategories: any[] }) => ({
+        id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
+        value: category.firstCategoryName,
+        label: category.firstCategoryName,
+        secondCategories: category.secondCategories.map((subCategory) => ({
+          id: subCategory.secondCategoryId,
+          value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
+          label: subCategory.name,
+        })),
+      }),
+    );
   } catch (error) {
     console.error('에러 처리:', error);
     throw error;
@@ -400,7 +405,6 @@ watch(
   (newData) => {
     if (newData) {
       firstCategoryList.value = newData;
-      console.log('📌 1차 카테고리 업데이트됨:', firstCategoryList.value);
 
       // ✅ 1차 카테고리 업데이트 후 2차 카테고리 업데이트 실행
       updateSecondCategoryList();
@@ -408,10 +412,6 @@ watch(
   },
   { immediate: true },
 );
-
-const contentWithoutTemplate = computed(() => {
-  return content.value.replace(template.value, '').trim(); // ✅ 템플릿 부분 제거
-});
 
 // 티켓 생성 뮤테이션
 const createTicketMutation = useCustomMutation(
@@ -435,10 +435,6 @@ const createTicketMutation = useCustomMutation(
   {
     onSuccess: () => {
       queryClient.refetchQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
-      console.log('생성 티켓 번호:', createTicketMutation.data); // 티켓 번호 콘솔에 출력
-    },
-    onError: () => {
-      console.log('티켓 생성 실패:', createTicketMutation.error);
     },
   },
 );
@@ -484,20 +480,6 @@ const handleConfirm = async () => {
   showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
 };
 
-watch(showDialog, (newValue) => {
-  if (newValue) {
-    console.log('showDialog값 true');
-  } else {
-    console.log('showDialog값 false');
-  }
-});
-
-// 현재 에러 상태 체크용 함수
-watchEffect(() => {
-  console.log('현재 에러 상태:', errors.value);
-  console.log(content.value);
-});
-
 // ✅ 초기 렌더링 시 템플릿을 content에 추가
 onMounted(() => {
   if (!content.value) {
@@ -538,7 +520,7 @@ const removeFile = (index: number) => {
       <section class="w-full h-12 mt-12">
         <label class="ticket-label">티켓 제목</label>
         <div class="relative w-full">
-          <input v-model="title" class="title-form bg-[#fafafa] pr-10" placeholder="제목을 입력하세요" />
+          <input v-model="title" class="title-form bg-[#fafafa] pr-10 text-black-2" placeholder="제목을 입력하세요" />
           <SvgIcon
             class="absolute right-3 top-1/2 tran sform -translate-y-1/2 w-4 h-4 text-gray-1"
             :icon="PencilIcon"
@@ -551,7 +533,7 @@ const removeFile = (index: number) => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">1차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 text-black-2"
             :options="firstCategoryList"
             :selectedOption="selectedFirstCategory"
             label=""
@@ -565,7 +547,7 @@ const removeFile = (index: number) => {
           <label class="ticket-label">2차 카테고리</label>
           <CustomDropdown
             v-if="fetchCategories.data?.value"
-            class="h-12 py-1"
+            class="h-12 py-1 text-black-2"
             :options="secondCategoryList"
             :selectedOption="selectedSecondCategory"
             label=""
@@ -583,7 +565,9 @@ const removeFile = (index: number) => {
 
       <section class="w-full mt-12">
         <label class="ticket-label">요청 사항</label>
-        <textarea v-model="content" class="ticket-desc-textarea min-h-60 bg-[#fafafa]" />
+
+        <textarea v-model="content" class="ticket-desc-textarea min-h-60 bg-[#fafafa] text-black-2" />
+
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->

@@ -244,7 +244,7 @@ const closeDialog = async () => {
       </section>
 
       <section class="w-full mt-24">
-        <label class="ticket-label">설명</label>
+        <label class="ticket-label">요청사항</label>
         <textarea
           :value="content"
           @input="contentChange"
