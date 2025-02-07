@@ -3,6 +3,14 @@ export interface ChartSeries {
   data: number[];
 }
 
+export interface ManagerStats {
+  userName: string;
+  state: {
+    status: 'IN_PROGRESS' | 'CLOSED';
+    ticketCount: number;
+  }[];
+}
+
 export interface ChartOptions {
   chart: {
     type: string;
@@ -21,7 +29,6 @@ export interface ChartOptions {
     style: { fontSize: string };
   };
   xaxis: { categories: string[] };
-  yaxis: { max: number };
   colors: string[];
   legend: {
     position: string;
@@ -31,4 +38,18 @@ export interface ChartOptions {
       shape: string;
     };
   };
+}
+
+export interface StatusRate {
+  status: string;
+  ticketCount: number;
+}
+
+export interface CategoryStat {
+  categoryName: string;
+  ticketCount: number;
+}
+
+export interface ClosedRateResponse {
+  closedRate: number;
 }

@@ -19,9 +19,11 @@ export const statsApi = {
   getCategoryStats() {
     return api.get('/stats/categories');
   },
-  // [관리자] 작업 완성률 조회
-  getClosedRateStats() {
-    return api.get('/stats/closed-rate');
+  // [관리자] 작업 완성률 조회 (현재 수정 필요)
+  getClosedRateStats(type: string) {
+    return api.get('/stats/closed-rate', {
+      params: { type },
+    });
   },
   // [관리자] 전체 작업 상태 분포
   getStatusRateStats() {
