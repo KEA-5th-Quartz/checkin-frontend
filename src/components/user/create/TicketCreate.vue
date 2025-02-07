@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick, onMounted } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
 import { watchEffect } from 'vue';
@@ -8,7 +8,8 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ClipIcon, PencilIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue';
-import { AttachedResponse, BaseTicketOption } from '@/types/tickets';
+import TicketTemplateButton from './TicketTemplateButton.vue';
+import { BaseTicketOption } from '@/types/tickets';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -378,7 +379,8 @@ watch(content, (newValue) => {
         </div>
       </section>
       <section class="flex justify-center">
-        <TicketCreateButton type="onSubmit" />
+        <TicketTemplateButton type="onSubmit" />
+        <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
       <CommonDialog
         v-if="showDialog"
