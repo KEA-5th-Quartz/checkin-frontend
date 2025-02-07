@@ -154,7 +154,7 @@ export const ticketApi = {
   },
   // [사용자] 휴지통 티켓 다중 복구
   patchTrashTicket(data: { ticketIds: number[] }) {
-    return api.patch('/tickets/trash/recover', data);
+    return api.patch('/tickets/trash/restore', data);
   },
   // [사용자] 휴지통 티켓 다중 삭제
   deleteTrashTickets(data: { ticketIds: number[] }) {

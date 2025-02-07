@@ -13,7 +13,7 @@ export interface StatusTicketOption extends BaseTicketOption {
 export interface DropdownProps {
   options: BaseTicketOption[];
   selectedOption: BaseTicketOption | undefined;
-  label: string; 
+  label: string;
   hasColor?: boolean;
   onOptionSelect?: (option: BaseTicketOption) => void;
   isEdit?: boolean;
@@ -54,6 +54,6 @@ export interface AttachmentResponse {
 
 // 티켓 생성 파일첨부 응답
 export interface AttachedResponse {
-  attachmentid :string;
-  id :number;
+  attachmentid: string;
+  id: number;
 }

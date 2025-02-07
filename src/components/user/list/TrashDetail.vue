@@ -40,8 +40,8 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
         <header class="ticket-header">
-          <p>{{ detailData.ticket.title }}</p>
-          <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+          <p>{{ detailData?.ticket?.title }}</p>
+          <p class="text-sm text-gray-1">{{ detailData?.customId }}</p>
           <div class="flex items-center gap-8">
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
           </div>
@@ -64,7 +64,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
                 <div
                   class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm line-clamp-1 overflow-scroll hide-scrollbar"
                 >
-                  {{ detailData.ticket.firstCategory }}
+                  {{ detailData?.ticket?.firstCategory }}
                 </div>
               </div>
               <!-- 요청자 블록 -->
@@ -87,7 +87,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <div class="mt-[76px]">
                 <label class="ticket-label">2차 카테고리</label>
                 <div class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm">
-                  {{ detailData.ticket.secondCategory }}
+                  {{ detailData?.ticket?.secondCategory }}
                 </div>
               </div>
               <!-- 담당자 블록 -->
@@ -108,7 +108,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <div>
                 <label class="ticket-label">마감 기한</label>
                 <p class="ticket-date">
-                  {{ detailData.ticket.due_date }}
+                  {{ detailData?.ticket?.due_date }}
                 </p>
               </div>
             </section>
@@ -118,16 +118,9 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
           <div class="mt-11">
             <label class="ticket-desc-label">요청사항</label>
             <div class="ticket-desc-area">
-              <p class="ticket-desc-content">{{ detailData.ticket.content }}</p>
+              <p class="ticket-desc-content">{{ detailData?.ticket?.content }}</p>
             </div>
           </div>
-
-          <!-- 첨부 파일 -->
-          <div class="mt-4">
-            <div class="ticket-attachment">Customer KYC</div>
-          </div>
-
-          <UserComment :ticket-id="ticketId" />
         </div>
       </div>
     </div>
