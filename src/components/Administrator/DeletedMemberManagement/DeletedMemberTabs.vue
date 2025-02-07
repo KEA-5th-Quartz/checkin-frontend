@@ -1,19 +1,5 @@
 <template>
   <div class="mx-auto w-[83%] mt-10">
-    <div class="flex justify-around border-b border-gray-2 mb-4">
-      <button
-        v-for="tab in tabs"
-        :key="tab"
-        :class="[
-          'px-12 py-2 text-sm font-semibold',
-          selectedRole === tab ? 'border-b-4 border-primary-3 text-primary-3' : 'text-gray-0 hover:text-primary-3',
-        ]"
-        @click="switchTab(tab)"
-      >
-        {{ roleLabels[tab] }}
-      </button>
-    </div>
-
     <div class="flex flex-wrap overflow-y-auto hide-scrollbar">
       <!-- 로딩 중 -->
       <div
@@ -57,13 +43,6 @@ import DeletedMemberManagement from './DeletedMemberManagement.vue';
 
 const store = useMemberListStore();
 
-const tabs = ['ADMIN', 'MANAGER', 'USER'] as const;
-const roleLabels: Record<string, string> = {
-  ADMIN: '관리자',
-  MANAGER: '담당자',
-  USER: '사용자',
-};
-
 const selectedRole = computed(() => store.selectedRole);
 const currentPage = computed(() => store.currentPage);
 const totalPages = computed(() => store.totalPages);
@@ -87,11 +66,6 @@ watch(data, (newData) => {
     store.setMembers(newData.members, newData.totalPages);
   }
 });
-
-const switchTab = async (role: 'ADMIN' | 'MANAGER' | 'USER') => {
-  store.setRole(role);
-  store.setCurrentPage(1);
-};
 
 const handlePageChange = async (page: number) => {
   store.setCurrentPage(page);
