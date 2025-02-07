@@ -103,14 +103,12 @@ const chartOptions = ref<ChartOptions>({
 const loadManagerStats = async () => {
   try {
     const response = await statsApi.getManagersStats(timeFilterTickets.value);
-    console.log('담당자별 티켓 목록 api 응답 데이터:', response.data);
 
     // API 응답 데이터 타입 적용
     const data: ManagerStats[] = response.data.data;
 
     //  담당자 목록 (X축)
     categories.value = data.map((manager) => manager.userName);
-    console.log('X축 카테고리 (담당자):', categories.value);
 
     //  진행 중 / 완료 티켓 개수 추출
     const inProgressData = data.map((manager) => {
@@ -245,10 +243,7 @@ const chartOptions3 = ref({
 //  API 호출 함수
 const loadClosedRateStats = async () => {
   try {
-    console.log('API 호출: getClosedRateStats()', timeFilterCompletion.value);
-
     const response = await statsApi.getClosedRateStats(timeFilterCompletion.value);
-    console.log(' 작업 완성률 API 응답 데이터:', response.data);
 
     const data: ClosedRateResponse = response.data.data;
     const closedRate = data.closedRate; //  완료율 값
@@ -263,7 +258,6 @@ const loadClosedRateStats = async () => {
 
 //  필터 변경 시 API 재호출
 watch(timeFilterCompletion, () => {
-  console.log('🛠 작업 완성률 필터 변경 감지:', timeFilterCompletion.value);
   loadClosedRateStats();
 });
 
@@ -298,10 +292,7 @@ const chartOptions4 = ref({
 
 const loadStatusRateStats = async () => {
   try {
-    console.log(' API 호출: getStatusRateStats()');
-
     const response = await statsApi.getStatusRateStats();
-    console.log('전체 작업 상태 분포 API 응답 데이터:', response.data);
 
     const data: StatusRate[] = response.data.data;
 
