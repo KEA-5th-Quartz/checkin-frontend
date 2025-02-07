@@ -13,6 +13,7 @@ import { onClickOutside } from '@vueuse/core';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
+import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 
 const trashStore = useUserTrashListStore();
 const queryClient = useQueryClient();
