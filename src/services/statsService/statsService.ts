@@ -10,8 +10,10 @@ export const statsApi = {
     return api.get(`/stats/${managerId}/due-today`);
   },
   // [담당자, 관리자] 각 담당자의 상태별 티켓 수
-  getManagersStats() {
-    return api.get('/stats/managers');
+  getManagersStats(type: string) {
+    return api.get('/stats/managers', {
+      params: { type },
+    });
   },
   // [담당자, 관리자] 카테고리별 진행중인 티켓 수
   getCategoryStats() {
