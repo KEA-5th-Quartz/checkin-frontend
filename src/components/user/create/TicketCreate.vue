@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed } from 'vue';
+import { ref, watch, nextTick, onMounted, computed, watchEffect } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
@@ -17,7 +17,6 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
-import { nextTick } from 'vue';
 
 const router = useRouter();
 
@@ -175,7 +174,6 @@ const handleFileChange = async (event: Event) => {
     const uploadedAttachmentIds = response.data.map((file: { attachmentId: string }) => file.attachmentId);
     attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
-
     const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
     previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
     // // attachmentId 필터링해서 숫자인 경우만 배열에 저장
@@ -183,12 +181,10 @@ const handleFileChange = async (event: Event) => {
 
     // console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
 
-
     // // attachmentIds가 배열인지 확인 후 처리
     // if (!Array.isArray(attachmentIds.value)) {
     //   attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
     // }
-
 
     // console.log('📌 Before:', JSON.stringify(attachmentIds.value));
 
@@ -200,7 +196,6 @@ const handleFileChange = async (event: Event) => {
     // // ✅ 업로드된 파일 URL 저장
     // const uploadedAttachmentUrl = response.data.map((file) => file.url);
     // previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
-
   } catch (error) {
     console.error('파일 업로드 실패:', error);
   } finally {
@@ -297,7 +292,6 @@ const onSubmit = handleSubmit(async () => {
 
   isSubmitting.value = true; // ✅ 요청 시작
   console.log('🚀 티켓 생성 요청 실행');
-
 
   try {
     await createTicketMutation.mutateAsync({
