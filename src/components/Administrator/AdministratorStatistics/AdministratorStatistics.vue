@@ -66,6 +66,7 @@ import { statsApi } from '@/services/statsService/statsService';
 
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
+const categories = ref<string[]>([]);
 
 const chartOptions = ref<ChartOptions>({
   chart: {
@@ -103,26 +104,35 @@ const loadManagerStats = async () => {
   try {
     const response = await statsApi.getManagersStats(timeFilterTickets.value);
     console.log('담당자별 티켓 목록 api 응답 데이터:', response.data);
+
+    // API 응답 데이터 타입 적용
     const data: ManagerStats[] = response.data.data;
 
-    // 담당자 목록 (X축)
-    categories.value = data.map((manager) => manager.username);
+    //  담당자 목록 (X축)
+    categories.value = data.map((manager) => manager.userName);
+    console.log('X축 카테고리 (담당자):', categories.value);
 
-    // 진행 중 / 완료 티켓 개수 추출
+    //  진행 중 / 완료 티켓 개수 추출
     const inProgressData = data.map((manager) => {
-      const inProgress = manager.state.find((s) => s.status === 'In Progress');
-      return inProgress ? inProgress.ticket_count : 0;
+      const inProgress = manager.state.find((s) => s.status === 'IN_PROGRESS');
+      return inProgress ? inProgress.ticketCount : 0;
     });
 
     const closedData = data.map((manager) => {
-      const closed = manager.state.find((s) => s.status === 'Closed');
-      return closed ? closed.ticket_count : 0;
+      const closed = manager.state.find((s) => s.status === 'CLOSED');
+      return closed ? closed.ticketCount : 0;
     });
 
     series.value = [
       { name: '진행중', data: inProgressData },
       { name: '완료', data: closedData },
     ];
+
+    // X축 카테고리 반영
+    chartOptions.value = {
+      ...chartOptions.value,
+      xaxis: { categories: categories.value },
+    };
   } catch (error) {
     console.error('Error fetching manager stats:', error);
   }
@@ -131,7 +141,6 @@ const loadManagerStats = async () => {
 watch(timeFilterTickets, loadManagerStats);
 
 const series2 = ref<ChartSeries[]>([]);
-const categories = ref<string[]>([]);
 const customColors = [
   '#232D64',
   '#2C396C',

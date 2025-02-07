@@ -4,10 +4,10 @@ export interface ChartSeries {
 }
 
 export interface ManagerStats {
-  username: string;
+  userName: string;
   state: {
-    status: string;
-    ticket_count: number;
+    status: 'IN_PROGRESS' | 'CLOSED';
+    ticketCount: number;
   }[];
 }
 
