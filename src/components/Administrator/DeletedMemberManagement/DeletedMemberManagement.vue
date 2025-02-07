@@ -54,6 +54,7 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import router from '@/router';
 
 const queryClient = useQueryClient();
 
@@ -161,7 +162,9 @@ const openRemoveMemberModal = () => {
 };
 
 // 멤버 탈퇴 함수
-const removeMember = () => {
-  alert(`멤버 영구삭제 요청: ${props.member.username}`);
+const removeMember = async () => {
+  await memberApi.deleteMemberDelete(props.member.memberId);
+  queryClient.invalidateQueries();
+  router.push('/admin/members');
 };
 </script>

@@ -58,6 +58,10 @@ export const memberApi = {
   patchRestoreMember(memberId: number) {
     return api.patch(`/members/trash/${memberId}/restore`);
   },
+  // [관리자] 회원 영구 삭제
+  deleteMemberDelete(memberId: number) {
+    return api.delete(`/members/trash/${memberId}`);
+  },
   // [관리자] 회원 권한 변경
   putMemberRole(memberId: number, data: { role: string }) {
     return api.put(`/members/${memberId}/role`, data);
