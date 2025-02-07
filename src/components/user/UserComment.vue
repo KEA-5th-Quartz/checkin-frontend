@@ -250,10 +250,25 @@ const handleFileChange = async (event: Event) => {
 // 파일 다운로드
 const handleFileDownload = (file: AttachedFile) => {
   try {
-    window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
+    const fileUrl = file.attachmentUrl;
+    // URL에서 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
+
+    // 이미지 파일인 경우 새 창에서 열기
+    if (file.isImage) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    // 파일 다운로드를 위한 임시 링크 생성
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
-    alert('파일 다운로드에 실패했습니다.');
   }
 };
 
@@ -345,7 +360,7 @@ const isLastComment = (index: number) => {
               <img
                 :src="item.attachmentUrl"
                 class="max-h-32 rounded cursor-pointer"
-                @click="
+                @click.stop="
                   handlePreview({
                     commentId: item.commentId,
                     attachmentUrl: item.attachmentUrl,
@@ -354,6 +369,7 @@ const isLastComment = (index: number) => {
                 "
               />
             </div>
+
             <!-- 이미지가 아닌 경우 -->
             <div
               v-else

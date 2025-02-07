@@ -187,6 +187,6 @@ export const ticketApi = {
   },
   // [담당자, 사용자] 티켓 첨부 파일 다운로드
   getTicketAttachment(ticketId: string, attachmentId: string) {
-    return api.get(`/tickets/${ticketId}/${attachmentId}`);
+    return api.get(`/tickets/${ticketId}/{attachmentUrl}?attachmentUrl=${attachmentId}`);
   },
 };

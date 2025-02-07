@@ -367,37 +367,42 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
 // 파일 다운로드 처리 함수
 const handleFileDownload = async (fileUrl: string) => {
   try {
-    // URL에서 파일명(attachmentId) 추출
-    const attachmentId = fileUrl.split('/').pop() || '';
+    // 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
 
-    // API 호출
-    const response = await ticketApi.getTicketAttachment(String(props.ticketId), '1');
-
-    // Blob 생성
-    const blob = new Blob([response.data]);
-
-    // 이미지 파일인 경우 새 창에서 열기
-    if (isImageFile(attachmentId)) {
-      const objectUrl = URL.createObjectURL(blob);
-      window.open(objectUrl, '_blank');
-      // cleanup
-      URL.revokeObjectURL(objectUrl);
+    // 이미지 파일인 경우
+    if (isImageFile(fileName)) {
+      window.open(fileUrl, '_blank');
       return;
     }
 
-    // 다운로드 처리
-    const url = window.URL.createObjectURL(blob);
+    // 일반 파일인 경우 API 호출
+    const response = await ticketApi.getTicketAttachment(String(props.ticketId), fileUrl);
+
+    // response 타입에 따른 처리
+    const blob =
+      response.data instanceof Blob
+        ? response.data
+        : new Blob([response.data], {
+            type: response.headers['content-type'] || 'application/octet-stream',
+          });
+
+    // 다운로드 링크 생성 및 클릭
+    const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
-    link.download = attachmentId; // 또는 서버에서 제공하는 실제 파일명
+    link.href = downloadUrl;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
 
     // cleanup
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, 100);
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
+    alert('파일 다운로드에 실패했습니다.');
   }
 };
 </script>

@@ -250,26 +250,44 @@ const formattedDueDate = computed({
 
 const handleFileDownload = async (fileUrl: string) => {
   try {
-    // URL에서 파일명 추출
+    // 파일명 추출
     const fileName = fileUrl.split('/').pop() || 'download';
 
-    // 이미지 파일인 경우 새 창에서 열기
+    // 이미지 파일인 경우
     if (isImageFile(fileName)) {
       window.open(fileUrl, '_blank');
       return;
     }
 
-    // 파일 다운로드를 위한 임시 링크 생성
+    // 일반 파일인 경우 API 호출
+    const response = await ticketApi.getTicketAttachment(String(props.ticketId), fileUrl);
+
+    // response 타입에 따른 처리
+    const blob =
+      response.data instanceof Blob
+        ? response.data
+        : new Blob([response.data], {
+            type: response.headers['content-type'] || 'application/octet-stream',
+          });
+
+    // 다운로드 링크 생성 및 클릭
+    const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = fileUrl;
+    link.href = downloadUrl;
     link.download = fileName;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+
+    // cleanup
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, 100);
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
   }
 };
+
 const canEdit = computed(() => {
   return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
 });
