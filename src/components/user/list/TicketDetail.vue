@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
+import { ClipIcon, DownloadIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
@@ -14,6 +14,7 @@ import UserComment from '../UserComment.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { getFileType, isImageFile } from '@/utils/getFileType';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -247,6 +248,46 @@ const formattedDueDate = computed({
   },
 });
 
+const handleFileDownload = async (fileUrl: string) => {
+  try {
+    // 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
+
+    // 이미지 파일인 경우
+    if (isImageFile(fileName)) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    // 일반 파일인 경우 API 호출
+    const response = await ticketApi.getTicketAttachment(String(props.ticketId), fileUrl);
+
+    // response 타입에 따른 처리
+    const blob =
+      response.data instanceof Blob
+        ? response.data
+        : new Blob([response.data], {
+            type: response.headers['content-type'] || 'application/octet-stream',
+          });
+
+    // 다운로드 링크 생성 및 클릭
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+
+    // cleanup
+    setTimeout(() => {
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    }, 100);
+  } catch (err) {
+    console.error('파일 다운로드 실패:', err);
+  }
+};
+
 const canEdit = computed(() => {
   return detailData.value?.status !== 'IN_PROGRESS' && detailData.value?.status !== 'CLOSED';
 });
@@ -259,7 +300,10 @@ const canEdit = computed(() => {
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
         <!-- 헤더 -->
         <header class="ticket-header">
-          <p v-if="!ticketStore.isEditMode">{{ ticketStore.ticket.title }}</p>
+          <div v-if="!ticketStore.isEditMode">
+            <p>{{ ticketStore.ticket.title }}</p>
+            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+          </div>
           <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon
@@ -371,9 +415,9 @@ const canEdit = computed(() => {
             </section>
           </div>
 
-          <!-- 설명 -->
+          <!-- 요청사항 -->
           <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
+            <label class="ticket-desc-label">요청사항</label>
             <div v-if="!ticketStore.isEditMode" class="ticket-desc-area">
               <p class="ticket-desc-content">{{ ticketStore.ticket.content }}</p>
             </div>
@@ -386,8 +430,19 @@ const canEdit = computed(() => {
           </div>
 
           <!-- 첨부 파일 -->
-          <div class="mt-4" v-if="!ticketStore.isEditMode">
-            <div class="ticket-attachment">Customer KYC</div>
+          <div v-if="detailData.ticketAttachmentUrls?.length > 0" class="mt-4 space-y-2">
+            <label class="ticket-label">첨부파일</label>
+            <div class="space-y-2">
+              <button
+                v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
+                :key="index"
+                @click="handleFileDownload(fileUrl)"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+              >
+                <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
+                <span>{{ getFileType(fileUrl) }} 다운</span>
+              </button>
+            </div>
           </div>
 
           <UserComment :ticket-id="ticketId" />

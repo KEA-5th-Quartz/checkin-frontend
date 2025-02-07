@@ -79,6 +79,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
       {
+        path: 'admin/deletedMembers',
+        name: 'deletedMemberManagement',
+        component: () => import('../views/Administrator/DeletedMemberView.vue'),
+        meta: { requiresAuth: true, roles: ['ADMIN'] },
+      },
+      {
         path: 'admin/categories',
         name: 'CategoryManagement',
         component: () => import('../views/Administrator/CategoryManagement.vue'),

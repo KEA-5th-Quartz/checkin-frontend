@@ -284,6 +284,19 @@ const hasLiked = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId)?.likes || [];
   return likes.some((like) => like.memberId === memberStore.memberId);
 };
+
+const isLastComment = (index: number) => {
+  if (!commentData.value?.activities) return false;
+
+  // 현재 인덱스부터 끝까지의 항목들 중에서
+  // 다음에 나오는 첫 번째 댓글(LOG가 아닌 항목)의 인덱스를 찾음
+  const nextCommentIndex = commentData.value.activities
+    .slice(index + 1)
+    .findIndex((item: { type: string }) => item.type !== 'LOG');
+
+  // 다음 댓글이 없으면 (-1이면) 현재 댓글이 마지막 댓글
+  return nextCommentIndex === -1;
+};
 </script>
 
 <template>
@@ -291,7 +304,7 @@ const hasLiked = (commentId: number) => {
   <div ref="chatContainer" class="ticket-comment-container">
     <!-- 로그 -->
     <div v-if="commentData">
-      <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
+      <div v-for="(item, index) in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
         <!-- 로그 표시 -->
         <div v-if="item.type === 'LOG'" class="ticket-comment-log">
           <div class="flex-stack items-center">
@@ -381,7 +394,7 @@ const hasLiked = (commentId: number) => {
 
               <section
                 v-if="selectedCommentId === item.commentId && selectedCommentLikes"
-                class="ticket-like-modal-section"
+                :class="['ticket-like-modal-section', isLastComment(index) ? 'bottom-full mb-1' : 'top-7 mt-2']"
               >
                 <div class="ticket-like-modal-div" @click.stop>
                   <div class="ticket-like-modal-header">좋아요</div>
@@ -393,7 +406,7 @@ const hasLiked = (commentId: number) => {
                 </div>
               </section>
             </div>
-            <p class="text-[10px] text-gray-1">
+            <p class="text-[9px] text-gray-1">
               {{ formatShortDateTime(item.createdAt) }}
             </p>
           </div>

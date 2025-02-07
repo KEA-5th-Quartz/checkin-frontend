@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
-import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';

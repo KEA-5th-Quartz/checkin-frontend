@@ -8,10 +8,12 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useUserTrashListStore } from '@/stores/userTrashStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import { QueryKey, useQueryClient } from '@tanstack/vue-query';
+import { useQueryClient } from '@tanstack/vue-query';
 import { onClickOutside } from '@vueuse/core';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 
 const trashStore = useUserTrashListStore();
 const queryClient = useQueryClient();
@@ -139,11 +141,6 @@ const handleCheckboxClick = (event: Event, id: number) => {
   } else {
     trashStore.addSelectedTicket(id);
   }
-  // 현재 선택된 모든 티켓 출력
-  console.log('현재 선택된 티켓들:', {
-    selectedIds: Array.from(trashStore.selectedTickets),
-    totalSelected: trashStore.selectedTickets.size,
-  });
 };
 
 const handleRowClick = (id: number) => {
@@ -159,7 +156,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <article class="py-10 relative">
+  <article class="py-10 relative mt-5">
     <header class="w-full flex justify-between gap-6">
       <div>
         <p class="pl-12 text-xl font-semibold">삭제된 항목은 30일간 휴지통에 보관됩니다.</p>
@@ -192,14 +189,25 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
+    <CommonDialog
+      v-if="dialogState.open"
+      :isWarn="dialogState.isWarn"
+      :title="dialogState.title"
+      :cancelText="dialogState.cancelText"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onCancelClick"
+      :onMainClick="dialogState.onMainClick"
+    />
+
     <section class="overflow-y-auto mt-4 px-5 mb-10 hide-scrollbar">
       <div class="h-[calc(100vh-290px)]">
         <table class="min-w-full">
           <thead class="manager-thead">
             <tr>
-              <th class="manager-th w-[5%] pl-6">번호</th>
+              <th class="manager-th w-[5%] pl-6">선택</th>
+              <th class="manager-th w-[20%] pl-6">번호</th>
               <th class="manager-th text-start w-[20%]">제목</th>
-              <th class="manager-th text-start w-[47.5%]">요청사항</th>
+              <th class="manager-th text-start w-[27.5%]">요청사항</th>
               <th class="manager-th w-[7.5%]">진행 상태</th>
               <th class="manager-th w-[10%]">담당자</th>
               <th class="manager-th w-[5%]">마감일</th>
@@ -224,8 +232,8 @@ onBeforeUnmount(() => {
                 </div>
               </td>
               <td class="manager-td max-w-0 pl-6">
-                <p :title="ticket.ticketId.toString()">
-                  {{ ticket.ticketId }}
+                <p :title="ticket.customId.toString()">
+                  {{ ticket.customId }}
                 </p>
               </td>
               <td class="manager-td max-w-0 text-start">
@@ -235,16 +243,6 @@ onBeforeUnmount(() => {
               </td>
               <td class="manager-td max-w-0">
                 <p class="truncate">
-                  {{ ticket.firstCategory }}
-                </p>
-              </td>
-              <td class="manager-td max-w-0">
-                <p class="truncate">
-                  {{ ticket.secondCategory }}
-                </p>
-              </td>
-              <td class="manager-td max-w-0 text-start">
-                <p class="truncate" :title="ticket.content">
                   {{ ticket.content }}
                 </p>
               </td>

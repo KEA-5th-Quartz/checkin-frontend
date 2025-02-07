@@ -58,7 +58,6 @@ const addMemberMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      console.log('회원 등록 성공');
       queryClient.invalidateQueries({ queryKey: ['members'] });
 
       // 성공 다이얼로그 표시

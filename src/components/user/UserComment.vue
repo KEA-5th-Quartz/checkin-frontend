@@ -250,10 +250,25 @@ const handleFileChange = async (event: Event) => {
 // 파일 다운로드
 const handleFileDownload = (file: AttachedFile) => {
   try {
-    window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
+    const fileUrl = file.attachmentUrl;
+    // URL에서 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
+
+    // 이미지 파일인 경우 새 창에서 열기
+    if (file.isImage) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    // 파일 다운로드를 위한 임시 링크 생성
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   } catch (err) {
     console.error('파일 다운로드 실패:', err);
-    alert('파일 다운로드에 실패했습니다.');
   }
 };
 
@@ -286,6 +301,16 @@ const hasLiked = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId)?.likes || [];
   return likes.some((like) => like.memberId === memberStore.memberId);
 };
+
+const isLastComment = (index: number) => {
+  if (!commentData.value?.activities) return false;
+
+  const nextCommentIndex = commentData.value.activities
+    .slice(index + 1)
+    .findIndex((item: { type: string }) => item.type !== 'LOG');
+
+  return nextCommentIndex === -1;
+};
 </script>
 
 <template>
@@ -293,7 +318,7 @@ const hasLiked = (commentId: number) => {
   <div ref="chatContainer" class="ticket-comment-container">
     <!-- 로그 -->
     <div v-if="commentData">
-      <div v-for="item in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
+      <div v-for="(item, index) in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
         <!-- 로그 표시 -->
         <div v-if="item.type === 'LOG'" class="ticket-comment-log">
           <div class="flex-stack items-center">
@@ -335,7 +360,7 @@ const hasLiked = (commentId: number) => {
               <img
                 :src="item.attachmentUrl"
                 class="max-h-32 rounded cursor-pointer"
-                @click="
+                @click.stop="
                   handlePreview({
                     commentId: item.commentId,
                     attachmentUrl: item.attachmentUrl,
@@ -344,6 +369,7 @@ const hasLiked = (commentId: number) => {
                 "
               />
             </div>
+
             <!-- 이미지가 아닌 경우 -->
             <div
               v-else
@@ -384,7 +410,7 @@ const hasLiked = (commentId: number) => {
 
               <section
                 v-if="selectedCommentId === item.commentId && selectedCommentLikes"
-                class="ticket-like-modal-section"
+                :class="['ticket-like-modal-section', isLastComment(index) ? 'bottom-full mb-1' : 'top-7 mt-2']"
               >
                 <div class="ticket-like-modal-div" @click.stop>
                   <div class="ticket-like-modal-header">좋아요</div>
@@ -396,7 +422,7 @@ const hasLiked = (commentId: number) => {
                 </div>
               </section>
             </div>
-            <p class="text-[10px] text-gray-1">
+            <p class="text-[9px] text-gray-1">
               {{ formatShortDateTime(item.createdAt) }}
             </p>
           </div>

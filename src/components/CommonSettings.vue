@@ -9,10 +9,6 @@ import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
 
-const assignmentNotification = ref(false);
-const statusNotification = ref(false);
-const commentNotification = ref(false);
-
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
 const dialogState = ref<DialogProps>({ ...initialDialog });
@@ -124,7 +120,7 @@ const handleImageChange = async (event: Event) => {
       await userApi.changeProfileImg(memberStore.memberId, formData);
       window.location.replace(window.location.href);
     } catch (error) {
-      console.log('프로필 이미지 변경 실패:', error);
+      console.error('프로필 이미지 변경 실패:', error);
     }
   }
 };
@@ -179,7 +175,7 @@ const handleImageChange = async (event: Event) => {
     </form>
 
     <!-- 알림 조건부 렌더링 -->
-    <div class="flex-stack gap-5 mt-5">
+    <!-- <div class="flex-stack gap-5 mt-5">
       <h2 class="text-lg font-semibold">알림 수신 관리</h2>
       <div class="flex items-center justify-between w-1/2">
         <p class="font-bold">담당자 배정 알림</p>
@@ -225,7 +221,7 @@ const handleImageChange = async (event: Event) => {
           />
         </button>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <CommonDialog

@@ -300,9 +300,9 @@ const canEdit = computed(() => {
             </section>
           </div>
 
-          <!-- 설명 -->
+          <!-- 요청사항 -->
           <div class="mt-11">
-            <label class="ticket-desc-label">설명</label>
+            <label class="ticket-desc-label">요청사항</label>
             <div v-if="!templateStore.isEditMode" class="ticket-desc-area">
               <p class="ticket-desc-content">{{ templateStore.template.content }}</p>
             </div>
