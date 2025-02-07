@@ -14,3 +14,10 @@ export interface CategoryResponse {
     data: Category[];
   };
 }
+
+export interface templateList {
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  content: string;
+}

@@ -11,13 +11,29 @@ import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue'
 import TicketTemplateButton from './TicketTemplateButton.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { templateApi } from '@/services/templateService/templateService';
 import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
+import { useMemberStore } from '@/stores/memberStore';
+import { useRouter } from 'vue-router';
+import { nextTick } from 'vue';
+
+const router = useRouter();
+
+const memberStore = useMemberStore();
+
+const templateOptions = ref<
+  { id: number; value: string; label: string; content: string; firstCategory: string; secondCategory: string }[]
+>([]);
 
 // 알림창 상태 체크
 const showDialog = ref<boolean>(false);
+const showTemplateDialog = ref<boolean>(false);
+
+// 템플릿 목록을 불러올때 map함수 두번 돌리기 위해 잠시 저장할 객체
+const response = ref<any>(null);
 
 // 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
@@ -39,11 +55,15 @@ const { handleSubmit, errors, validate } = useForm({
 });
 
 // useField로 각 필드 생성
-const { value: title } = useField<string>('title');
+const { value: title } = useField<any>('title');
 const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCategory');
 const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
 const { value: content } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
+const { value: selectedTitle } = useField<BaseTicketOption>('title');
+
+// 선택된 템플릿을 저장하는 객체
+const selectedTemplate = ref<{ title: string; firstCategory: any; secondCategory: any; content: string } | null>(null);
 
 // 첨부파일 ID 요청을 위해 파일이름을 담을 값 생성 O
 const attachment = ref<FormData | null>(null);
@@ -168,6 +188,81 @@ const handleFileChange = async (event: Event) => {
   }
 };
 
+// 템플릿 불러오기 api 재사용을 위한 요청값 하드코딩
+const pages = 1;
+const size = 100;
+
+// 템플릿 불러오기 api을 위한 사용자 id값 불러오기
+const memberId = ref<number | null>(null);
+
+// memberStore의 memberId가 변경될 때마다 memberId 값 업데이트
+watch(
+  () => memberStore.memberId,
+  (newMemberId) => {
+    memberId.value = newMemberId;
+  },
+);
+
+// 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
+const fetchTemplates = useCustomQuery(['templates', memberId], async () => {
+  try {
+    const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
+    return response.data.data.templates.map((template: any) => ({
+      templateId: template.templateId,
+      title: template.title,
+      firstCategory: template.firstCategory,
+      secondCategory: template.secondCategory,
+      content: template.content,
+    })); // 뮤테이션 호출시 [ {제목, 1차 카테고리, 2차 카테고리, 요청 사항}, ... , ] 객체들의 배열이 반환됨
+  } catch (error) {
+    console.error('템플릿 불러오기 API 에러:', error);
+  }
+});
+
+// 템플릿 목록 조회 api 받아서 title에[ {id: value: label:} ]배열로 값 저장하는 로직
+const handleTemplateClick = async (event: Event) => {
+  event.preventDefault();
+  console.log('📌 TicketTemplateButton 클릭됨!');
+
+  try {
+    response.value = fetchTemplates.data.value ?? [];
+    console.log(fetchTemplates.data.value);
+    if (Array.isArray(response.value)) {
+      templateOptions.value = response.value.map((template: any) => ({
+        id: template.templateId,
+        value: template.title, // ✅ 제목
+        label: template.title,
+        firstCategory: template.firstCategory, // ✅ 1차 카테고리 추가
+        secondCategory: template.secondCategory, // ✅ 2차 카테고리 추가
+        content: template.content, // ✅ 요청 사항 추가
+      }));
+    } else {
+      templateOptions.value = [];
+    }
+
+    console.log('📌 templateOptions 업데이트됨:', templateOptions.value);
+    showTemplateDialog.value = true;
+  } catch (error) {
+    console.error('📌 템플릿 목록 불러오기 실패!', error);
+  }
+};
+
+// watchEffect(() => {
+//   if (fetchTemplates.data.value) {
+//     console.log('📌 API에서 가져온 템플릿 데이터:', fetchTemplates.data.value);
+
+//     templateOptions.value = fetchTemplates.data.value.map((template: any) => ({
+//       id: template.templateId,
+//       value: template.title,
+//       label: template.title,
+//     }));
+
+//     console.log('📌 변환된 templateOptions:', JSON.stringify(templateOptions.value, null, 2));
+//   }
+// });
+
+// 확인 버튼 클릭시 title, firstCategory, secondCategory, content 값으로 화면에 자동 채워넣기
+
 // 티켓 생성 버튼
 const onSubmit = handleSubmit(async () => {
   console.log('생성 함수 실행');
@@ -219,6 +314,16 @@ const updateSecondCategoryList = () => {
   } else {
     secondCategoryList.value = [];
   }
+};
+
+const handleTitleSelect = (option: any) => {
+  selectedTitle.value = option;
+  selectedTemplate.value = {
+    title: option.value,
+    firstCategory: option.firstCategory,
+    secondCategory: option.secondCategory,
+    content: option.content,
+  };
 };
 
 // ✅ 1차 카테고리 선택 및 2차 카테고리 초기화
@@ -284,9 +389,44 @@ const createTicketMutation = useCustomMutation(
   },
 );
 
-// Dialog 안닫히는 문제해결용 함수
-const closeDialog = () => {
-  showDialog.value = false;
+// 취소, 확인 버튼 클릭
+const computedContent = computed(() => content.value);
+
+const styledContent = computed(() => {
+  return `<span style="color: gray;">${template.value}</span><br><br><span style="color: black;">${
+    selectedTemplate.value?.content || ''
+  }</span>`;
+});
+
+const tempContent = ref(''); // ✅ 임시 content 변수
+const handleConfirm = async () => {
+  if (selectedTemplate.value) {
+    console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
+
+    // ✅ 제목, 카테고리 반영
+    title.value = selectedTemplate.value.title;
+
+    selectedFirstCategory.value =
+      firstCategoryList.value.find((category) => category.value === selectedTemplate.value?.firstCategory) || null;
+
+    if (selectedFirstCategory.value) {
+      updateSecondCategoryList();
+      watchEffect(() => {
+        selectedSecondCategory.value =
+          secondCategoryList.value.find((category) => category.value === selectedTemplate.value?.secondCategory) ||
+          null;
+      });
+    }
+
+    // ✅ 기존 템플릿 유지하면서 새 요청 사항 추가
+    if (selectedTemplate.value.content) {
+      await nextTick(); // Vue가 UI 업데이트할 시간을 줌
+      content.value = `${template.value}\n\n${selectedTemplate.value.content}`; // ✅ 기존 템플릿 + 새 내용 추가
+      console.log('📌 최종 요청 사항:', content.value);
+    }
+  }
+
+  showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
 };
 
 watch(showDialog, (newValue) => {
@@ -379,7 +519,7 @@ watch(content, (newValue) => {
         </div>
       </section>
       <section class="flex justify-center">
-        <TicketTemplateButton />
+        <TicketTemplateButton type="button" @click="handleTemplateClick" />
         <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
       <CommonDialog
@@ -388,8 +528,26 @@ watch(content, (newValue) => {
         content="티켓이 정상적으로 요청되었습니다."
         :isOneBtn="true"
         mainText="확인"
-        :onMainClick="closeDialog"
+        :onMainClick="handleMain"
       />
+      <CommonDialog
+        v-if="showTemplateDialog"
+        title="템플릿 선택"
+        mainText="확인"
+        cancel-text="취소"
+        :onMainClick="handleConfirm"
+        :onCancelClick="handleCancel"
+      >
+        <CustomDropdown
+          v-if="templateOptions.length > 0"
+          class="h-12 py-1"
+          :options="templateOptions"
+          :selectedOption="selectedTitle"
+          label=""
+          @select="handleTitleSelect"
+          isEdit
+        />
+      </CommonDialog>
     </form>
   </main>
 </template>

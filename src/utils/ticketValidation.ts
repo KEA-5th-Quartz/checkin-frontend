@@ -3,12 +3,23 @@ import { addMonths } from 'date-fns';
 
 export const ticketValidationSchema = yup.object({
   title: yup
-    .string()
-    .trim()
-    .required('* 제목을 입력하세요')
-    .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
-    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
-    .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다'),
+    .mixed()
+    .test('is-string-or-object', '* 제목은 문자열 또는 객체여야 합니다', (value) => {
+      return typeof value === 'string' || (typeof value === 'object' && value !== null);
+    })
+    .when([], (value) => {
+      if (typeof value === 'string') {
+        return yup
+          .string()
+          .required('* 제목을 입력하세요')
+          .trim() // ✅ 앞뒤 공백 제거
+          .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0) // ✅ 공백만 입력 방지
+          .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
+          .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다') // ✅ 연속된 공백 방지
+          .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다');
+      }
+      return yup.mixed();
+    }),
 
   firstCategory: yup
     .object()
