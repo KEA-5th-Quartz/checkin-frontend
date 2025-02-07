@@ -46,6 +46,14 @@ export const memberApi = {
   getMemberStatsRole() {
     return api.get('/members/stats/role');
   },
+  // [관리자] 삭제된 회원 목록 조회
+  getDeletedMember(page: number, size: number) {
+    return api.get(`/members/trash?page=${page}&size=${size}`);
+  },
+  // [관리자] 회원 삭제
+  deleteMember(memberId: number) {
+    return api.delete(`/members/${memberId}`);
+  },
   // [관리자] 회원 권한 변경
   putMemberRole(memberId: number, data: { role: string }) {
     return api.put(`/members/${memberId}/role`, data);

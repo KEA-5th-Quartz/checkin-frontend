@@ -57,7 +57,6 @@ import DeletedMemberManagement from './DeletedMemberManagement.vue';
 
 const store = useMemberListStore();
 
-// 탭 목록
 const tabs = ['ADMIN', 'MANAGER', 'USER'] as const;
 const roleLabels: Record<string, string> = {
   ADMIN: '관리자',
@@ -65,33 +64,35 @@ const roleLabels: Record<string, string> = {
   USER: '사용자',
 };
 
-// 현재 선택된 역할
 const selectedRole = computed(() => store.selectedRole);
-
-// 현재 페이지
 const currentPage = computed(() => store.currentPage);
 const totalPages = computed(() => store.totalPages);
 
 // 멤버 목록 API 요청
 const { data, isLoading } = useCustomQuery(
-  ['members', selectedRole, currentPage],
-  () => memberApi.getMembers(selectedRole.value, currentPage.value, 10, store.searchQuery),
+  ['deleted-members', selectedRole, currentPage],
+  async () => {
+    const response = await memberApi.getDeletedMember(currentPage.value, 10);
+    return response.data.data; // API 응답에서 data.data를 반환
+  },
   { keepPreviousData: true },
 );
 
-const members = computed(() => data.value?.members ?? []);
+// computed 속성 수정
+const members = computed(() => data.value?.members || []);
 
+// watch 수정
 watch(data, (newData) => {
-  if (newData) store.setMembers(newData.members, newData.totalPages);
+  if (newData) {
+    store.setMembers(newData.members, newData.totalPages);
+  }
 });
 
-// 탭 전환 함수
 const switchTab = async (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   store.setRole(role);
-  store.setCurrentPage(1); // 역할 변경 시 페이지 초기화
+  store.setCurrentPage(1);
 };
 
-// 페이지 변경 핸들러
 const handlePageChange = async (page: number) => {
   store.setCurrentPage(page);
 };
