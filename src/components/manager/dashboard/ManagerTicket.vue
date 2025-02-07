@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { XIcon } from '@/assets/icons/path';
+import { DownloadIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '../../common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import CustomDropdown from '../../common/CustomDropdown.vue';
@@ -14,6 +14,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import ManagerComments from './ManagerComments.vue';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { getFileType, isImageFile } from '@/utils/getFileType';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -362,6 +363,30 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
     console.error('담당자 변경 실패:', err);
   }
 };
+
+// 파일 다운로드 처리 함수
+const handleFileDownload = async (fileUrl: string) => {
+  try {
+    // URL에서 파일명 추출
+    const fileName = fileUrl.split('/').pop() || 'download';
+
+    // 이미지 파일인 경우 새 창에서 열기
+    if (isImageFile(fileName)) {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+
+    // 파일 다운로드를 위한 임시 링크 생성
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error('파일 다운로드 실패:', err);
+  }
+};
 </script>
 
 <template>
@@ -461,8 +486,19 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
             </div>
 
             <!-- 첨부파일 -->
-            <div class="mt-4">
-              <div class="ticket-attachment">Customer KYC</div>
+            <div v-if="detailData.ticketAttachmentUrls?.length > 0" class="mt-4 space-y-2">
+              <label class="ticket-label">첨부파일</label>
+              <div class="space-y-2">
+                <button
+                  v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
+                  :key="index"
+                  @click="handleFileDownload(fileUrl)"
+                  class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+                >
+                  <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
+                  <span>{{ getFileType(fileUrl) }} 다운</span>
+                </button>
+              </div>
             </div>
 
             <ManagerComments :ticket-id="ticketId" />
