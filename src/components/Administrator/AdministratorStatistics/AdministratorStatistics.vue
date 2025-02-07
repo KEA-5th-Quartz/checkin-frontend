@@ -277,7 +277,7 @@ const chartOptions4 = ref({
     type: 'donut',
   },
   labels: [] as string[],
-  colors: ['#3570FF', '#F59E0B', '#10B981', '#EF4444'], // 진행 중, 오픈, 완료, 연체
+  colors: ['#3570FF', '#10B981', '#9CA3AF', '#EF4444'], // 진행 중, 오픈, 완료, 연체
   dataLabels: {
     enabled: true,
     formatter: (val: number) => `${val.toFixed(1)}%`,

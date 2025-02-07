@@ -478,7 +478,7 @@ body {
   }
 
   .member-list-wrapper {
-    @apply flex flex-col gap-2 mt-3;
+    @apply flex flex-col gap-2 mt-6;
   }
 
   .member-list-item {
