@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -417,7 +418,7 @@ const isLastComment = (index: number) => {
 
   <!-- 댓글 인풋 -->
   <div class="ticket-comment-input-area">
-    <textarea
+    <CommonTextarea
       v-model="commentContent"
       maxlength="128"
       placeholder="댓글을 작성하세요"
