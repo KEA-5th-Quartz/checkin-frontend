@@ -16,6 +16,7 @@ import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey } from '@tanstack/vue-query';
 import { useMemberStore } from '@/stores/memberStore';
+import CommonInput from '@/components/common/CommonInput.vue';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
@@ -24,8 +25,9 @@ const isMyTicket = ref(false);
 
 const memberStore = useMemberStore();
 const keyword = ref('');
+const searchKeyword = ref('');
 const isSearch = ref(false);
-const order = ref('DESC');
+const order = ref('ASC');
 
 const ManagerfilterState = ref<ManagerFilterState>({
   statuses: [],
@@ -41,7 +43,7 @@ const queryParams = computed(() => ({
   size: pageSize.value,
   statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
-    ? [memberStore.username] // 기본으로 manager2.js, 나중에 수정
+    ? [memberStore.username]
     : Array.isArray(ManagerfilterState.value.usernames)
     ? ManagerfilterState.value.usernames
     : [],
@@ -62,6 +64,7 @@ const searchQueryParams = computed(() => ({
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
+    searchKeyword.value = keyword.value; // 검색 실행 시에만 searchKeyword 업데이트
     currentPage.value = 1;
     sessionStorage.setItem('managerCurrentPage', '1');
   } else {
@@ -72,6 +75,7 @@ const handleSearch = () => {
 // 검색 초기화 함수
 const resetSearch = () => {
   keyword.value = '';
+  searchKeyword.value = '';
   isSearch.value = false;
   currentPage.value = parseInt(sessionStorage.getItem('managerCurrentPage') || '1');
 };
@@ -101,7 +105,7 @@ const toggleMyTicket = () => {
 // 검색 쿼리 키 computed
 const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
-    return ['search-tickets', keyword.value, currentPage.value, pageSize.value, order.value];
+    return ['search-tickets', searchKeyword.value, currentPage.value, pageSize.value, order.value];
   }
   return ['tickets', queryParams.value];
 });
@@ -160,11 +164,22 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
 };
 
 const toggleOrder = () => {
-  order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-  // 정렬이 변경될 때 첫 페이지로 이동
-  currentPage.value = 1;
-  sessionStorage.setItem('logCurrentPage', '1');
+  if (!isSearch.value) {
+    order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
+    currentPage.value = 1;
+    sessionStorage.setItem('logCurrentPage', '1');
+  }
 };
+
+const hasActiveFilters = computed(() => {
+  return (
+    ManagerfilterState.value.statuses.length > 0 ||
+    ManagerfilterState.value.usernames.length > 0 ||
+    ManagerfilterState.value.categories.length > 0 ||
+    ManagerfilterState.value.dueToday ||
+    ManagerfilterState.value.dueThisWeek
+  );
+});
 
 onBeforeUnmount(() => {
   sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
@@ -175,9 +190,9 @@ onBeforeUnmount(() => {
   <header class="board-header">
     <!-- 검색 -->
     <div class="flex w-1/4">
-      <div class="manager-search-div">
+      <div v-if="!hasActiveFilters" class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
-        <input
+        <CommonInput
           v-model="keyword"
           maxlength="20"
           placeholder="티켓 검색..."
@@ -208,7 +223,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- 내 티켓 -->
-      <button class="btn-main py-2" @click="toggleMyTicket">
+      <button v-if="!isSearch" class="btn-main py-2" @click="toggleMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
@@ -238,20 +253,21 @@ onBeforeUnmount(() => {
       <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
-            <th @click="toggleOrder" class="manager-th w-[17.5%] text-start pl-6 cursor-pointer duration-200">
+            <th @click="toggleOrder" class="manager-th w-[10%] text-start pl-6 cursor-pointer duration-200">
               <div class="flex items-center gap-2">
                 번호
                 <SvgIcon
+                  v-if="!isSearch"
                   :icon="ArrowDownIcon"
                   :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
                 />
               </div>
             </th>
-            <th class="manager-th text-start w-[27.5%]">제목</th>
+            <th class="manager-th text-start w-[37.5%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
             <th class="manager-th w-[7.5%]">2차 카테고리</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
-            <th class="manager-th w-[10%] text-start pl-6">담당자</th>
+            <th class="manager-th w-[7.5%] text-center pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
           </tr>
         </thead>
@@ -264,7 +280,7 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start max-w-0 pl-6">
-              <p :title="ticket.customId.toString()">
+              <p class="truncate text-xs" :title="ticket.customId.toString()">
                 {{ ticket.customId }}
               </p>
             </td>
@@ -317,7 +333,7 @@ onBeforeUnmount(() => {
             <th class="manager-th w-[7.5%]">진행 상태</th>
             <th class="manager-th w-[12.5%] text-start pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
-            <th class="manager-th w-[12.5%] pr-6">중요도</th>
+            <th class="manager-th w-[7.5%] pr-6">중요도</th>
           </tr>
         </thead>
 
@@ -329,7 +345,7 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start pl-6">
-              <p :title="ticket.customId.toString()">
+              <p class="text-xs" :title="ticket.customId.toString()">
                 {{ ticket.customId }}
               </p>
             </td>
@@ -358,9 +374,9 @@ onBeforeUnmount(() => {
                   :src="ticket.managerProfilePic"
                   class="h-7 max-w-7 rounded-full object-fill"
                 />
-                <span class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
+                <p class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
                   {{ ticket.manager || '━' }}
-                </span>
+                </p>
               </div>
             </td>
             <td class="manager-td">

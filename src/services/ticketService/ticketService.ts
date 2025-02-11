@@ -105,7 +105,7 @@ export const ticketApi = {
   },
   // [담당자] 티켓의 담당자 변경
   patchTicketReassign(ticketId: number, data: { manager: string }) {
-    return api.patch(`/tickets/${ticketId}/reassign`, data);
+    return api.patch(`/tickets/${ticketId}/assign`, data);
   },
   // [담당자] 티켓의 중요도 변경
   patchTicketPriority(ticketId: number, data: { priority: string }) {
