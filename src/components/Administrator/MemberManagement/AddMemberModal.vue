@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, computed } from 'vue';
+import { ref, defineProps, defineEmits, computed, watch } from 'vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { XIcon } from '@/assets/icons/path';
 import { onClickOutside } from '@vueuse/core';
@@ -76,7 +76,7 @@ import { isApiError } from '@/types/common/error';
 const modalRef = ref(null);
 
 // Props 및 Emits
-defineProps({
+const props = defineProps({
   isOpen: Boolean,
 });
 const emit = defineEmits(['close', 'submit']);
@@ -146,11 +146,30 @@ async function validateEmail() {
     isEmailValid.value = false;
   }
 }
+// 상태 초기화
+function resetForm() {
+  formData.value = { username: '', email: '', role: '' };
+  usernameError.value = '';
+  emailError.value = '';
+  isUsernameValid.value = false;
+  isEmailValid.value = false;
+}
 
 // 모달 닫기
 function closeModal() {
+  resetForm();
   emit('close');
 }
+
+// 모달이 열릴 때도 초기화
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    if (newVal) {
+      resetForm();
+    }
+  },
+);
 
 onClickOutside(modalRef, () => {
   closeModal();
