@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect } from 'vue';
 import {
   ChartSeries,
   ManagerStats,
@@ -162,40 +162,37 @@ const customColors = [
   '#3F5689',
 ];
 
-const chartOptions2 = computed(
-  (): ChartOptions =>
-    ({
-      chart: {
-        type: 'bar',
-        stacked: false,
-        toolbar: { show: false },
-      },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          columnWidth: '30%',
-          borderRadius: 5,
-        },
-      },
-      dataLabels: {
-        enabled: true,
-        style: { fontSize: '13px' },
-      },
-      xaxis: {
-        categories: categoryCategories.value,
-        labels: { maxHeight: 80, trim: true },
-      },
-      colors: customColors,
-      legend: {
-        position: 'top',
-        horizontalAlign: 'right',
-        markers: {
-          radius: 12,
-          shape: 'circle',
-        },
-      },
-    } as ChartOptions),
-);
+const chartOptions2 = ref<ChartOptions>({
+  chart: {
+    type: 'bar',
+    stacked: false,
+    toolbar: { show: false },
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: '30%',
+      borderRadius: 5,
+    },
+  },
+  dataLabels: {
+    enabled: true,
+    style: { fontSize: '13px' },
+  },
+  xaxis: {
+    categories: [],
+    labels: { maxHeight: 80, trim: true },
+  },
+  colors: customColors,
+  legend: {
+    position: 'top',
+    horizontalAlign: 'right',
+    markers: {
+      radius: 12,
+      shape: 'circle',
+    },
+  },
+});
 
 const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
   ['category-stats'],
@@ -220,6 +217,13 @@ watchEffect(() => {
       data: categoryStatsData.value.map((item) => item.ticketCount),
     },
   ];
+  chartOptions2.value = {
+    ...chartOptions2.value,
+    xaxis: {
+      ...chartOptions2.value.xaxis,
+      categories: categoryCategories.value,
+    },
+  };
 });
 
 // 필터링 값 (초기값: WEEK)
@@ -319,8 +323,17 @@ const { data: statusRateData } = useCustomQuery<StatusRate[]>(
 watchEffect(() => {
   if (!statusRateData.value) return;
 
-  labels.value = statusRateData.value.map((item) => item.status);
+  // 상태명을 한글로 변환
+  const statusMapping: Record<string, string> = {
+    IN_PROGRESS: '진행 중',
+    OPEN: '오픈',
+    CLOSED: '완료',
+    OVERDUE: '연체',
+  };
+
+  labels.value = statusRateData.value.map((item) => statusMapping[item.status] || item.status);
   series4.value = statusRateData.value.map((item) => item.ticketCount);
+
   chartOptions4.value = {
     ...chartOptions4.value,
     labels: [...labels.value],
