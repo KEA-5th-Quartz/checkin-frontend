@@ -69,6 +69,17 @@ const onSubmit = handleSubmit(async (values) => {
           },
         };
         break;
+      case 'COMMON_4000':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '현재 비밀번호가 일치하지 않습니다.',
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
       case 'MEMBER_4010':
         dialogState.value = {
           open: true,
