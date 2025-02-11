@@ -136,6 +136,11 @@ const handleLogin = async () => {
         },
       };
     } else {
+      blockTime.value = '';
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
       dialogState.value = {
         open: true,
         isOneBtn: true,
