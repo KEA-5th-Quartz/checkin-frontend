@@ -15,6 +15,9 @@ import ManagerComments from './ManagerComments.vue';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { getFileType, isImageFile } from '@/utils/getFileType';
+import { ApiError } from '@/types/common/error';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -41,6 +44,7 @@ const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
 const managerSelected = ref();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // 티켓 상세 페치
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
@@ -349,7 +353,45 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
     });
     managerSelected.value = option;
   } catch (err) {
-    console.error('담당자 변경 실패:', err);
+    const error = err as ApiError;
+    switch (error.code) {
+      case 'MEMBER_4040':
+        break;
+      case 'TICKET_4090':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.reload();
+          },
+        };
+        break;
+      case 'TICKET_4091':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
+      default:
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '예상치 못한 문제가 발생했습니다.',
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.replace('/manager/dashboard');
+          },
+        };
+    }
   }
 };
 
@@ -512,6 +554,15 @@ const handleFileDownload = async (fileUrl: string) => {
           </div>
         </div>
       </template>
+
+      <CommonDialog
+        v-if="dialogState.open"
+        :isOneBtn="dialogState.isOneBtn"
+        :title="dialogState.title"
+        :mainText="dialogState.mainText"
+        :onCancelClick="dialogState.onMainClick"
+        :onMainClick="dialogState.onMainClick"
+      />
     </div>
   </Teleport>
 </template>
