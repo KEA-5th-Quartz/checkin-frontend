@@ -10,6 +10,7 @@ import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
 import { ApiError } from '@/types/common/error';
 import { useQueryClient } from '@tanstack/vue-query';
+import CommonInput from '../common/CommonInput.vue';
 
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -144,9 +145,17 @@ const togglePwdVisibility = () => {
 
 <template>
   <form class="login-form" @submit.prevent="handleLogin">
-    <input v-model="username" type="text" required class="login-input border-primary-0" placeholder="Username" />
+    <CommonInput
+      :maxLength="15"
+      v-model="username"
+      type="text"
+      required
+      class="login-input border-primary-0"
+      placeholder="Username"
+    />
     <div class="relative">
-      <input
+      <CommonInput
+        :maxLength="30"
         v-model="password"
         :type="showPwd ? 'text' : 'password'"
         required
