@@ -8,6 +8,7 @@ import CommonDialog from '@/components/common/CommonDialog.vue';
 import FilterModal from './TicketFilter.vue';
 import { onClickOutside } from '@vueuse/core';
 import { perPageOptions } from '@/components/manager/ticketOptionTest';
+import CommonInput from '@/components/common/CommonInput.vue';
 
 const ticketStore = useUserTicketListStore();
 
@@ -60,7 +61,7 @@ const handleDelete = () => {
   <header v-if="!ticketStore.isDeleteMode" class="board-header">
     <!-- 검색 -->
     <div class="manager-search-div">
-      <input maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
+      <CommonInput maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
       <SvgIcon :icon="SearchIcon" />
     </div>
 
