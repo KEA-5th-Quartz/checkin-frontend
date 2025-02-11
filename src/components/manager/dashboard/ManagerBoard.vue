@@ -27,7 +27,7 @@ const memberStore = useMemberStore();
 const keyword = ref('');
 const searchKeyword = ref('');
 const isSearch = ref(false);
-const order = ref('DESC');
+const order = ref('ASC');
 
 const ManagerfilterState = ref<ManagerFilterState>({
   statuses: [],
@@ -171,6 +171,16 @@ const toggleOrder = () => {
   }
 };
 
+const hasActiveFilters = computed(() => {
+  return (
+    ManagerfilterState.value.statuses.length > 0 ||
+    ManagerfilterState.value.usernames.length > 0 ||
+    ManagerfilterState.value.categories.length > 0 ||
+    ManagerfilterState.value.dueToday ||
+    ManagerfilterState.value.dueThisWeek
+  );
+});
+
 onBeforeUnmount(() => {
   sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
 });
@@ -180,7 +190,7 @@ onBeforeUnmount(() => {
   <header class="board-header">
     <!-- 검색 -->
     <div class="flex w-1/4">
-      <div class="manager-search-div">
+      <div v-if="!hasActiveFilters" class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
         <CommonInput
           v-model="keyword"
@@ -213,7 +223,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- 내 티켓 -->
-      <button class="btn-main py-2" @click="toggleMyTicket">
+      <button v-if="!isSearch" class="btn-main py-2" @click="toggleMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
