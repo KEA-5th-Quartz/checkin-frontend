@@ -1,6 +1,6 @@
 <template>
   <div class="w-full p-5">
-    <div class="grid grid-cols-3 gap-6 gap-y-0">
+    <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-6 gap-y-0">
       <!-- 담당자별 티켓 진행 현황 -->
       <div class="p-5 col-span-2">
         <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
