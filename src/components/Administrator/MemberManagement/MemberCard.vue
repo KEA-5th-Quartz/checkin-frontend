@@ -211,10 +211,37 @@ const openRemoveMemberModal = () => {
 };
 
 // 멤버 탈퇴 함수
-const removeMember = () => {
-  memberApi.deleteMember(props.member.memberId);
-  dialogState.value = { ...initialDialog };
-  queryClient.invalidateQueries();
+const removeMember = async () => {
+  try {
+    await memberApi.deleteMember(props.member.memberId);
+
+    //  탈퇴 성공 시 다이얼로그 표시
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '회원 탈퇴 완료',
+      content: `${props.member.username}님이 탈퇴되었습니다.`,
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        queryClient.invalidateQueries();
+      },
+    };
+  } catch (error) {
+    console.error('회원 탈퇴 실패:', error);
+
+    //  탈퇴 실패 시 오류 다이얼로그 띄우기
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '회원 탈퇴 실패',
+      content: '회원 탈퇴 중 문제가 발생했습니다. 다시 시도해주세요.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
+  }
 };
 </script>
 
