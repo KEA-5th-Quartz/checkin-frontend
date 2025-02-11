@@ -146,6 +146,25 @@ async function validateEmail() {
     isEmailValid.value = false;
   }
 }
+
+function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Enter' && isFormValid.value) {
+    event.preventDefault();
+    handleSubmit();
+  }
+}
+
+watch(
+  () => props.isOpen,
+  (newVal) => {
+    if (newVal) {
+      document.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.removeEventListener('keydown', handleKeyDown);
+    }
+  },
+);
+
 // 상태 초기화
 function resetForm() {
   formData.value = { username: '', email: '', role: '' };
@@ -160,16 +179,6 @@ function closeModal() {
   resetForm();
   emit('close');
 }
-
-// 모달이 열릴 때도 초기화
-watch(
-  () => props.isOpen,
-  (newVal) => {
-    if (newVal) {
-      resetForm();
-    }
-  },
-);
 
 onClickOutside(modalRef, () => {
   closeModal();
