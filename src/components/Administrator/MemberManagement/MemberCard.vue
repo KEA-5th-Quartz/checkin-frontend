@@ -1,7 +1,8 @@
 <template>
-  <div class="max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative">
+  <div class="flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative h-[250px]">
     <div class="flex justify-end w-full">
-      <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
+      <button v-if="!isCurrentUser" class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
+      <span v-else class="invisible">⋮</span>
       <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
         <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">권한 변경</li>
         <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">탈퇴</li>
@@ -27,8 +28,9 @@
       <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
         {{ member.email }}
       </p>
+      <div v-if="isCurrentUser" class="text-blue-3 text-sm"><p>(본인)</p></div>
     </div>
-    <div class="mt-8">
+    <div class="mt-auto">
       <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
     </div>
 
@@ -83,9 +85,9 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-
+import { useMemberStore } from '@/stores/memberStore';
 const queryClient = useQueryClient();
-
+const memberStore = useMemberStore();
 const isMenuOpen = ref(false);
 const isRoleChangeModalOpen = ref(false); // 권한 변경 모달
 const dialogState = ref<DialogProps>({ ...initialDialog }); // 공통 모달
@@ -101,6 +103,9 @@ const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   MANAGER: '담당자',
   USER: '사용자',
 };
+
+const currentUserId = computed(() => memberStore.memberId);
+const isCurrentUser = computed(() => props.member.memberId === currentUserId.value);
 
 const selectedRole = ref<'ADMIN' | 'MANAGER' | 'USER' | null>(null);
 
