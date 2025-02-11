@@ -221,6 +221,17 @@ const handleAddComments = async () => {
   }
 };
 
+const handleKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      return;
+    } else {
+      event.preventDefault();
+      await handleAddComments();
+    }
+  }
+};
+
 // 파일 선택 트리거 함수
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -447,6 +458,7 @@ const isLastComment = (index: number) => {
       maxlength="128"
       placeholder="댓글을 작성하세요"
       class="ticket-comment-textarea"
+      @keydown="handleKeyDown"
     />
     <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">

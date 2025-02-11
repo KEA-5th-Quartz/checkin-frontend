@@ -320,7 +320,7 @@ body {
     @apply text-xs text-gray-0 font-semibold;
   }
   .ticket-comment-bubble {
-    @apply max-h-fit max-w-[70%] px-2 py-1 bg-white-2 border border-gray-1 rounded-md;
+    @apply max-h-fit max-w-[70%] px-2 py-1 bg-white-2 border border-gray-1 rounded-md whitespace-pre-wrap break-words;
   }
   .ticket-comment-input-area {
     @apply mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl;
