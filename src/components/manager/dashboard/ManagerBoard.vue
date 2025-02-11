@@ -16,6 +16,7 @@ import { ManagerFilterPayload, ManagerFilterState } from '@/types/manager';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey } from '@tanstack/vue-query';
 import { useMemberStore } from '@/stores/memberStore';
+import CommonInput from '@/components/common/CommonInput.vue';
 
 const selectedTicketId = ref<number | null>(null);
 const currentPage = ref(parseInt(sessionStorage.getItem('managerCurrentPage') || '1'));
@@ -24,6 +25,7 @@ const isMyTicket = ref(false);
 
 const memberStore = useMemberStore();
 const keyword = ref('');
+const searchKeyword = ref('');
 const isSearch = ref(false);
 const order = ref('DESC');
 
@@ -41,7 +43,7 @@ const queryParams = computed(() => ({
   size: pageSize.value,
   statuses: Array.isArray(ManagerfilterState.value.statuses) ? ManagerfilterState.value.statuses : [],
   usernames: isMyTicket.value
-    ? [memberStore.username] // 기본으로 manager2.js, 나중에 수정
+    ? [memberStore.username]
     : Array.isArray(ManagerfilterState.value.usernames)
     ? ManagerfilterState.value.usernames
     : [],
@@ -62,6 +64,7 @@ const searchQueryParams = computed(() => ({
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
+    searchKeyword.value = keyword.value; // 검색 실행 시에만 searchKeyword 업데이트
     currentPage.value = 1;
     sessionStorage.setItem('managerCurrentPage', '1');
   } else {
@@ -72,6 +75,7 @@ const handleSearch = () => {
 // 검색 초기화 함수
 const resetSearch = () => {
   keyword.value = '';
+  searchKeyword.value = '';
   isSearch.value = false;
   currentPage.value = parseInt(sessionStorage.getItem('managerCurrentPage') || '1');
 };
@@ -101,7 +105,7 @@ const toggleMyTicket = () => {
 // 검색 쿼리 키 computed
 const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
-    return ['search-tickets', keyword.value, currentPage.value, pageSize.value, order.value];
+    return ['search-tickets', searchKeyword.value, currentPage.value, pageSize.value, order.value];
   }
   return ['tickets', queryParams.value];
 });
@@ -177,7 +181,7 @@ onBeforeUnmount(() => {
     <div class="flex w-1/4">
       <div class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
-        <input
+        <CommonInput
           v-model="keyword"
           maxlength="20"
           placeholder="티켓 검색..."
