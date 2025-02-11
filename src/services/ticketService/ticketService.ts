@@ -87,10 +87,6 @@ export const ticketApi = {
       },
     });
   },
-  // [담당자] 티켓 상태 변경 (생성 -> 진행중)
-  patchTicketInProgress(ticketId: number, data: { status: string }) {
-    return api.patch(`/tickets/${ticketId}/assign`, data);
-  },
   // [담당자] 티켓 상태 변경 (진행중 -> 완료)
   patchTicketClose(ticketId: number) {
     return api.patch(`/tickets/${ticketId}/close`);
@@ -104,7 +100,7 @@ export const ticketApi = {
     return api.patch(`/tickets/${ticketId}/category/${firstCategoryId}`, data);
   },
   // [담당자] 티켓의 담당자 변경
-  patchTicketReassign(ticketId: number, data: { manager: string }) {
+  patchTicketAssign(ticketId: number, data: { manager: string }) {
     return api.patch(`/tickets/${ticketId}/assign`, data);
   },
   // [담당자] 티켓의 중요도 변경

@@ -196,8 +196,8 @@ const availableStatusOptions = computed(() => {
   const currentStatus = statusSelected.value.value;
 
   switch (currentStatus) {
-    case 'CREATED':
-      return ticket_status.filter((status) => ['CREATED', 'IN_PROGRESS'].includes(status.value));
+    case 'OPEN':
+      return ticket_status.filter((status) => ['OPEN', 'IN_PROGRESS'].includes(status.value));
     case 'IN_PROGRESS':
       return ticket_status.filter((status) => ['IN_PROGRESS', 'CLOSED'].includes(status.value));
     case 'CLOSED':
@@ -217,16 +217,7 @@ const priorityMutation = useCustomMutation(
     onSuccess: invalidateTicketQueries,
   },
 );
-// 티켓 진행중 뮤테이션
-const inProgressMutation = useCustomMutation(
-  async ({ ticketId, status }: { ticketId: number; status: string }) => {
-    const response = await ticketApi.patchTicketInProgress(ticketId, { status });
-    return response.data;
-  },
-  {
-    onSuccess: invalidateTicketQueries,
-  },
-);
+
 // 티켓 완료 뮤테이션
 const closeMutation = useCustomMutation(
   async (ticketId: number) => {
@@ -268,7 +259,7 @@ const secondCategoryMutation = useCustomMutation(
 // 담당자 변경 뮤테이션
 const reassignMutation = useCustomMutation(
   async ({ ticketId, manager }: { ticketId: number; manager: string }) => {
-    const response = await ticketApi.patchTicketReassign(ticketId, { manager });
+    const response = await ticketApi.patchTicketAssign(ticketId, { manager });
     return response.data;
   },
   {
@@ -282,9 +273,7 @@ const handleStatusSelect = async (option: BaseTicketOption) => {
   const newStatus = option.value;
 
   try {
-    if (currentStatus === 'CREATED' && newStatus === 'IN_PROGRESS') {
-      await inProgressMutation.mutateAsync({ ticketId: props.ticketId, status: 'in_progress' });
-    } else if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
+    if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
       await closeMutation.mutateAsync(props.ticketId);
     }
     statusSelected.value = option;
