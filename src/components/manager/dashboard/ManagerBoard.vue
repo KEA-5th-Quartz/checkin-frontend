@@ -164,10 +164,11 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
 };
 
 const toggleOrder = () => {
-  order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-  // 정렬이 변경될 때 첫 페이지로 이동
-  currentPage.value = 1;
-  sessionStorage.setItem('logCurrentPage', '1');
+  if (!isSearch.value) {
+    order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
+    currentPage.value = 1;
+    sessionStorage.setItem('logCurrentPage', '1');
+  }
 };
 
 onBeforeUnmount(() => {
@@ -246,6 +247,7 @@ onBeforeUnmount(() => {
               <div class="flex items-center gap-2">
                 번호
                 <SvgIcon
+                  v-if="!isSearch"
                   :icon="ArrowDownIcon"
                   :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
                 />
