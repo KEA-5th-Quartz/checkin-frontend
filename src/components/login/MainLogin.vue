@@ -2,7 +2,7 @@
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
-import { ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SvgIcon from '../common/SvgIcon.vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
@@ -16,8 +16,48 @@ const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
 const queryClient = useQueryClient();
+let blockTime = ref('');
+let timerInterval: number | null = null;
+
+const formatTime = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}분 ${seconds}초`;
+};
+
+const startBlockTimer = (initialTime: string) => {
+  const matches = initialTime.match(/(\d+)분\s*(\d+)초/);
+  if (!matches) return;
+
+  let totalSeconds = parseInt(matches[1]) * 60 + parseInt(matches[2]);
+
+  // 이전 타이머가 있다면 제거
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+
+  blockTime.value = formatTime(totalSeconds);
+
+  timerInterval = setInterval(() => {
+    totalSeconds -= 1;
+
+    if (totalSeconds <= 0) {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      blockTime.value = '';
+      return;
+    }
+
+    blockTime.value = formatTime(totalSeconds);
+  }, 1000);
+};
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
+
+const dialogContent = computed(() => {
+  return blockTime.value ? `남은시간 ${blockTime.value}` : undefined;
+});
 
 const getRedirectPath = (role: MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
@@ -60,18 +100,41 @@ const handleLogin = async () => {
   } catch (error: unknown) {
     const { message, data } = error as ApiError;
 
-    dialogState.value = {
-      open: true,
-      isOneBtn: true,
-      title: message,
-      content: '남은시간 ' + data?.blockTime,
-      mainText: '확인',
-      onMainClick: () => {
-        dialogState.value = { ...initialDialog };
-      },
-    };
+    if (data?.blockTime) {
+      startBlockTimer(data.blockTime);
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: message,
+        content: dialogContent.value,
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+          if (timerInterval) {
+            clearInterval(timerInterval);
+          }
+        },
+      };
+    } else {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: message,
+        content: '',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+    }
   }
 };
+
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
 
 const showPwd = ref(false);
 const togglePwdVisibility = () => {
@@ -104,7 +167,7 @@ const togglePwdVisibility = () => {
     v-if="dialogState.open"
     :isOneBtn="dialogState.isOneBtn"
     :title="dialogState.title"
-    :content="dialogState.content"
+    :content="dialogContent"
     :mainText="dialogState.mainText"
     :onCancelClick="dialogState.onMainClick"
     :onMainClick="dialogState.onMainClick"
