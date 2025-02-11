@@ -2,7 +2,7 @@
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
-import { computed, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SvgIcon from '../common/SvgIcon.vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
@@ -149,6 +149,10 @@ const handleLogin = async () => {
     }
   }
 };
+
+onMounted(() => {
+  sessionStorage.clear();
+});
 
 onUnmounted(() => {
   if (timerInterval) {
