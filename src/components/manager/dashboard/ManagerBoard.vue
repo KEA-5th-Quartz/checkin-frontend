@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
       <table v-if="!isMyTicket" class="min-w-full">
         <thead class="manager-thead">
           <tr>
-            <th @click="toggleOrder" class="manager-th w-[17.5%] text-start pl-6 cursor-pointer duration-200">
+            <th @click="toggleOrder" class="manager-th w-[10%] text-start pl-6 cursor-pointer duration-200">
               <div class="flex items-center gap-2">
                 번호
                 <SvgIcon
@@ -247,11 +247,11 @@ onBeforeUnmount(() => {
                 />
               </div>
             </th>
-            <th class="manager-th text-start w-[27.5%]">제목</th>
+            <th class="manager-th text-start w-[37.5%]">제목</th>
             <th class="manager-th w-[10%]">1차 카테고리</th>
             <th class="manager-th w-[7.5%]">2차 카테고리</th>
             <th class="manager-th w-[7.5%]">진행 상태</th>
-            <th class="manager-th w-[10%] text-start pl-6">담당자</th>
+            <th class="manager-th w-[7.5%] text-center pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
           </tr>
         </thead>
@@ -264,7 +264,7 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start max-w-0 pl-6">
-              <p :title="ticket.customId.toString()">
+              <p class="truncate text-xs" :title="ticket.customId.toString()">
                 {{ ticket.customId }}
               </p>
             </td>
@@ -317,7 +317,7 @@ onBeforeUnmount(() => {
             <th class="manager-th w-[7.5%]">진행 상태</th>
             <th class="manager-th w-[12.5%] text-start pl-6">담당자</th>
             <th class="manager-th w-[5%]">마감일</th>
-            <th class="manager-th w-[12.5%] pr-6">중요도</th>
+            <th class="manager-th w-[7.5%] pr-6">중요도</th>
           </tr>
         </thead>
 
@@ -329,7 +329,7 @@ onBeforeUnmount(() => {
             @click="handleRowClick(ticket.ticketId)"
           >
             <td class="manager-td text-start pl-6">
-              <p :title="ticket.customId.toString()">
+              <p class="text-xs" :title="ticket.customId.toString()">
                 {{ ticket.customId }}
               </p>
             </td>
@@ -358,9 +358,9 @@ onBeforeUnmount(() => {
                   :src="ticket.managerProfilePic"
                   class="h-7 max-w-7 rounded-full object-fill"
                 />
-                <span class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
+                <p class="truncate" :class="ticket.manager ? '' : 'flex-center w-full mr-3'">
                   {{ ticket.manager || '━' }}
-                </span>
+                </p>
               </div>
             </td>
             <td class="manager-td">

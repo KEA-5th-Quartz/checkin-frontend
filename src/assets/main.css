@@ -84,7 +84,7 @@ body {
   /* 사이드바 */
   .sidebar-nav-container {
     @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] 
-    bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
+    bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D] z-40;
   }
   .sidebar-logo {
     @apply text-center text-white-0 font-extrabold text-2xl mt-12 cursor-default;
