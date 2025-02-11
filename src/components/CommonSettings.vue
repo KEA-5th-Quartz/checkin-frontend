@@ -163,8 +163,8 @@ const handleImageChange = async (event: Event) => {
         label="새 비밀번호"
         name="newPwd"
         maxlength="20"
-        placeholder="새 비밀번호를 입력해주세요"
-        :error="errors.newPwd"
+        placeholder="비밀번호는 영문, 숫자, 특수문자 포함 8~20자입니다."
+        :error="errors.newPwd ? errors.newPwd : ''"
         :success-message="newPwd && !errors.newPwd ? '사용 가능한 비밀번호입니다.' : ''"
       />
 
