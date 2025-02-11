@@ -179,6 +179,7 @@ const togglePwdVisibility = () => {
       @input="handleUsernameInput"
       type="text"
       required
+      :value="username"
       class="login-input border-primary-0"
       placeholder="Username"
     />
@@ -188,6 +189,7 @@ const togglePwdVisibility = () => {
         @input="handlePasswordInput"
         :type="showPwd ? 'text' : 'password'"
         required
+        :value="password"
         class="login-input border-primary-0"
         placeholder="Password"
       />
