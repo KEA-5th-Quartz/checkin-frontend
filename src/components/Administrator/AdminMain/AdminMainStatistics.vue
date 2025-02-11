@@ -87,6 +87,7 @@ const chartOptions = ref<ChartOptions>({
   },
   xaxis: {
     categories: [],
+    labels: { maxHeight: 80, trim: true },
   },
   colors: ['#3570FF', '#828DCA'],
   legend: {
@@ -173,6 +174,7 @@ const chartOptions2 = ref<ChartOptions>({
   },
   xaxis: {
     categories: [],
+    labels: { maxHeight: 80, trim: true },
   },
   colors: customColors,
   legend: {

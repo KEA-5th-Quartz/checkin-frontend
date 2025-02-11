@@ -28,7 +28,13 @@ export interface ChartOptions {
     enabled: boolean;
     style: { fontSize: string };
   };
-  xaxis: { categories: string[] };
+  xaxis: {
+    categories: string[];
+    labels?: {
+      maxHeight?: number;
+      trim?: boolean;
+    };
+  };
   colors: string[];
   legend: {
     position: string;
