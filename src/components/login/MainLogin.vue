@@ -152,6 +152,7 @@ const handleLogin = async () => {
 
 onMounted(() => {
   sessionStorage.clear();
+  memberStore.clearMemberInfo();
 });
 
 onUnmounted(() => {
