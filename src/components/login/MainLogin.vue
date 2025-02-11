@@ -20,6 +20,25 @@ const queryClient = useQueryClient();
 let blockTime = ref('');
 let timerInterval: number | null = null;
 
+const removeEmojiAndSpaces = (str: string): string => {
+  return str
+    .replace(
+      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
+      '',
+    )
+    .replace(/\s/g, '');
+};
+
+const handleUsernameInput = (e: Event) => {
+  const input = (e.target as HTMLInputElement).value;
+  username.value = removeEmojiAndSpaces(input);
+};
+
+const handlePasswordInput = (e: Event) => {
+  const input = (e.target as HTMLInputElement).value;
+  password.value = removeEmojiAndSpaces(input);
+};
+
 const formatTime = (totalSeconds: number): string => {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
@@ -147,7 +166,7 @@ const togglePwdVisibility = () => {
   <form class="login-form" @submit.prevent="handleLogin">
     <CommonInput
       :maxLength="15"
-      v-model="username"
+      @input="handleUsernameInput"
       type="text"
       required
       class="login-input border-primary-0"
@@ -156,7 +175,7 @@ const togglePwdVisibility = () => {
     <div class="relative">
       <CommonInput
         :maxLength="30"
-        v-model="password"
+        @input="handlePasswordInput"
         :type="showPwd ? 'text' : 'password'"
         required
         class="login-input border-primary-0"
