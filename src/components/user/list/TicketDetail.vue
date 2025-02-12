@@ -95,8 +95,8 @@ const getValidationData = (ticket: any) => {
   };
 };
 
-// 개별 필드 검증 함수 수정
-const validateField = async (field: string, value: any) => {
+// 개별 필드 검증 함수
+const validateField = async (field: string, value: unknown) => {
   try {
     const validationData = getValidationData({
       ...ticketStore.ticket,
@@ -114,7 +114,7 @@ const validateField = async (field: string, value: any) => {
   }
 };
 
-// 전체 폼 검증 함수 수정
+// 전체 폼 검증 함수
 const validateForm = async () => {
   try {
     const validationData = getValidationData(ticketStore.ticket);
@@ -536,9 +536,9 @@ const canEdit = computed(() => {
               <CommonTextarea
                 v-model="ticketStore.ticket.content"
                 class="ticket-desc-textarea"
-                :class="{ 'border-red-500': errors.content }"
+                :class="{ 'border-red-1': errors.content }"
               />
-              <span v-if="errors.content" class="text-xs text-red-500 mt-1 block">{{ errors.content }}</span>
+              <span v-if="errors.content" class="text-xs text-red-1 mt-1 block">{{ errors.content }}</span>
             </div>
           </div>
 
