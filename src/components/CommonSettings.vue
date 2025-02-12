@@ -8,10 +8,16 @@ import PasswordInput from './common/PasswordInput.vue';
 import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
+import { useCustomQuery } from '@/composables/useCustomQuery';
 
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
 const dialogState = ref<DialogProps>({ ...initialDialog });
+
+const { data: memberData } = useCustomQuery(['member-data'], async () => {
+  const response = await userApi.getMemberId(memberStore.memberId as number);
+  return response;
+});
 
 const { handleSubmit, errors } = useForm({
   validationSchema: schema,
@@ -57,6 +63,17 @@ const onSubmit = handleSubmit(async (values) => {
           open: true,
           isOneBtn: true,
           title: err.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
+      case 'COMMON_4000':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '현재 비밀번호가 일치하지 않습니다.',
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };
@@ -140,7 +157,7 @@ const handleImageChange = async (event: Event) => {
       </div>
       <div class="flex flex-col gap-5">
         <p class="font-semibold text-2xl">{{ memberStore.username }}</p>
-        <p class="text-2xl text-gray-1">{{ memberStore.email }}</p>
+        <p class="text-xl text-gray-1">{{ memberData?.data?.data?.email ?? '' }}</p>
       </div>
     </section>
 
@@ -157,8 +174,8 @@ const handleImageChange = async (event: Event) => {
         label="새 비밀번호"
         name="newPwd"
         maxlength="20"
-        placeholder="새 비밀번호를 입력해주세요"
-        :error="errors.newPwd"
+        placeholder="비밀번호는 영문, 숫자, 특수문자 포함 8~20자입니다."
+        :error="errors.newPwd ? errors.newPwd : ''"
         :success-message="newPwd && !errors.newPwd ? '사용 가능한 비밀번호입니다.' : ''"
       />
 
@@ -173,55 +190,6 @@ const handleImageChange = async (event: Event) => {
 
       <button type="submit" class="btn-main max-w-fit self-end">저장</button>
     </form>
-
-    <!-- 알림 조건부 렌더링 -->
-    <!-- <div class="flex-stack gap-5 mt-5">
-      <h2 class="text-lg font-semibold">알림 수신 관리</h2>
-      <div class="flex items-center justify-between w-1/2">
-        <p class="font-bold">담당자 배정 알림</p>
-        <button
-          type="button"
-          class="relative inline-flex h-6 w-11 items-center rounded-full"
-          :class="assignmentNotification ? 'bg-blue-1' : 'bg-gray-1'"
-          @click="assignmentNotification = !assignmentNotification"
-        >
-          <div
-            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-            :class="assignmentNotification ? 'translate-x-6' : 'translate-x-1'"
-          />
-        </button>
-      </div>
-
-      <div class="flex items-center justify-between w-1/2">
-        <p class="font-bold">진행상태 변경 알림</p>
-        <button
-          type="button"
-          class="relative inline-flex h-6 w-11 items-center rounded-full"
-          :class="statusNotification ? 'bg-blue-1' : 'bg-gray-1'"
-          @click="statusNotification = !statusNotification"
-        >
-          <div
-            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-            :class="statusNotification ? 'translate-x-6' : 'translate-x-1'"
-          />
-        </button>
-      </div>
-
-      <div class="flex items-center justify-between w-1/2">
-        <p class="font-bold">티켓 댓글 알림</p>
-        <button
-          type="button"
-          class="relative inline-flex h-6 w-11 items-center rounded-full"
-          :class="commentNotification ? 'bg-blue-1' : 'bg-gray-1'"
-          @click="commentNotification = !commentNotification"
-        >
-          <div
-            class="inline-block h-4 w-4 transform rounded-full bg-white-0 transition"
-            :class="commentNotification ? 'translate-x-6' : 'translate-x-1'"
-          />
-        </button>
-      </div>
-    </div> -->
   </div>
 
   <CommonDialog
