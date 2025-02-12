@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClipIcon, DownloadIcon, PencilIcon, XIcon } from '@/assets/icons/path';
+import { DownloadIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
@@ -19,10 +19,14 @@ import { ValidationError } from 'yup';
 import { ticketEditValidationSchema } from '@/utils/ticketEditValidation';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonInput from '@/components/common/CommonInput.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { ApiError } from '@/types/common/error';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const props = defineProps<{
   ticketId: number;
@@ -247,7 +251,19 @@ const updateMutation = useCustomMutation(
       ticketStore.isEditMode = false;
     },
     onError: (error) => {
-      console.error('티켓 수정 실패:', error);
+      const err = error as unknown as ApiError;
+      if (err.code === 'CATEGORY_4041') {
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.reload();
+          },
+        };
+      }
     },
   },
 );
@@ -505,6 +521,7 @@ const canEdit = computed(() => {
                   :class="{ 'border-red-1': errors.dueDate }"
                   v-model="formattedDueDate"
                 />
+                <span v-if="errors.due_date" class="text-xs text-red-1 mt-1 block">{{ errors.due_date }}</span>
               </div>
             </section>
           </div>
@@ -522,9 +539,6 @@ const canEdit = computed(() => {
                 :class="{ 'border-red-500': errors.content }"
               />
               <span v-if="errors.content" class="text-xs text-red-500 mt-1 block">{{ errors.content }}</span>
-              <div class="flex w-full justify-end pr-2 cursor-pointer">
-                <SvgIcon :icon="ClipIcon" />
-              </div>
             </div>
           </div>
 
@@ -548,6 +562,15 @@ const canEdit = computed(() => {
         </div>
       </div>
     </div>
+
+    <CommonDialog
+      v-if="dialogState.open"
+      :isOneBtn="dialogState.isOneBtn"
+      :title="dialogState.title"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onMainClick"
+      :onMainClick="dialogState.onMainClick"
+    />
   </Teleport>
 </template>
 
