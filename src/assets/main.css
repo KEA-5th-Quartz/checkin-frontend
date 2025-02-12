@@ -382,6 +382,10 @@ body {
     @apply w-full border-b border-gray-2 focus:outline-none focus:border-primary-3 px-2 py-1 text-sm;
   }
 
+  .category-modal-textarea {
+    @apply h-32 resize-none border border-gray-300 rounded-md px-3 py-2;
+  }
+
   .category-modal-error-message {
     @apply text-sm text-red-1 mt-1;
   }
