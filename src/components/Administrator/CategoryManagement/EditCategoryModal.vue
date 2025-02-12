@@ -9,24 +9,20 @@
       <!-- 모달 본문 -->
       <div class="category-modal-body">
         <label class="category-modal-input-label">카테고리 이름</label>
-        <input
-          type="text"
-          v-model="updatedName"
-          class="category-modal-input"
-          placeholder="카테고리 이름을 입력하세요"
-        />
+        <CommonInput v-model="updatedName" class="category-modal-input" placeholder="카테고리 이름을 입력하세요" />
         <!-- Alias 입력란 -->
         <label class="category-modal-input-label">카테고리 약어</label>
-        <input type="text" v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
+        <CommonInput v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
 
         <!-- Content Guide 입력란 -->
         <label v-if="isFirstCategoryComputed" class="category-modal-input-label">카테고리 요청 가이드</label>
-        <textarea
+        <CommonTextarea
+          maxlength="255"
           v-if="isFirstCategoryComputed"
           v-model="updatedContentGuide"
-          class="category-modal-input"
+          class="category-modal-input category-modal-textarea"
           placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
-        ></textarea>
+        ></CommonTextarea>
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
       <!-- 모달 푸터 -->
@@ -44,6 +40,8 @@ import { FirstCategory, SecondCategory } from '@/types/category';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { isApiError } from '@/types/common/error';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
+import CommonInput from '@/components/common/CommonInput.vue';
 
 const props = defineProps({
   isOpen: Boolean,
@@ -120,6 +118,10 @@ const { mutate: updateCategory } = useCustomMutation(
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
         } else if (error.code === 'COMMON_4000') {
           errorMessage.value = '요청 본문에 필수적인 필드가 없거나 유효하지 않습니다.';
+        } else if (error.code === 'CATEGORY_4093') {
+          errorMessage.value = '동일한 이름의 약어가 존재합니다.';
+        } else if (error.code === 'CATEGORY_4091') {
+          errorMessage.value = '동일한 이름의 2차 카테고리가 존재합니다.';
         } else {
           errorMessage.value = '카테고리 수정 중 알 수 없는 오류가 발생했습니다.';
         }

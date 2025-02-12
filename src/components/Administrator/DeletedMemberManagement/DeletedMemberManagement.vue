@@ -54,7 +54,6 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import router from '@/router';
 
 const queryClient = useQueryClient();
 
@@ -95,8 +94,9 @@ const restoreMemberMutation = useCustomMutation(
         title: '회원 복구',
         content: `${props.member.username}님이 복구되었습니다.`,
         mainText: '확인',
-        onMainClick: () => {
+        onMainClick: async () => {
           dialogState.value = { ...initialDialog };
+          await queryClient.refetchQueries({ queryKey: ['members'] });
           queryClient.invalidateQueries();
         },
       };
@@ -144,27 +144,59 @@ const openRestoreModal = () => {
   isMenuOpen.value = false;
 };
 
+// 멤버 영구 삭제 뮤테이션
+const deleteMemberMutation = useCustomMutation(
+  async (memberId: number) => {
+    await memberApi.deleteMemberDelete(memberId);
+  },
+  {
+    onSuccess: () => {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '회원 삭제 완료',
+        content: `${props.member.username}님이 영구 삭제되었습니다.`,
+        mainText: '확인',
+        onMainClick: async () => {
+          dialogState.value = { ...initialDialog };
+
+          //  삭제된 회원 목록을 다시 불러오기
+          await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
+        },
+      };
+    },
+    onError: (error) => {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '오류',
+        content: '회원 삭제 중 오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+      console.error('회원 삭제 실패:', error);
+    },
+  },
+);
+
 // 멤버 탈퇴 모달 열기
 const openRemoveMemberModal = () => {
   dialogState.value = {
     open: true,
     isWarn: true,
-    title: '멤버 탈퇴',
-    content: `${props.member.username}님을 정말로 탈퇴시키겠습니까?`,
-    mainText: '탈퇴',
-    onMainClick: removeMember,
+    title: '멤버 영구 삭제',
+    content: `${props.member.username}님을 정말 영구 삭제하시겠습니까?`,
+    mainText: '삭제',
+    onMainClick: () => {
+      deleteMemberMutation.mutate(props.member.memberId);
+    },
     cancelText: '취소',
     onCancelClick: () => {
       dialogState.value = { ...initialDialog };
     },
   };
   isMenuOpen.value = false;
-};
-
-// 멤버 탈퇴 함수
-const removeMember = async () => {
-  await memberApi.deleteMemberDelete(props.member.memberId);
-  queryClient.invalidateQueries();
-  router.push('/admin/members');
 };
 </script>

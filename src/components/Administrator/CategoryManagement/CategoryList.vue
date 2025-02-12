@@ -283,6 +283,14 @@ const { mutate: removeCategory } = useCustomMutation(
         };
         isDialogOpen.value = true;
         closeRemoveCategoryModal();
+      } else if (isApiError(error) && error.code === 'CATEGORY_4004') {
+        dialogContent.value = {
+          title: '삭제 불가',
+          content: '카테고리를 사용중인 티켓이 있어 삭제할 수 없습니다.',
+          mainText: '확인',
+        };
+        isDialogOpen.value = true;
+        closeRemoveCategoryModal();
       }
     },
   },
