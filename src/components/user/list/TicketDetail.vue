@@ -260,7 +260,6 @@ const updateMutation = useCustomMutation(
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };
-            window.location.reload();
           },
         };
       }

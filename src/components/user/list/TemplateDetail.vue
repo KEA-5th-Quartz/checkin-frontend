@@ -240,11 +240,10 @@ const updateMutation = useCustomMutation(
         dialogState.value = {
           open: true,
           isOneBtn: true,
-          title: error.message,
+          title: err.message,
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };
-            window.location.reload();
           },
         };
       }
