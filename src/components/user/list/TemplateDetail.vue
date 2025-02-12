@@ -11,7 +11,6 @@ import { templateApi } from '@/services/templateService/templateService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { useCustomMutation } from '@/composables/useCustomMutation';
-import { useMemberStore } from '@/stores/memberStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { templateEditValidationSchema } from '@/utils/templateEditValidation';
 import { ValidationError } from 'yup';
@@ -26,7 +25,6 @@ const secondCategorySelected = ref();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const templateStore = useTemplateStore();
-const memberStore = useMemberStore();
 
 const props = defineProps<{
   templateId: number;
@@ -276,18 +274,19 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
     firstCategorySelected.value = option;
     await validateField('firstCategory', option);
 
-    // templateStore 업데이트
-    templateStore.updateTemplate({
-      ...templateStore.template,
-      firstCategory: option.label,
-    });
-
-    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
+    // 선택된 1차 카테고리의 contentGuide 찾기
     const selectedFirstCategory = categoryData.value?.data?.data.find(
       (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
     );
 
-    // 2차 카테고리를 첫 번째 요소로 설정
+    // templateStore 업데이트 - contentGuide를 content에 설정
+    templateStore.updateTemplate({
+      ...templateStore.template,
+      firstCategory: option.label,
+      content: selectedFirstCategory?.contentGuide || '', // contentGuide를 content에 설정
+    });
+
+    // 2차 카테고리 설정 (기존 코드)
     if (selectedFirstCategory?.secondCategories?.length > 0) {
       const firstSecondCategoryOption = {
         id: selectedFirstCategory.secondCategories[0].secondCategoryId,
@@ -296,7 +295,6 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       };
       secondCategorySelected.value = firstSecondCategoryOption;
 
-      // 2차 카테고리도 ticketStore에 업데이트
       templateStore.updateTemplate({
         ...templateStore.template,
         secondCategory: firstSecondCategoryOption.label,
