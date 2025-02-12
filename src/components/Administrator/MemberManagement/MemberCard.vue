@@ -86,6 +86,7 @@ import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { useMemberStore } from '@/stores/memberStore';
+
 const queryClient = useQueryClient();
 const memberStore = useMemberStore();
 const isMenuOpen = ref(false);
@@ -214,6 +215,8 @@ const openRemoveMemberModal = () => {
 const removeMember = async () => {
   try {
     await memberApi.deleteMember(props.member.memberId);
+    // 멤버 탈퇴 시 삭제된 멤버 서버 동기화
+    await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
 
     //  탈퇴 성공 시 다이얼로그 표시
     dialogState.value = {
