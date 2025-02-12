@@ -11,6 +11,7 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import SvgIcon from '../common/SvgIcon.vue';
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
 import { useTicketStore } from '@/stores/userTicketStore';
+import CommonTextarea from '../common/commonTextarea.vue';
 
 const props = defineProps<{
   ticketId: number;
@@ -462,7 +463,7 @@ const isLastComment = (index: number) => {
 
   <!-- 댓글 인풋 -->
   <div v-if="!ticketStore.isEditMode" class="ticket-comment-input-area">
-    <textarea
+    <CommonTextarea
       v-model="commentContent"
       maxlength="128"
       placeholder="댓글을 작성하세요"

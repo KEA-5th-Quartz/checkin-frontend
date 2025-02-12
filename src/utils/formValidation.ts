@@ -3,8 +3,9 @@ import * as yup from 'yup';
 export const templateValidationSchema = yup.object({
   title: yup
     .string()
-    .trim()
     .required('* 제목을 입력하세요')
+    .trim()
+    .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0)
     .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
     .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
     .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다'),

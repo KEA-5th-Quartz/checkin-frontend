@@ -5,7 +5,7 @@ import { BaseTicketOption } from '@/types/tickets';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import { computed, ref, watch } from 'vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { ClipIcon, TemplateIcon } from '@/assets/icons/path';
+import { TemplateIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { categoryApi } from '@/services/categoryService/categoryService';
@@ -14,10 +14,15 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { templateApi } from '@/services/templateService/templateService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { CategoryResponse } from '@/types/template';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
+import CommonInput from '@/components/common/CommonInput.vue';
+import { ApiError } from '@/types/common/error';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
 
 const showDialog = ref(false);
 const router = useRouter();
 const queryClient = useQueryClient();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const initialValues = {
   title: '',
@@ -153,6 +158,26 @@ const createTemplateMutation = useCustomMutation(
   },
 );
 
+const handleTitleInput = (event: Event) => {
+  const sanitizedValue = (event.target as HTMLInputElement).value
+    .replace(/<[^>]*>/g, '') // HTML 태그 제거
+    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
+    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+
+  titleChange(sanitizedValue);
+};
+
+const handleContentInput = (event: Event) => {
+  const sanitizedValue = (event.target as HTMLTextAreaElement).value
+    .replace(/<[^>]*>/g, '') // HTML 태그 제거
+    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
+    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+
+  contentChange(sanitizedValue);
+};
+
 const onSubmit = handleSubmit(async (formValues, { setErrors }) => {
   try {
     const data = categoryData.value?.data?.data;
@@ -191,8 +216,20 @@ const onSubmit = handleSubmit(async (formValues, { setErrors }) => {
     };
 
     await createTemplateMutation.mutateAsync(templateData);
+    queryClient.refetchQueries(['template-list']);
   } catch (error) {
-    console.error('템플릿 생성 중 오류 발생:', error);
+    const err = error as unknown as ApiError;
+    if (err.code === 'CATEGORY_4041') {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: err.message,
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+    }
   }
 });
 
@@ -207,14 +244,15 @@ const closeDialog = async () => {
     <form @submit.prevent="onSubmit">
       <section class="w-full h-12 mt-24">
         <label class="ticket-label">템플릿 제목</label>
-        <input
+        <CommonInput
           :value="title"
-          @input="titleChange"
+          @input="handleTitleInput"
           name="title"
           class="title-form bg-[#fafafa]"
           placeholder="제목을 입력하세요"
+          maxLength="25"
         />
-        <div class="text-red-500 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
+        <div class="text-red-1 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
       </section>
 
       <section class="w-full flex gap-x-32 mt-16">
@@ -245,16 +283,14 @@ const closeDialog = async () => {
 
       <section class="w-full mt-24">
         <label class="ticket-label">요청사항</label>
-        <textarea
+        <CommonTextarea
           :value="content"
-          @input="contentChange"
+          @input="handleContentInput"
           name="content"
           class="ticket-desc-textarea min-h-80 bg-[#fafafa]"
+          maxLength="256"
         />
-        <div class="text-red-500 text-sm mt-1" v-if="errors.content">{{ errors.content }}</div>
-        <div class="flex justify-end pr-2 cursor-pointer">
-          <SvgIcon :icon="ClipIcon" />
-        </div>
+        <div class="text-red-1 text-sm mt-1" v-if="errors.content">{{ errors.content }}</div>
       </section>
 
       <button class="create-button justify-self-center" type="submit">
@@ -272,6 +308,15 @@ const closeDialog = async () => {
           closeDialog();
         }
       "
+    />
+
+    <CommonDialog
+      v-if="dialogState.open"
+      :isOneBtn="dialogState.isOneBtn"
+      :title="dialogState.title"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onMainClick"
+      :onMainClick="dialogState.onMainClick"
     />
   </section>
 </template>
