@@ -51,7 +51,16 @@ const onSubmit = handleSubmit(async (values) => {
 
     resetForm();
   } catch (error) {
-    console.error('비밀번호 변경 실패:', error);
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '예상치 못한 문제가 발생했습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        window.location.replace('/');
+      },
+    };
   }
 });
 
