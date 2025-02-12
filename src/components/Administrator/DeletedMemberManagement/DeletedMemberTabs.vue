@@ -33,23 +33,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
-import { useMemberListStore } from '@/stores/useMemberListStore';
+import { computed, ref, watch } from 'vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { memberApi } from '@/services/memberService/memberService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import SkeletonCard from '@/components/UI/SkeletonCard.vue';
 import DeletedMemberManagement from './DeletedMemberManagement.vue';
+import { useDeletedMemberListStore } from '@/stores/useDeletedMemberListStore';
 
-const store = useMemberListStore();
+const store = useDeletedMemberListStore();
 
-const selectedRole = computed(() => store.selectedRole);
-const currentPage = computed(() => store.currentPage);
+const currentPage = ref(parseInt(sessionStorage.getItem('deletedMembersPage') || '1'));
+store.setCurrentPage(currentPage.value);
 const totalPages = computed(() => store.totalPages);
 
 // 멤버 목록 API 요청
 const { data, isLoading } = useCustomQuery(
-  ['deleted-members', selectedRole, currentPage],
+  ['deleted-members', currentPage],
   async () => {
     const response = await memberApi.getDeletedMember(currentPage.value, 10);
     return response.data.data; // API 응답에서 data.data를 반환
@@ -69,5 +69,7 @@ watch(data, (newData) => {
 
 const handlePageChange = async (page: number) => {
   store.setCurrentPage(page);
+  currentPage.value = page;
+  sessionStorage.setItem('deletedMembersPage', page.toString());
 };
 </script>
