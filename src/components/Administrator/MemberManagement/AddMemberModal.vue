@@ -20,13 +20,13 @@
         </select>
         <label class="block text-sm font-medium text-gray-0 mb-2">이메일</label>
         <div class="flex items-center gap-2 mb-2">
-          <input
-            type="email"
+          <CommonInput
             v-model="formData.email"
+            type="email"
+            placeholder="이메일을 입력해주세요"
+            class="member-modal-input"
             @input="resetEmailValidation"
             @blur="validateEmail"
-            class="member-modal-input"
-            placeholder="이메일을 입력해주세요"
           />
         </div>
         <p v-if="emailError" class="member-modal-error">{{ emailError }}</p>
@@ -34,13 +34,14 @@
 
         <label class="block text-sm font-medium text-gray-0 mb-2">아이디</label>
         <div class="flex items-center gap-2 mb-2">
-          <input
-            type="text"
+          <CommonInput
             v-model="formData.username"
+            maxlength="16"
+            type="text"
+            placeholder="아이디를 입력해주세요"
+            class="member-modal-input"
             @input="resetUsernameValidation"
             @blur="validateUsername"
-            class="member-modal-input"
-            placeholder="아이디를 입력해주세요"
           />
         </div>
         <p v-if="usernameError" class="member-modal-error">{{ usernameError }}</p>
@@ -72,6 +73,7 @@ import { XIcon } from '@/assets/icons/path';
 import { onClickOutside } from '@vueuse/core';
 import { memberApi } from '@/services/memberService/memberService';
 import { isApiError } from '@/types/common/error';
+import CommonInput from '@/components/common/CommonInput.vue';
 
 const modalRef = ref(null);
 
