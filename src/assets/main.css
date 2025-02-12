@@ -283,7 +283,7 @@ body {
     @apply ticket-desc-area w-full resize-none text-sm text-gray-1 focus:outline-none;
   }
   .ticket-desc-content {
-    @apply text-sm text-gray-1;
+    @apply text-sm text-gray-1 whitespace-pre-wrap break-words;
   }
   .ticket-attachment {
     @apply bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-xs;

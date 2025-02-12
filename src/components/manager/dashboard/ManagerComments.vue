@@ -10,7 +10,6 @@ import { useMemberStore } from '@/stores/memberStore';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
-import { onClickOutside } from '@vueuse/core';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
