@@ -2,7 +2,7 @@
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
-import { ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import SvgIcon from '../common/SvgIcon.vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
@@ -10,14 +10,74 @@ import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '../common/CommonDialog.vue';
 import { ApiError } from '@/types/common/error';
 import { useQueryClient } from '@tanstack/vue-query';
+import CommonInput from '../common/CommonInput.vue';
 
 const router = useRouter();
 const memberStore = useMemberStore();
 const username = ref('');
 const password = ref('');
 const queryClient = useQueryClient();
+let blockTime = ref('');
+let timerInterval: number | null = null;
+
+const removeEmojiAndSpaces = (str: string): string => {
+  return str
+    .replace(
+      /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,
+      '',
+    )
+    .replace(/\s/g, '');
+};
+
+const handleUsernameInput = (e: Event) => {
+  const input = (e.target as HTMLInputElement).value;
+  username.value = removeEmojiAndSpaces(input);
+};
+
+const handlePasswordInput = (e: Event) => {
+  const input = (e.target as HTMLInputElement).value;
+  password.value = removeEmojiAndSpaces(input);
+};
+
+const formatTime = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}분 ${seconds}초`;
+};
+
+const startBlockTimer = (initialTime: string) => {
+  const matches = initialTime.match(/(\d+)분\s*(\d+)초/);
+  if (!matches) return;
+
+  let totalSeconds = parseInt(matches[1]) * 60 + parseInt(matches[2]);
+
+  // 이전 타이머가 있다면 제거
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+
+  blockTime.value = formatTime(totalSeconds);
+
+  timerInterval = setInterval(() => {
+    totalSeconds -= 1;
+
+    if (totalSeconds <= 0) {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      blockTime.value = '';
+      return;
+    }
+
+    blockTime.value = formatTime(totalSeconds);
+  }, 1000);
+};
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
+
+const dialogContent = computed(() => {
+  return blockTime.value ? `남은시간 ${blockTime.value}` : undefined;
+});
 
 const getRedirectPath = (role: MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
@@ -60,18 +120,51 @@ const handleLogin = async () => {
   } catch (error: unknown) {
     const { message, data } = error as ApiError;
 
-    dialogState.value = {
-      open: true,
-      isOneBtn: true,
-      title: message,
-      content: '남은시간 ' + data?.blockTime,
-      mainText: '확인',
-      onMainClick: () => {
-        dialogState.value = { ...initialDialog };
-      },
-    };
+    if (data?.blockTime) {
+      startBlockTimer(data.blockTime);
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: message,
+        content: dialogContent.value,
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+          if (timerInterval) {
+            clearInterval(timerInterval);
+          }
+        },
+      };
+    } else {
+      blockTime.value = '';
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: message,
+        content: '',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+    }
   }
 };
+
+onMounted(() => {
+  sessionStorage.clear();
+  memberStore.clearMemberInfo();
+});
+
+onUnmounted(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
 
 const showPwd = ref(false);
 const togglePwdVisibility = () => {
@@ -81,12 +174,22 @@ const togglePwdVisibility = () => {
 
 <template>
   <form class="login-form" @submit.prevent="handleLogin">
-    <input v-model="username" type="text" required class="login-input border-primary-0" placeholder="Username" />
+    <CommonInput
+      :maxLength="15"
+      @input="handleUsernameInput"
+      type="text"
+      required
+      :value="username"
+      class="login-input border-primary-0"
+      placeholder="Username"
+    />
     <div class="relative">
-      <input
-        v-model="password"
+      <CommonInput
+        :maxLength="30"
+        @input="handlePasswordInput"
         :type="showPwd ? 'text' : 'password'"
         required
+        :value="password"
         class="login-input border-primary-0"
         placeholder="Password"
       />
@@ -104,7 +207,7 @@ const togglePwdVisibility = () => {
     v-if="dialogState.open"
     :isOneBtn="dialogState.isOneBtn"
     :title="dialogState.title"
-    :content="dialogState.content"
+    :content="dialogContent"
     :mainText="dialogState.mainText"
     :onCancelClick="dialogState.onMainClick"
     :onMainClick="dialogState.onMainClick"

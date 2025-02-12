@@ -51,10 +51,16 @@ import SvgIcon from '../../../components/common/SvgIcon.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { memberApi } from '@/services/memberService/memberService';
 
-const { data: memberStatsData } = useCustomQuery(['member-stats'], async () => {
-  const response = await memberApi.getMemberStatsRole();
-  return response.data;
-});
+const { data: memberStatsData } = useCustomQuery(
+  ['member-stats'],
+  async () => {
+    const response = await memberApi.getMemberStatsRole();
+    return response.data;
+  },
+  {
+    refetchInterval: 1000 * 60,
+  },
+);
 
 const stats = computed(() => ({
   admins: memberStatsData.value?.data?.totalAdmins ?? 0,

@@ -15,6 +15,9 @@ import ManagerComments from './ManagerComments.vue';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { getFileType, isImageFile } from '@/utils/getFileType';
+import { ApiError } from '@/types/common/error';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -41,6 +44,7 @@ const statusSelected = ref<BaseTicketOption>(ticket_status[0]);
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
 const managerSelected = ref();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // 티켓 상세 페치
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
@@ -196,8 +200,8 @@ const availableStatusOptions = computed(() => {
   const currentStatus = statusSelected.value.value;
 
   switch (currentStatus) {
-    case 'CREATED':
-      return ticket_status.filter((status) => ['CREATED', 'IN_PROGRESS'].includes(status.value));
+    case 'OPEN':
+      return ticket_status.filter((status) => ['OPEN', 'IN_PROGRESS'].includes(status.value));
     case 'IN_PROGRESS':
       return ticket_status.filter((status) => ['IN_PROGRESS', 'CLOSED'].includes(status.value));
     case 'CLOSED':
@@ -217,16 +221,7 @@ const priorityMutation = useCustomMutation(
     onSuccess: invalidateTicketQueries,
   },
 );
-// 티켓 진행중 뮤테이션
-const inProgressMutation = useCustomMutation(
-  async ({ ticketId, status }: { ticketId: number; status: string }) => {
-    const response = await ticketApi.patchTicketInProgress(ticketId, { status });
-    return response.data;
-  },
-  {
-    onSuccess: invalidateTicketQueries,
-  },
-);
+
 // 티켓 완료 뮤테이션
 const closeMutation = useCustomMutation(
   async (ticketId: number) => {
@@ -268,7 +263,7 @@ const secondCategoryMutation = useCustomMutation(
 // 담당자 변경 뮤테이션
 const reassignMutation = useCustomMutation(
   async ({ ticketId, manager }: { ticketId: number; manager: string }) => {
-    const response = await ticketApi.patchTicketReassign(ticketId, { manager });
+    const response = await ticketApi.patchTicketAssign(ticketId, { manager });
     return response.data;
   },
   {
@@ -282,9 +277,7 @@ const handleStatusSelect = async (option: BaseTicketOption) => {
   const newStatus = option.value;
 
   try {
-    if (currentStatus === 'CREATED' && newStatus === 'IN_PROGRESS') {
-      await inProgressMutation.mutateAsync({ ticketId: props.ticketId, status: 'in_progress' });
-    } else if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
+    if (currentStatus === 'IN_PROGRESS' && newStatus === 'CLOSED') {
       await closeMutation.mutateAsync(props.ticketId);
     }
     statusSelected.value = option;
@@ -360,7 +353,45 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
     });
     managerSelected.value = option;
   } catch (err) {
-    console.error('담당자 변경 실패:', err);
+    const error = err as ApiError;
+    switch (error.code) {
+      case 'MEMBER_4040':
+        break;
+      case 'TICKET_4090':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.reload();
+          },
+        };
+        break;
+      case 'TICKET_4091':
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+          },
+        };
+        break;
+      default:
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: '예상치 못한 문제가 발생했습니다.',
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.replace('/manager/dashboard');
+          },
+        };
+    }
   }
 };
 
@@ -523,6 +554,15 @@ const handleFileDownload = async (fileUrl: string) => {
           </div>
         </div>
       </template>
+
+      <CommonDialog
+        v-if="dialogState.open"
+        :isOneBtn="dialogState.isOneBtn"
+        :title="dialogState.title"
+        :mainText="dialogState.mainText"
+        :onCancelClick="dialogState.onMainClick"
+        :onMainClick="dialogState.onMainClick"
+      />
     </div>
   </Teleport>
 </template>

@@ -2,14 +2,16 @@
   <div class="flex-between p-4 mx-auto w-[84%] mt-[40px]">
     <!-- 검색 필드 -->
     <div class="flex items-center px-2 py-3 rounded-md shadow-md w-full max-w-sm border border-gray-2">
-      <input
-        type="text"
-        maxlength="14"
+      <CommonInput
+        maxlength="16"
         class="bg-transparent focus:outline-none pl-3 text-gray-0 w-full"
         placeholder="인원 검색..."
         v-model="searchQuery"
+        @keydown.enter="serchMember"
       />
-      <SvgIcon :icon="SearchIcon" />
+      <button @click="serchMember">
+        <SvgIcon :icon="SearchIcon" />
+      </button>
     </div>
 
     <!-- 인원 등록 버튼 -->
@@ -43,6 +45,8 @@ import { memberApi } from '@/services/memberService/memberService';
 import { useQueryClient } from '@tanstack/vue-query';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { useMemberListStore } from '@/stores/useMemberListStore';
+import CommonInput from '@/components/common/CommonInput.vue';
+import { useDebounceFn } from '@vueuse/core';
 
 const store = useMemberListStore();
 
@@ -88,6 +92,21 @@ const searchQuery = computed({
   set: (value) => store.setSearchQuery(value),
 });
 
+// 검색 디바운스
+const debouncedSearch = useDebounceFn(() => {
+  queryClient.invalidateQueries({ queryKey: ['members'] });
+}, 3000);
+
+// 검색어 변경 감지
+watch(searchQuery, () => {
+  debouncedSearch();
+});
+
+// 즉시 멤버 검색
+const serchMember = () => {
+  queryClient.invalidateQueries({ queryKey: ['members'] });
+};
+
 // 모달 상태
 const isAddMemberModalOpen = ref(false);
 
@@ -109,11 +128,6 @@ function closeAddMemberModal() {
 function closeDialog() {
   isDialogOpen.value = false;
 }
-
-// 검색어 변경 시 API 요청 트리거
-watch(searchQuery, () => {
-  queryClient.invalidateQueries({ queryKey: ['members'] });
-});
 </script>
 
 <style scoped></style>

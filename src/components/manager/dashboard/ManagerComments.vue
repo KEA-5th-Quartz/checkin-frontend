@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useCustomQuery } from '@/composables/useCustomQuery';
@@ -9,7 +10,8 @@ import { useMemberStore } from '@/stores/memberStore';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
-import { nextTick, ref, watch } from 'vue';
+import { onClickOutside } from '@vueuse/core';
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
   ticketId: number;
@@ -42,6 +44,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const attachedFiles = ref<AttachedFile[]>([]);
 const previewUrl = ref<string | null>(null);
 const showPreview = ref(false);
+const isLikeMenu = ref(false);
 
 const scrollToBottom = async () => {
   await nextTick();
@@ -55,6 +58,23 @@ const scrollToBottom = async () => {
     }, 50);
   }
 };
+
+const handleClickOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.ticket-like-modal-section')) {
+    isLikeMenu.value = false;
+    selectedCommentId.value = null;
+    selectedCommentLikes.value = null;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 // 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
@@ -179,6 +199,7 @@ const handleLikeToggle = async (commentId: number) => {
       ticketId: props.ticketId,
       commentId: commentId,
     });
+    queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
   } catch (err) {
     console.error('좋아요 토글 실패:', err);
   }
@@ -197,6 +218,17 @@ const handleAddComments = async () => {
     scrollToBottom();
   } catch (err) {
     console.error('댓글 작성 실패:', err);
+  }
+};
+
+const handleKeyDown = async (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      return;
+    } else {
+      event.preventDefault();
+      await handleAddComments();
+    }
   }
 };
 
@@ -264,17 +296,20 @@ const handlePreview = (file: AttachedFile) => {
 };
 
 // 좋아요 목록 모달 표시 함수
-const handleShowLikes = (commentId: number) => {
+const handleShowLikes = (commentId: number, event: Event) => {
+  event.stopPropagation(); // 이벤트 전파 중지
   const likes = commentLikesMap.value.get(commentId);
   if (likes) {
     if (selectedCommentId.value === commentId) {
       // 같은 댓글을 다시 클릭하면 모달 닫기
       selectedCommentId.value = null;
       selectedCommentLikes.value = null;
+      isLikeMenu.value = false;
     } else {
       // 다른 댓글을 클릭하면 해당 댓글의 좋아요 정보 표시
       selectedCommentId.value = commentId;
       selectedCommentLikes.value = likes;
+      isLikeMenu.value = true;
     }
   }
 };
@@ -387,13 +422,14 @@ const isLastComment = (index: number) => {
                 :class="{
                   'bg-primary-4 text-white-0 border-primary-4': selectedCommentId === item.commentId,
                 }"
-                @click="handleShowLikes(item.commentId)"
+                @click="(event) => handleShowLikes(item.commentId, event)"
               >
                 {{ commentLikesMap.get(item.commentId)?.totalLikes || 0 }}
               </span>
 
               <section
-                v-if="selectedCommentId === item.commentId && selectedCommentLikes"
+                v-if="selectedCommentId === item.commentId && selectedCommentLikes && isLikeMenu"
+                ref="likeMenuRef"
                 :class="['ticket-like-modal-section', isLastComment(index) ? 'bottom-full mb-1' : 'top-7 mt-2']"
               >
                 <div class="ticket-like-modal-div" @click.stop>
@@ -417,11 +453,12 @@ const isLastComment = (index: number) => {
 
   <!-- 댓글 인풋 -->
   <div class="ticket-comment-input-area">
-    <textarea
+    <CommonTextarea
       v-model="commentContent"
       maxlength="128"
       placeholder="댓글을 작성하세요"
       class="ticket-comment-textarea"
+      @keydown="handleKeyDown"
     />
     <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">

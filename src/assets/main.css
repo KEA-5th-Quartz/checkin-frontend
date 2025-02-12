@@ -84,7 +84,7 @@ body {
   /* 사이드바 */
   .sidebar-nav-container {
     @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] 
-    bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
+    bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D] z-40;
   }
   .sidebar-logo {
     @apply text-center text-white-0 font-extrabold text-2xl mt-12 cursor-default;
@@ -317,10 +317,10 @@ body {
     @apply flex items-center gap-0.5 py-0.5 px-2 border-b;
   }
   .ticket-log-p-content {
-    @apply text-xs text-gray-0 font-semibold;
+    @apply text-xs text-gray-0 font-semibold whitespace-pre-wrap break-words;
   }
   .ticket-comment-bubble {
-    @apply max-h-fit max-w-[70%] px-2 py-1 bg-white-2 border border-gray-1 rounded-md;
+    @apply max-h-fit max-w-[70%] px-2 py-1 bg-white-2 border border-gray-1 rounded-md whitespace-pre-wrap break-words;
   }
   .ticket-comment-input-area {
     @apply mt-4 w-full border border-gray-2 px-4 pt-4 rounded-xl;
