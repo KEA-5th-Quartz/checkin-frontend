@@ -8,6 +8,7 @@ declare module 'vue-router' {
   interface RouteMeta {
     requiresAuth?: boolean;
     roles?: MemberType[];
+    redirectMode?: boolean;
   }
 }
 
@@ -31,19 +32,19 @@ const routes: Array<RouteRecordRaw> = [
         path: 'first-login',
         name: 'first-login',
         component: () => import('../views/account/FirstLoginView.vue'),
-        meta: { requiresAuth: false },
+        meta: { requiresAuth: false, redirectMode: true },
       },
       {
         path: 'password-reset',
         name: 'password-reset',
         component: () => import('../views/account/PasswordResetView.vue'),
-        meta: { requiresAuth: false },
+        meta: { requiresAuth: false, redirectMode: true },
       },
       {
         path: '/password-reset-email',
         name: 'password-reset-email',
         component: () => import('../views/account/PasswordResetEmailView.vue'),
-        meta: { requiresAuth: false },
+        meta: { requiresAuth: false, redirectMode: true },
       },
     ],
   },
@@ -174,6 +175,18 @@ router.beforeEach(async (to, from, next) => {
   const isLoginPage = to.path === '/';
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiredRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
+
+  // redirectMode 체크 수정
+  const isRedirectModePage = to.matched.some((record) => record.meta.redirectMode);
+  if (isRedirectModePage && !from.name) {
+    // password-reset 페이지에 대한 특별 처리
+    if (to.path === '/password-reset' && to.query.memberId && to.query.passwordResetToken) {
+      // memberId와 passwordResetToken이 있는 경우 (이메일 링크를 통한 접근) 허용
+      return next();
+    }
+    // 그 외의 경우 홈으로 리다이렉트
+    return next('/');
+  }
 
   // 1. 로그인 페이지로 가는 경우
   if (isLoginPage) {

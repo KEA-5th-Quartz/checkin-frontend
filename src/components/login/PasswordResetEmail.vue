@@ -5,6 +5,7 @@ import { useField, useForm } from 'vee-validate';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import CommonDialog from '../common/CommonDialog.vue';
+import CommonInput from '../common/CommonInput.vue';
 
 const router = useRouter();
 const dialogState = ref<DialogProps>({ ...initialDialog });
@@ -56,7 +57,7 @@ const onSubmit = handleSubmit(async () => {
   <form class="login-form" @submit="onSubmit">
     <div class="relative">
       <label>아이디</label>
-      <input
+      <CommonInput
         v-model="username"
         maxlength="14"
         name="username"
