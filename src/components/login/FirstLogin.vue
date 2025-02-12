@@ -4,11 +4,12 @@ import { MemberType } from '@/types/member';
 import { useForm, useField } from 'vee-validate';
 import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 import { userApi } from '@/services/userService/userService';
 import CommonDialog from '../common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonInput from '../common/CommonInput.vue';
 
 const memberStore = useMemberStore();
 const dialogState = ref<DialogProps>({ ...initialDialog });
@@ -19,8 +20,8 @@ const { handleSubmit, errors, meta } = useForm({
 });
 
 // Field 설정
-const { value: newPwd } = useField('newPwd');
-const { value: checkPwd } = useField('checkPwd');
+const { value: newPwd } = useField<string>('newPwd');
+const { value: checkPwd } = useField<string>('checkPwd');
 
 const getRedirectPath = (role: string | MemberType): string => {
   const roleRedirectMap: Record<MemberType, string> = {
@@ -70,8 +71,27 @@ const onSubmit = handleSubmit(async (values) => {
 
     resetForm();
   } catch (error) {
-    console.error('비밀번호 변경 실패:', error);
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '예상치 못한 문제가 발생했습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+        window.location.replace('/');
+      },
+    };
   }
+});
+
+const newPassword = computed({
+  get: () => newPwd.value,
+  set: (val: string) => (newPwd.value = val),
+});
+
+const confirmPassword = computed({
+  get: () => checkPwd.value,
+  set: (val: string) => (checkPwd.value = val),
 });
 
 // 비밀번호 표시 여부
@@ -90,8 +110,8 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
   <form class="login-form" @submit="onSubmit">
     <div class="relative">
       <label>비밀번호</label>
-      <input
-        v-model="newPwd"
+      <CommonInput
+        v-model="newPassword"
         :type="showPwd.new ? 'text' : 'password'"
         name="newPwd"
         maxlength="20"
@@ -132,8 +152,8 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
 
     <div class="relative">
       <label>비밀번호 확인</label>
-      <input
-        v-model="checkPwd"
+      <CommonInput
+        v-model="confirmPassword"
         :type="showPwd.check ? 'text' : 'password'"
         name="checkPwd"
         placeholder="Check Password"

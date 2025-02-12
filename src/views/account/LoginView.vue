@@ -7,7 +7,7 @@ import MainLogin from '@/components/login/MainLogin.vue';
     <div class="max-w-[39%] w-full">
       <img class="h-44 w-auto mb-24 mx-auto" src="../../assets/logo.png" alt="logo" />
       <MainLogin />
-      <a href="/password-reset-email" class="login-password-reset">비밀번호 재설정</a>
+      <router-link to="/password-reset-email" class="login-password-reset"> 비밀번호 재설정 </router-link>
     </div>
   </article>
 </template>
