@@ -193,15 +193,11 @@ const attachmentMutation = useCustomMutation(
 
 // 좋아요 토글 핸들러
 const handleLikeToggle = async (commentId: number) => {
-  try {
-    await likeMutation.mutateAsync({
-      ticketId: props.ticketId,
-      commentId: commentId,
-    });
-    queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
-  } catch (err) {
-    console.error('좋아요 토글 실패:', err);
-  }
+  await likeMutation.mutateAsync({
+    ticketId: props.ticketId,
+    commentId: commentId,
+  });
+  queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
 // 댓글 작성 함수
