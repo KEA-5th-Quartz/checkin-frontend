@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClipIcon, PencilIcon, XIcon } from '@/assets/icons/path';
+import { PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import { useTemplateStore } from '@/stores/userTemplateStore';
@@ -11,14 +11,20 @@ import { templateApi } from '@/services/templateService/templateService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { useCustomMutation } from '@/composables/useCustomMutation';
-import { useMemberStore } from '@/stores/memberStore';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { templateEditValidationSchema } from '@/utils/templateEditValidation';
+import { ValidationError } from 'yup';
+import { ApiError } from '@/types/common/error';
+import CommonInput from '@/components/common/CommonInput.vue';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const templateStore = useTemplateStore();
-const memberStore = useMemberStore();
 
 const props = defineProps<{
   templateId: number;
@@ -36,6 +42,74 @@ const handleClose = () => {
     handleCancelEdit();
   }, 300);
 };
+
+type ErrorFields = {
+  [key: string]: string;
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  content: string;
+  dueDate: string;
+};
+
+const errors = ref<ErrorFields>({
+  title: '',
+  firstCategory: '',
+  secondCategory: '',
+  content: '',
+  dueDate: '',
+});
+const getValidationData = (ticket: any) => {
+  return {
+    ...ticket,
+    firstCategory: ticket.firstCategory?.value || ticket.firstCategory,
+    secondCategory: ticket.secondCategory?.value || ticket.secondCategory,
+  };
+};
+
+// 개별 필드 검증 함수
+const validateField = async (field: string, value: unknown) => {
+  try {
+    const validationData = getValidationData({
+      ...templateStore.template,
+      [field]: value,
+    });
+
+    await templateEditValidationSchema.validateAt(field, validationData);
+    errors.value[field] = '';
+    return true;
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      errors.value[field] = err.message;
+    }
+    return false;
+  }
+};
+
+// 전체 폼 검증 함수
+const validateForm = async () => {
+  try {
+    const validationData = getValidationData(templateStore.template);
+    await templateEditValidationSchema.validate(validationData, { abortEarly: false });
+    return true;
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      err.inner.forEach((error) => {
+        if (error.path) {
+          errors.value[error.path] = error.message;
+        }
+      });
+    }
+    return false;
+  }
+};
+
+watch(
+  () => templateStore.template?.title,
+  async (newTitle) => {
+    await validateField('title', newTitle);
+  },
+);
 
 // 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['template-detail', props.templateId], async () => {
@@ -132,6 +206,13 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => templateStore.template?.content,
+  async (newContent) => {
+    await validateField('content', newContent);
+  },
+);
+
 const updateMutation = useCustomMutation(
   async () => {
     if (!templateStore.template || !props.templateId) return;
@@ -150,11 +231,23 @@ const updateMutation = useCustomMutation(
   {
     onSuccess: () => {
       queryClient.invalidateQueries(['template-detail', props.templateId]);
-      queryClient.invalidateQueries({ queryKey: ['template-list', memberStore.memberId] });
+      queryClient.invalidateQueries(['template-list']);
       templateStore.isEditMode = false;
     },
     onError: (error) => {
-      console.error('템플릿 수정 실패:', error);
+      const err = error as unknown as ApiError;
+      if (err.code === 'CATEGORY_4041') {
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.reload();
+          },
+        };
+      }
     },
   },
 );
@@ -164,7 +257,10 @@ const handleCancelEdit = () => {
   templateStore.isEditMode = false;
 };
 
-const handleConfirmEdit = () => {
+const handleConfirmEdit = async () => {
+  if (!(await validateForm())) {
+    return;
+  }
   updateMutation.mutate();
 };
 
@@ -176,19 +272,21 @@ const startEdit = () => {
 const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   try {
     firstCategorySelected.value = option;
+    await validateField('firstCategory', option);
 
-    // ticketStore 업데이트
-    templateStore.updateTemplate({
-      ...templateStore.template,
-      firstCategory: option.label,
-    });
-
-    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
+    // 선택된 1차 카테고리의 contentGuide 찾기
     const selectedFirstCategory = categoryData.value?.data?.data.find(
       (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
     );
 
-    // 2차 카테고리를 첫 번째 요소로 설정
+    // templateStore 업데이트 - contentGuide를 content에 설정
+    templateStore.updateTemplate({
+      ...templateStore.template,
+      firstCategory: option.label,
+      content: selectedFirstCategory?.contentGuide || '', // contentGuide를 content에 설정
+    });
+
+    // 2차 카테고리 설정 (기존 코드)
     if (selectedFirstCategory?.secondCategories?.length > 0) {
       const firstSecondCategoryOption = {
         id: selectedFirstCategory.secondCategories[0].secondCategoryId,
@@ -197,7 +295,6 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       };
       secondCategorySelected.value = firstSecondCategoryOption;
 
-      // 2차 카테고리도 ticketStore에 업데이트
       templateStore.updateTemplate({
         ...templateStore.template,
         secondCategory: firstSecondCategoryOption.label,
@@ -235,7 +332,12 @@ const canEdit = computed(() => {
         <!-- 헤더 -->
         <header class="ticket-header">
           <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
-          <input v-else v-model="templateStore.template.title" class="ticket-edit-input" />
+          <CommonInput
+            v-else
+            v-model="templateStore.template.title"
+            class="ticket-edit-input"
+            :class="{ 'border-red-1': errors.title }"
+          />
           <div v-if="!templateStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon
               v-if="canEdit"
@@ -272,6 +374,7 @@ const canEdit = computed(() => {
                   :options="firstCategoryOptions"
                   :selected-option="firstCategorySelected"
                   @select="handleFirstCategorySelect"
+                  :class="{ 'border-red-1': errors.firstCategory }"
                   isEdit
                 />
               </div>
@@ -306,30 +409,26 @@ const canEdit = computed(() => {
             <div v-if="!templateStore.isEditMode" class="ticket-desc-area">
               <p class="ticket-desc-content">{{ templateStore.template.content }}</p>
             </div>
-            <div v-else>
-              <textarea v-model="templateStore.template.content" class="ticket-desc-textarea" />
-              <div class="flex w-full justify-end pr-2 cursor-pointer">
-                <SvgIcon :icon="ClipIcon" />
-              </div>
-            </div>
+
+            <CommonTextarea
+              v-else
+              v-model="templateStore.template.content"
+              class="ticket-desc-textarea"
+              :class="{ 'border-red-1': errors.content }"
+            />
+            <span v-if="errors.content" class="text-xs text-red-1 mt-1 block">{{ errors.content }}</span>
           </div>
         </div>
       </div>
     </div>
+
+    <CommonDialog
+      v-if="dialogState.open"
+      :isOneBtn="dialogState.isOneBtn"
+      :title="dialogState.title"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onMainClick"
+      :onMainClick="dialogState.onMainClick"
+    />
   </Teleport>
 </template>
-
-<style scoped>
-input[type='date']::-webkit-calendar-picker-indicator {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-input[type='date'] {
-  position: relative;
-  background-color: white;
-}
-</style>
