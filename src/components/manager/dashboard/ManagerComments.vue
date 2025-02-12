@@ -10,7 +10,6 @@ import { useMemberStore } from '@/stores/memberStore';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
-import { onClickOutside } from '@vueuse/core';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps<{
@@ -194,15 +193,11 @@ const attachmentMutation = useCustomMutation(
 
 // 좋아요 토글 핸들러
 const handleLikeToggle = async (commentId: number) => {
-  try {
-    await likeMutation.mutateAsync({
-      ticketId: props.ticketId,
-      commentId: commentId,
-    });
-    queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
-  } catch (err) {
-    console.error('좋아요 토글 실패:', err);
-  }
+  await likeMutation.mutateAsync({
+    ticketId: props.ticketId,
+    commentId: commentId,
+  });
+  queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
 // 댓글 작성 함수

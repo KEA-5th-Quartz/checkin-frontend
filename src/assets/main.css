@@ -130,7 +130,7 @@ body {
     @apply inline-flex gap-2 py-1;
   }
   .dropdown-bar-isEdit {
-    @apply border border-gray-2 py-2 w-full -mt-2 rounded-xl;
+    @apply border border-gray-2 py-2 w-full -mt-2 rounded-xl max-w-[216px];
   }
   .dropdown-bar-default {
     @apply border border-primary-2 hover:border-primary-4 py-2;
@@ -283,14 +283,14 @@ body {
     @apply ticket-desc-area w-full resize-none text-sm text-gray-1 focus:outline-none;
   }
   .ticket-desc-content {
-    @apply text-sm text-gray-1;
+    @apply text-sm text-gray-1 whitespace-pre-wrap break-words;
   }
   .ticket-attachment {
     @apply bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-xs;
   }
   /* 티켓 댓글 */
   .ticket-comment-container {
-    @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar bg-gray-3 pt-5 pb-3 px-2;
+    @apply flex-stack gap-5 mt-4 h-56 overflow-y-auto hide-scrollbar bg-gray-3 pt-9 pb-3 px-4;
   }
   .ticket-comment-log {
     @apply flex-center gap-5 w-full mb-5;

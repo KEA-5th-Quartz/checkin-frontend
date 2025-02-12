@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ClipIcon, DownloadIcon, PencilIcon, XIcon } from '@/assets/icons/path';
+import { DownloadIcon, PencilIcon, XIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { computed, ref, watch } from 'vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
@@ -15,10 +15,18 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { getFileType, isImageFile } from '@/utils/getFileType';
+import { ValidationError } from 'yup';
+import { ticketEditValidationSchema } from '@/utils/ticketEditValidation';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
+import CommonInput from '@/components/common/CommonInput.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { ApiError } from '@/types/common/error';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
 const secondCategorySelected = ref();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const props = defineProps<{
   ticketId: number;
@@ -59,6 +67,77 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
 });
 
 const ticketStore = useTicketStore();
+
+type ErrorFields = {
+  [key: string]: string; // 인덱스 시그니처 추가
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  content: string;
+  dueDate: string;
+  attachments: string;
+};
+
+// errors ref 선언
+const errors = ref<ErrorFields>({
+  title: '',
+  firstCategory: '',
+  secondCategory: '',
+  content: '',
+  dueDate: '',
+  attachments: '',
+});
+const getValidationData = (ticket: any) => {
+  return {
+    ...ticket,
+    firstCategory: ticket.firstCategory?.value || ticket.firstCategory,
+    secondCategory: ticket.secondCategory?.value || ticket.secondCategory,
+  };
+};
+
+// 개별 필드 검증 함수 수정
+const validateField = async (field: string, value: any) => {
+  try {
+    const validationData = getValidationData({
+      ...ticketStore.ticket,
+      [field]: value,
+    });
+
+    await ticketEditValidationSchema.validateAt(field, validationData);
+    errors.value[field] = '';
+    return true;
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      errors.value[field] = err.message;
+    }
+    return false;
+  }
+};
+
+// 전체 폼 검증 함수 수정
+const validateForm = async () => {
+  try {
+    const validationData = getValidationData(ticketStore.ticket);
+    await ticketEditValidationSchema.validate(validationData, { abortEarly: false });
+    return true;
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      err.inner.forEach((error) => {
+        if (error.path) {
+          errors.value[error.path] = error.message;
+        }
+      });
+    }
+    return false;
+  }
+};
+
+watch(
+  () => ticketStore.ticket?.title,
+  async (newTitle) => {
+    await validateField('title', newTitle);
+  },
+);
 
 // 1차 카테고리 옵션 동적 생성
 const firstCategoryOptions = computed(() => {
@@ -142,6 +221,13 @@ watch(
   { immediate: true },
 );
 
+watch(
+  () => ticketStore.ticket?.content,
+  async (newContent) => {
+    await validateField('content', newContent);
+  },
+);
+
 const updateMutation = useCustomMutation(
   async () => {
     if (!ticketStore.ticket || !props.ticketId) return;
@@ -165,7 +251,19 @@ const updateMutation = useCustomMutation(
       ticketStore.isEditMode = false;
     },
     onError: (error) => {
-      console.error('티켓 수정 실패:', error);
+      const err = error as unknown as ApiError;
+      if (err.code === 'CATEGORY_4041') {
+        dialogState.value = {
+          open: true,
+          isOneBtn: true,
+          title: error.message,
+          mainText: '확인',
+          onMainClick: () => {
+            dialogState.value = { ...initialDialog };
+            window.location.reload();
+          },
+        };
+      }
     },
   },
 );
@@ -175,7 +273,10 @@ const handleCancelEdit = () => {
   ticketStore.isEditMode = false;
 };
 
-const handleConfirmEdit = () => {
+const handleConfirmEdit = async () => {
+  if (!(await validateForm())) {
+    return;
+  }
   updateMutation.mutate();
 };
 
@@ -187,6 +288,7 @@ const startEdit = () => {
 const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   try {
     firstCategorySelected.value = option;
+    await validateField('firstCategory', option);
 
     // ticketStore 업데이트
     ticketStore.updateTicket({
@@ -304,7 +406,13 @@ const canEdit = computed(() => {
             <p>{{ ticketStore.ticket.title }}</p>
             <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
           </div>
-          <input v-else v-model="ticketStore.ticket.title" class="ticket-edit-input" />
+          <CommonInput
+            v-else
+            v-model="ticketStore.ticket.title"
+            class="ticket-edit-input"
+            :class="{ 'border-red-1': errors.title }"
+          />
+
           <div v-if="!ticketStore.isEditMode" class="flex items-center gap-8">
             <SvgIcon
               v-if="canEdit"
@@ -347,6 +455,7 @@ const canEdit = computed(() => {
                   :options="firstCategoryOptions"
                   :selected-option="firstCategorySelected"
                   @select="handleFirstCategorySelect"
+                  :class="{ 'border-red-1': errors.firstCategory }"
                   isEdit
                 />
               </div>
@@ -404,13 +513,15 @@ const canEdit = computed(() => {
                 <p v-if="!ticketStore.isEditMode" class="ticket-date">
                   {{ formatMinusDate(ticketStore.ticket.due_date) }}
                 </p>
-                <input
+                <CommonInput
                   v-else
                   type="date"
                   :min="new Date().toISOString().split('T')[0]"
                   class="ticket-date ticket-edit-input py-2"
+                  :class="{ 'border-red-1': errors.dueDate }"
                   v-model="formattedDueDate"
                 />
+                <span v-if="errors.due_date" class="text-xs text-red-1 mt-1 block">{{ errors.due_date }}</span>
               </div>
             </section>
           </div>
@@ -422,10 +533,12 @@ const canEdit = computed(() => {
               <p class="ticket-desc-content">{{ ticketStore.ticket.content }}</p>
             </div>
             <div v-else>
-              <textarea v-model="ticketStore.ticket.content" class="ticket-desc-textarea" />
-              <div class="flex w-full justify-end pr-2 cursor-pointer">
-                <SvgIcon :icon="ClipIcon" />
-              </div>
+              <CommonTextarea
+                v-model="ticketStore.ticket.content"
+                class="ticket-desc-textarea"
+                :class="{ 'border-red-500': errors.content }"
+              />
+              <span v-if="errors.content" class="text-xs text-red-500 mt-1 block">{{ errors.content }}</span>
             </div>
           </div>
 
@@ -449,6 +562,15 @@ const canEdit = computed(() => {
         </div>
       </div>
     </div>
+
+    <CommonDialog
+      v-if="dialogState.open"
+      :isOneBtn="dialogState.isOneBtn"
+      :title="dialogState.title"
+      :mainText="dialogState.mainText"
+      :onCancelClick="dialogState.onMainClick"
+      :onMainClick="dialogState.onMainClick"
+    />
   </Teleport>
 </template>
 
