@@ -3,11 +3,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
 import { userApi } from '@/services/userService/userService';
 import CommonDialog from '../common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonInput from '../common/CommonInput.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -23,8 +24,18 @@ const { handleSubmit, errors, meta } = useForm({
 });
 
 // Field 설정
-const { value: newPwd } = useField('newPwd');
-const { value: checkPwd } = useField('checkPwd');
+const { value: newPwd } = useField<string>('newPwd');
+const { value: checkPwd } = useField<string>('checkPwd');
+
+const newPassword = computed({
+  get: () => newPwd.value,
+  set: (val: string) => (newPwd.value = val),
+});
+
+const confirmPassword = computed({
+  get: () => checkPwd.value,
+  set: (val: string) => (checkPwd.value = val),
+});
 
 const resetForm = () => {
   newPwd.value = '';
@@ -80,8 +91,8 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
   <form class="login-form" @submit="onSubmit">
     <div class="relative">
       <label>비밀번호</label>
-      <input
-        v-model="newPwd"
+      <CommonInput
+        v-model="newPassword"
         :type="showPwd.new ? 'text' : 'password'"
         name="newPwd"
         maxlength="20"
@@ -122,8 +133,8 @@ const togglePwdVisibility = (field: 'new' | 'check') => {
 
     <div class="relative">
       <label>비밀번호 확인</label>
-      <input
-        v-model="checkPwd"
+      <CommonInput
+        v-model="confirmPassword"
         :type="showPwd.check ? 'text' : 'password'"
         name="checkPwd"
         placeholder="Check Password"
