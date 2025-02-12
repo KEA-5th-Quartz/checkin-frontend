@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'; // 반응형 상태 생성
-import TemplateDetail from './TemplateDetail.vue'; // 상세 템플릿 조회
-import { useUserTemplateListStore } from '@/stores/userTemplateListStore'; // 템플릿 상태관리
-import SvgIcon from '@/components/common/SvgIcon.vue'; // 아이콘
+import { onBeforeUnmount, onMounted, ref, watchEffect } from 'vue';
+import TemplateDetail from './TemplateDetail.vue';
+import { useUserTemplateListStore } from '@/stores/userTemplateListStore';
+import SvgIcon from '@/components/common/SvgIcon.vue';
 import { ArrowDownIcon, CreateTicketIcon, TrashcanIcon } from '@/assets/icons/path';
 import { perPageOptions } from '@/components/manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
@@ -14,24 +14,39 @@ import CommonDialog from '@/components/common/CommonDialog.vue';
 import CustomPagination from '@/components/common/CustomPagination.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
+import router from '@/router';
 
 const templateStore = useUserTemplateListStore();
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
-
 const selectedTemplateId = ref<number | null>(null);
-const selectedPerPage = ref(perPageOptions[0]);
-const isSizeOpen = ref(false);
 
-const currentPage = ref(parseInt(sessionStorage.getItem('templateCurrentPage') || '1'));
+const initialPage = parseInt(sessionStorage.getItem('templateCurrentPage') || '1');
+const currentPage = ref(initialPage);
+
 const pageSize = ref(perPageOptions[0].value);
 
+const selectedPerPage = ref(perPageOptions[0]);
+const isSizeOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+
 onClickOutside(dropdownRef, () => (isSizeOpen.value = false));
 
-const selectOption = (
-  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
-) => {
+const queryParams = ref({
+  page: currentPage.value,
+  size: pageSize.value,
+  memberId: memberStore.memberId,
+});
+
+watchEffect(() => {
+  queryParams.value = {
+    page: currentPage.value,
+    size: pageSize.value,
+    memberId: memberStore.memberId,
+  };
+});
+
+const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
   currentPage.value = 1;
@@ -41,21 +56,23 @@ const selectOption = (
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 쿼리 파라미터
-const queryParams = computed(() => ({
-  page: currentPage.value,
-  size: pageSize.value,
-}));
-
 // 데이터 페칭
-const { data: templateData } = useCustomQuery(['template-list', memberStore.memberId], async () => {
-  const response = await templateApi.getTemplateList(
-    memberStore.memberId,
-    queryParams.value.page,
-    queryParams.value.size,
-  );
-  return response.data;
-});
+const { data: templateData } = useCustomQuery(
+  ['template-list', queryParams],
+  async () => {
+    const response = await templateApi.getTemplateList(
+      queryParams.value.memberId,
+      queryParams.value.page,
+      queryParams.value.size,
+    );
+    return response.data;
+  },
+  {
+    enabled: true,
+    keepPreviousData: false,
+    refetchOnWindowFocus: false,
+  },
+);
 
 // 템플릿 삭제 뮤테이션
 const deleteMutation = useCustomMutation(
@@ -65,13 +82,12 @@ const deleteMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['template-list', memberStore.memberId] });
+      queryClient.invalidateQueries({ queryKey: ['template-list'] });
     },
   },
 );
 
 const handleDelete = () => {
-  // Set을 배열로 변환하여 선택된 템플릿 ID들을 가져옴
   const selectedTemplateIds = Array.from(templateStore.selectedTemplates);
   const templateCount = selectedTemplateIds.length;
 
@@ -86,10 +102,9 @@ const handleDelete = () => {
     mainText: '삭제',
     onMainClick: () => {
       deleteMutation.mutate({ templateIds: selectedTemplateIds });
-
-      templateStore.clearSelectedTemplates(); // 선택된 티켓 초기화
-      templateStore.toggleDeleteMode(); // 삭제 모드 종료
-      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+      templateStore.clearSelectedTemplates();
+      templateStore.toggleDeleteMode();
+      dialogState.value = { ...initialDialog };
     },
   };
 };
@@ -108,7 +123,6 @@ const handleCloseModal = () => {
 };
 
 const handleCheckboxClick = (event: Event, id: number) => {
-  // 체크박스 클릭 시 이벤트 전파 중지 (행 클릭 이벤트 방지)
   event.stopPropagation();
 
   if (templateStore.selectedTemplates.has(id)) {
@@ -122,6 +136,12 @@ const handlePageChange = (page: number) => {
   currentPage.value = page;
   sessionStorage.setItem('templateCurrentPage', page.toString());
 };
+
+onMounted(() => {
+  queryClient.invalidateQueries({
+    queryKey: ['template-list'],
+  });
+});
 
 onBeforeUnmount(() => {
   sessionStorage.setItem('templateCurrentPage', currentPage.value.toString());
@@ -147,13 +167,14 @@ onBeforeUnmount(() => {
         <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="templateStore.toggleDeleteMode" />
       </div>
     </header>
-    <!-- 템플릿 삭제 모드 헤더 -->
+
     <header v-else class="board-header">
       <div class="flex items-center gap-4 ml-auto">
         <button @click="handleCancel" class="btn-cancel py-2">취소</button>
         <button @click="handleDelete" class="btn-main py-2">삭제</button>
       </div>
     </header>
+
     <article class="overflow-x-auto mt-5 px-5 pb-20 hide-scrollbar">
       <div class="h-[calc(100vh-300px)]">
         <table class="min-w-full table-fixed">
@@ -236,6 +257,7 @@ onBeforeUnmount(() => {
       :onMainClick="dialogState.onMainClick"
     />
   </section>
+
   <section v-else class="w-full flex flex-col items-center pb-40">
     <div class="flex flex-col items-center gap-8 mt-32">
       <img src="@/assets/no-template.png" class="w-96 h-96" />
@@ -245,7 +267,10 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <button class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20">
+    <button
+      @click="router.push('/user/templatecreate')"
+      class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
+    >
       <SvgIcon :icon="CreateTicketIcon" />
       템플릿 생성
     </button>
