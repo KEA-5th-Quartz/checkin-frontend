@@ -216,6 +216,7 @@ const onSubmit = handleSubmit(async (formValues, { setErrors }) => {
     };
 
     await createTemplateMutation.mutateAsync(templateData);
+    queryClient.refetchQueries(['template-list']);
   } catch (error) {
     const err = error as unknown as ApiError;
     if (err.code === 'CATEGORY_4041') {
