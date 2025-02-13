@@ -9,10 +9,15 @@
       <!-- 모달 본문 -->
       <div class="category-modal-body">
         <label class="category-modal-input-label">카테고리 이름</label>
-        <CommonInput v-model="updatedName" class="category-modal-input" placeholder="카테고리 이름을 입력하세요" />
+        <CommonInput
+          type="text"
+          v-model="updatedName"
+          class="category-modal-input"
+          placeholder="카테고리 이름을 입력하세요"
+        />
         <!-- Alias 입력란 -->
         <label class="category-modal-input-label">카테고리 약어</label>
-        <CommonInput v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
+        <CommonInput type="text" v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
 
         <!-- Content Guide 입력란 -->
         <label v-if="isFirstCategoryComputed" class="category-modal-input-label">카테고리 요청 가이드</label>

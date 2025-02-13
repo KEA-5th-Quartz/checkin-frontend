@@ -4,6 +4,7 @@
     <div class="flex items-center px-2 py-3 rounded-md shadow-md w-full max-w-sm border border-gray-2">
       <CommonInput
         maxlength="16"
+        type="text"
         class="bg-transparent focus:outline-none pl-3 text-gray-0 w-full"
         placeholder="인원 검색..."
         v-model="searchQuery"

@@ -193,6 +193,7 @@ onBeforeUnmount(() => {
       <div v-if="!hasActiveFilters" class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
         <CommonInput
+          type="text"
           v-model="keyword"
           maxlength="20"
           placeholder="티켓 검색..."

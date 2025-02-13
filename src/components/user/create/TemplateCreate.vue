@@ -280,6 +280,7 @@ const closeDialog = async () => {
         <label class="ticket-label">템플릿 제목</label>
         <CommonInput
           :value="title"
+          type="text"
           @input="handleTitleInput"
           name="title"
           class="title-form bg-[#fafafa]"
