@@ -21,7 +21,7 @@
           v-if="isFirstCategoryComputed"
           v-model="updatedContentGuide"
           class="category-modal-input category-modal-textarea"
-          placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+          placeholder="ex) 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
         ></CommonTextarea>
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
@@ -66,7 +66,7 @@ function isSecondCategory(category: FirstCategory | SecondCategory | null): cate
 const isFirstCategoryComputed = computed(() => isFirstCategory(props.category));
 
 const aliasPlaceholder = computed(() => {
-  return isFirstCategoryComputed.value ? '영문 2~4글자 대문자 ex> INFR' : '영문 3글자 대문자 ex> NFS';
+  return isFirstCategoryComputed.value ? '영문 2~4글자 대문자 ex) INFR' : '영문 3글자 대문자 ex) NFS';
 });
 
 // Emits 정의
