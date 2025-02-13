@@ -502,8 +502,16 @@ const isLastComment = (index: number) => {
     />
     <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">
-      <SvgIcon :icon="ClipIcon" class="cursor-pointer" @click="triggerFileInput" />
-      <SvgIcon :icon="SendIcon" class="cursor-pointer" @click="handleAddComments" />
+      <SvgIcon
+        :icon="ClipIcon"
+        class="cursor-pointer hover:bg-primary-5 h-6 w-6 rounded-md"
+        @click="triggerFileInput"
+      />
+      <SvgIcon
+        :icon="SendIcon"
+        class="cursor-pointer hover:bg-primary-5 h-6 w-6 rounded-md"
+        @click="handleAddComments"
+      />
     </div>
   </div>
 
