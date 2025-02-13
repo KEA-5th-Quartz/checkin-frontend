@@ -71,7 +71,7 @@ const pages = computed(() => {
     <button
       :disabled="currentPage === 1"
       @click="goToPage(currentPage - 1)"
-      class="w-10 h-10 px-2 py-1 bg-gray-3 rounded disabled:bg-gray-3 flex items-center justify-center border-gray-4"
+      class="w-10 h-10 px-2 py-1 bg-gray-3 rounded disabled:bg-gray-3 flex-center border-gray-4"
     >
       <span class="text-sm">&lt;</span>
     </button>
@@ -83,7 +83,9 @@ const pages = computed(() => {
       @click="typeof page === 'number' ? goToPage(page) : null"
       :class="[
         'w-10 h-10 text-sm px-2 py-1 rounded border-gray-4',
-        page === currentPage ? 'bg-primary-0 text-white-0 border-purple-400' : 'bg-gray-3',
+        page === currentPage
+          ? 'bg-primary-0 text-white-0 border-purple-400 hover:bg-opacity-80'
+          : 'bg-gray-3 hover:bg-gray-2',
         page === '...' ? 'cursor-default' : 'cursor-pointer',
       ]"
       :disabled="page === '...'"
@@ -95,7 +97,7 @@ const pages = computed(() => {
     <button
       :disabled="currentPage === totalPages"
       @click="goToPage(currentPage + 1)"
-      class="w-10 h-10 px-2 py-1 bg-gray-3 rounded disabled:bg-gray-3 flex items-center justify-center"
+      class="w-10 h-10 px-2 py-1 bg-gray-3 hover:bg-gray-2 rounded disabled:bg-gray-3 flex-center"
     >
       <span class="text-sm">&gt;</span>
     </button>

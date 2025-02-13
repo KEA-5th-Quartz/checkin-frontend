@@ -269,7 +269,7 @@ onBeforeUnmount(() => {
 
     <button
       @click="router.push('/user/templatecreate')"
-      class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
+      class="flex items-center bg-primary-0 hover:bg-opacity-80 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
     >
       <SvgIcon :icon="CreateTicketIcon" />
       템플릿 생성

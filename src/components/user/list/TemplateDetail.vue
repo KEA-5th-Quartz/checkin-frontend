@@ -18,6 +18,7 @@ import { ApiError } from '@/types/common/error';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
+import { AxiosError } from 'axios';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -235,18 +236,18 @@ const updateMutation = useCustomMutation(
       templateStore.isEditMode = false;
     },
     onError: (error) => {
-      const err = error as unknown as ApiError;
-      if (err.code === 'CATEGORY_4041') {
-        dialogState.value = {
-          open: true,
-          isOneBtn: true,
-          title: err.message,
-          mainText: '확인',
-          onMainClick: () => {
-            dialogState.value = { ...initialDialog };
-          },
-        };
-      }
+      const err = error as unknown as AxiosError;
+      const apiError = err.response?.data as ApiError;
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: apiError.message || '오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     },
   },
 );

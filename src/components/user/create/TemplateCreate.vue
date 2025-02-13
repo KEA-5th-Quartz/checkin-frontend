@@ -18,6 +18,7 @@ import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonInput from '@/components/common/CommonInput.vue';
 import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { AxiosError } from 'axios';
 
 interface CategoryWithGuide {
   firstCategoryId: number;
@@ -173,6 +174,20 @@ const createTemplateMutation = useCustomMutation(
     onSuccess: () => {
       showDialog.value = true;
       queryClient.refetchQueries(['template-list']);
+    },
+    onError: (error) => {
+      const err = error as unknown as AxiosError;
+      const apiError = err.response?.data as ApiError;
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: apiError.message || '오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     },
   },
 );
