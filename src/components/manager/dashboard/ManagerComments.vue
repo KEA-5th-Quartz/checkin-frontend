@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
@@ -7,6 +8,7 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { userApi } from '@/services/userService/userService';
 import { useMemberStore } from '@/stores/memberStore';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -18,6 +20,7 @@ const props = defineProps<{
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const chatContainer = ref<HTMLElement | null>(null);
 // 댓글 작성자 정보를 저장할 Map
@@ -232,29 +235,63 @@ const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
-// 파일 변경 핸들러
+const ALLOWED_FILE_TYPES = {
+  'image/jpeg': [0xff, 0xd8, 0xff],
+  'image/png': [0x89, 0x50, 0x4e, 0x47],
+  'image/webp': [0x52, 0x49, 0x46, 0x46],
+  'application/pdf': [0x25, 0x50, 0x44, 0x46],
+  'application/msword': [0xd0, 0xcf, 0x11, 0xe0],
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [0x50, 0x4b, 0x03, 0x04],
+};
+
+const validateFileSignature = async (file: File, expectedSignature: number[]): Promise<boolean> => {
+  const buffer = await file.arrayBuffer();
+  const header = new Uint8Array(buffer.slice(0, expectedSignature.length));
+  return expectedSignature.every((byte, i) => header[i] === byte);
+};
+
+const sanitizeFileName = (fileName: string): string => {
+  const extension = fileName.split('.').pop();
+  const baseName = fileName.split('.').slice(0, -1).join('.');
+  const sanitizedBase = baseName.replace(/[^\w\s-]/g, '');
+  return `${sanitizedBase}.${extension}`;
+};
+
 const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   if (!target.files?.length) return;
 
   const file = target.files[0];
-
-  // 파일 크기 검사 (10MB)
-  if (file.size > 10 * 1024 * 1024) {
-    alert('파일 크기는 10MB를 초과할 수 없습니다.');
-    target.value = '';
-    return;
-  }
-
-  const formData = new FormData();
-  const requestData = {
-    ticketId: props.ticketId,
-  };
-
-  formData.append('file', file);
-  formData.append('data', new Blob([JSON.stringify(requestData)], { type: 'application/json' }));
+  const fileType = file.type;
 
   try {
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('파일 크기는 10MB를 초과할 수 없습니다.');
+    }
+
+    if (!Object.keys(ALLOWED_FILE_TYPES).includes(fileType)) {
+      throw new Error('지원하지 않는 파일 형식입니다.');
+    }
+
+    const isValidSignature = await validateFileSignature(
+      file,
+      ALLOWED_FILE_TYPES[fileType as keyof typeof ALLOWED_FILE_TYPES],
+    );
+
+    if (!isValidSignature) {
+      throw new Error('파일 형식이 올바르지 않습니다.');
+    }
+
+    const sanitizedFileName = sanitizeFileName(file.name);
+
+    const formData = new FormData();
+    const requestData = {
+      ticketId: props.ticketId,
+    };
+
+    formData.append('file', file, sanitizedFileName);
+    formData.append('data', new Blob([JSON.stringify(requestData)], { type: 'application/json' }));
+
     await attachmentMutation.mutateAsync({
       ticketId: props.ticketId,
       formData: formData,
@@ -265,13 +302,21 @@ const handleFileChange = async (event: Event) => {
     }
     scrollToBottom();
   } catch (err) {
-    if (err instanceof Error) {
-      console.error('파일 첨부 실패:', err.message);
+    if (fileInput.value) {
+      fileInput.value.value = '';
     }
-    alert('파일 첨부에 실패했습니다.');
+
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: err instanceof Error ? err.message : '파일 첨부에 실패했습니다.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
   }
 };
-
 // 파일 다운로드
 const handleFileDownload = (file: AttachedFile) => {
   try {
@@ -461,4 +506,13 @@ const isLastComment = (index: number) => {
       <SvgIcon :icon="SendIcon" class="cursor-pointer" @click="handleAddComments" />
     </div>
   </div>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>
