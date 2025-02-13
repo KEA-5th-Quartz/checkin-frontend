@@ -20,7 +20,7 @@
           v-if="isFirstCategory"
           v-model="alias"
           class="category-modal-input"
-          placeholder="영문 2~4글자 대문자 ex> INFR"
+          placeholder="영문 2~4글자 대문자 ex) INFR"
         />
 
         <label v-if="isSecondaryCategory" class="category-modal-input-label"> 카테고리 약어 </label>
@@ -28,7 +28,7 @@
           v-if="isSecondaryCategory"
           v-model="alias"
           class="category-modal-input"
-          placeholder="영문 3글자 대문자 ex> NFS"
+          placeholder="영문 3글자 대문자 ex) CRT"
         />
 
         <!-- Content Guide 입력란 -->
@@ -38,7 +38,7 @@
           v-if="!isSecondaryCategory"
           v-model="contentGuide"
           class="category-modal-input category-modal-textarea"
-          placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+          placeholder="ex) 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
         ></CommonTextarea>
         <!-- 경고 메시지 -->
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
