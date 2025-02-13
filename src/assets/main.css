@@ -83,7 +83,7 @@ body {
 
   /* 사이드바 */
   .sidebar-nav-container {
-    @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] 
+    @apply fixed top-0 left-0 w-48 lg:w-64 min-h-screen rounded-r-[49px] z-[50]
     bg-gradient-to-b from-[#2E2E48] to-[#5D5D9D];
   }
   .sidebar-logo {
