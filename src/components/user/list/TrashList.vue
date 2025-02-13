@@ -161,7 +161,7 @@ onBeforeUnmount(() => {
       <div>
         <p class="pl-12 text-xl font-semibold">삭제된 항목은 30일간 휴지통에 보관됩니다.</p>
       </div>
-      <div class="flex gap-8">
+      <div v-if="trashData?.tickets?.length !== 0 || !trashData" class="flex gap-8">
         <div ref="dropdownRef" class="relative">
           <button @click="isOpen = !isOpen" class="manager-filter-btn">
             <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="flex items-center gap-4 pr-10">
+        <div v-if="trashData?.tickets?.length !== 0 || !trashData" class="flex items-center gap-4 pr-10">
           <button @click="handleRestore" class="btn-cancel py-2">복구</button>
           <button @click="handleDelete" class="btn-main py-2">삭제</button>
         </div>
@@ -215,6 +215,9 @@ onBeforeUnmount(() => {
           </thead>
 
           <tbody class="whitespace-nowrap">
+            <tr v-if="trashData?.tickets?.length === 0 || !trashData">
+              <td colspan="8" class="text-center py-6 text-gray-500">휴지통에 항목이 존재하지 않습니다.</td>
+            </tr>
             <tr
               v-for="ticket in trashData?.tickets"
               :key="ticket.ticketId"
@@ -275,6 +278,7 @@ onBeforeUnmount(() => {
     </section>
 
     <CustomPagination
+      v-if="trashData?.tickets?.length !== 0 || !trashData"
       :items-per-page="pageSize"
       :current-page="currentPage"
       :total-pages="trashData?.totalPages || 1"
