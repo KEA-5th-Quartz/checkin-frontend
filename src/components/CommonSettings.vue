@@ -9,6 +9,7 @@ import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
 import { useCustomQuery } from '@/composables/useCustomQuery';
+import { AxiosError } from 'axios';
 
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
@@ -53,16 +54,17 @@ const onSubmit = handleSubmit(async (values) => {
 
     resetForm();
   } catch (error) {
-    const err = error as ApiError;
+    const err = error as AxiosError;
+    const apiError = err.response?.data as ApiError;
 
-    switch (err.code) {
+    switch (apiError?.code) {
       case 'MEMBER_4004':
       case 'MEMBER_4003':
       case 'MEMBER_4000':
         dialogState.value = {
           open: true,
           isOneBtn: true,
-          title: err.message,
+          title: apiError.message,
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };

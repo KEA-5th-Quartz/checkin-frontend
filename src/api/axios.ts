@@ -133,14 +133,10 @@ api.interceptors.response.use(
       case 403:
         showErrorDialog('접근 권한 없음', '해당 기능에 대한 접근 권한이 없습니다.');
         break;
-      case 404:
-        showErrorDialog('리소스 없음', '요청하신 정보를 찾을 수 없습니다.');
-        break;
       case 500:
         showErrorDialog('서버 오류', '서버에서 오류가 발생했습니다.');
         break;
       default:
-        showErrorDialog('오류 발생', '예기치 못한 오류가 발생했습니다.');
     }
 
     return Promise.reject(error);
