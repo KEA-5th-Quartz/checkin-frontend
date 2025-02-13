@@ -96,6 +96,7 @@ const chartOptions = ref<ChartOptions>({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',
@@ -187,6 +188,7 @@ const chartOptions2 = ref<ChartOptions>({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',

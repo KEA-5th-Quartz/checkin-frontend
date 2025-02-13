@@ -71,11 +71,40 @@ const series = ref<{ name: string; data: number[] }[]>([]);
 const managerCategories = ref<string[]>([]); // 담당자 X축 카테고리
 const categoryCategories = ref<string[]>([]); // 카테고리 X축 카테고리
 
+const commonChartOptions = {
+  toolbar: {
+    show: true,
+    tools: {
+      download: true, // Export 버튼 활성화
+      selection: false,
+      zoom: false,
+      zoomin: false,
+      zoomout: false,
+      pan: false,
+      reset: false,
+    },
+    export: {
+      csv: {
+        filename: 'chart_data',
+        columnDelimiter: ',',
+        headerCategory: 'Category',
+        headerValue: 'Value',
+      },
+      svg: {
+        filename: 'chart_data',
+      },
+      png: {
+        filename: 'chart_data',
+      },
+    },
+  },
+};
+
 const chartOptions = ref<ChartOptions>({
   chart: {
     type: 'bar',
     stacked: true,
-    toolbar: { show: false },
+    ...commonChartOptions,
   },
   plotOptions: {
     bar: {
@@ -95,7 +124,8 @@ const chartOptions = ref<ChartOptions>({
   colors: ['#3570FF', '#828DCA'],
   legend: {
     position: 'top',
-    horizontalAlign: 'right',
+    horizontalAlign: 'left',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',
@@ -166,7 +196,7 @@ const chartOptions2 = ref<ChartOptions>({
   chart: {
     type: 'bar',
     stacked: false,
-    toolbar: { show: false },
+    ...commonChartOptions,
   },
   plotOptions: {
     bar: {
@@ -187,6 +217,7 @@ const chartOptions2 = ref<ChartOptions>({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',
@@ -243,6 +274,7 @@ const series3 = ref<number[]>([50, 50]);
 const chartOptions3 = ref({
   chart: {
     type: 'donut',
+    ...commonChartOptions,
   },
   labels: ['완료된 작업', '미완료 작업'],
   colors: ['#3570FF', '#D1D5DB'], // 완료/미완료 색상
@@ -294,6 +326,7 @@ const labels = ref<string[]>([]);
 const chartOptions4 = ref({
   chart: {
     type: 'donut',
+    ...commonChartOptions,
   },
   labels: [] as string[],
   colors: ['#3570FF', '#10B981', '#9CA3AF', '#EF4444'], // 진행 중, 오픈, 완료, 연체
