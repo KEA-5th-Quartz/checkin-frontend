@@ -334,6 +334,7 @@ const canEdit = computed(() => {
           <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
           <CommonInput
             v-else
+            type="text"
             v-model="templateStore.template.title"
             class="ticket-edit-input"
             :class="{ 'border-red-1': errors.title }"

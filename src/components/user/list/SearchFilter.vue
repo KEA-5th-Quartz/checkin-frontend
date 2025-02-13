@@ -61,7 +61,7 @@ const handleDelete = () => {
   <header v-if="!ticketStore.isDeleteMode" class="board-header">
     <!-- 검색 -->
     <div class="manager-search-div">
-      <CommonInput maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
+      <CommonInput type="text" maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
       <SvgIcon :icon="SearchIcon" />
     </div>
 

@@ -409,6 +409,7 @@ const canEdit = computed(() => {
           <CommonInput
             v-else
             v-model="ticketStore.ticket.title"
+            type="text"
             class="ticket-edit-input"
             :class="{ 'border-red-1': errors.title }"
           />
