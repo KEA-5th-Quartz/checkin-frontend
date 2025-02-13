@@ -3,8 +3,6 @@ import { AxiosError } from 'axios';
 import { useMemberStore } from '@/stores/memberStore';
 import { userApi } from '@/services/userService/userService';
 import { useRouter } from 'vue-router';
-import { createApp } from 'vue';
-import CommonDialog from '@/components/common/CommonDialog.vue';
 
 interface QueueItem {
   resolve: (value?: unknown) => void;
@@ -37,31 +35,6 @@ const processQueue = (error: Error | null = null) => {
     }
   });
   failedQueue = [];
-};
-
-const showErrorDialog = (title: string, content: string) => {
-  const existingDialog = document.getElementById('error-dialog');
-  if (existingDialog) {
-    document.body.removeChild(existingDialog);
-  }
-
-  const dialogDiv = document.createElement('div');
-  dialogDiv.id = 'error-dialog';
-  document.body.appendChild(dialogDiv);
-
-  const dialogApp = createApp(CommonDialog, {
-    title,
-    content,
-    isWarn: true,
-    isOneBtn: true,
-    mainText: '확인',
-    onMainClick: () => {
-      document.body.removeChild(dialogDiv);
-      dialogApp.unmount();
-    },
-  });
-
-  dialogApp.mount(dialogDiv);
 };
 
 // Request 인터셉터
@@ -126,20 +99,15 @@ api.interceptors.response.use(
       }
     }
 
-    switch (error.response?.status) {
-      case 401:
-        showErrorDialog('인증 오류', '세션이 만료되었습니다.');
-        break;
-      case 403:
-        showErrorDialog('접근 권한 없음', '해당 기능에 대한 접근 권한이 없습니다.');
-        break;
-      case 500:
-        showErrorDialog('서버 오류', '서버에서 오류가 발생했습니다.');
-        break;
-      default:
+    // 그 외 에러 처리
+    if (error.response?.data) {
+      return Promise.reject(error.response.data);
     }
-
-    return Promise.reject(error);
+    // 네트워크 에러 처리
+    return Promise.reject({
+      message: '서버와의 통신에 실패했습니다.',
+      status: 500,
+    });
   },
 );
 export default api;
