@@ -5,7 +5,6 @@ export interface OverlayProps {
 export interface DialogProps {
   open?: boolean;
   isOneBtn?: boolean;
-  hasInput?: boolean;
   placeholder?: string;
   isWarn?: boolean;
   title: string;
@@ -19,7 +18,6 @@ export interface DialogProps {
 // 다이얼로그 초기값
 export const initialDialog = {
   open: false,
-  hasInput: false,
   placeholder: '',
   isWarn: false,
   title: '',
