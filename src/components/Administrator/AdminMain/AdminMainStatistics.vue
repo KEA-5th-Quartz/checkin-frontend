@@ -96,6 +96,7 @@ const chartOptions = ref<ChartOptions>({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',
@@ -187,6 +188,7 @@ const chartOptions2 = ref<ChartOptions>({
   legend: {
     position: 'top',
     horizontalAlign: 'right',
+    offsetY: 10,
     markers: {
       radius: 12,
       shape: 'circle',
@@ -209,14 +211,21 @@ const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
 watchEffect(() => {
   if (!categoryStatsData.value) return;
 
-  categoryCategories.value = categoryStatsData.value.map((item) => item.categoryName);
+  // 티켓 개수가 0 이상인 데이터만 필터링
+  const filteredData = categoryStatsData.value.filter((item) => item.ticketCount > 0);
 
+  // X축 카테고리 업데이트
+  categoryCategories.value = filteredData.map((item) => item.categoryName);
+
+  // 시리즈 데이터 업데이트
   series2.value = [
     {
       name: '티켓 수',
-      data: categoryStatsData.value.map((item) => item.ticketCount),
+      data: filteredData.map((item) => item.ticketCount),
     },
   ];
+
+  // 차트 옵션 업데이트
   chartOptions2.value = {
     ...chartOptions2.value,
     xaxis: {
