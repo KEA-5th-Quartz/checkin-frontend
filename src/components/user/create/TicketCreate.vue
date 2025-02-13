@@ -17,6 +17,8 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
 import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
+import CommonInput from '@/components/common/CommonInput.vue';
+import CommonTextarea from '@/components/common/commonTextarea.vue';
 
 const router = useRouter();
 
@@ -58,12 +60,32 @@ const { handleSubmit, errors, validate } = useForm({
 });
 
 // useField로 각 필드 생성
-const { value: title } = useField<any>('title');
+const { value: title, handleChange: titleChange } = useField<string>('title');
 const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCategory');
 const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
-const { value: content } = useField<string>('content');
+const { value: content, handleChange: contentChange } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
 const { value: selectedTitle } = useField<BaseTicketOption>('title');
+
+const handleTitleInput = (event: Event) => {
+  const sanitizedValue = (event.target as HTMLInputElement).value
+    .replace(/<[^>]*>/g, '') // HTML 태그 제거
+    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
+    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+
+  titleChange(sanitizedValue);
+};
+
+const handleContentInput = (event: Event) => {
+  const sanitizedValue = (event.target as HTMLTextAreaElement).value
+    .replace(/<[^>]*>/g, '') // HTML 태그 제거
+    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
+    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+
+  contentChange(sanitizedValue);
+};
 
 // 선택된 템플릿을 저장하는 객체
 const selectedTemplate = ref<{ title: string; firstCategory: any; secondCategory: any; content: string } | null>(null);
@@ -428,7 +450,7 @@ const createTicketMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.refetchQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
+      queryClient.invalidateQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
     },
   },
 );
@@ -513,14 +535,15 @@ const removeFile = (index: number) => {
     <form @submit.prevent="onSubmit">
       <section class="w-full h-12 mt-12">
         <label class="ticket-label">티켓 제목</label>
-        <div class="relative w-full">
-          <input v-model="title" class="title-form bg-[#fafafa] pr-10 text-black-2" placeholder="제목을 입력하세요" />
-          <SvgIcon
-            class="absolute right-3 top-1/2 tran sform -translate-y-1/2 w-4 h-4 text-gray-1"
-            :icon="PencilIcon"
-          />
-        </div>
-        <div class="text-red-2 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
+        <CommonInput
+          :value="title"
+          @input="handleTitleInput"
+          name="title"
+          class="title-form bg-[#fafafa]"
+          placeholder="제목을 입력하세요"
+          maxLength="25"
+        />
+        <div class="text-red-1 text-sm mt-1" v-if="errors.title">{{ errors.title }}</div>
       </section>
 
       <section class="w-full flex gap-x-32 mt-12">
@@ -559,9 +582,13 @@ const removeFile = (index: number) => {
 
       <section class="w-full mt-12">
         <label class="ticket-label">요청 사항</label>
-
-        <textarea v-model="content" class="ticket-desc-textarea min-h-60 bg-[#fafafa] text-black-2" />
-
+        <CommonTextarea
+          :value="content"
+          @input="handleContentInput"
+          name="content"
+          class="ticket-desc-textarea min-h-80 bg-[#fafafa]"
+          maxLength="256"
+        />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->
