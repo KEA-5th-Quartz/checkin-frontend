@@ -293,7 +293,7 @@ const closeDialog = async () => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">1차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 w-full max-w-full"
             label=""
             :options="firstCategoryOptions"
             :selected-option="firstCategorySelected"
@@ -305,7 +305,7 @@ const closeDialog = async () => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">2차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 max-w-full"
             label=""
             :options="secondCategoryOptions"
             :selected-option="secondCategorySelected"
