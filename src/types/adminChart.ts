@@ -39,6 +39,7 @@ export interface ChartOptions {
   legend: {
     position: string;
     horizontalAlign: string;
+    offsetY: number;
     markers: {
       radius: number;
       shape: string;

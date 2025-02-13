@@ -20,6 +20,12 @@ import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { AxiosError } from 'axios';
 
+interface CategoryWithGuide {
+  firstCategoryId: number;
+  firstCategoryName: string;
+  contentGuide: string;
+}
+
 const showDialog = ref(false);
 const router = useRouter();
 const queryClient = useQueryClient();
@@ -138,6 +144,19 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
     console.error('1차 카테고리 변경 실패:', err);
   }
 };
+
+watch(firstCategorySelected, (newValue) => {
+  if (!newValue || !categoryData.value?.data?.data) return;
+
+  const selectedCategory = categoryData.value.data.data.find((category) => category.firstCategoryId === newValue.id);
+
+  if (selectedCategory) {
+    const categoryWithGuide = selectedCategory as unknown as CategoryWithGuide;
+    if (categoryWithGuide.contentGuide) {
+      contentChange(categoryWithGuide.contentGuide);
+    }
+  }
+});
 
 const handleSecondCategorySelect = async (option: BaseTicketOption) => {
   try {
