@@ -1,14 +1,14 @@
 <template>
-  <div class="max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative">
+  <div class="DeletedMember-container">
     <div class="flex justify-end w-full">
-      <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
-      <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
-        <li @click="openRestoreModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">복구</li>
-        <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">영구삭제</li>
+      <button class="DeletedMember-menu-button" @click="toggleMenu">⋮</button>
+      <ul v-if="isMenuOpen" ref="menuRef" class="DeletedMember-menu">
+        <li @click="openRestoreModal" class="DeletedMember-menu-item">복구</li>
+        <li @click="openRemoveMemberModal" class="DeletedMember-menu-item-danger">영구삭제</li>
       </ul>
     </div>
 
-    <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
+    <div class="DeletedMember-profile">
       <img
         v-if="member.profilePic"
         :src="member.profilePic"
@@ -17,19 +17,17 @@
       />
     </div>
 
-    <div class="flex-stack items-center mt-4">
-      <p
-        class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
-        :title="member.username"
-      >
+    <div class="DeletedMember-info">
+      <p class="DeletedMember-text" :title="member.username">
         {{ member.username }}
       </p>
-      <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
+      <p class="DeletedMember-subtext" :title="member.email">
         {{ member.email }}
       </p>
     </div>
-    <div class="mt-8">
-      <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
+
+    <div class="DeletedMember-role">
+      <p>{{ roleLabels[member.role] }}</p>
     </div>
 
     <CommonDialog

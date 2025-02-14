@@ -1,14 +1,14 @@
 <template>
-  <div class="flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative h-[250px]">
+  <div class="member-card-container">
     <div class="flex justify-end w-full">
-      <button v-if="!isCurrentUser" class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
+      <button v-if="!isCurrentUser" class="member-card-menu-button" @click="toggleMenu">⋮</button>
       <span v-else class="invisible">⋮</span>
-      <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
+      <ul v-if="isMenuOpen" ref="menuRef" class="member-card-menu">
         <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">권한 변경</li>
         <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">탈퇴</li>
       </ul>
     </div>
-    <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
+    <div class="member-card-profile">
       <img
         v-if="member.profilePic"
         :src="member.profilePic"
@@ -16,20 +16,19 @@
         class="w-full h-full object-cover rounded-full"
       />
     </div>
-    <div class="flex-stack items-center mt-4">
-      <p
-        class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
-        :title="member.username"
-      >
+    <div class="member-card-info">
+      <p class="member-card-username" :title="member.username">
         {{ member.username }}
       </p>
-      <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
+      <p class="member-card-email" :title="member.email">
         {{ member.email }}
       </p>
-      <div v-if="isCurrentUser" class="text-blue-3 text-sm"><p>(본인)</p></div>
+      <div v-if="isCurrentUser" class="member-card-self">
+        <p>(본인)</p>
+      </div>
     </div>
-    <div class="mt-auto">
-      <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
+    <div class="member-card-role">
+      <p>{{ roleLabels[member.role] }}</p>
     </div>
     <CommonDialog
       v-if="isRoleChangeModalOpen"
@@ -41,11 +40,11 @@
       :onCancelClick="closeRoleChangeModal"
     >
       <div ref="dropdownRef" class="relative mt-4">
-        <button @click="toggleDropdown" class="manager-filter-btn w-full flex items-center justify-between">
+        <button @click="toggleDropdown" class="member-card-role-change-btn">
           <span class="font-medium">{{ selectedRole ? roleLabels[selectedRole] : '권한 선택' }}</span>
-          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isDropdownOpen ? 'rotate-180' : '']" />
+          <SvgIcon :icon="ArrowDownIcon" :class="['member-card-dropdown-icon', isDropdownOpen ? 'rotate-180' : '']" />
         </button>
-        <div v-if="isDropdownOpen" class="manager-filter-menu w-full">
+        <div v-if="isDropdownOpen" class="member-card-role-menu">
           <ul>
             <li v-for="option in roleOptions" :key="option" @click="selectRole(option)" class="board-size-menu">
               {{ roleLabels[option] }}

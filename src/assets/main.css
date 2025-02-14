@@ -500,6 +500,149 @@ body {
   .member-list-empty {
     @apply text-sm text-gray-1 ml-5;
   }
+  .DeletedMember-container {
+    @apply max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative;
+  }
+
+  .DeletedMember-menu {
+    @apply absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50;
+  }
+
+  .DeletedMember-menu-button {
+    @apply text-gray-0 hover:text-black-0;
+  }
+
+  .DeletedMember-menu-item {
+    @apply px-4 py-2 cursor-pointer hover:bg-gray-2;
+  }
+
+  .DeletedMember-menu-item-danger {
+    @apply px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2;
+  }
+
+  .DeletedMember-profile {
+    @apply w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1;
+  }
+
+  .DeletedMember-info {
+    @apply flex-stack items-center mt-4;
+  }
+
+  .DeletedMember-text {
+    @apply font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+
+  .DeletedMember-subtext {
+    @apply text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+
+  .DeletedMember-role {
+    @apply mt-8 text-gray-1;
+  }
+  .DeletedMemberManagement-container {
+    @apply mx-auto w-[83%] mt-10;
+  }
+
+  .DeletedMemberManagement-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+  .DeletedMemberManagement-loading {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+
+  .DeletedMemberManagement-empty {
+    @apply text-center text-gray-0 py-10 w-full;
+  }
+  .adminHeader-container {
+    @apply flex justify-center gap-5 lg:gap-[80px] mt-12 w-full px-2;
+  }
+  .adminHeader-section {
+    @apply flex-center gap-3 lg:gap-6;
+  }
+  .adminHeader-section-left {
+    @apply pr-20 lg:pr-[120px] border-r;
+  }
+  .adminHeader-section-center {
+    @apply px-20 lg:px-[70px];
+  }
+  .adminHeader-section-right {
+    @apply pl-20 lg:pl-[120px] border-l;
+  }
+  .adminHeader-icon {
+    @apply flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full;
+  }
+  .adminHeader-label {
+    @apply text-gray-1 pb-1.5 whitespace-nowrap;
+  }
+  .adminHeader-value {
+    @apply text-lg lg:text-xl pr-2;
+  }
+  .adminHeader-unit {
+    @apply text-black-0;
+  }
+  .member-card-container {
+    @apply flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative h-[250px];
+  }
+  .member-card-menu-button {
+    @apply text-gray-0 hover:text-black-0;
+  }
+  .member-card-menu {
+    @apply absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50;
+  }
+  .member-card-profile {
+    @apply w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1;
+  }
+  .member-card-info {
+    @apply flex-stack items-center mt-4;
+  }
+  .member-card-username {
+    @apply font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+  .member-card-email {
+    @apply text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+  .member-card-self {
+    @apply text-blue-3 text-sm;
+  }
+  .member-card-role {
+    @apply mt-auto text-gray-1;
+  }
+  .member-card-role-change-btn {
+    @apply manager-filter-btn w-full flex items-center justify-between;
+  }
+  .member-card-role-menu {
+    @apply manager-filter-menu w-full;
+  }
+  .member-card-dropdown-icon {
+    @apply transition-02s;
+  }
+  .member-tab-container {
+    @apply mx-auto w-[83%];
+  }
+
+  .member-tab-header {
+    @apply flex justify-around border-b border-gray-2 mb-4;
+  }
+
+  .member-tab-button {
+    @apply px-12 py-2 text-sm font-semibold;
+  }
+
+  .member-tab-button-active {
+    @apply border-b-4 border-primary-3 text-primary-3;
+  }
+
+  .member-tab-button-inactive {
+    @apply text-gray-0 hover:text-primary-3;
+  }
+
+  .member-tab-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+
+  .member-tab-empty {
+    @apply text-center text-gray-0 py-10 w-full;
+  }
 }
 
 /* 사용자 템플릿 불러오기 버튼 */

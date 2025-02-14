@@ -1,38 +1,38 @@
 <template>
-  <section class="flex justify-center gap-5 lg:gap-[80px] mt-12 w-full px-2">
-    <div class="flex-center gap-3 lg:gap-6 pr-20 lg:pr-[120px] border-r">
-      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+  <section class="adminHeader-container">
+    <div class="adminHeader-section adminHeader-section-left">
+      <div class="adminHeader-icon">
         <SvgIcon :icon="AdminIcon" />
       </div>
       <div>
-        <p class="text-gray-1 pb-1.5 whitespace-nowrap">관리자</p>
+        <p class="adminHeader-label">관리자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ stats.admins }}</p>
-          <p class="text-black-0">명</p>
+          <p class="adminHeader-value">{{ stats.admins }}</p>
+          <p class="adminHeader-unit">명</p>
         </div>
       </div>
     </div>
-    <div class="flex-center gap-3 lg:gap-6 px-20 lg:px-[70px]">
-      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+    <div class="adminHeader-section adminHeader-section-center">
+      <div class="adminHeader-icon">
         <SvgIcon :icon="ManagerIcon" />
       </div>
       <div>
-        <p class="text-gray-1 pb-1.5 whitespace-nowrap">담당자</p>
+        <p class="adminHeader-label">담당자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ stats.managers }}</p>
-          <p class="text-black-0">명</p>
+          <p class="adminHeader-value">{{ stats.managers }}</p>
+          <p class="adminHeader-unit">명</p>
         </div>
       </div>
     </div>
-    <div class="flex-center gap-3 lg:gap-6 pl-20 lg:pl-[120px] border-l">
-      <div class="flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full">
+    <div class="adminHeader-section adminHeader-section-right">
+      <div class="adminHeader-icon">
         <SvgIcon :icon="UserIcon" />
       </div>
       <div>
-        <p class="text-gray-1 pb-1.5 whitespace-nowrap">사용자</p>
+        <p class="adminHeader-label">사용자</p>
         <div class="flex items-end">
-          <p class="text-lg lg:text-xl pr-2">{{ stats.users }}</p>
-          <p class="text-black-0">명</p>
+          <p class="adminHeader-value">{{ stats.users }}</p>
+          <p class="adminHeader-unit">명</p>
         </div>
       </div>
     </div>
