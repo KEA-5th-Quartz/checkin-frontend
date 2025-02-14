@@ -21,9 +21,7 @@ export const ticketEditValidationSchema = yup.object({
     .required('* 요청사항을 입력하세요')
     .min(10, '* 요청사항은 최소 10자 이상이어야 합니다')
     .max(100, '* 요청사항은 최대 100자까지 입력 가능합니다')
-    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
-    .matches(/^(?!.*<script>).*$/, '* HTML 태그를 포함할 수 없습니다'),
-
+    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다'),
   due_date: yup
     .string()
     .required('* 날짜를 입력해주세요')

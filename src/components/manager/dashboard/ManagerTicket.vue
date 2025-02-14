@@ -11,7 +11,6 @@ import { ticketApi } from '@/services/ticketService/ticketService';
 import { useMemberStore } from '@/stores/memberStore';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
-import ManagerComments from './ManagerComments.vue';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { getFileType, isImageFile } from '@/utils/getFileType';
@@ -19,6 +18,7 @@ import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { handleError } from '@/utils/handleError';
+import UserComment from '@/components/user/UserComment.vue';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -508,7 +508,7 @@ const handleFileDownload = async (fileUrl: string) => {
               </div>
             </div>
 
-            <ManagerComments :ticket-id="ticketId" />
+            <UserComment :ticket-id="ticketId" />
           </div>
         </div>
       </template>
