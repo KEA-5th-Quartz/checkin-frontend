@@ -8,6 +8,9 @@ import { status } from '../ticketOptionTest';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { userApi } from '@/services/userService/userService';
 import { categoryApi } from '@/services/categoryService/categoryService';
+import { handleError } from '@/utils/handleError';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import CommonDialog from '@/components/common/CommonDialog.vue';
 
 const props = defineProps<{
   isMyTicket: boolean;
@@ -28,6 +31,8 @@ const selectedCategories = ref<string[]>([]);
 const isManagerDropdownOpen = ref(false);
 const isCategoryDropdownOpen = ref(false);
 
+const dialogState = ref<DialogProps>({ ...initialDialog });
+
 // 빠른 필터 옵션
 const quickFilters = [
   { id: 'dueToday', label: '오늘 마감', icon: CalendarIcon },
@@ -40,7 +45,7 @@ const { data: managersData } = useCustomQuery(['manager-list'], async () => {
     const response = await userApi.getManagers('MANAGER', 1, 100);
     return response;
   } catch (err) {
-    console.error('담당자 목록 조회 실패:', err);
+    handleError(dialogState, '담당자 목록 조회 실패');
     throw err;
   }
 });
@@ -65,7 +70,7 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
     const response = await categoryApi.getCategories();
     return response;
   } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
+    handleError(dialogState, '카테고리 목록 조회 실패');
     throw err;
   }
 });
@@ -239,4 +244,14 @@ onClickOutside(modalRef, () => {
       <button @click="handleSave" class="btn-main">저장</button>
     </section>
   </div>
+
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :content="dialogState.content"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

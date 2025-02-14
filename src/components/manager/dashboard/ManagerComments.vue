@@ -11,6 +11,7 @@ import { useMemberStore } from '@/stores/memberStore';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
+import { handleError } from '@/utils/handleError';
 import { useQueryClient } from '@tanstack/vue-query';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
@@ -89,7 +90,7 @@ const fetchCommentUserInfo = async (memberId: number) => {
       profilePic: userData.profilePic,
     });
   } catch (err) {
-    console.error('회원 정보 조회 실패:', err);
+    handleError(dialogState, '회원 정보 조회 실패');
   }
 };
 
@@ -103,7 +104,7 @@ const fetchCommentLikes = async (ticketId: number, commentId: number) => {
       likes: likesData.likes,
     });
   } catch (err) {
-    console.error('댓글 좋아요 정보 조회 실패:', err);
+    handleError(dialogState, '댓글 좋아요 정보 조회 실패');
   }
 };
 
@@ -113,7 +114,7 @@ const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId]
     const response = await ticketApi.getTicketComments(props.ticketId);
     return response.data.data;
   } catch (err) {
-    console.error('티켓 댓글 조회 실패:', err);
+    handleError(dialogState, '티켓 댓글 조회 실패');
     throw err;
   }
 });
@@ -215,7 +216,7 @@ const handleAddComments = async () => {
     commentContent.value = '';
     scrollToBottom();
   } catch (err) {
-    console.error('댓글 작성 실패:', err);
+    handleError(dialogState, '댓글 작성 실패');
   }
 };
 
@@ -322,8 +323,7 @@ const handleFileDownload = (file: AttachedFile) => {
   try {
     window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
   } catch (err) {
-    console.error('파일 다운로드 실패:', err);
-    alert('파일 다운로드에 실패했습니다.');
+    handleError(dialogState, '파일 다운로드 실패');
   }
 };
 
