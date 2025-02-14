@@ -55,16 +55,15 @@ const onSubmit = handleSubmit(async (values) => {
     resetForm();
   } catch (error) {
     const err = error as AxiosError;
-    const apiError = err.response?.data as ApiError;
 
-    switch (apiError?.code) {
+    switch (err?.code) {
       case 'MEMBER_4004':
       case 'MEMBER_4003':
       case 'MEMBER_4000':
         dialogState.value = {
           open: true,
           isOneBtn: true,
-          title: apiError.message,
+          title: err.message,
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };

@@ -14,6 +14,7 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import { handleError } from '@/utils/handleError';
 
 const trashStore = useUserTrashListStore();
 const queryClient = useQueryClient();
@@ -55,7 +56,7 @@ const { data: trashData } = useCustomQuery(['trash-list', queryParams], async ()
     });
     return response.data.data;
   } catch (err) {
-    console.error('휴지통 목록 조회 실패:', err);
+    handleError(dialogState, '휴지통 목록 조회 실패');
     throw err;
   }
 });

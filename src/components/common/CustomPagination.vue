@@ -16,13 +16,11 @@ const emit = defineEmits<{
   (e: 'page-change', page: number): void;
 }>();
 
-// 페이지 이동 핸들러
 const goToPage = (page: number) => {
   if (page < 1 || page > props.totalPages) return;
   emit('page-change', page);
 };
 
-// 동적으로 표시할 페이지 계산
 const pages = computed(() => {
   const { currentPage, totalPages, visiblePages } = props;
   const half = Math.floor(visiblePages / 2);
@@ -44,18 +42,15 @@ const pages = computed(() => {
 
   const result: (number | string)[] = [];
 
-  // 첫 페이지 표시
   if (start > 1) {
     result.push(1);
     if (start > 2) result.push('...');
   }
 
-  // 중간 페이지들
   for (let i = start; i <= end; i++) {
     result.push(i);
   }
 
-  // 마지막 페이지 표시
   if (end < totalPages) {
     if (end < totalPages - 1) result.push('...');
     result.push(totalPages);
@@ -67,7 +62,6 @@ const pages = computed(() => {
 
 <template>
   <div class="flex justify-end items-center space-x-2 mt-4 mr-5 gap-1">
-    <!-- 이전 버튼 -->
     <button
       :disabled="currentPage === 1"
       @click="goToPage(currentPage - 1)"
@@ -76,7 +70,6 @@ const pages = computed(() => {
       <span class="text-sm">&lt;</span>
     </button>
 
-    <!-- 페이지 번호 버튼 -->
     <button
       v-for="page in pages"
       :key="page"
@@ -93,7 +86,6 @@ const pages = computed(() => {
       {{ page }}
     </button>
 
-    <!-- 다음 버튼 -->
     <button
       :disabled="currentPage === totalPages"
       @click="goToPage(currentPage + 1)"

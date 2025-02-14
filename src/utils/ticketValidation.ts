@@ -12,10 +12,10 @@ export const ticketValidationSchema = yup.object({
         return yup
           .string()
           .required('* 제목을 입력하세요')
-          .trim() // ✅ 앞뒤 공백 제거
-          .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0) // ✅ 공백만 입력 방지
+          .trim()
+          .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0)
           .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
-          .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다') // ✅ 연속된 공백 방지
+          .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
           .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다');
       }
       return yup.mixed();
@@ -24,7 +24,7 @@ export const ticketValidationSchema = yup.object({
   firstCategory: yup
     .object()
     .shape({
-      id: yup.number().required(), // 실제 API 요청에 필요
+      id: yup.number().required(),
       value: yup.string().required('* 1차 카테고리를 선택하세요'),
       label: yup.string().required(),
     })
@@ -46,7 +46,6 @@ export const ticketValidationSchema = yup.object({
     .min(10, '* 요청사항은 최소 10자 이상이어야 합니다')
     .max(100, '* 요청사항은 최대 100자까지 입력 가능합니다')
     .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다'),
-  // .matches(/^(?!.*<script>).*$/, '* HTML 태그를 포함할 수 없습니다'),
 
   dueDate: yup
     .string()
@@ -62,30 +61,29 @@ export const ticketValidationSchema = yup.object({
   attachments: yup
     .mixed()
     .test('fileSize', '* 첨부파일 크기는 개당 10MB 이하여야 합니다.', (value) => {
-      if (!value) return true; // 파일이 없으면 검사 통과
+      if (!value) return true;
       const files = Array.isArray(value) ? value : [value];
-      return files.every((file) => (file as File).size <= 10 * 1024 * 1024); // 10MB 이하
+      return files.every((file) => (file as File).size <= 10 * 1024 * 1024);
     })
     .test('fileType', '* 허용되지 않는 파일 형식입니다.', (value) => {
       if (!value) return true;
 
-      //  허용할 파일 확장자 목록 (이미지, 문서, 압축 파일 포함)
       const allowedTypes = [
         'image/png',
         'image/jpeg',
         'image/jpg',
         'image/gif',
-        'image/webp', // 이미지 파일
+        'image/webp',
         'application/pdf',
-        'application/msword', // PDF, Word 문서
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xls, .xlsx
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-powerpoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .ppt, .pptx
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'application/zip',
         'application/x-rar-compressed',
-        'application/x-7z-compressed', // ZIP, RAR, 7z
+        'application/x-7z-compressed',
       ];
 
       const files = Array.isArray(value) ? value : [value];

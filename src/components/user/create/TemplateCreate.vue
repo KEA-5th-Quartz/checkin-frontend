@@ -19,6 +19,7 @@ import CommonInput from '@/components/common/CommonInput.vue';
 import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { AxiosError } from 'axios';
+import { handleError } from '@/utils/handleError';
 
 interface CategoryWithGuide {
   firstCategoryId: number;
@@ -57,7 +58,7 @@ const { data: categoryData } = useCustomQuery<CategoryResponse>(['category-list'
     const response = await categoryApi.getCategories();
     return response;
   } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
+    handleError(dialogState, '카테고리 목록 조회 실패');
     throw err;
   }
 });
@@ -141,7 +142,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       secondCategoryChange(firstSecondCategory.name);
     }
   } catch (err) {
-    console.error('1차 카테고리 변경 실패:', err);
+    handleError(dialogState, '1차 카테고리 변경 실패');
   }
 };
 
@@ -163,7 +164,7 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
     secondCategorySelected.value = option;
     secondCategoryChange(option.label);
   } catch (err) {
-    console.error('2차 카테고리 변경 실패:', err);
+    handleError(dialogState, '2차 카테고리 변경 실패');
   }
 };
 
@@ -177,7 +178,7 @@ const createTemplateMutation = useCustomMutation(
     },
     onError: (error) => {
       const err = error as unknown as AxiosError;
-      const apiError = err.response?.data as ApiError;
+      const apiError = err.message as unknown as ApiError;
 
       dialogState.value = {
         open: true,

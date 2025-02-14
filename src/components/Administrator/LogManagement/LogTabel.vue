@@ -8,6 +8,9 @@ import { memberApi } from '@/services/memberService/memberService';
 import { formatDateTime } from '@/utils/dateFormat';
 import { ArrowDownIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { handleError } from '@/utils/handleError';
 
 const currentPage = ref(parseInt(sessionStorage.getItem('logCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
@@ -16,6 +19,7 @@ const order = ref('DESC');
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
@@ -42,7 +46,7 @@ const { data: logData } = useCustomQuery(['log-list', queryParams], async () => 
     );
     return response.data.data;
   } catch (err) {
-    console.error('로그 목록 조회 실패:', err);
+    handleError(dialogState, '로그 목록 조회 실패');
     throw err;
   }
 });
@@ -90,7 +94,7 @@ onBeforeUnmount(() => {
                   시간
                   <SvgIcon
                     :icon="ArrowDownIcon"
-                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                    :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                   />
                 </div>
               </th>
@@ -141,4 +145,12 @@ onBeforeUnmount(() => {
       @page-change="handlePageChange"
     />
   </article>
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

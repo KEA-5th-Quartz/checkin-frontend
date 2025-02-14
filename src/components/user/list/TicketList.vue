@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
       <!-- 검색 -->
       <div class="flex w-1/4">
         <div class="manager-search-div">
-          <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+          <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
           <input
             v-model="keyword"
             maxlength="20"
@@ -304,7 +304,7 @@ onBeforeUnmount(() => {
     </header>
     <!-- 티켓 삭제모드 헤더 -->
     <header v-else class="board-header">
-      <div class="flex items-center gap-4 ml-auto">
+      <div class="header-cancel-delete-div">
         <button @click="handleCancel" class="btn-cancel py-2">취소</button>
         <button @click="handleDelete" class="btn-main py-2">삭제</button>
       </div>
@@ -340,7 +340,7 @@ onBeforeUnmount(() => {
                   번호
                   <SvgIcon
                     :icon="ArrowDownIcon"
-                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                    :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                   />
                 </div>
               </th>

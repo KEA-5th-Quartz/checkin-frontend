@@ -149,8 +149,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="templateData?.data.templates !== 0" class="pb-10 mt-12">
-    <div class="mt-8" v-if="templateData?.data?.templates.length !== 0 || !templateData">
+  <section v-if="templateData?.data?.templates.length !== 0" class="pb-10 mt-12">
+    <div class="mt-8">
       <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-8 gap-10 mr-10">
         <div ref="dropdownRef" class="relative mt-1 flex items-center gap-10">
           <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
       </header>
 
       <header v-else class="board-header">
-        <div class="flex items-center gap-4 ml-auto">
+        <div class="header-cancel-delete-div">
           <button @click="handleCancel" class="btn-cancel py-2">취소</button>
           <button @click="handleDelete" class="btn-main py-2">삭제</button>
         </div>
@@ -197,10 +197,6 @@ onBeforeUnmount(() => {
           </thead>
 
           <tbody class="whitespace-nowrap">
-            <tr v-if="templateData?.data?.templates.length === 0">
-              <td colspan="8" class="text-center py-6 text-gray-500">생성된 템플릿이 존재하지 않습니다.</td>
-            </tr>
-
             <tr
               v-for="item in templateData?.data.templates"
               :key="item.templateId"

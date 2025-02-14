@@ -1,6 +1,5 @@
 import * as yup from 'yup';
 
-// 유효성 검사 스키마 정의
 export const schema = yup.object({
   originalPwd: yup.string().required('현재 비밀번호를 입력해주세요.'),
   newPwd: yup

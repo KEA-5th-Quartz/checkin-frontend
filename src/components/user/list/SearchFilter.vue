@@ -99,7 +99,7 @@ const handleDelete = () => {
   </header>
 
   <section v-else class="board-header">
-    <div class="flex items-center gap-4 ml-auto">
+    <div class="header-cancel-delete-div">
       <button @click="handleCancel" class="btn-cancel py-2">취소</button>
       <button @click="handleDelete" class="btn-main py-2">삭제</button>
     </div>

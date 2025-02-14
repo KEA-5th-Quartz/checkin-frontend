@@ -52,14 +52,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     component: SidebarLayout,
     children: [
-      // 공통
       {
         path: 'settings',
         name: 'settings',
         component: () => import('../views/SettingsView.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN', 'MANAGER', 'USER'] },
       },
-      // 담당자
+
       {
         path: 'manager/dashboard',
         name: 'manager-dashboard',
@@ -72,7 +71,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/manager/ManagerStatisticsView.vue'),
         meta: { requiresAuth: true, roles: ['MANAGER'] },
       },
-      // 관리자
+
       {
         path: '/admin/members',
         name: 'MemberManagement',
@@ -109,7 +108,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Administrator/AdminMainView.vue'),
         meta: { requiresAuth: true, roles: ['ADMIN'] },
       },
-      // 사용자
+
       {
         path: 'user/ticketlist',
         name: 'user-ticketlist',
@@ -144,7 +143,6 @@ const routes: Array<RouteRecordRaw> = [
   },
 ];
 
-// role에 따른 리다이렉트 경로 결정 함수
 const getRedirectPath = (role: MemberType): string => {
   switch (role) {
     case 'ADMIN':
@@ -158,7 +156,6 @@ const getRedirectPath = (role: MemberType): string => {
   }
 };
 
-// 권한 검사 함수
 const hasRequiredRole = (userRole: MemberType | '', requiredRoles?: MemberType[]): boolean => {
   if (!requiredRoles) return true;
   if (!userRole) return false;
@@ -176,43 +173,34 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
   const requiredRoles = to.matched.find((record) => record.meta.roles)?.meta.roles;
 
-  // redirectMode 체크 수정
   const isRedirectModePage = to.matched.some((record) => record.meta.redirectMode);
   if (isRedirectModePage && !from.name) {
-    // password-reset 페이지에 대한 특별 처리
     if (to.path === '/password-reset' && to.query.memberId && to.query.passwordResetToken) {
-      // memberId와 passwordResetToken이 있는 경우 (이메일 링크를 통한 접근) 허용
       return next();
     }
-    // 그 외의 경우 홈으로 리다이렉트
+
     return next('/');
   }
 
-  // 1. 로그인 페이지로 가는 경우
   if (isLoginPage) {
     if (memberStore.accessToken) {
-      // 이미 로그인된 경우 역할에 맞는 페이지로 리다이렉트
       return next(getRedirectPath(memberStore.role as MemberType));
     }
     return next();
   }
 
-  // 2. 토큰이 없는 경우 토큰 복구 시도
   if (!memberStore.accessToken && !memberStore.isLoggedOut) {
     await memberStore.restoreAuth();
   }
 
-  // 3. 인증이 필요한 페이지 체크
   if (requiresAuth && !memberStore.accessToken) {
     return next('/');
   }
 
-  // 4. 권한 체크
   if (!hasRequiredRole(memberStore.role as MemberType, requiredRoles)) {
     return next(getRedirectPath(memberStore.role as MemberType));
   }
 
-  // 5. 첫 로그인 사용자의 비밀번호 변경 페이지 리다이렉트
   if (memberStore.passwordResetToken && to.path !== '/first-login') {
     return next('/first-login');
   }

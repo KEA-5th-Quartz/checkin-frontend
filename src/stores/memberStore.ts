@@ -36,10 +36,9 @@ export const useMemberStore = defineStore('member', {
     },
 
     async logout() {
-      // 로그아웃 API 호출
       await userApi.logout();
       this.clearMemberInfo();
-      this.isLoggedOut = true; // 로그아웃 시 플래그 설정
+      this.isLoggedOut = true;
     },
 
     async restoreAuth() {

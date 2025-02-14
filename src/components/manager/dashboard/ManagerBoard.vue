@@ -37,7 +37,6 @@ const ManagerfilterState = ref<ManagerFilterState>({
   dueThisWeek: false,
 });
 
-// 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -53,18 +52,16 @@ const queryParams = computed(() => ({
   order: order.value,
 }));
 
-// 검색 쿼리 파라미터
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
   order: order.value,
 }));
 
-// 검색 함수
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
-    searchKeyword.value = keyword.value; // 검색 실행 시에만 searchKeyword 업데이트
+    searchKeyword.value = keyword.value;
     currentPage.value = 1;
     sessionStorage.setItem('managerCurrentPage', '1');
   } else {
@@ -72,7 +69,6 @@ const handleSearch = () => {
   }
 };
 
-// 검색 초기화 함수
 const resetSearch = () => {
   keyword.value = '';
   searchKeyword.value = '';
@@ -80,7 +76,6 @@ const resetSearch = () => {
   currentPage.value = parseInt(sessionStorage.getItem('managerCurrentPage') || '1');
 };
 
-// 필터 적용 핸들러
 const handleApplyFilters = (filters: ManagerFilterPayload) => {
   ManagerfilterState.value = {
     statuses: filters.statuses.map((id: string) => {
@@ -102,7 +97,6 @@ const toggleMyTicket = () => {
   sessionStorage.setItem('managerCurrentPage', '1');
 };
 
-// 검색 쿼리 키 computed
 const queryKey = computed<QueryKey>(() => {
   if (isSearch.value) {
     return ['search-tickets', searchKeyword.value, currentPage.value, pageSize.value, order.value];
@@ -147,7 +141,6 @@ const handlePageChange = (page: number) => {
   sessionStorage.setItem('managerCurrentPage', page.toString());
 };
 
-// 배너
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const isFilterOpen = ref(false);
@@ -188,10 +181,9 @@ onBeforeUnmount(() => {
 
 <template>
   <header class="board-header">
-    <!-- 검색 -->
     <div class="flex w-1/4">
       <div v-if="!hasActiveFilters" class="manager-search-div">
-        <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+        <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
         <CommonInput
           type="text"
           v-model="keyword"
@@ -206,7 +198,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- 필터 -->
     <div v-if="!isSearch && (ticketData?.tickets?.length !== 0 || ticketData)" class="flex items-center gap-10">
       <div ref="dropdownRef" class="relative">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
@@ -223,18 +214,16 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 내 티켓 -->
       <button v-if="!isSearch" class="btn-main py-2" @click="toggleMyTicket">
         {{ !isMyTicket ? '내 티켓 조회' : '전체 티켓 조회' }}
       </button>
 
-      <!-- 필터링 아이콘 -->
       <div v-if="!isSearch" class="relative flex items-center max-h-fit">
         <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
           <SvgIcon :icon="FilterIcon" />
           필터
         </button>
-        <!-- 필터 모달 -->
+
         <ManagerFilter
           v-if="isFilterOpen"
           :isMyTicket="isMyTicket"
@@ -260,7 +249,7 @@ onBeforeUnmount(() => {
                 <SvgIcon
                   v-if="!isSearch"
                   :icon="ArrowDownIcon"
-                  :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                  :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                 />
               </div>
             </th>
