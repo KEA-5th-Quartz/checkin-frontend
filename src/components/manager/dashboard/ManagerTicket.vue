@@ -193,6 +193,11 @@ const invalidateTicketQueries = () => {
     queryKey: ['ticket-detail', props.ticketId],
   });
   queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
+  queryClient.invalidateQueries({ queryKey: ['manager-category-stats'] });
+  queryClient.invalidateQueries({ queryKey: ['manager-progress'] });
+  queryClient.invalidateQueries({ queryKey: ['category-stats'] });
+  queryClient.invalidateQueries({ queryKey: ['closed-rate-stats'] });
+  queryClient.invalidateQueries({ queryKey: ['status-rate-stats'] });
 };
 
 // 현재 상태에 따른 사용 가능한 상태 옵션 계산
