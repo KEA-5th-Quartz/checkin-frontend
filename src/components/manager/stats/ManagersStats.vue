@@ -139,39 +139,39 @@ const tableData = computed(() => {
 
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-      <div class="mt-6 flex justify-center">
-        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
-              <th class="px-4 py-2 text-left whitespace-nowrap">담당자</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">진행 중</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">완료</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">전체</th>
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">담당자</th>
+              <th class="manager-table-header-cell-center">진행 중</th>
+              <th class="manager-table-header-cell-center">완료</th>
+              <th class="manager-table-header-cell-center">전체</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'">
-              <td class="px-4 py-2 text-gray-800 font-medium">{{ row.manager }}</td>
-              <td class="px-4 py-2 text-center text-gray-700">{{ row.inProgress }}</td>
-              <td class="px-4 py-2 text-center text-gray-700">{{ row.closed }}</td>
-              <td class="px-4 py-2 text-center font-semibold text-gray-900">{{ row.total }}</td>
+              <td class="manager-table-row">{{ row.manager }}</td>
+              <td class="manager-table-row-data">{{ row.inProgress }}</td>
+              <td class="manager-table-row-data">{{ row.closed }}</td>
+              <td class="manager-table-row-total">{{ row.total }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="bg-gray-3 font-semibold">
-              <td class="px-4 py-2 text-black-2">합계</td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-3 font-semibold">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ tableData.reduce((sum, row) => sum + row.inProgress, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-green-0 text-green-1 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-green">
                   {{ tableData.reduce((sum, row) => sum + row.closed, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-gray-300 text-black-0 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">
                   {{ tableData.reduce((sum, row) => sum + row.total, 0) }}
                 </span>
               </td>

@@ -121,13 +121,13 @@ watchEffect(() => {
       <h2 class="statistics-section-title">카테고리별 티켓 진행 현황</h2>
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-      <div class="mt-6 flex justify-center">
-        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
-              <th class="px-4 py-2 text-left whitespace-nowrap">카테고리</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">티켓 수</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">비율</th>
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">카테고리</th>
+              <th class="manager-table-header-cell-center">티켓 수</th>
+              <th class="manager-table-header-cell-center">비율</th>
             </tr>
           </thead>
           <tbody>
@@ -136,23 +136,21 @@ watchEffect(() => {
               :key="category"
               :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'"
             >
-              <td class="px-4 py-2 text-gray-800 font-medium">{{ category }}</td>
-              <td class="px-4 py-2 text-center text-gray-700">{{ series[0].data[index] }}</td>
-              <td class="px-4 py-2 text-center font-semibold text-gray-900">
-                {{ ((series[0].data[index] / totalTickets) * 100).toFixed(1) }}%
-              </td>
+              <td class="manager-table-row">{{ category }}</td>
+              <td class="manager-table-row-data">{{ series[0].data[index] }}</td>
+              <td class="manager-table-row-total">{{ ((series[0].data[index] / totalTickets) * 100).toFixed(1) }}%</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="bg-gray-3 font-semibold">
-              <td class="px-4 py-2 text-black-2">합계</td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 font-semibold">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ totalTickets }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-gray-3 text-black-2 font-semibold">100%</span>
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">100%</span>
               </td>
             </tr>
           </tfoot>

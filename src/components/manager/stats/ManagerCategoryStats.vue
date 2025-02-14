@@ -142,36 +142,36 @@ const tableData = computed(() => {
 
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-      <div class="mt-6 flex justify-center">
-        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
-              <th class="px-4 py-2 text-left whitespace-nowrap">담당자</th>
-              <th v-for="series in series" :key="series.name" class="px-4 py-2 text-center whitespace-nowrap text-sm">
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">담당자</th>
+              <th v-for="series in series" :key="series.name" class="manager-table-header-cell-center">
                 {{ series.name }}
               </th>
-              <th class="px-4 py-2 text-center">전체</th>
+              <th class="manager-table-header-cell-center">전체</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'">
-              <td class="px-4 py-2 text-gray-800 font-medium">{{ row.manager }}</td>
-              <td v-for="(val, i) in row.categoryData" :key="i" class="px-4 py-2 text-center text-gray-700">
+              <td class="manager-table-row">{{ row.manager }}</td>
+              <td v-for="(val, i) in row.categoryData" :key="i" class="manager-table-row-data">
                 {{ val }}
               </td>
-              <td class="px-4 py-2 text-center font-semibold text-gray-900">{{ row.total }}</td>
+              <td class="manager-table-row-total">{{ row.total }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="bg-gray-3 font-semibold">
-              <td class="px-4 py-2 text-black-2">합계</td>
-              <td v-for="series in series" :key="series.name" class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 font-semibold">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td v-for="series in series" :key="series.name" class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ series.data.reduce((sum, val) => sum + val, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">
                   {{ series.reduce((sum, s) => sum + s.data.reduce((innerSum, val) => innerSum + val, 0), 0) }}
                 </span>
               </td>
