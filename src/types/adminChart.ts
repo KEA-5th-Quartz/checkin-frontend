@@ -6,7 +6,7 @@ export interface ChartSeries {
 export interface ManagerStats {
   userName: string;
   state: {
-    status: 'IN_PROGRESS' | 'CLOSED';
+    categoryName: 'IN_PROGRESS' | 'CLOSED';
     ticketCount: number;
   }[];
 }
@@ -22,7 +22,11 @@ export interface ChartOptions {
       horizontal: boolean;
       columnWidth: string;
       borderRadius: number;
+      distributed: boolean;
     };
+  };
+  grid: {
+    show: boolean;
   };
   dataLabels: {
     enabled: boolean;
@@ -52,11 +56,19 @@ export interface StatusRate {
   ticketCount: number;
 }
 
+export interface StatusRateResponse {
+  totalCount: number;
+  result: StatusRate[];
+}
+
 export interface CategoryStat {
   categoryName: string;
   ticketCount: number;
 }
 
 export interface ClosedRateResponse {
+  closedCount: number;
   closedRate: number;
+  totalCount: number;
+  unclosedCount: number;
 }
