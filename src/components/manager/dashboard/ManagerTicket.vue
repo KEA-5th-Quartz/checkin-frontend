@@ -18,7 +18,7 @@ import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { handleError } from '@/utils/handleError';
-import UserComment from '@/components/user/UserComment.vue';
+import TicketComment from '@/components/TicketComment.vue';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -508,7 +508,7 @@ const handleFileDownload = async (fileUrl: string) => {
               </div>
             </div>
 
-            <UserComment :ticket-id="ticketId" />
+            <TicketComment :ticket-id="ticketId" />
           </div>
         </div>
       </template>

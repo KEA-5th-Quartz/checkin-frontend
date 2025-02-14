@@ -8,14 +8,14 @@ import { AttachedFile, CommentMember } from '@/types/tickets';
 import { formatShortDateTime } from '@/utils/dateFormat';
 import { useQueryClient } from '@tanstack/vue-query';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import SvgIcon from '../common/SvgIcon.vue';
 import { ClipIcon, DownloadIcon, LikeIcon, SendIcon } from '@/assets/icons/path';
 import { useTicketStore } from '@/stores/userTicketStore';
-import CommonTextarea from '../common/commonTextarea.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import CommonDialog from '../common/CommonDialog.vue';
 import { handleError } from '@/utils/handleError';
 import { ALLOWED_FILE_TYPES } from '@/constants/fileConstants';
+import SvgIcon from './common/SvgIcon.vue';
+import CommonTextarea from './common/commonTextarea.vue';
+import CommonDialog from './common/CommonDialog.vue';
 
 const props = defineProps<{
   ticketId: number;

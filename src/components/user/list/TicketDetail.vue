@@ -10,7 +10,6 @@ import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { formatMinusDate } from '@/utils/dateFormat';
-import UserComment from '../UserComment.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
@@ -24,6 +23,7 @@ import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
 import { AxiosError } from 'axios';
 import { handleError } from '@/utils/handleError';
+import TicketComment from '@/components/TicketComment.vue';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -560,7 +560,7 @@ const canEdit = computed(() => {
             </div>
           </div>
 
-          <UserComment :ticket-id="ticketId" />
+          <TicketComment :ticket-id="ticketId" />
         </div>
       </div>
     </div>
