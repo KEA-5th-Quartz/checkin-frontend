@@ -100,7 +100,6 @@ const { mutate: createCategory } = useCustomMutation(
       close();
     },
     onError: (error: unknown) => {
-      console.error('카테고리 추가 실패:', error);
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';

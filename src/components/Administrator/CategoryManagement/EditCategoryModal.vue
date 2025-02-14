@@ -110,7 +110,6 @@ const { mutate: updateCategory } = useCustomMutation(
       closeModal();
     },
     onError: (error: unknown) => {
-      console.error('카테고리 수정 실패:', error);
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
@@ -168,7 +167,6 @@ function submitEdit() {
   errorMessage.value = '';
 
   if (!props.category) {
-    console.error('카테고리 정보가 없습니다.');
     return;
   }
 

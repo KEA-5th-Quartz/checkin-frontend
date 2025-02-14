@@ -67,7 +67,6 @@ const addMemberMutation = useCustomMutation(
       isDialogOpen.value = true;
     },
     onError: (error) => {
-      console.error('회원 등록 실패:', error);
       dialogContent.value = {
         title: '회원 등록 실패',
         content: error?.message || '회원 등록 중 오류가 발생했습니다.',

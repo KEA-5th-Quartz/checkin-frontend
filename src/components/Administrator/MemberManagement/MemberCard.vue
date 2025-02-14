@@ -147,7 +147,16 @@ const handleUpdateRole = async () => {
       role: selectedRole.value,
     });
   } catch (err) {
-    console.error('권한 변경 실패:', err);
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '권한 변경 실패',
+      content: '권한 변경중 문제가 발생했습니다. 다시 시도해주세요.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
   }
 };
 
@@ -213,9 +222,7 @@ const removeMember = async () => {
         queryClient.invalidateQueries();
       },
     };
-  } catch (error) {
-    console.error('회원 탈퇴 실패:', error);
-
+  } catch (err) {
     dialogState.value = {
       open: true,
       isOneBtn: true,

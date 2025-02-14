@@ -100,7 +100,7 @@ const restoreMemberMutation = useCustomMutation(
         },
       };
     },
-    onError: (error) => {
+    onError: () => {
       dialogState.value = {
         open: true,
         isOneBtn: true,
@@ -111,7 +111,6 @@ const restoreMemberMutation = useCustomMutation(
           dialogState.value = { ...initialDialog };
         },
       };
-      console.error('회원 복구 실패:', error);
     },
   },
 );
@@ -159,7 +158,7 @@ const deleteMemberMutation = useCustomMutation(
         },
       };
     },
-    onError: (error) => {
+    onError: () => {
       dialogState.value = {
         open: true,
         isOneBtn: true,
@@ -170,7 +169,6 @@ const deleteMemberMutation = useCustomMutation(
           dialogState.value = { ...initialDialog };
         },
       };
-      console.error('회원 삭제 실패:', error);
     },
   },
 );

@@ -95,7 +95,6 @@ const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
       const response = await statsApi.getManagerCategoryStats();
       return response.data?.data || [];
     } catch (err) {
-      console.error('API 요청 실패:', err);
       return [];
     } finally {
       isLoading.value = false;
@@ -106,12 +105,10 @@ const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
 
 watchEffect(() => {
   if (!managerCategoryStats.value || error.value) {
-    console.error('데이터 로드 중 오류 발생:', error.value);
     return;
   }
 
   if (!Array.isArray(managerCategoryStats.value) || managerCategoryStats.value.length === 0) {
-    console.warn('API 응답이 비어 있습니다.');
     return;
   }
 
