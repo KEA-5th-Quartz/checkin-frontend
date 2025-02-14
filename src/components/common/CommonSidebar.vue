@@ -60,27 +60,23 @@ const userTemplateItems = [
 const checkCurrentPath = () => {
   const currentPath = router.currentRoute.value.path;
 
-  // 티켓 관련 경로 체크
   if (currentPath.includes('/user/ticket')) {
     isTicketOpen.value = true;
   }
 
-  // 템플릿 관련 경로 체크
   if (currentPath.includes('/user/template')) {
     isTemplateOpen.value = true;
   }
-  // 회원 관리 경로 체크 추가
+
   if (currentPath.includes('/admin/members')) {
     isMemberOpen.value = true;
   }
 };
 
-// 초기 마운트 시 경로 체크
 onMounted(() => {
   checkCurrentPath();
 });
 
-// route 변경 시 경로 체크
 watch(
   () => router.currentRoute.value.path,
   () => {
@@ -88,7 +84,6 @@ watch(
   },
 );
 
-// 로그아웃
 const handleLogout = async () => {
   await memberStore.logout();
   queryClient.clear();
@@ -116,7 +111,6 @@ const handleLogout = async () => {
       <p class="sidebar-p">{{ roleInKorean(memberStore.role) }}</p>
     </section>
 
-    <!-- 담당자 -->
     <ul v-if="role === 'MANAGER'" class="sidebar-ul">
       <router-link
         v-for="item in managerNavItems"
@@ -136,9 +130,7 @@ const handleLogout = async () => {
       </router-link>
     </ul>
 
-    <!-- 관리자 -->
     <ul v-else-if="role === 'ADMIN'" class="sidebar-ul">
-      <!-- 홈 메뉴 -->
       <router-link :to="'/admin'" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />
@@ -147,13 +139,11 @@ const handleLogout = async () => {
         </li>
       </router-link>
 
-      <!-- 회원 관리 메뉴 -->
       <li class="relative">
         <div class="sidebar-li cursor-pointer" :class="{ active: isMemberOpen }" @click="isMemberOpen = !isMemberOpen">
           <SvgIcon :icon="MemberIcon" />회원 관리
         </div>
 
-        <!-- 회원 관리 하위 메뉴 -->
         <transition name="submenu">
           <ul v-show="isMemberOpen" class="sidebar-sub-menu">
             <router-link
@@ -172,7 +162,6 @@ const handleLogout = async () => {
         </transition>
       </li>
 
-      <!-- 나머지 관리자 메뉴 -->
       <router-link
         v-for="item in adminNavItems"
         :key="item.path"
@@ -188,15 +177,12 @@ const handleLogout = async () => {
       </router-link>
     </ul>
 
-    <!-- 사용자 -->
     <ul v-else-if="role === 'USER'" class="sidebar-ul">
-      <!-- 티켓 -->
       <li class="relative">
         <div class="sidebar-li cursor-pointer" :class="{ active: isTicketOpen }" @click="isTicketOpen = !isTicketOpen">
           <SvgIcon :icon="CategoryIcon" />티켓
         </div>
 
-        <!-- 하위 메뉴 -->
         <transition name="submenu">
           <ul v-show="isTicketOpen" class="sidebar-sub-menu">
             <router-link
@@ -215,7 +201,6 @@ const handleLogout = async () => {
         </transition>
       </li>
 
-      <!-- 템플릿 -->
       <li class="relative">
         <div
           class="sidebar-li cursor-pointer"
@@ -225,7 +210,6 @@ const handleLogout = async () => {
           <SvgIcon :icon="CreateTicketIcon" class="" /> 템플릿
         </div>
 
-        <!-- 하위 메뉴 -->
         <transition name="submenu">
           <ul v-show="isTemplateOpen" class="sidebar-sub-menu">
             <router-link
@@ -244,7 +228,6 @@ const handleLogout = async () => {
         </transition>
       </li>
 
-      <!-- 휴지통 메뉴 -->
       <router-link to="/user/trash" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />
@@ -253,7 +236,6 @@ const handleLogout = async () => {
         </li>
       </router-link>
 
-      <!-- 설정 메뉴 -->
       <router-link to="/settings" custom v-slot="{ isActive, navigate }">
         <li class="sidebar-li relative" :class="{ active: isActive }" @click="navigate">
           <div v-if="isActive" class="sidebar-active" />

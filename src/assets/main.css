@@ -23,23 +23,21 @@ body {
   min-width: 1024px;
   overflow-x: auto;
   overflow-wrap: break-word;
-  font-family: 'MainFont', system-ui, -apple-system, sans-serif; /* fallback 폰트 추가 */
-  -webkit-font-smoothing: antialiased; /* 폰트 렌더링 개선 */
-  -moz-osx-font-smoothing: grayscale; /* Firefox에서 폰트 렌더링 개선 */
+  font-family: 'MainFont', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* 스크롤바 숨기기 */
 .hide-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera*/
+  display: none;
 }
 
 @layer components {
-  /* flex 속성 */
   .flex-center {
     @apply flex justify-center items-center;
   }
@@ -54,12 +52,10 @@ body {
     @apply bg-white-0 rounded-lg shadow-md;
   }
 
-  /* 컨테이너 */
   .container {
     @apply w-full px-8;
   }
 
-  /* 0.2초 애니메이션 */
   .transition-02s {
     @apply transition-transform duration-200;
   }
@@ -500,9 +496,8 @@ body {
   .member-list-empty {
     @apply text-sm text-gray-1 ml-5;
   }
-}
 
-/* 사용자 템플릿 불러오기 버튼 */
-.template-list-button {
-  @apply border rounded bg-gray-1 text-sm text-white-0 font-semibold flex items-center px-8 gap-2.5 mt-20;
+  .template-list-button {
+    @apply border rounded bg-gray-1 text-sm text-white-0 font-semibold flex items-center px-8 gap-2.5 mt-20;
+  }
 }
