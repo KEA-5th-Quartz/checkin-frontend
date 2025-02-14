@@ -18,6 +18,7 @@ import { getFileType, isImageFile } from '@/utils/getFileType';
 import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '@/components/common/CommonDialog.vue';
+import { handleError } from '@/utils/handleError';
 
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
@@ -45,28 +46,12 @@ const secondCategorySelected = ref();
 const managerSelected = ref();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-const handleError = (errorMessage: string, error: unknown, redirectToDashboard = false) => {
-  dialogState.value = {
-    open: true,
-    isOneBtn: true,
-    title: '예상치 못한 문제가 발생했습니다.',
-    content: errorMessage + ' : ' + error,
-    mainText: '확인',
-    onMainClick: () => {
-      dialogState.value = { ...initialDialog };
-      if (redirectToDashboard) {
-        window.location.replace('/manager/dashboard');
-      }
-    },
-  };
-};
-
 const { data: detailData, isLoading } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
     return response.data.data;
   } catch (err) {
-    handleError('티켓 상세 조회 실패:', err);
+    dialogState.value = handleError(dialogState, '중요도 변경 실패');
     throw err;
   }
 });
@@ -76,7 +61,7 @@ const { data: managersData } = useCustomQuery(['manager-list'], async () => {
     const response = await userApi.getManagers('MANAGER', 1, 100);
     return response;
   } catch (err) {
-    handleError('담당자 목록 조회 실패:', err);
+    dialogState.value = handleError(dialogState, '담당자 목록 조회 실패');
     throw err;
   }
 });
@@ -86,7 +71,7 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
     const response = await categoryApi.getCategories();
     return response;
   } catch (err) {
-    handleError('카테고리 목록 조회 실패:', err);
+    dialogState.value = handleError(dialogState, '카테고리 목록 조회 실패');
     throw err;
   }
 });
@@ -283,7 +268,7 @@ const handleStatusSelect = async (option: BaseTicketOption) => {
     }
     statusSelected.value = option;
   } catch (err) {
-    handleError('상태 변경 실패:', err);
+    dialogState.value = handleError(dialogState, '상태 변경 실패');
   }
 };
 
@@ -295,7 +280,7 @@ const handlePrioritySelect = async (option: BaseTicketOption) => {
     });
     prioritySelected.value = option;
   } catch (err) {
-    handleError('중요도 변경 실패:', err);
+    dialogState.value = handleError(dialogState, '중요도 변경 실패');
   }
 };
 
@@ -326,7 +311,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       });
     }
   } catch (err) {
-    handleError('1차 카테고리 변경 실패:', err);
+    dialogState.value = handleError(dialogState, '1차 카테고리 변경 실패');
   }
 };
 
@@ -339,7 +324,7 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
     });
     secondCategorySelected.value = option;
   } catch (err) {
-    handleError('2차 카테고리 변경 실패:', err);
+    dialogState.value = handleError(dialogState, '2차 카테고리 변경 실패');
   }
 };
 
@@ -379,7 +364,7 @@ const handleManagerSelect = async (option: BaseTicketOption) => {
         };
         break;
       default:
-        handleError('담당자 변경 실패', error, true);
+        dialogState.value = handleError(dialogState, '담당자 변경 실패');
     }
   }
 };
@@ -414,7 +399,7 @@ const handleFileDownload = async (fileUrl: string) => {
       window.URL.revokeObjectURL(downloadUrl);
     }, 100);
   } catch (err) {
-    handleError('파일 다운로드 실패:', err);
+    dialogState.value = handleError(dialogState, '파일 다운로드 실패');
   }
 };
 </script>

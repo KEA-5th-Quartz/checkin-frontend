@@ -113,7 +113,7 @@ body {
     @apply fixed inset-0 flex-center bg-black-2 bg-opacity-25 z-50 backdrop-blur-[2px] cursor-default;
   }
   .dialog-section {
-    @apply fixed flex-stack bg-white-1 w-96 p-6 shadow-lg rounded-xl;
+    @apply fixed flex-stack bg-white-1 w-96 p-6 shadow-lg rounded-xl z-[100];
   }
   .dialog-input {
     @apply placeholder:text-sm placeholder:text-gray-1 p-2 bg-white-1 focus:outline-none border-b border-gray-0 mt-4;
