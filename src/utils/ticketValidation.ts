@@ -59,26 +59,39 @@ export const ticketValidationSchema = yup.object({
     .test('fileType', '* 허용되지 않는 파일 형식입니다.', (value) => {
       if (!value) return true;
 
-      //  허용할 파일 확장자 목록 (이미지, 문서, 압축 파일 포함)
       const allowedTypes = [
         'image/png',
         'image/jpeg',
         'image/jpg',
         'image/gif',
-        'image/webp', // 이미지 파일
+        'image/webp',
         'application/pdf',
-        'application/msword', // PDF, Word 문서
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xls, .xlsx
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-powerpoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .ppt, .pptx
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'application/zip',
         'application/x-rar-compressed',
-        'application/x-7z-compressed', // ZIP, RAR, 7z
+        'application/x-7z-compressed',
       ];
 
       const files = Array.isArray(value) ? value : [value];
       return files.every((file) => allowedTypes.includes((file as File).type));
+    })
+    .test('maxFiles', '* 최대 3개까지 첨부 가능합니다.', (value) => {
+      if (!value) return true; // 파일이 없으면 검사 통과
+      const files = Array.isArray(value) ? value : [value];
+      return files.length <= 3; // ✅ 3개 이하만 허용
+    })
+    .test('duplicateFiles', '* 이미 업로드한 첨부파일입니다.', (value) => {
+      if (!value) return true;
+
+      const files = Array.isArray(value) ? value : [value];
+      const fileNames = files.map((file) => (file as File).name);
+      const uniqueFileNames = new Set(fileNames);
+
+      return fileNames.length === uniqueFileNames.size; // ✅ 중복 파일 검사
     }),
 });

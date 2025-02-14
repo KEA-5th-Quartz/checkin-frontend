@@ -43,11 +43,11 @@ const isUploading = ref<boolean>(false);
 
 // 티켓 템플릿 하드코딩
 const template = ref<string>(
-  '  이 기능이 어떻게 동작해야 하나요?  상세한 요청 사항을 입력해주세요.  관련 정보(링크, 파일 등)를 포함해주세요.',
+  '  이 기능이 어떻게 동작해야 하나요  상세한 요청 사항을 입력해주세요.  관련 정보를 포함해주세요.',
 );
 
 // Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
-const { handleSubmit, errors, validate } = useForm({
+const { handleSubmit, errors, validate, validateField } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
     title: '',
@@ -55,6 +55,7 @@ const { handleSubmit, errors, validate } = useForm({
     firstCategory: null as BaseTicketOption | null,
     secondCategory: null as BaseTicketOption | null,
     dueDate: '',
+    attachments: [],
     attachmentIds: [] as number[],
   },
 });
@@ -66,6 +67,7 @@ const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCate
 const { value: content, handleChange: contentChange } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
 const { value: selectedTitle } = useField<BaseTicketOption>('title');
+const { value: attachments, errorMessage: attachmentsError } = useField<File[]>('attachments');
 
 const handleTitleInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLInputElement).value
@@ -146,83 +148,55 @@ const triggerFileInput = () => {
 
 // 2. 숨겨진 input 클릭 시 나타나는 파일탐색기
 const handleFileChange = async (event: Event) => {
-  // 파일 중복 요청 방지 코드
   if (isUploading.value) {
     console.warn('📌 이미 파일 업로드 중입니다. 중복 요청 방지.');
-    return; // ✅ 중복 실행 방지
+    return;
   }
 
   const target = event.target as HTMLInputElement;
 
-  // 파일이 없는 경우 처리
   if (!target.files || target.files.length === 0) {
     console.error('📌 파일이 선택되지 않았습니다.');
-    // isUploading.value = false;
     return;
   }
 
-  // 파일 업로드 시 isUploading 상태 true로 전환
-  isUploading.value = true; // ✅ 업로드 시작
-
-  // 타겟 파일 배열로 변환해서 files에 저장
   const files = Array.from(target.files);
 
-  const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
-  if (oversizedFiles.length > 0) {
-    alert(`파일 크기는 10MB를 초과할 수 없습니다.\n초과된 파일: ${oversizedFiles.map((f) => f.name).join(', ')}`);
-    target.value = '';
-    isUploading.value = false;
+  attachments.value = files; // ✅ `attachments` 필드 업데이트
+
+  // ✅ 유효성 검사 실행
+  const isValid = await validateField('attachments');
+
+  if (!isValid) {
+    console.warn('📌 파일 유효성 검사 실패:', attachmentsError.value);
+    attachments.value = []; // 🚨 오류 발생 시 파일 목록 초기화
+    target.value = ''; // 파일 선택 초기화
     return;
   }
 
-  // 기존 FormData 초기화
-  const formData = new FormData(); // formData는 객체임
+  // ✅ 파일 업로드 로직 시작 (유효한 경우)
+  isUploading.value = true;
 
-  // formData 객체를 file값들로 초기화
-  files.forEach((file) => {
-    // files 중 개별 요소를 file이란 이름으로 초기화
-    formData.append('files', file); // file 값들을 formData에 채우기
-  });
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
 
-  // 선택된 files의 개별 값인 file을 담은 formData 객체값으로 attachment 상태값 초기화
-  attachment.value = formData; // 기존 attachment 값이 FormData 배열이지만 초기값이 null이기 때문에 null이 사라지지않음
-
-  // 유효성 검사 실행
-  validate();
+  attachment.value = formData; // `FormData` 객체로 상태 업데이트
 
   try {
-    // 유효성 검사 통과시 첨부파일 요청 뮤테이션 실행
-    const response = await attachmentMutation.mutateAsync({ attachment: attachment.value }); // response값은 백엔드 응답데이터
-    const uploadedAttachmentIds = response.data.map((file: { attachmentId: string }) => file.attachmentId);
+    const response = await attachmentMutation.mutateAsync({ attachment: attachment.value });
+
+    // ✅ 백엔드에서 받은 `attachmentId` 업데이트
+    const uploadedAttachmentIds = response.data.map((file: { attachmentId: number }) => file.attachmentId);
     attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
+    // ✅ 프리뷰 URL 저장
     const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
     previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
-    // // attachmentId 필터링해서 숫자인 경우만 배열에 저장
-    // const uploadedAttachmentIds = response.data.map((file) => file.attachmentId).filter((id) => Number.isInteger(id));
-
-    // console.log('📌 필터링된 uploadedAttachmentIds:', JSON.stringify(uploadedAttachmentIds));
-
-    // // attachmentIds가 배열인지 확인 후 처리
-    // if (!Array.isArray(attachmentIds.value)) {
-    //   attachmentIds.value = []; // ✅ 배열이 아닌 경우 초기화
-    // }
-
-    // console.log('📌 Before:', JSON.stringify(attachmentIds.value));
-
-    // // ✅ Proxy 문제 해결 (push() 대신 spread 연산자 사용)
-    // attachmentIds.value = [...uploadedAttachmentIds];
-
-    // console.log('📌 After:', JSON.stringify(attachmentIds.value));
-
-    // // ✅ 업로드된 파일 URL 저장
-    // const uploadedAttachmentUrl = response.data.map((file) => file.url);
-    // previewUrl.value = [...previewUrl.value, ...uploadedAttachmentUrl];
   } catch (error) {
     console.error('파일 업로드 실패:', error);
   } finally {
-    isUploading.value = false; // ✅ 업로드 완료 후 상태 초기화
-    target.value = '';
+    isUploading.value = false;
+    target.value = ''; // ✅ 업로드 후 초기화
   }
 };
 
@@ -284,22 +258,6 @@ const handleTemplateClick = async (event: Event) => {
     console.error('📌 템플릿 목록 불러오기 실패!', error);
   }
 };
-
-// watchEffect(() => {
-//   if (fetchTemplates.data.value) {
-//     console.log('📌 API에서 가져온 템플릿 데이터:', fetchTemplates.data.value);
-
-//     templateOptions.value = fetchTemplates.data.value.map((template: any) => ({
-//       id: template.templateId,
-//       value: template.title,
-//       label: template.title,
-//     }));
-
-//     console.log('📌 변환된 templateOptions:', JSON.stringify(templateOptions.value, null, 2));
-//   }
-// });
-
-// 확인 버튼 클릭시 title, firstCategory, secondCategory, content 값으로 화면에 자동 채워넣기
 
 // 티켓 생성 버튼
 // ✅ 요청 중복 방지 플래그
@@ -410,8 +368,17 @@ const handleFirstCategorySelect = (option: BaseTicketOption) => {
   validate();
 };
 
-// ✅ 2차 카테고리 선택
+const firstCategoryError = ref<string | null>(null);
+
+// ✅ 2차 카테고리 선택 시, 1차 카테고리가 없으면 에러 메시지 표시
 const handleSecondCategorySelect = (option: BaseTicketOption) => {
+  if (!selectedFirstCategory.value) {
+    firstCategoryError.value = '1차 카테고리를 먼저 선택하세요.';
+    return; // 선택 방지
+  }
+
+  // 정상적으로 선택되면 에러 메시지 제거
+  firstCategoryError.value = null;
   selectedSecondCategory.value = option;
 };
 
@@ -450,7 +417,7 @@ const createTicketMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.invalidateQueries(['ticket-list']); // 티켓 생성목록 데이터 자동 리패칭
+      queryClient.invalidateQueries(['user-tickets']); // 티켓 생성목록 데이터 자동 리패칭
     },
   },
 );
@@ -496,21 +463,6 @@ const handleConfirm = async () => {
   showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
 };
 
-// ✅ 초기 렌더링 시 템플릿을 content에 추가
-onMounted(() => {
-  if (!content.value) {
-    content.value = template.value + '\n\n'; // ✅ 처음 페이지 로딩 시 템플릿 추가
-  }
-});
-
-watch(content, (newValue) => {
-  if (newValue.length < template.value.length) {
-    content.value = template.value + '\n\n'; // ✅ 사용자가 템플릿을 삭제하면 복구
-  } else if (!newValue.startsWith(template.value)) {
-    content.value = template.value + '\n\n' + newValue.slice(template.value.length).trim(); // ✅ 템플릿 중복 방지
-  }
-});
-
 const isImage = (url: string) => /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
 
 const getFileExtensionLabel = (url: string) => {
@@ -550,21 +502,23 @@ const removeFile = (index: number) => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">1차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1 text-black-2"
+            class="h-12 py-1 text-black-2 max-w-full"
             :options="firstCategoryList"
             :selectedOption="selectedFirstCategory"
             label=""
             @select="handleFirstCategorySelect"
             isEdit
           />
-          <div class="text-red-2 text-sm mt-1" v-if="errors.firstCategory">{{ errors.firstCategory }}</div>
+          <div class="text-red-2 text-sm mt-1" v-if="errors.firstCategory || firstCategoryError">
+            {{ errors.firstCategory || firstCategoryError }}
+          </div>
         </div>
 
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">2차 카테고리</label>
           <CustomDropdown
             v-if="fetchCategories.data?.value"
-            class="h-12 py-1 text-black-2"
+            class="h-12 py-1 text-black-2 max-w-full"
             :options="secondCategoryList"
             :selectedOption="selectedSecondCategory"
             label=""
@@ -598,6 +552,9 @@ const removeFile = (index: number) => {
       </section>
       <section class="w-full mt-4">
         <label class="ticket-label">첨부된 파일</label>
+        <div class="text-red-1 text-sm mt-1" v-if="attachmentsError">
+          {{ attachmentsError }}
+        </div>
         <div class="flex flex-wrap gap-2 mt-2">
           <div
             v-for="(url, index) in previewUrl"
@@ -634,7 +591,7 @@ const removeFile = (index: number) => {
       >
         <CustomDropdown
           v-if="templateOptions.length > 0"
-          class="h-12 py-1"
+          class="h-12 py-1 max-w-full"
           :options="templateOptions"
           :selectedOption="selectedTitle"
           label=""
