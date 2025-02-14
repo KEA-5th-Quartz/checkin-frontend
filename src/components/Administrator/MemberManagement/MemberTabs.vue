@@ -25,6 +25,7 @@
     </div>
 
     <CustomPagination
+      v-if="members.length > 0"
       :itemsPerPage="10"
       :currentPage="currentPage"
       :totalPages="totalPages"
