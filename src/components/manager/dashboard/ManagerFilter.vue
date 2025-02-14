@@ -21,25 +21,21 @@ const modalRef = ref<HTMLElement | null>(null);
 const managerRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
 
-// 필터 선택 상태 관리
 const selectedQuickFilter = ref<string>('');
 const selectedManagers = ref<string[]>([]);
 const selectedStatuses = ref<string[]>([]);
 const selectedCategories = ref<string[]>([]);
 
-// 드롭다운 상태 관리
 const isManagerDropdownOpen = ref(false);
 const isCategoryDropdownOpen = ref(false);
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 빠른 필터 옵션
 const quickFilters = [
   { id: 'dueToday', label: '오늘 마감', icon: CalendarIcon },
   { id: 'dueThisWeek', label: '이번 주 마감', icon: CalendarIcon },
 ];
 
-// 담당자 목록 페치
 const { data: managersData } = useCustomQuery(['manager-list'], async () => {
   try {
     const response = await userApi.getManagers('MANAGER', 1, 100);
@@ -50,7 +46,6 @@ const { data: managersData } = useCustomQuery(['manager-list'], async () => {
   }
 });
 
-// managerOptions를 동적으로 생성하는 computed 속성 추가
 const managerOptions = computed(() => {
   if (!managersData.value?.data?.data?.members) return [];
 
@@ -64,7 +59,6 @@ const managerOptions = computed(() => {
   );
 });
 
-// 카테고리 목록 페치
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
   try {
     const response = await categoryApi.getCategories();
@@ -85,13 +79,10 @@ const categoryOptions = computed(() => {
   }));
 });
 
-// 필터 토글 함수들
 const toggleQuickFilter = (filterId: string) => {
-  // 이미 선택된 필터를 다시 클릭하면 선택 해제
   if (selectedQuickFilter.value === filterId) {
     selectedQuickFilter.value = '';
   } else {
-    // 다른 필터 선택
     selectedQuickFilter.value = filterId;
   }
 };
@@ -130,11 +121,10 @@ const handleReset = () => {
   emit('closeFilter');
 };
 
-// 저장 버튼 클릭 핸들러
 const handleSave = () => {
   emit('applyFilters', {
     quickFilters: selectedQuickFilter.value,
-    // isMyTicket이 true일 때는 빈 배열 전달
+
     managers: props.isMyTicket ? [] : selectedManagers.value,
     statuses: selectedStatuses.value,
     categories: selectedCategories.value,
@@ -171,7 +161,7 @@ onClickOutside(modalRef, () => {
         <p>{{ filter.label }}</p>
       </div>
     </section>
-    <!-- 담당자 -->
+
     <section v-if="!isMyTicket" class="filter-section">
       <label class="filter-label">담당자</label>
       <div class="relative" ref="managerRef">
@@ -197,7 +187,7 @@ onClickOutside(modalRef, () => {
         </ul>
       </div>
     </section>
-    <!-- 카테고리 -->
+
     <section class="filter-section">
       <label class="filter-label">카테고리</label>
       <div class="relative" ref="categoryRef">
@@ -223,7 +213,7 @@ onClickOutside(modalRef, () => {
         </ul>
       </div>
     </section>
-    <!-- 상태 -->
+
     <section class="filter-section">
       <label class="filter-label">상태</label>
       <div class="flex gap-2">
@@ -238,7 +228,7 @@ onClickOutside(modalRef, () => {
         />
       </div>
     </section>
-    <!-- 초기화 저장 버튼 -->
+
     <section class="filter-btn-section">
       <button @click="handleReset" class="btn-cancel">초기화</button>
       <button @click="handleSave" class="btn-main">저장</button>

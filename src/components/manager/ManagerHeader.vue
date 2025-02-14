@@ -12,7 +12,7 @@ const { data: managerProgressData } = useCustomQuery(
     return response.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 갱신
+    refetchInterval: 1000 * 60,
   },
 );
 

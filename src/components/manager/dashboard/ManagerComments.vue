@@ -24,10 +24,10 @@ const queryClient = useQueryClient();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const chatContainer = ref<HTMLElement | null>(null);
-// 댓글 작성자 정보를 저장할 Map
+
 const commentUserMap = ref(new Map<number, CommentMember>());
 const commentContent = ref('');
-// 댓글 좋아요 정보를 저장할 Map
+
 const commentLikesMap = ref(
   new Map<
     number,
@@ -43,7 +43,7 @@ const selectedCommentLikes = ref<{
   likes: Array<{ memberId: number; username: string }>;
 } | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-// 첨부된 파일 정보를 저장할 ref
+
 const attachedFiles = ref<AttachedFile[]>([]);
 const previewUrl = ref<string | null>(null);
 const showPreview = ref(false);
@@ -53,7 +53,7 @@ const scrollToBottom = async () => {
   await nextTick();
   if (chatContainer.value) {
     chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
-    // 확실히 하기 위해 약간의 지연 후 다시 시도
+
     setTimeout(() => {
       if (chatContainer.value) {
         chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
@@ -79,7 +79,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-// 댓글 작성자 정보를 가져오는 함수
 const fetchCommentUserInfo = async (memberId: number) => {
   try {
     const response = await userApi.getMemberId(memberId);
@@ -94,7 +93,6 @@ const fetchCommentUserInfo = async (memberId: number) => {
   }
 };
 
-// 댓글의 좋아요 정보를 가져오는 함수
 const fetchCommentLikes = async (ticketId: number, commentId: number) => {
   try {
     const response = await ticketApi.getCommentsLikes(ticketId, commentId);
@@ -108,35 +106,38 @@ const fetchCommentLikes = async (ticketId: number, commentId: number) => {
   }
 };
 
-// 댓글 데이터 페치
-const { data: commentData } = useCustomQuery(['ticket-comments', props.ticketId], async () => {
-  try {
-    const response = await ticketApi.getTicketComments(props.ticketId);
-    return response.data.data;
-  } catch (err) {
-    handleError(dialogState, '티켓 댓글 조회 실패');
-    throw err;
-  }
-});
+const { data: commentData } = useCustomQuery(
+  ['ticket-comments', props.ticketId],
+  async () => {
+    try {
+      const response = await ticketApi.getTicketComments(props.ticketId);
+      return response.data.data;
+    } catch (err) {
+      handleError(dialogState, '티켓 댓글 조회 실패');
+      throw err;
+    }
+  },
+  {
+    refetchOnWindowFocus: true,
+  },
+);
 
-// 댓글 작성자 정보와 좋아요 정보
 watch(
   () => commentData.value?.activities,
   async (activities) => {
     if (activities) {
-      // 멤버 정보 수집 및 좋아요 정보 가져오기
       const memberIds = new Set(
         activities
           .filter((item: { type: string }) => item.type !== 'LOG')
           .map((item: { memberId: number }) => item.memberId),
       );
-      // 멤버 정보 가져오기
+
       for (const memberId of memberIds) {
         if (!commentUserMap.value.has(memberId as number)) {
           await fetchCommentUserInfo(memberId as number);
         }
       }
-      // 각 댓글의 좋아요 정보 가져오기
+
       for (const item of activities) {
         if (item.type !== 'LOG') {
           await fetchCommentLikes(props.ticketId, item.commentId);
@@ -147,7 +148,6 @@ watch(
   { immediate: true },
 );
 
-// 좋아요 토글 뮤테이션
 const likeMutation = useCustomMutation(
   async ({ ticketId, commentId }: { ticketId: number; commentId: number }) => {
     const response = await ticketApi.putCommentsLikes(ticketId, commentId);
@@ -155,13 +155,11 @@ const likeMutation = useCustomMutation(
   },
   {
     onSuccess: async (_, variables) => {
-      // 좋아요 토글 후 해당 댓글의 좋아요 정보 새로고침
       await fetchCommentLikes(variables.ticketId, variables.commentId);
     },
   },
 );
 
-// 댓글 작성 뮤테이션
 const commentsMutation = useCustomMutation(
   async ({ ticketId, content }: { ticketId: number; content: string }) => {
     const response = await ticketApi.postTicketComments(ticketId, { content });
@@ -174,7 +172,6 @@ const commentsMutation = useCustomMutation(
   },
 );
 
-// 파일 첨부 뮤테이션
 const attachmentMutation = useCustomMutation(
   async ({ ticketId, formData }: { ticketId: number; formData: any }) => {
     const response = await ticketApi.postTicketAttachment(ticketId, formData);
@@ -195,7 +192,6 @@ const attachmentMutation = useCustomMutation(
   },
 );
 
-// 좋아요 토글 핸들러
 const handleLikeToggle = async (commentId: number) => {
   await likeMutation.mutateAsync({
     ticketId: props.ticketId,
@@ -204,15 +200,14 @@ const handleLikeToggle = async (commentId: number) => {
   queryClient.invalidateQueries({ queryKey: ['ticket-comments', props.ticketId] });
 };
 
-// 댓글 작성 함수
 const handleAddComments = async () => {
-  if (!commentContent.value.trim()) return; // 빈 댓글 방지
+  if (!commentContent.value.trim()) return;
   try {
     await commentsMutation.mutateAsync({
       ticketId: props.ticketId,
       content: commentContent.value,
     });
-    // 성공적으로 댓글이 작성되면 textarea 비우기
+
     commentContent.value = '';
     scrollToBottom();
   } catch (err) {
@@ -231,7 +226,6 @@ const handleKeyDown = async (event: KeyboardEvent) => {
   }
 };
 
-// 파일 선택 트리거 함수
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
@@ -318,16 +312,15 @@ const handleFileChange = async (event: Event) => {
     };
   }
 };
-// 파일 다운로드
+
 const handleFileDownload = (file: AttachedFile) => {
   try {
-    window.open(file.attachmentUrl, '_blank'); // 새 창에서 파일 URL 열기
+    window.open(file.attachmentUrl, '_blank');
   } catch (err) {
     handleError(dialogState, '파일 다운로드 실패');
   }
 };
 
-// 이미지 미리보기
 const handlePreview = (file: AttachedFile) => {
   if (file.isImage) {
     previewUrl.value = file.attachmentUrl;
@@ -335,18 +328,15 @@ const handlePreview = (file: AttachedFile) => {
   }
 };
 
-// 좋아요 목록 모달 표시 함수
 const handleShowLikes = (commentId: number, event: Event) => {
-  event.stopPropagation(); // 이벤트 전파 중지
+  event.stopPropagation();
   const likes = commentLikesMap.value.get(commentId);
   if (likes) {
     if (selectedCommentId.value === commentId) {
-      // 같은 댓글을 다시 클릭하면 모달 닫기
       selectedCommentId.value = null;
       selectedCommentLikes.value = null;
       isLikeMenu.value = false;
     } else {
-      // 다른 댓글을 클릭하면 해당 댓글의 좋아요 정보 표시
       selectedCommentId.value = commentId;
       selectedCommentLikes.value = likes;
       isLikeMenu.value = true;
@@ -354,7 +344,6 @@ const handleShowLikes = (commentId: number, event: Event) => {
   }
 };
 
-// 현재 사용자가 좋아요를 눌렀는지 확인하는 함수
 const hasLiked = (commentId: number) => {
   const likes = commentLikesMap.value.get(commentId)?.likes || [];
   return likes.some((like) => like.memberId === memberStore.memberId);
@@ -363,24 +352,18 @@ const hasLiked = (commentId: number) => {
 const isLastComment = (index: number) => {
   if (!commentData.value?.activities) return false;
 
-  // 현재 인덱스부터 끝까지의 항목들 중에서
-  // 다음에 나오는 첫 번째 댓글(LOG가 아닌 항목)의 인덱스를 찾음
   const nextCommentIndex = commentData.value.activities
     .slice(index + 1)
     .findIndex((item: { type: string }) => item.type !== 'LOG');
 
-  // 다음 댓글이 없으면 (-1이면) 현재 댓글이 마지막 댓글
   return nextCommentIndex === -1;
 };
 </script>
 
 <template>
-  <!-- 댓글 창 -->
   <div ref="chatContainer" class="ticket-comment-container">
-    <!-- 로그 -->
     <div v-if="commentData">
       <div v-for="(item, index) in commentData.activities" :key="item.type === 'LOG' ? item.log_id : item.commentId">
-        <!-- 로그 표시 -->
         <div v-if="item.type === 'LOG'" class="ticket-comment-log">
           <div class="flex-stack items-center">
             <p class="text-xs text-gray-1">
@@ -392,7 +375,6 @@ const isLastComment = (index: number) => {
           </div>
         </div>
 
-        <!-- 댓글 표시 -->
         <div v-else class="ticket-comment-comment">
           <div class="relative flex-stack">
             <p class="ticket-comment-username">
@@ -404,9 +386,7 @@ const isLastComment = (index: number) => {
               class="w-8 h-8 rounded-full object-cover"
             />
           </div>
-          <!-- 첨부 파일이 있는 경우 표시 -->
           <div v-if="item.attachmentUrl">
-            <!-- 이미지인 경우 -->
             <div
               @click="
                 handleFileDownload({
@@ -430,7 +410,7 @@ const isLastComment = (index: number) => {
                 "
               />
             </div>
-            <!-- 이미지가 아닌 경우 -->
+
             <div
               v-else
               @click="
@@ -491,7 +471,6 @@ const isLastComment = (index: number) => {
     </div>
   </div>
 
-  <!-- 댓글 인풋 -->
   <div class="ticket-comment-input-area">
     <CommonTextarea
       v-model="commentContent"
