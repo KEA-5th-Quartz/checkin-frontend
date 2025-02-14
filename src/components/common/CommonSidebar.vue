@@ -23,15 +23,6 @@ const router = useRouter();
 const memberStore = useMemberStore();
 const queryClient = useQueryClient();
 
-onMounted(async () => {
-  if (!memberStore.accessToken) {
-    const success = await memberStore.restoreAuth();
-    if (!success) {
-      router.push('/');
-    }
-  }
-});
-
 const isMemberOpen = ref(false);
 const isTicketOpen = ref(false);
 const isTemplateOpen = ref(false);
