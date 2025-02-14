@@ -1,217 +1,172 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
+import { CategoryStat, ChartOptions } from '@/types/adminChart';
 import { statsApi } from '@/services/statsService/statsService';
+import { useCustomQuery } from '@/composables/useCustomQuery';
 
-interface CategoryData {
-  categoryName: string;
-  ticketCount: number;
-}
+const series = ref<{ name: string; data: number[] }[]>([]);
+const categoryCategories = ref<string[]>([]); // X축 카테고리 (카테고리명)
 
-interface SeriesData {
-  name: string;
-  data: number[];
-}
-
-const series = ref<SeriesData[]>([]);
-const chartOptions = ref({
-  chart: {
-    type: 'bar',
-    height: 450,
-    toolbar: {
-      show: true,
+const commonChartOptions = {
+  toolbar: {
+    show: true,
+    tools: {
+      download: true, // Export 버튼 활성화
+      selection: false,
+      zoom: false,
+      zoomin: false,
+      zoomout: false,
+      pan: false,
+      reset: false,
+    },
+    export: {
+      csv: {
+        filename: 'chart_data',
+        columnDelimiter: ',',
+        headerCategory: 'Category',
+        headerValue: 'Value',
+      },
+      svg: {
+        filename: 'chart_data',
+      },
+      png: {
+        filename: 'chart_data',
+      },
     },
   },
-  grid: {
-    show: true,
-    padding: {
-      top: 0,
-      right: 20,
-      bottom: 0,
-      left: 20,
-    },
+};
+
+const chartOptions = ref<ChartOptions>({
+  chart: {
+    type: 'bar',
+    stacked: false,
+    ...commonChartOptions,
   },
   plotOptions: {
     bar: {
       horizontal: false,
-      columnWidth: '60%',
-      borderRadius: 4,
-      dataLabels: {
-        position: 'top',
-      },
-      distributed: true, // 각 막대별로 다른 색상 적용
+      columnWidth: '30%',
+      borderRadius: 3,
+      distributed: true, //  각 막대 개별 색상 적용
     },
+  },
+  grid: {
+    show: true,
   },
   dataLabels: {
     enabled: true,
-    formatter: function (val: number) {
-      return val.toString();
-    },
-    offsetY: -20,
-    style: {
-      fontSize: '12px',
-      colors: ['#666'],
-    },
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  title: {
-    text: '카테고리별 티켓 현황',
-    align: 'left',
-    style: {
-      fontSize: '18px',
-      fontWeight: 'bold',
-    },
+    style: { fontSize: '13px' },
   },
   xaxis: {
-    categories: [],
-    labels: {
-      rotate: -45,
-      style: {
-        fontSize: '12px',
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: '티켓 수',
-    },
-    labels: {
-      formatter: function (val: number) {
-        return Math.round(val);
-      },
-    },
-  },
-  fill: {
-    opacity: 1,
+    categories: [], //  X축에 카테고리별로 개별 표시
+    labels: { maxHeight: 80, trim: true },
   },
   colors: [
-    '#FF6B6B', // 산호색
-    '#4ECDC4', // 청록색
-    '#45B7D1', // 하늘색
-    '#96CEB4', // 민트
-    '#FFEEAD', // 연한 노랑
-    '#D4A5A5', // 연한 분홍
-    '#9ED2C6', // 연한 청록
-    '#FFB6B9', // 연한 주황
-    '#957DAD', // 연한 보라
-    '#7AC7D4', // 하늘색
-    '#F9C74F', // 골드
-    '#90BE6D', // 연두색
-    '#F94144', // 빨강
-    '#43AA8B', // 초록
-    '#577590', // 남색
-  ],
+    '#232D64',
+    '#2C396C',
+    '#1A2357',
+    '#3C4A85',
+    '#121A46',
+    '#465493',
+    '#2E3772',
+    '#394B6E',
+    '#556AA3',
+    '#1B274B',
+    '#3F5689',
+  ], //  카테고리별 색상 적용
   legend: {
-    show: false, // 범례 숨김
-  },
-  tooltip: {
-    y: {
-      formatter: function (val: number) {
-        return val + ' 건';
-      },
-    },
+    position: 'top',
+    horizontalAlign: 'left',
+    offsetY: 10,
+    markers: { radius: 12, shape: 'circle' },
   },
 });
 
-const fetchCategoryStats = async () => {
-  try {
+//  전체 티켓 수 계산 (computed 사용)
+const totalTickets = computed(() => {
+  return series.value.length ? series.value[0].data.reduce((sum, val) => sum + val, 0) : 0;
+});
+
+const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
+  ['category-stats'],
+  async () => {
     const response = await statsApi.getCategoryStats();
-    const apiData: CategoryData[] = response.data.data;
+    return response.data.data;
+  },
+  { refetchInterval: 1000 * 60, keepPreviousData: true }, //  60초마다 데이터 갱신
+);
 
-    if (!Array.isArray(apiData)) {
-      console.error('데이터 페칭 실패:', apiData);
-      return;
-    }
+watchEffect(() => {
+  if (!categoryStatsData.value) return;
 
-    // 카테고리명과 티켓 수 배열 생성
-    const categories = apiData.map((item) => item.categoryName);
-    const ticketCounts = apiData.map((item) => item.ticketCount);
+  //  티켓 개수가 0 이상인 항목만 표시
+  const filteredData = categoryStatsData.value.filter((item) => item.ticketCount > 0);
 
-    // 시리즈 데이터 설정
-    series.value = [
-      {
-        name: '티켓 수',
-        data: ticketCounts,
-      },
-    ];
+  //  X축 카테고리 업데이트
+  categoryCategories.value = filteredData.map((item) => item.categoryName);
 
-    // 차트 옵션 업데이트
-    chartOptions.value = {
-      ...chartOptions.value,
-      xaxis: {
-        ...chartOptions.value.xaxis,
-        categories: categories,
-      },
-    };
-  } catch (error) {
-    console.error('카테고리별 통계 조회 실패:', error);
-  }
-};
+  //  시리즈 데이터 업데이트 (각 카테고리를 개별 막대로 표시)
+  series.value = [
+    {
+      name: '티켓 수',
+      data: filteredData.map((item) => item.ticketCount),
+    },
+  ];
 
-onMounted(() => {
-  fetchCategoryStats();
+  //  X축 업데이트 (카테고리별로 개별 표시)
+  chartOptions.value = {
+    ...chartOptions.value,
+    xaxis: {
+      ...chartOptions.value.xaxis,
+      categories: categoryCategories.value,
+    },
+  };
 });
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5 pb-20">
+  <div class="mt-5 w-full p-5">
     <div class="statistics-section">
-      <div class="flex-center" v-if="series.length">
-        <apexchart class="w-full" type="bar" height="450" :options="chartOptions" :series="series" />
+      <h2 class="statistics-section-title">카테고리별 티켓 진행 현황</h2>
+      <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-        <!-- 테이블 추가 -->
-        <div class="mt-8 flex justify-center">
-          <table class="w-fit table-auto">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="table-header min-w-[200px]">카테고리</th>
-                <th class="table-header min-w-[150px] text-center">티켓 수</th>
-                <th class="table-header min-w-[150px] text-center">비율</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(category, index) in chartOptions.xaxis.categories"
-                :key="category"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-              >
-                <td class="table-cell font-medium">{{ category }}</td>
-                <td class="table-cell text-center">{{ series[0].data[index] }}</td>
-                <td class="table-cell text-center">
-                  {{ ((series[0].data[index] / series[0].data.reduce((sum, val) => sum + val, 0)) * 100).toFixed(1) }}%
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td class="table-footer font-bold bg-blue-50">합계</td>
-                <td class="table-footer text-center font-bold bg-blue-50">
-                  <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800">
-                    {{ series[0].data.reduce((sum, val) => sum + val, 0) }}
-                  </span>
-                </td>
-                <td class="table-footer text-center font-bold bg-blue-50">
-                  <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-800"> 100% </span>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+      <div class="mt-6 flex justify-center">
+        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+          <thead>
+            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
+              <th class="px-4 py-2 text-left whitespace-nowrap">카테고리</th>
+              <th class="px-4 py-2 text-center whitespace-nowrap">티켓 수</th>
+              <th class="px-4 py-2 text-center whitespace-nowrap">비율</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(category, index) in chartOptions.xaxis.categories"
+              :key="category"
+              :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'"
+            >
+              <td class="px-4 py-2 text-gray-800 font-medium">{{ category }}</td>
+              <td class="px-4 py-2 text-center text-gray-700">{{ series[0].data[index] }}</td>
+              <td class="px-4 py-2 text-center font-semibold text-gray-900">
+                {{ ((series[0].data[index] / totalTickets) * 100).toFixed(1) }}%
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="bg-gray-3 font-semibold">
+              <td class="px-4 py-2 text-black-2">합계</td>
+              <td class="px-4 py-2 text-center">
+                <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 font-semibold">
+                  {{ totalTickets }}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-center">
+                <span class="px-2 py-1 rounded bg-gray-3 text-black-2 font-semibold">100%</span>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-      <div v-else class="flex justify-center items-center h-64 text-gray-500">데이터를 불러오는 중...</div>
     </div>
-  </section>
+  </div>
 </template>
-
-<style scoped>
-.statistics-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-}
-</style>
