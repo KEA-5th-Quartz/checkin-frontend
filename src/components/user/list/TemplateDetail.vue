@@ -238,12 +238,12 @@ const updateMutation = useCustomMutation(
     },
     onError: (error) => {
       const err = error as unknown as AxiosError;
-      const apiError = err.response?.data as ApiError;
+      const apiError = err.message as string;
 
       dialogState.value = {
         open: true,
         isOneBtn: true,
-        title: apiError.message || '오류가 발생했습니다.',
+        title: apiError || '오류가 발생했습니다.',
         mainText: '확인',
         onMainClick: () => {
           dialogState.value = { ...initialDialog };

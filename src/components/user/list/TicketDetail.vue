@@ -20,7 +20,6 @@ import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import { ApiError } from '@/types/common/error';
 import { AxiosError } from 'axios';
 import { handleError } from '@/utils/handleError';
 import TicketComment from '@/components/TicketComment.vue';
@@ -254,12 +253,12 @@ const updateMutation = useCustomMutation(
     },
     onError: (error) => {
       const err = error as unknown as AxiosError;
-      const apiError = err.response?.data as ApiError;
+      const apiError = err.message as string;
 
       dialogState.value = {
         open: true,
         isOneBtn: true,
-        title: apiError.message || '오류가 발생했습니다.',
+        title: apiError || '오류가 발생했습니다.',
         mainText: '확인',
         onMainClick: () => {
           dialogState.value = { ...initialDialog };

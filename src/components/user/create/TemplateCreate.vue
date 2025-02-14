@@ -178,7 +178,7 @@ const createTemplateMutation = useCustomMutation(
     },
     onError: (error) => {
       const err = error as unknown as AxiosError;
-      const apiError = err.response?.data as ApiError;
+      const apiError = err.message as unknown as ApiError;
 
       dialogState.value = {
         open: true,
