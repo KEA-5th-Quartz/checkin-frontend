@@ -433,6 +433,10 @@ const styledContent = computed(() => {
 
 const tempContent = ref(''); // ✅ 임시 content 변수
 
+const handleCancel = () => {
+  showTemplateDialog.value = false;
+};
+
 const handleConfirm = async () => {
   if (selectedTemplate.value) {
     console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
