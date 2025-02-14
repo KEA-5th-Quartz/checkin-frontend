@@ -40,7 +40,7 @@
       </div>
       <!-- 전체 작업 상태 분포 -->
       <div class="p-5">
-        <h2 class="statistics-section-title">전체 작업 상태 분포</h2>
+        <h2 class="statistics-section-title">작업 상태</h2>
         <apexchart type="donut" height="300" :options="chartOptions4" :series="series4" />
       </div>
       <!-- 카테고리별 티켓 수 -->
@@ -368,7 +368,7 @@ const chartOptions4 = ref<ApexOptions>({
           show: true,
           total: {
             show: true,
-            label: '총 작업 수',
+            label: '작업 상태',
             formatter: () => '0개',
           },
         },
@@ -418,7 +418,7 @@ watchEffect(() => {
             show: true,
             total: {
               show: true,
-              label: '총 작업 수',
+              label: '작업 상태',
               formatter: () => `${totalCount.value}개`, //  중앙에 총 작업 수 표시
             },
           },

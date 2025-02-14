@@ -46,7 +46,7 @@
 
     <!-- 전체 작업상태 분포-->
     <div class="statistics-section">
-      <h2 class="statistics-section-title">전체 작업 상태 분포</h2>
+      <h2 class="statistics-section-title">작업 상태 현황</h2>
       <apexchart type="donut" height="380" :options="chartOptions4" :series="series4" />
     </div>
   </div>
@@ -400,7 +400,7 @@ const chartOptions4 = ref<ApexOptions>({
           show: true,
           total: {
             show: true,
-            label: '총 작업 수',
+            label: '작업 상태',
             formatter: () => `0개`,
           },
         },
@@ -450,7 +450,7 @@ watchEffect(() => {
             show: true,
             total: {
               show: true,
-              label: '총 작업 수',
+              label: '작업 상태',
               formatter: () => `${totalCount.value}개`, //  중앙에 총 작업 수 표시
             },
           },
