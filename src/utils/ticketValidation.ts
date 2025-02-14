@@ -79,5 +79,19 @@ export const ticketValidationSchema = yup.object({
 
       const files = Array.isArray(value) ? value : [value];
       return files.every((file) => allowedTypes.includes((file as File).type));
+    })
+    .test('maxFiles', '* 최대 3개까지 첨부 가능합니다.', (value) => {
+      if (!value) return true; // 파일이 없으면 검사 통과
+      const files = Array.isArray(value) ? value : [value];
+      return files.length <= 3; // ✅ 3개 이하만 허용
+    })
+    .test('duplicateFiles', '* 이미 업로드한 첨부파일입니다.', (value) => {
+      if (!value) return true;
+
+      const files = Array.isArray(value) ? value : [value];
+      const fileNames = files.map((file) => (file as File).name);
+      const uniqueFileNames = new Set(fileNames);
+
+      return fileNames.length === uniqueFileNames.size; // ✅ 중복 파일 검사
     }),
 });
