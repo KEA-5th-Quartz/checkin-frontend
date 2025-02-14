@@ -1,4 +1,3 @@
-// 2025-01-20T05:34:02 -> 2025/01/20
 export const formatSlashDate = (dateString: string): string => {
   const date = new Date(dateString);
   const year = date.getFullYear();
@@ -8,13 +7,11 @@ export const formatSlashDate = (dateString: string): string => {
   return `${year}/${month}/${day}`;
 };
 
-// 2025/01/30 -> 2025-01-30
 export const formatMinusDate = (dateStr: string): string => {
   const [year, month, day] = dateStr.split('/');
   return `${year}-${month}-${day}`;
 };
 
-// 2025-01-30T15:50:25.205637 -> 1/30 15:50:25
 export const formatShortDateTime = (dateString: string): string => {
   const date = new Date(dateString);
 
@@ -26,7 +23,6 @@ export const formatShortDateTime = (dateString: string): string => {
   return `${month}/${day} ${hours}:${minutes}`;
 };
 
-// 2025-01-30T15:50:25.205637 -> 2025-01-30 15:50
 export const formatDateTime = (dateString: string): string => {
   const date = new Date(dateString);
   const year = date.getFullYear();

@@ -2,10 +2,7 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   darkMode: 'class',
-  content: [
-    './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}', // Vue 파일 경로로 수정
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     screens: {
       sm: '1024px',
@@ -62,14 +59,6 @@ const config: Config = {
           0: '#D6F4D0',
           1: '#45D934',
         },
-        // dark: {
-        //   bg: '#121212',
-        //   surface: '#1E1E1E',
-        //   border: '#2E2E2E',
-        //   text: {
-        //     primary: '#FFFFFF',
-        //   },
-        // },
       },
     },
   },

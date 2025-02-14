@@ -17,14 +17,14 @@ const defaultTemplate: Template = {
 export const useTemplateStore = defineStore('template', {
   state: () => ({
     template: defaultTemplate as Template,
-    originalTicket: null as Template | null, // 원본 데이터 저장용
+    originalTicket: null as Template | null,
     isEditMode: false,
   }),
 
   actions: {
     setTemplate(template: Template) {
       this.template = { ...template };
-      this.originalTicket = { ...template }; // 원본 데이터 저장
+      this.originalTicket = { ...template };
     },
 
     updateTemplate(updateTemplate: Template) {
@@ -37,7 +37,7 @@ export const useTemplateStore = defineStore('template', {
 
     resetToOriginal() {
       if (this.originalTicket) {
-        this.template = { ...this.originalTicket }; // 원본 데이터로 복원
+        this.template = { ...this.originalTicket };
       }
     },
   },

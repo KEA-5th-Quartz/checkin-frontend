@@ -15,7 +15,6 @@ export interface DialogProps {
   onMainClick: (inputValue?: string) => void;
 }
 
-// 다이얼로그 초기값
 export const initialDialog = {
   open: false,
   placeholder: '',
