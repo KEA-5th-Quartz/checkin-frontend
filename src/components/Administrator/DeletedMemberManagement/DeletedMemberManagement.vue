@@ -80,7 +80,6 @@ const props = defineProps({
   },
 });
 
-// 회원 복구 뮤테이션
 const restoreMemberMutation = useCustomMutation(
   async (memberId: number) => {
     const response = await memberApi.patchRestoreMember(memberId);
@@ -121,12 +120,10 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-// 드롭다운 외부 클릭 시 닫기
 onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// 복구 모달 열기
 const openRestoreModal = () => {
   dialogState.value = {
     open: true,
@@ -144,7 +141,6 @@ const openRestoreModal = () => {
   isMenuOpen.value = false;
 };
 
-// 멤버 영구 삭제 뮤테이션
 const deleteMemberMutation = useCustomMutation(
   async (memberId: number) => {
     await memberApi.deleteMemberDelete(memberId);
@@ -159,8 +155,6 @@ const deleteMemberMutation = useCustomMutation(
         mainText: '확인',
         onMainClick: async () => {
           dialogState.value = { ...initialDialog };
-
-          //  삭제된 회원 목록을 다시 불러오기
           await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
         },
       };
@@ -181,7 +175,6 @@ const deleteMemberMutation = useCustomMutation(
   },
 );
 
-// 멤버 탈퇴 모달 열기
 const openRemoveMemberModal = () => {
   dialogState.value = {
     open: true,

@@ -4,7 +4,6 @@ import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ChartOptions } from '@/types/adminChart';
 
-//  API 응답 데이터를 정의할 인터페이스
 interface CategoryState {
   categoryName: string;
   ticketCount: number;
@@ -15,7 +14,6 @@ interface UserData {
   state: CategoryState[];
 }
 
-//  차트 데이터 타입 정의
 interface SeriesData {
   name: string;
   data: number[];
@@ -23,13 +21,13 @@ interface SeriesData {
 
 const series = ref<SeriesData[]>([]);
 const categories = ref<string[]>([]);
-const isLoading = ref(true); //  데이터 로딩 상태 추가
+const isLoading = ref(true);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -89,7 +87,6 @@ const chartOptions = ref<ChartOptions>({
   },
 });
 
-//  API 호출
 const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
   ['manager-category-stats'],
   async () => {
@@ -107,7 +104,6 @@ const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
   { refetchInterval: 1000 * 60, keepPreviousData: true },
 );
 
-//  데이터 변경 시 업데이트
 watchEffect(() => {
   if (!managerCategoryStats.value || error.value) {
     console.error('데이터 로드 중 오류 발생:', error.value);
@@ -119,16 +115,13 @@ watchEffect(() => {
     return;
   }
 
-  //  담당자 리스트 (X축)
   categories.value = managerCategoryStats.value.map((user: UserData) => user.userName);
 
-  //  모든 카테고리 추출
   const allCategories = new Set<string>();
   managerCategoryStats.value.forEach((user: UserData) => {
     user.state?.forEach((state: CategoryState) => allCategories.add(state.categoryName));
   });
 
-  //  시리즈 데이터 생성
   const seriesData: SeriesData[] = Array.from(allCategories).map((category) => {
     const data = categories.value.map((userName) => {
       const user = managerCategoryStats.value.find((u: UserData) => u.userName === userName);
@@ -142,11 +135,9 @@ watchEffect(() => {
 
   series.value = seriesData;
 
-  //  차트 옵션 업데이트
   chartOptions.value = { ...chartOptions.value, xaxis: { categories: categories.value } };
 });
 
-//  테이블 데이터 계산 (자동 업데이트)
 const tableData = computed(() => {
   if (!series.value.length || !categories.value.length) return [];
 

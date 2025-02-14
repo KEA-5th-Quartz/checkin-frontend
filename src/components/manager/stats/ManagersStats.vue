@@ -7,13 +7,13 @@ import { ChartOptions, ManagerStats } from '@/types/adminChart';
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
 const categories = ref<string[]>([]);
-const isLoading = ref(true); //  데이터 로딩 상태 추가
+const isLoading = ref(true);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -62,7 +62,6 @@ const chartOptions = ref<ChartOptions>({
   },
 });
 
-//  API 데이터 가져오기
 const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
   ['manager-progress', timeFilterTickets],
   async () => {
@@ -80,7 +79,6 @@ const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
   { refetchInterval: 1000 * 60, keepPreviousData: true },
 );
 
-//  데이터 변경 시 업데이트
 watchEffect(() => {
   if (!managerProgressData.value || error.value) {
     console.error('데이터 로드 중 오류 발생:', error.value);
@@ -92,10 +90,8 @@ watchEffect(() => {
     return;
   }
 
-  // 담당자 리스트 (X축)
   categories.value = managerProgressData.value.map((manager) => manager.userName);
 
-  // 진행 중 / 완료 티켓 개수 추출
   const inProgressData = managerProgressData.value.map((manager) => {
     const inProgress = manager.state?.find((s) => s.categoryName === 'IN_PROGRESS');
     return inProgress ? inProgress.ticketCount : 0;
@@ -111,11 +107,9 @@ watchEffect(() => {
     { name: '완료', data: closedData },
   ];
 
-  // 차트 옵션 업데이트
   chartOptions.value = { ...chartOptions.value, xaxis: { categories: categories.value } };
 });
 
-//  테이블 데이터 계산 (자동 업데이트)
 const tableData = computed(() => {
   if (!series.value.length || !categories.value.length) return [];
 

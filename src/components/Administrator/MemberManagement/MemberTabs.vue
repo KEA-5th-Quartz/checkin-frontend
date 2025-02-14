@@ -13,25 +13,19 @@
         {{ roleLabels[tab] }}
       </button>
     </div>
-
     <div class="flex flex-wrap overflow-y-auto hide-scrollbar">
-      <!-- 로딩 중 -->
       <div
         v-if="isLoading"
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
       >
         <SkeletonCard v-for="n in 8" :key="n" class="w-[80%]" />
       </div>
-
-      <!-- 멤버 카드 목록 -->
       <div
         v-else-if="members.length > 0"
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
       >
         <MemberCard v-for="member in members" :key="member.memberId" :member="member" />
       </div>
-
-      <!-- 조회된 멤버가 없는 경우 -->
       <div v-else class="text-center text-gray-0 py-10 w-full">
         <p>조회된 멤버가 없습니다.</p>
       </div>
@@ -56,8 +50,6 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import SkeletonCard from '@/components/UI/SkeletonCard.vue';
 
 const store = useMemberListStore();
-
-// 탭 목록
 const tabs = ['ADMIN', 'MANAGER', 'USER'] as const;
 const roleLabels: Record<string, string> = {
   ADMIN: '관리자',
@@ -65,14 +57,10 @@ const roleLabels: Record<string, string> = {
   USER: '사용자',
 };
 
-// 현재 선택된 역할
 const selectedRole = computed(() => store.selectedRole);
-
-// 현재 페이지
 const currentPage = computed(() => store.currentPage);
 const totalPages = computed(() => store.totalPages);
 
-// 멤버 목록 API 요청
 const { data, isLoading } = useCustomQuery(
   ['members', selectedRole, currentPage],
   () => memberApi.getMembers(selectedRole.value, currentPage.value, 10, store.searchQuery),
@@ -85,13 +73,11 @@ watch(data, (newData) => {
   if (newData) store.setMembers(newData.members, newData.totalPages);
 });
 
-// 탭 전환 함수
 const switchTab = async (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   store.setRole(role);
-  store.setCurrentPage(1); // 역할 변경 시 페이지 초기화
+  store.setCurrentPage(1);
 };
 
-// 페이지 변경 핸들러
 const handlePageChange = async (page: number) => {
   store.setCurrentPage(page);
 };

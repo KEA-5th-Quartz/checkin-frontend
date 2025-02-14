@@ -9,7 +9,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits } from 'vue';
 
-// Props 정의
 const props = defineProps({
   buttonText: {
     type: String,
@@ -17,10 +16,8 @@ const props = defineProps({
   },
 });
 
-// Emits 정의
 const emit = defineEmits(['addCategory']);
 
-// 카테고리 추가 버튼 클릭 핸들러
 function handleAddCategory() {
   emit('addCategory');
 }

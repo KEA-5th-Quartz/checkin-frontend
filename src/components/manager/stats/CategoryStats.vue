@@ -5,13 +5,13 @@ import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 
 const series = ref<{ name: string; data: number[] }[]>([]);
-const categoryCategories = ref<string[]>([]); // X축 카테고리 (카테고리명)
+const categoryCategories = ref<string[]>([]);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -47,7 +47,7 @@ const chartOptions = ref<ChartOptions>({
       horizontal: false,
       columnWidth: '30%',
       borderRadius: 3,
-      distributed: true, //  각 막대 개별 색상 적용
+      distributed: true,
     },
   },
   grid: {
@@ -58,7 +58,7 @@ const chartOptions = ref<ChartOptions>({
     style: { fontSize: '13px' },
   },
   xaxis: {
-    categories: [], //  X축에 카테고리별로 개별 표시
+    categories: [],
     labels: { maxHeight: 80, trim: true },
   },
   colors: [
@@ -73,7 +73,7 @@ const chartOptions = ref<ChartOptions>({
     '#556AA3',
     '#1B274B',
     '#3F5689',
-  ], //  카테고리별 색상 적용
+  ],
   legend: {
     position: 'top',
     horizontalAlign: 'left',
@@ -82,7 +82,6 @@ const chartOptions = ref<ChartOptions>({
   },
 });
 
-//  전체 티켓 수 계산 (computed 사용)
 const totalTickets = computed(() => {
   return series.value.length ? series.value[0].data.reduce((sum, val) => sum + val, 0) : 0;
 });
@@ -93,27 +92,19 @@ const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
     const response = await statsApi.getCategoryStats();
     return response.data.data;
   },
-  { refetchInterval: 1000 * 60, keepPreviousData: true }, //  60초마다 데이터 갱신
+  { refetchInterval: 1000 * 60, keepPreviousData: true },
 );
 
 watchEffect(() => {
   if (!categoryStatsData.value) return;
-
-  //  티켓 개수가 0 이상인 항목만 표시
   const filteredData = categoryStatsData.value.filter((item) => item.ticketCount > 0);
-
-  //  X축 카테고리 업데이트
   categoryCategories.value = filteredData.map((item) => item.categoryName);
-
-  //  시리즈 데이터 업데이트 (각 카테고리를 개별 막대로 표시)
   series.value = [
     {
       name: '티켓 수',
       data: filteredData.map((item) => item.ticketCount),
     },
   ];
-
-  //  X축 업데이트 (카테고리별로 개별 표시)
   chartOptions.value = {
     ...chartOptions.value,
     xaxis: {

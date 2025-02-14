@@ -8,7 +8,6 @@
         <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">탈퇴</li>
       </ul>
     </div>
-
     <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
       <img
         v-if="member.profilePic"
@@ -17,7 +16,6 @@
         class="w-full h-full object-cover rounded-full"
       />
     </div>
-
     <div class="flex-stack items-center mt-4">
       <p
         class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
@@ -33,7 +31,6 @@
     <div class="mt-auto">
       <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
     </div>
-
     <CommonDialog
       v-if="isRoleChangeModalOpen"
       :title="'권한 변경'"
@@ -44,13 +41,10 @@
       :onCancelClick="closeRoleChangeModal"
     >
       <div ref="dropdownRef" class="relative mt-4">
-        <!-- 드롭다운 버튼 -->
         <button @click="toggleDropdown" class="manager-filter-btn w-full flex items-center justify-between">
           <span class="font-medium">{{ selectedRole ? roleLabels[selectedRole] : '권한 선택' }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isDropdownOpen ? 'rotate-180' : '']" />
         </button>
-
-        <!-- 드롭다운 옵션 리스트 -->
         <div v-if="isDropdownOpen" class="manager-filter-menu w-full">
           <ul>
             <li v-for="option in roleOptions" :key="option" @click="selectRole(option)" class="board-size-menu">
@@ -90,14 +84,14 @@ import { useMemberStore } from '@/stores/memberStore';
 const queryClient = useQueryClient();
 const memberStore = useMemberStore();
 const isMenuOpen = ref(false);
-const isRoleChangeModalOpen = ref(false); // 권한 변경 모달
-const dialogState = ref<DialogProps>({ ...initialDialog }); // 공통 모달
+const isRoleChangeModalOpen = ref(false);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 const menuRef = ref<HTMLElement | null>(null);
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 const roleOptions = computed(() => {
   const allRoles: Array<'ADMIN' | 'MANAGER' | 'USER'> = ['ADMIN', 'MANAGER', 'USER'];
-  return allRoles.filter((role) => role !== props.member.role); // 본인 현재 권한 빼고
+  return allRoles.filter((role) => role !== props.member.role);
 });
 const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   ADMIN: '관리자',
@@ -110,7 +104,6 @@ const isCurrentUser = computed(() => props.member.memberId === currentUserId.val
 
 const selectedRole = ref<'ADMIN' | 'MANAGER' | 'USER' | null>(null);
 
-// 멤버 데이터 (props로 전달받음)
 const props = defineProps({
   member: {
     type: Object as () => {
@@ -124,7 +117,6 @@ const props = defineProps({
   },
 });
 
-// 권한 변경 뮤테이션
 const updateRoleMutation = useCustomMutation(
   async ({ memberId, role }: { memberId: number; role: string }) => {
     const response = await memberApi.putMemberRole(memberId, { role });
@@ -163,23 +155,20 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-// 드롭다운 외부 클릭 시 닫기
 onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// 권한 변경 모달 열기/닫기
 const openRoleChangeModal = () => {
   isRoleChangeModalOpen.value = true;
   isMenuOpen.value = false;
-  selectedRole.value = null; // 초기화
+  selectedRole.value = null;
 };
 const closeRoleChangeModal = () => {
   isRoleChangeModalOpen.value = false;
   dialogState.value = { ...initialDialog };
 };
 
-// 드롭다운 열기/닫기
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
@@ -187,15 +176,12 @@ onClickOutside(dropdownRef, () => {
   isDropdownOpen.value = false;
 });
 
-// 선택된 권한 변경
 const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   selectedRole.value = role;
   isDropdownOpen.value = false;
 };
 
-// 멤버 탈퇴 모달 열기/닫기
 const openRemoveMemberModal = () => {
-  // isRemoveMemberModalOpen.value = true;
   dialogState.value = {
     open: true,
     isWarn: true,
@@ -211,14 +197,11 @@ const openRemoveMemberModal = () => {
   isMenuOpen.value = false;
 };
 
-// 멤버 탈퇴 함수
 const removeMember = async () => {
   try {
     await memberApi.deleteMember(props.member.memberId);
-    // 멤버 탈퇴 시 삭제된 멤버 서버 동기화
     await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
 
-    //  탈퇴 성공 시 다이얼로그 표시
     dialogState.value = {
       open: true,
       isOneBtn: true,
@@ -233,7 +216,6 @@ const removeMember = async () => {
   } catch (error) {
     console.error('회원 탈퇴 실패:', error);
 
-    //  탈퇴 실패 시 오류 다이얼로그 띄우기
     dialogState.value = {
       open: true,
       isOneBtn: true,
