@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
                   시간
                   <SvgIcon
                     :icon="ArrowDownIcon"
-                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                    :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                   />
                 </div>
               </th>

@@ -47,17 +47,20 @@ body {
   .flex-between {
     @apply flex items-center justify-between;
   }
-
   .card-base {
     @apply bg-white-0 rounded-lg shadow-md;
   }
-
   .container {
     @apply w-full px-8;
   }
-
   .transition-02s {
     @apply transition-transform duration-200;
+  }
+  .sm-gray-1 {
+    @apply text-sm text-gray-1;
+  }
+  .arrow-down-transition {
+    @apply w-4 h-4 transition-transform duration-200;
   }
 
   /* 로그인 */
@@ -74,7 +77,7 @@ body {
     @apply absolute pt-1.5 text-sm font-bold;
   }
   .login-password-reset {
-    @apply block mt-12 text-center text-sm text-gray-1 hover:text-gray-0;
+    @apply block mt-12 text-center sm-gray-1 hover:text-gray-0;
   }
 
   /* 사이드바 */
@@ -155,6 +158,9 @@ body {
   .manager-header-card-span {
     @apply text-lg lg:text-xl pr-2;
   }
+  .header-cancel-delete-div {
+    @apply flex items-center gap-4 ml-auto;
+  }
 
   /* 담당자 검색/필터 */
   .manager-search-div {
@@ -168,6 +174,9 @@ body {
   }
   .manager-filter-menu {
     @apply absolute card-base mt-0.5 w-full border border-gray-2 z-20;
+  }
+  .search-reset-btn {
+    @apply text-sm btn-cancel px-2 ml-2 py-0;
   }
 
   /* 대시보드 */
@@ -276,13 +285,16 @@ body {
     @apply min-h-32 max-h-36 overflow-scroll border-y border-y-primary-2 px-2 py-6 hide-scrollbar;
   }
   .ticket-desc-textarea {
-    @apply ticket-desc-area w-full resize-none text-sm text-gray-1 focus:outline-none;
+    @apply ticket-desc-area w-full resize-none sm-gray-1 focus:outline-none;
   }
   .ticket-desc-content {
-    @apply text-sm text-gray-1 whitespace-pre-wrap break-words;
+    @apply sm-gray-1 whitespace-pre-wrap break-words;
   }
-  .ticket-attachment {
-    @apply bg-white-1 text-gray-0 rounded-[14px] border border-gray-2 py-1 px-2.5 max-w-fit cursor-pointer text-xs;
+  .ticket-attachment-btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 mr-1 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors;
+  }
+  .ticket-error-p {
+    @apply text-xs text-red-1 mt-1 block;
   }
   /* 티켓 댓글 */
   .ticket-comment-container {
@@ -315,6 +327,9 @@ body {
   .ticket-log-p-content {
     @apply text-xs text-gray-0 font-semibold whitespace-pre-wrap break-words;
   }
+  .ticket-comment-profile {
+    @apply w-8 h-8 rounded-full object-cover;
+  }
   .ticket-comment-bubble {
     @apply max-h-fit max-w-[70%] px-2 py-1 bg-white-2 border border-gray-1 rounded-md whitespace-pre-wrap break-words;
   }
@@ -323,6 +338,9 @@ body {
   }
   .ticket-comment-textarea {
     @apply w-full placeholder:text-gray-1 resize-none focus:outline-none hide-scrollbar;
+  }
+  .ticket-comment-icon {
+    @apply cursor-pointer hover:bg-primary-5 h-6 w-6 rounded-md;
   }
   /* 관리자 카테고리 스타일 */
   .category-container {
@@ -494,7 +512,7 @@ body {
   }
 
   .member-list-empty {
-    @apply text-sm text-gray-1 ml-5;
+    @apply sm-gray-1 ml-5;
   }
 
   .template-list-button {

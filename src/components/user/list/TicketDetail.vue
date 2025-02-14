@@ -405,7 +405,7 @@ const canEdit = computed(() => {
         <header class="ticket-header">
           <div v-if="!ticketStore.isEditMode">
             <p>{{ ticketStore.ticket.title }}</p>
-            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+            <p class="sm-gray-1">{{ detailData.customId }}</p>
           </div>
           <CommonInput
             v-else
@@ -465,7 +465,7 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <p class="text-sm text-gray-1">{{ detailData?.username }}</p>
+                  <p class="sm-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
@@ -523,7 +523,7 @@ const canEdit = computed(() => {
                   :class="{ 'border-red-1': errors.dueDate }"
                   v-model="formattedDueDate"
                 />
-                <span v-if="errors.due_date" class="text-xs text-red-1 mt-1 block">{{ errors.due_date }}</span>
+                <span v-if="errors.due_date" class="ticket-error-p">{{ errors.due_date }}</span>
               </div>
             </section>
           </div>
@@ -540,7 +540,7 @@ const canEdit = computed(() => {
                 class="ticket-desc-textarea"
                 :class="{ 'border-red-1': errors.content }"
               />
-              <span v-if="errors.content" class="text-xs text-red-1 mt-1 block">{{ errors.content }}</span>
+              <span v-if="errors.content" class="ticket-error-p">{{ errors.content }}</span>
             </div>
           </div>
 
@@ -552,7 +552,7 @@ const canEdit = computed(() => {
                 v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
                 :key="index"
                 @click="handleFileDownload(fileUrl)"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+                class="ticket-attachment-btn"
               >
                 <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
                 <span>{{ getFileType(fileUrl) }} 다운</span>

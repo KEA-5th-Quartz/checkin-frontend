@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
   <header class="board-header">
     <div class="flex w-1/4">
       <div v-if="!hasActiveFilters" class="manager-search-div">
-        <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+        <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
         <CommonInput
           type="text"
           v-model="keyword"
@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
                 <SvgIcon
                   v-if="!isSearch"
                   :icon="ArrowDownIcon"
-                  :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                  :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                 />
               </div>
             </th>

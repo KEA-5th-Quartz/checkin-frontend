@@ -389,7 +389,7 @@ const isLastComment = (index: number) => {
             <img
               v-if="commentUserMap.get(item.memberId)?.profilePic"
               :src="commentUserMap.get(item.memberId)?.profilePic"
-              class="w-8 h-8 rounded-full object-cover"
+              class="ticket-comment-profile"
             />
           </div>
 
@@ -429,8 +429,8 @@ const isLastComment = (index: number) => {
               "
               class="self-center flex mt-2 cursor-pointer"
             >
-              <SvgIcon :icon="DownloadIcon" class="w-5 h-5 text-gray-500" />
-              <span class="text-sm text-gray-1">첨부파일</span>
+              <SvgIcon :icon="DownloadIcon" class="w-5 h-5 text-gray-1" />
+              <span class="sm-gray-1">첨부파일</span>
             </div>
           </div>
 
@@ -488,16 +488,8 @@ const isLastComment = (index: number) => {
     />
     <input ref="fileInput" type="file" class="hidden" @change="handleFileChange" />
     <div class="flex gap-2 w-full justify-end pb-1.5">
-      <SvgIcon
-        :icon="ClipIcon"
-        class="cursor-pointer hover:bg-primary-5 h-6 w-6 rounded-md"
-        @click="triggerFileInput"
-      />
-      <SvgIcon
-        :icon="SendIcon"
-        class="cursor-pointer hover:bg-primary-5 h-6 w-6 rounded-md"
-        @click="handleAddComments"
-      />
+      <SvgIcon :icon="ClipIcon" class="ticket-comment-icon" @click="triggerFileInput" />
+      <SvgIcon :icon="SendIcon" class="ticket-comment-icon" @click="handleAddComments" />
     </div>
   </div>
 

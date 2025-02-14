@@ -418,7 +418,7 @@ const canEdit = computed(() => {
               class="ticket-desc-textarea"
               :class="{ 'border-red-1': errors.content }"
             />
-            <span v-if="errors.content" class="text-xs text-red-1 mt-1 block">{{ errors.content }}</span>
+            <span v-if="errors.content" class="ticket-error-p">{{ errors.content }}</span>
           </div>
         </div>
       </div>

@@ -47,7 +47,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
         <header class="ticket-header">
           <div>
             <p>{{ detailData.title }}</p>
-            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+            <p class="sm-gray-1">{{ detailData.customId }}</p>
           </div>
           <div class="flex items-center gap-8 self-start">
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
@@ -78,7 +78,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <p class="text-sm text-gray-1">{{ detailData.username }}</p>
+                  <p class="sm-gray-1">{{ detailData.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->

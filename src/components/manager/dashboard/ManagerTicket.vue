@@ -414,7 +414,7 @@ const handleFileDownload = async (fileUrl: string) => {
           <header class="ticket-header">
             <div class="flex-stack justify-center">
               <p class="text-2xl">{{ detailData.title }}</p>
-              <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+              <p class="sm-gray-1">{{ detailData.customId }}</p>
             </div>
             <SvgIcon :icon="XIcon" class="cursor-pointer self-start" @click="handleClose" />
           </header>
@@ -442,7 +442,7 @@ const handleFileDownload = async (fileUrl: string) => {
                 <div>
                   <label class="ticket-label">요청자</label>
                   <div class="manager-filter-btn w-full border-primary-2 justify-start gap-2">
-                    <p class="text-sm text-gray-1">{{ detailData.username }}</p>
+                    <p class="sm-gray-1">{{ detailData.username }}</p>
                   </div>
                 </div>
 
@@ -500,7 +500,7 @@ const handleFileDownload = async (fileUrl: string) => {
                   v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
                   :key="index"
                   @click="handleFileDownload(fileUrl)"
-                  class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+                  class="ticket-attachment-btn"
                 >
                   <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
                   <span>{{ getFileType(fileUrl) }} 다운</span>
