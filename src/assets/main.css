@@ -500,57 +500,57 @@ body {
   .member-list-empty {
     @apply text-sm text-gray-1 ml-5;
   }
-  .DeletedMember-container {
+  .deletedMember-container {
     @apply max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative;
   }
 
-  .DeletedMember-menu {
+  .deletedMember-menu {
     @apply absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50;
   }
 
-  .DeletedMember-menu-button {
+  .deletedMember-menu-button {
     @apply text-gray-0 hover:text-black-0;
   }
 
-  .DeletedMember-menu-item {
+  .deletedMember-menu-item {
     @apply px-4 py-2 cursor-pointer hover:bg-gray-2;
   }
 
-  .DeletedMember-menu-item-danger {
+  .deletedMember-menu-item-danger {
     @apply px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2;
   }
 
-  .DeletedMember-profile {
+  .deletedMember-profile {
     @apply w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1;
   }
 
-  .DeletedMember-info {
+  .deletedMember-info {
     @apply flex-stack items-center mt-4;
   }
 
-  .DeletedMember-text {
+  .deletedMember-text {
     @apply font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
   }
 
-  .DeletedMember-subtext {
+  .deletedMember-subtext {
     @apply text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
   }
 
-  .DeletedMember-role {
+  .deletedMember-role {
     @apply mt-8 text-gray-1;
   }
-  .DeletedMemberManagement-container {
+  .deletedMemberManagement-container {
     @apply mx-auto w-[83%] mt-10;
   }
 
-  .DeletedMemberManagement-grid {
+  .deletedMemberManagement-grid {
     @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
   }
-  .DeletedMemberManagement-loading {
+  .deletedMemberManagement-loading {
     @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
   }
 
-  .DeletedMemberManagement-empty {
+  .deletedMemberManagement-empty {
     @apply text-center text-gray-0 py-10 w-full;
   }
   .adminHeader-container {

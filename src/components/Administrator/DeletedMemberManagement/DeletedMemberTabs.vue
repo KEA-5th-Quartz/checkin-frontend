@@ -1,13 +1,13 @@
 <template>
-  <div class="DeletedMemberManagement-container">
+  <div class="deletedMemberManagement-container">
     <div class="flex flex-wrap overflow-y-auto hide-scrollbar">
-      <div v-if="isLoading" class="DeletedMemberManagement-loading">
+      <div v-if="isLoading" class="deletedMemberManagement-loading">
         <SkeletonCard v-for="n in 8" :key="n" class="w-[80%]" />
       </div>
-      <div v-else-if="members.length > 0" class="DeletedMemberManagement-grid">
+      <div v-else-if="members.length > 0" class="deletedMemberManagement-grid">
         <DeletedMemberManagement v-for="member in members" :key="member.memberId" :member="member" />
       </div>
-      <div v-else class="DeletedMemberManagement-empty">
+      <div v-else class="deletedMemberManagement-empty">
         <p>조회된 멤버가 없습니다.</p>
       </div>
     </div>

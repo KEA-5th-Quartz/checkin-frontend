@@ -1,14 +1,14 @@
 <template>
-  <div class="DeletedMember-container">
+  <div class="deletedMember-container">
     <div class="flex justify-end w-full">
-      <button class="DeletedMember-menu-button" @click="toggleMenu">⋮</button>
-      <ul v-if="isMenuOpen" ref="menuRef" class="DeletedMember-menu">
-        <li @click="openRestoreModal" class="DeletedMember-menu-item">복구</li>
-        <li @click="openRemoveMemberModal" class="DeletedMember-menu-item-danger">영구삭제</li>
+      <button class="deletedMember-menu-button" @click="toggleMenu">⋮</button>
+      <ul v-if="isMenuOpen" ref="menuRef" class="deletedMember-menu">
+        <li @click="openRestoreModal" class="deletedMember-menu-item">복구</li>
+        <li @click="openRemoveMemberModal" class="deletedMember-menu-item-danger">영구삭제</li>
       </ul>
     </div>
 
-    <div class="DeletedMember-profile">
+    <div class="deletedMember-profile">
       <img
         v-if="member.profilePic"
         :src="member.profilePic"
@@ -17,16 +17,16 @@
       />
     </div>
 
-    <div class="DeletedMember-info">
-      <p class="DeletedMember-text" :title="member.username">
+    <div class="deletedMember-info">
+      <p class="deletedMember-text" :title="member.username">
         {{ member.username }}
       </p>
-      <p class="DeletedMember-subtext" :title="member.email">
+      <p class="deletedMember-subtext" :title="member.email">
         {{ member.email }}
       </p>
     </div>
 
-    <div class="DeletedMember-role">
+    <div class="deletedMember-role">
       <p>{{ roleLabels[member.role] }}</p>
     </div>
 
