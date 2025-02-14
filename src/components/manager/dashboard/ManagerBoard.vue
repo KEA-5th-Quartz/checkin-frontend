@@ -193,6 +193,7 @@ onBeforeUnmount(() => {
       <div v-if="!hasActiveFilters" class="manager-search-div">
         <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
         <CommonInput
+          type="text"
           v-model="keyword"
           maxlength="20"
           placeholder="티켓 검색..."
@@ -206,7 +207,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- 필터 -->
-    <div class="flex items-center gap-10">
+    <div v-if="!isSearch && (ticketData?.tickets?.length !== 0 || ticketData)" class="flex items-center gap-10">
       <div ref="dropdownRef" class="relative">
         <button @click="isOpen = !isOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -273,6 +274,9 @@ onBeforeUnmount(() => {
         </thead>
 
         <tbody class="whitespace-nowrap">
+          <tr v-if="isSearch && (ticketData?.tickets?.length === 0 || !ticketData)">
+            <td colspan="8" class="text-center py-6 text-gray-500">티켓이 존재하지 않습니다.</td>
+          </tr>
           <tr
             v-for="ticket in ticketData?.tickets"
             :key="ticket.ticketId"
@@ -338,6 +342,9 @@ onBeforeUnmount(() => {
         </thead>
 
         <tbody class="whitespace-nowrap">
+          <tr v-if="isSearch && (ticketData?.tickets?.length === 0 || !ticketData)">
+            <td colspan="8" class="text-center py-6 text-gray-500">일치하는 티켓이 존재하지 않습니다.</td>
+          </tr>
           <tr
             v-for="ticket in ticketData?.tickets"
             :key="ticket.ticketId"
@@ -396,6 +403,7 @@ onBeforeUnmount(() => {
   </section>
 
   <CustomPagination
+    v-if="!isSearch && (ticketData?.tickets?.length !== 0 || ticketData)"
     :items-per-page="pageSize"
     :current-page="currentPage"
     :total-pages="ticketData?.totalPages || 1"

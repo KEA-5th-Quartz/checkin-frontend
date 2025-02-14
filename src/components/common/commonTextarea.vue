@@ -22,5 +22,5 @@ const handleInput = (event: Event) => {
 </script>
 
 <template>
-  <textarea :value="modelValue" :placeholder="placeholder" @input="handleInput" v-bind="$attrs" />
+  <textarea :value="modelValue" :placeholder="placeholder" @input="handleInput" v-bind="$attrs" class="resize-none" />
 </template>

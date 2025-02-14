@@ -18,6 +18,7 @@ import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonInput from '@/components/common/CommonInput.vue';
 import { ApiError } from '@/types/common/error';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { AxiosError } from 'axios';
 
 interface CategoryWithGuide {
   firstCategoryId: number;
@@ -174,6 +175,20 @@ const createTemplateMutation = useCustomMutation(
       showDialog.value = true;
       queryClient.refetchQueries(['template-list']);
     },
+    onError: (error) => {
+      const err = error as unknown as AxiosError;
+      const apiError = err.response?.data as ApiError;
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: apiError.message || '오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+    },
   },
 );
 
@@ -265,6 +280,7 @@ const closeDialog = async () => {
         <label class="ticket-label">템플릿 제목</label>
         <CommonInput
           :value="title"
+          type="text"
           @input="handleTitleInput"
           name="title"
           class="title-form bg-[#fafafa]"
@@ -278,7 +294,7 @@ const closeDialog = async () => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">1차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 w-full max-w-full"
             label=""
             :options="firstCategoryOptions"
             :selected-option="firstCategorySelected"
@@ -290,7 +306,7 @@ const closeDialog = async () => {
         <div class="max-w-[50%] w-full">
           <label class="ticket-label">2차 카테고리</label>
           <CustomDropdown
-            class="h-12 py-1"
+            class="h-12 py-1 max-w-full"
             label=""
             :options="secondCategoryOptions"
             :selected-option="secondCategorySelected"

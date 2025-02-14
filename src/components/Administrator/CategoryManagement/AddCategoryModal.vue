@@ -13,18 +13,26 @@
           상위 카테고리: <span class="font-semibold">{{ parentCategory.firstCategoryName }}</span>
         </p>
         <label class="category-modal-input-label">카테고리 이름</label>
-        <CommonInput v-model="categoryName" class="category-modal-input" placeholder="카테고리 이름을 입력하세요" />
+        <CommonInput
+          type="text"
+          v-model="categoryName"
+          class="category-modal-input"
+          placeholder="카테고리 이름을 입력하세요"
+        />
         <!-- Alias 입력란 -->
         <label v-if="isFirstCategory" class="category-modal-input-label"> 카테고리 약어 </label>
         <CommonInput
+          type="text"
           v-if="isFirstCategory"
           v-model="alias"
+          maxLength="4"
           class="category-modal-input"
           placeholder="영문 2~4글자 대문자 ex) INFR"
         />
 
         <label v-if="isSecondaryCategory" class="category-modal-input-label"> 카테고리 약어 </label>
         <CommonInput
+          type="text"
           v-if="isSecondaryCategory"
           v-model="alias"
           class="category-modal-input"
@@ -39,7 +47,7 @@
           v-model="contentGuide"
           class="category-modal-input category-modal-textarea"
           placeholder="ex) 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
-        ></CommonTextarea>
+        />
         <!-- 경고 메시지 -->
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>

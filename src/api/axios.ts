@@ -42,8 +42,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const memberStore = useMemberStore();
   if (memberStore.accessToken) {
     config.headers.Authorization = `Bearer ${memberStore.accessToken}`;
-  } else {
-    console.error('❌ accessToken이 존재하지 않습니다!');
   }
   return config;
 });

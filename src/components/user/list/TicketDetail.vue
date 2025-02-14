@@ -22,6 +22,7 @@ import CommonInput from '@/components/common/CommonInput.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
+import { AxiosError } from 'axios';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -251,18 +252,18 @@ const updateMutation = useCustomMutation(
       ticketStore.isEditMode = false;
     },
     onError: (error) => {
-      const err = error as unknown as ApiError;
-      if (err.code === 'CATEGORY_4041') {
-        dialogState.value = {
-          open: true,
-          isOneBtn: true,
-          title: error.message,
-          mainText: '확인',
-          onMainClick: () => {
-            dialogState.value = { ...initialDialog };
-          },
-        };
-      }
+      const err = error as unknown as AxiosError;
+      const apiError = err.response?.data as ApiError;
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: apiError.message || '오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     },
   },
 );
@@ -408,6 +409,7 @@ const canEdit = computed(() => {
           <CommonInput
             v-else
             v-model="ticketStore.ticket.title"
+            type="text"
             class="ticket-edit-input"
             :class="{ 'border-red-1': errors.title }"
           />

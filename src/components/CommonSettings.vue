@@ -9,6 +9,7 @@ import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { ApiError } from '@/types/common/error';
 import { useCustomQuery } from '@/composables/useCustomQuery';
+import { AxiosError } from 'axios';
 
 const memberStore = useMemberStore();
 const previewImage = ref(memberStore.profilePic);
@@ -53,16 +54,17 @@ const onSubmit = handleSubmit(async (values) => {
 
     resetForm();
   } catch (error) {
-    const err = error as ApiError;
+    const err = error as AxiosError;
+    const apiError = err.response?.data as ApiError;
 
-    switch (err.code) {
+    switch (apiError?.code) {
       case 'MEMBER_4004':
       case 'MEMBER_4003':
       case 'MEMBER_4000':
         dialogState.value = {
           open: true,
           isOneBtn: true,
-          title: err.message,
+          title: apiError.message,
           mainText: '확인',
           onMainClick: () => {
             dialogState.value = { ...initialDialog };
@@ -110,18 +112,60 @@ const handleImageChange = async (event: Event) => {
   const file = target.files?.[0];
 
   if (file) {
-    // 파일 크기 체크, 일단 5mb로 지정
     if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '파일 크기는 5MB 이하여야 합니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
       return;
     }
+
+    const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
 
     // 허용된 이미지 타입 정의
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
     // 이미지 타입 체크
     if (!allowedTypes.includes(file.type)) {
-      alert('JPG, PNG, WEBP 형식의 이미지만 업로드 가능합니다.');
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: 'JPG, PNG, WEBP 형식의 이미지만 업로드 가능합니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
+      return;
+    }
+
+    const buffer = await file.arrayBuffer();
+    const header = new Uint8Array(buffer.slice(0, 4));
+    const validImageHeaders = {
+      jpeg: [0xff, 0xd8, 0xff],
+      png: [0x89, 0x50, 0x4e, 0x47],
+      webp: [0x52, 0x49, 0x46, 0x46],
+    };
+
+    const isValidSignature = Object.values(validImageHeaders).some((signature) =>
+      signature.every((byte, i) => header[i] === byte),
+    );
+
+    if (!isValidSignature) {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '올바르지 않은 이미지 파일입니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
       return;
     }
 
@@ -133,11 +177,19 @@ const handleImageChange = async (event: Event) => {
 
     try {
       const formData = new FormData();
-      formData.append('file', file, file.name);
+      formData.append('file', file, sanitizedFileName);
       await userApi.changeProfileImg(memberStore.memberId, formData);
       window.location.replace(window.location.href);
     } catch (error) {
-      console.error('프로필 이미지 변경 실패:', error);
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '프로필 이미지 변경에 실패했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     }
   }
 };
