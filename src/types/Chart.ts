@@ -72,3 +72,13 @@ export interface ClosedRateResponse {
   totalCount: number;
   unclosedCount: number;
 }
+
+export interface UserData {
+  userName: string;
+  state: CategoryStat[];
+}
+
+export interface SeriesData {
+  name: string;
+  data: number[];
+}

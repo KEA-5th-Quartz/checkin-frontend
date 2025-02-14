@@ -2,7 +2,7 @@
 import { ref, computed, watchEffect } from 'vue';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
-import { ChartOptions, ManagerStats } from '@/types/adminChart';
+import { ChartOptions, ManagerStats } from '@/types/Chart';
 
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);

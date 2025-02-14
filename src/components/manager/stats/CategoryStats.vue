@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from 'vue';
-import { CategoryStat, ChartOptions } from '@/types/adminChart';
+import { CategoryStat, ChartOptions } from '@/types/Chart';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 

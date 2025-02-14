@@ -2,22 +2,8 @@
 import { ref, computed, watchEffect } from 'vue';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
-import { ChartOptions } from '@/types/adminChart';
-
-interface CategoryState {
-  categoryName: string;
-  ticketCount: number;
-}
-
-interface UserData {
-  userName: string;
-  state: CategoryState[];
-}
-
-interface SeriesData {
-  name: string;
-  data: number[];
-}
+import { ChartOptions } from '@/types/Chart';
+import { CategoryStat, UserData, SeriesData } from '@/types/Chart';
 
 const series = ref<SeriesData[]>([]);
 const categories = ref<string[]>([]);
@@ -116,14 +102,14 @@ watchEffect(() => {
 
   const allCategories = new Set<string>();
   managerCategoryStats.value.forEach((user: UserData) => {
-    user.state?.forEach((state: CategoryState) => allCategories.add(state.categoryName));
+    user.state?.forEach((state: CategoryStat) => allCategories.add(state.categoryName));
   });
 
   const seriesData: SeriesData[] = Array.from(allCategories).map((category) => {
     const data = categories.value.map((userName) => {
       const user = managerCategoryStats.value.find((u: UserData) => u.userName === userName);
       if (!user || !user.state) return 0;
-      const categoryState = user.state.find((s: CategoryState) => s.categoryName === category);
+      const categoryState = user.state.find((s: CategoryStat) => s.categoryName === category);
       return categoryState ? categoryState.ticketCount : 0;
     });
 

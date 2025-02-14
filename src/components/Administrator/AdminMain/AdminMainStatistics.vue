@@ -56,7 +56,7 @@ import {
   CategoryStat,
   ClosedRateResponse,
   StatusRateResponse,
-} from '@/types/adminChart';
+} from '@/types/Chart';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ApexOptions } from 'apexcharts';
