@@ -19,6 +19,7 @@ import CommonInput from '@/components/common/CommonInput.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { AxiosError } from 'axios';
+import { handleError } from '@/utils/handleError';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -118,7 +119,7 @@ const { data: detailData } = useCustomQuery(['template-detail', props.templateId
     const response = await templateApi.getTemplateDetail(props.templateId);
     return response.data.data;
   } catch (err) {
-    console.error('티켓 상세 조회 실패:', err);
+    handleError(dialogState, '티켓 상세 조회 실패');
     throw err;
   }
 });
@@ -129,7 +130,7 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
     const response = await categoryApi.getCategories();
     return response;
   } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
+    handleError(dialogState, '카테고리 목록 조회 실패');
     throw err;
   }
 });
@@ -301,7 +302,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       });
     }
   } catch (err) {
-    console.error('1차 카테고리 변경 실패:', err);
+    handleError(dialogState, '1차 카테고리 변경 실패');
   }
 };
 
@@ -315,7 +316,7 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
       secondCategory: option.label,
     });
   } catch (err) {
-    console.error('2차 카테고리 변경 실패:', err);
+    handleError(dialogState, '2차 카테고리 변경 실패');
   }
 };
 

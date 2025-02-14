@@ -5,6 +5,9 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { ref } from 'vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { handleError } from '@/utils/handleError';
 
 const props = defineProps<{
   ticketId: number;
@@ -21,6 +24,7 @@ const handleClose = () => {
     emit('close');
   }, 300);
 };
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
@@ -28,7 +32,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
     const response = await ticketApi.getTicketDetail(props.ticketId);
     return response.data.data;
   } catch (err) {
-    console.error('티켓 상세 조회 실패:', err);
+    handleError(dialogState, '티켓 상세 조회 실패');
     throw err;
   }
 });
@@ -124,4 +128,12 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
       </div>
     </div>
   </Teleport>
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>
