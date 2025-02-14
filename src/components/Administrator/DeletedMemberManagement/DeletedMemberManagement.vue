@@ -96,6 +96,11 @@ const restoreMemberMutation = useCustomMutation(
           await queryClient.refetchQueries({ queryKey: ['members'] });
           queryClient.invalidateQueries();
         },
+        onCancelClick: async () => {
+          dialogState.value = { ...initialDialog };
+          await queryClient.refetchQueries({ queryKey: ['members'] });
+          queryClient.invalidateQueries();
+        },
       };
     },
     onError: () => {
@@ -106,6 +111,9 @@ const restoreMemberMutation = useCustomMutation(
         content: '회원 복구 중 오류가 발생했습니다.',
         mainText: '확인',
         onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+        onCancelClick: () => {
           dialogState.value = { ...initialDialog };
         },
       };
@@ -154,6 +162,10 @@ const deleteMemberMutation = useCustomMutation(
           dialogState.value = { ...initialDialog };
           await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
         },
+        onCancelClick: async () => {
+          dialogState.value = { ...initialDialog };
+          await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
+        },
       };
     },
     onError: () => {
@@ -164,6 +176,9 @@ const deleteMemberMutation = useCustomMutation(
         content: '회원 삭제 중 오류가 발생했습니다.',
         mainText: '확인',
         onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+        onCancelClick: () => {
           dialogState.value = { ...initialDialog };
         },
       };

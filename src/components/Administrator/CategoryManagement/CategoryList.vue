@@ -71,6 +71,7 @@
       :content="dialogContent.content"
       :mainText="dialogContent.mainText"
       :onMainClick="closeDialog"
+      :onCancelClick="closeDialog"
       isOneBtn
     />
     <CommonDialog
@@ -247,7 +248,6 @@ const { mutate: removeCategory } = useCustomMutation(
       isDialogOpen.value = true;
     },
     onError: (error: unknown) => {
-      console.error('카테고리 삭제 실패:', error);
       if (isApiError(error) && error.code === 'CATEGORY_4092') {
         dialogContent.value = {
           title: '삭제 불가',

@@ -26,6 +26,7 @@
       :content="dialogContent.content"
       :mainText="dialogContent.mainText"
       :onMainClick="closeDialog"
+      :onCancelClick="closeDialog"
       isOneBtn
     />
   </div>

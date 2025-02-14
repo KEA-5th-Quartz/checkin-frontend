@@ -133,6 +133,10 @@ const updateRoleMutation = useCustomMutation(
           closeRoleChangeModal();
           queryClient.invalidateQueries();
         },
+        onCancelClick: () => {
+          closeRoleChangeModal();
+          queryClient.invalidateQueries();
+        },
       };
     },
   },
@@ -153,6 +157,9 @@ const handleUpdateRole = async () => {
       content: '권한 변경중 문제가 발생했습니다. 다시 시도해주세요.',
       mainText: '확인',
       onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+      onCancelClick: () => {
         dialogState.value = { ...initialDialog };
       },
     };
@@ -220,6 +227,10 @@ const removeMember = async () => {
         dialogState.value = { ...initialDialog };
         queryClient.invalidateQueries();
       },
+      onCancelClick: () => {
+        dialogState.value = { ...initialDialog };
+        queryClient.invalidateQueries();
+      },
     };
   } catch (err) {
     dialogState.value = {
@@ -229,6 +240,9 @@ const removeMember = async () => {
       content: '회원 탈퇴 중 문제가 발생했습니다. 다시 시도해주세요.',
       mainText: '확인',
       onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+      onCancelClick: () => {
         dialogState.value = { ...initialDialog };
       },
     };
