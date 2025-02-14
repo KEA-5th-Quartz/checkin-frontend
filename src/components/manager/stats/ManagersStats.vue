@@ -2,18 +2,18 @@
 import { ref, computed, watchEffect } from 'vue';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
-import { ChartOptions, ManagerStats } from '@/types/adminChart';
+import { ChartOptions, ManagerStats } from '@/types/Chart';
 
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
 const categories = ref<string[]>([]);
-const isLoading = ref(true); //  데이터 로딩 상태 추가
+const isLoading = ref(true);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -62,7 +62,6 @@ const chartOptions = ref<ChartOptions>({
   },
 });
 
-//  API 데이터 가져오기
 const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
   ['manager-progress', timeFilterTickets],
   async () => {
@@ -71,7 +70,6 @@ const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
       const response = await statsApi.getManagersStats(timeFilterTickets.value);
       return response.data?.data || [];
     } catch (err) {
-      console.error('API 요청 실패:', err);
       return [];
     } finally {
       isLoading.value = false;
@@ -80,22 +78,17 @@ const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
   { refetchInterval: 1000 * 60, keepPreviousData: true },
 );
 
-//  데이터 변경 시 업데이트
 watchEffect(() => {
   if (!managerProgressData.value || error.value) {
-    console.error('데이터 로드 중 오류 발생:', error.value);
     return;
   }
 
   if (!Array.isArray(managerProgressData.value) || managerProgressData.value.length === 0) {
-    console.warn('API 응답이 비어 있습니다.');
     return;
   }
 
-  // 담당자 리스트 (X축)
   categories.value = managerProgressData.value.map((manager) => manager.userName);
 
-  // 진행 중 / 완료 티켓 개수 추출
   const inProgressData = managerProgressData.value.map((manager) => {
     const inProgress = manager.state?.find((s) => s.categoryName === 'IN_PROGRESS');
     return inProgress ? inProgress.ticketCount : 0;
@@ -111,11 +104,9 @@ watchEffect(() => {
     { name: '완료', data: closedData },
   ];
 
-  // 차트 옵션 업데이트
   chartOptions.value = { ...chartOptions.value, xaxis: { categories: categories.value } };
 });
 
-//  테이블 데이터 계산 (자동 업데이트)
 const tableData = computed(() => {
   if (!series.value.length || !categories.value.length) return [];
 
@@ -148,39 +139,39 @@ const tableData = computed(() => {
 
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-      <div class="mt-6 flex justify-center">
-        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
-              <th class="px-4 py-2 text-left whitespace-nowrap">담당자</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">진행 중</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">완료</th>
-              <th class="px-4 py-2 text-center whitespace-nowrap">전체</th>
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">담당자</th>
+              <th class="manager-table-header-cell-center">진행 중</th>
+              <th class="manager-table-header-cell-center">완료</th>
+              <th class="manager-table-header-cell-center">전체</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'">
-              <td class="px-4 py-2 text-gray-800 font-medium">{{ row.manager }}</td>
-              <td class="px-4 py-2 text-center text-gray-700">{{ row.inProgress }}</td>
-              <td class="px-4 py-2 text-center text-gray-700">{{ row.closed }}</td>
-              <td class="px-4 py-2 text-center font-semibold text-gray-900">{{ row.total }}</td>
+              <td class="manager-table-row">{{ row.manager }}</td>
+              <td class="manager-table-row-data">{{ row.inProgress }}</td>
+              <td class="manager-table-row-data">{{ row.closed }}</td>
+              <td class="manager-table-row-total">{{ row.total }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="bg-gray-3 font-semibold">
-              <td class="px-4 py-2 text-black-2">합계</td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-3 font-semibold">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ tableData.reduce((sum, row) => sum + row.inProgress, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-green-0 text-green-1 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-green">
                   {{ tableData.reduce((sum, row) => sum + row.closed, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-gray-300 text-black-0 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">
                   {{ tableData.reduce((sum, row) => sum + row.total, 0) }}
                 </span>
               </td>

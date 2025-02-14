@@ -1,6 +1,5 @@
 <template>
   <div class="member-list-container">
-    <!-- 관리자 목록 -->
     <div class="member-list-section">
       <h2 class="member-list-title">관리자</h2>
       <div class="member-list-wrapper">
@@ -22,8 +21,6 @@
         </template>
       </div>
     </div>
-
-    <!-- 담당자 목록 -->
     <div class="member-list-section">
       <h2 class="member-list-title">담당자</h2>
       <div class="member-list-wrapper">
@@ -41,8 +38,6 @@
         </template>
       </div>
     </div>
-
-    <!-- 사용자 목록 -->
     <div class="member-list-section">
       <h2 class="member-list-title">사용자</h2>
       <div class="member-list-wrapper">
@@ -68,7 +63,6 @@ import { useCustomQuery } from '@/composables/useCustomQuery';
 import { memberApi } from '@/services/memberService/memberService';
 import SkeletonList from '@/components/UI/SkeletonList.vue';
 
-// 역할별 멤버 리스트 API 호출 (최대 5명까지만 조회)
 const { data: adminData, isLoading: adminLoading } = useCustomQuery(['members', 'ADMIN'], () =>
   memberApi.getMembers('ADMIN', 1, 5),
 );

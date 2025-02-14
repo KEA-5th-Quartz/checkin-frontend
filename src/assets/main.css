@@ -500,6 +500,208 @@ body {
   .member-list-empty {
     @apply text-sm text-gray-1 ml-5;
   }
+  .deletedMember-container {
+    @apply max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative;
+  }
+
+  .deletedMember-menu {
+    @apply absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50;
+  }
+
+  .deletedMember-menu-button {
+    @apply text-gray-0 hover:text-black-0;
+  }
+
+  .deletedMember-menu-item {
+    @apply px-4 py-2 cursor-pointer hover:bg-gray-2;
+  }
+
+  .deletedMember-menu-item-danger {
+    @apply px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2;
+  }
+
+  .deletedMember-profile {
+    @apply w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1;
+  }
+
+  .deletedMember-info {
+    @apply flex-stack items-center mt-4;
+  }
+
+  .deletedMember-text {
+    @apply font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+
+  .deletedMember-subtext {
+    @apply text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+
+  .deletedMember-role {
+    @apply mt-8 text-gray-1;
+  }
+  .deletedMemberManagement-container {
+    @apply mx-auto w-[83%] mt-10;
+  }
+
+  .deletedMemberManagement-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+  .deletedMemberManagement-loading {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+
+  .deletedMemberManagement-empty {
+    @apply text-center text-gray-0 py-10 w-full;
+  }
+  .adminHeader-container {
+    @apply flex justify-center gap-5 lg:gap-[80px] mt-12 w-full px-2;
+  }
+  .adminHeader-section {
+    @apply flex-center gap-3 lg:gap-6;
+  }
+  .adminHeader-section-left {
+    @apply pr-20 lg:pr-[120px] border-r;
+  }
+  .adminHeader-section-center {
+    @apply px-20 lg:px-[70px];
+  }
+  .adminHeader-section-right {
+    @apply pl-20 lg:pl-[120px] border-l;
+  }
+  .adminHeader-icon {
+    @apply flex-center min-w-12 lg:min-w-[60px] min-h-12 lg:min-h-[60px] bg-primary-5 rounded-full;
+  }
+  .adminHeader-label {
+    @apply text-gray-1 pb-1.5 whitespace-nowrap;
+  }
+  .adminHeader-value {
+    @apply text-lg lg:text-xl pr-2;
+  }
+  .adminHeader-unit {
+    @apply text-black-0;
+  }
+  .member-card-container {
+    @apply flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative h-[250px];
+  }
+  .member-card-menu-button {
+    @apply text-gray-0 hover:text-black-0;
+  }
+  .member-card-menu {
+    @apply absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50;
+  }
+  .member-card-profile {
+    @apply w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1;
+  }
+  .member-card-info {
+    @apply flex-stack items-center mt-4;
+  }
+  .member-card-username {
+    @apply font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+  .member-card-email {
+    @apply text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis;
+  }
+  .member-card-self {
+    @apply text-blue-3 text-sm;
+  }
+  .member-card-role {
+    @apply mt-auto text-gray-1;
+  }
+  .member-card-role-change-btn {
+    @apply manager-filter-btn w-full flex items-center justify-between;
+  }
+  .member-card-role-menu {
+    @apply manager-filter-menu w-full;
+  }
+  .member-card-dropdown-icon {
+    @apply transition-02s;
+  }
+  .member-tab-container {
+    @apply mx-auto w-[83%];
+  }
+
+  .member-tab-header {
+    @apply flex justify-around border-b border-gray-2 mb-4;
+  }
+
+  .member-tab-button {
+    @apply px-12 py-2 text-sm font-semibold;
+  }
+
+  .member-tab-button-active {
+    @apply border-b-4 border-primary-3 text-primary-3;
+  }
+
+  .member-tab-button-inactive {
+    @apply text-gray-0 hover:text-primary-3;
+  }
+
+  .member-tab-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%];
+  }
+
+  .member-tab-empty {
+    @apply text-center text-gray-0 py-10 w-full;
+  }
+  .manager-table-chart {
+    @apply mt-6 flex justify-center;
+  }
+
+  .manager-table-wrapper {
+    @apply w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white-0 text-sm;
+  }
+
+  .manager-table-header {
+    @apply bg-gray-3 text-gray-600 uppercase tracking-wide;
+  }
+
+  .manager-table-header-cell {
+    @apply px-4 py-2 text-left whitespace-nowrap;
+  }
+
+  .manager-table-header-cell-center {
+    @apply px-4 py-2 text-center whitespace-nowrap;
+  }
+
+  .manager-table-row {
+    @apply px-4 py-2 text-gray-800 font-medium;
+  }
+
+  .manager-table-row-data {
+    @apply px-4 py-2 text-center text-gray-700;
+  }
+
+  .manager-table-row-total {
+    @apply px-4 py-2 text-center font-semibold text-gray-900;
+  }
+
+  .manager-table-footer {
+    @apply bg-gray-3 font-semibold;
+  }
+
+  .manager-table-footer-cell {
+    @apply px-4 py-2 text-black-2;
+  }
+
+  .manager-table-footer-data {
+    @apply px-4 py-2 text-center;
+  }
+
+  .manager-table-badge {
+    @apply px-2 py-1 rounded font-semibold;
+  }
+
+  .manager-table-badge-blue {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .manager-table-badge-green {
+    @apply bg-green-0 text-green-1;
+  }
+
+  .manager-table-badge-gray {
+    @apply bg-gray-300 text-black-0;
+  }
 }
 
 /* 사용자 템플릿 불러오기 버튼 */

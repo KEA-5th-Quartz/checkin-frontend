@@ -9,7 +9,6 @@ import { formatDateTime } from '@/utils/dateFormat';
 import { ArrowDownIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 
-// 페이지 상태 관리
 const currentPage = ref(parseInt(sessionStorage.getItem('logCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const order = ref('DESC');
@@ -28,7 +27,6 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isOpen.value = false;
 };
 
-// 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -49,7 +47,6 @@ const { data: logData } = useCustomQuery(['log-list', queryParams], async () => 
   }
 });
 
-// 페이지 변경 핸들러
 const handlePageChange = (page: number) => {
   currentPage.value = page;
   sessionStorage.setItem('logCurrentPage', page.toString());
@@ -57,7 +54,6 @@ const handlePageChange = (page: number) => {
 
 const toggleOrder = () => {
   order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-  // 정렬이 변경될 때 첫 페이지로 이동
   currentPage.value = 1;
   sessionStorage.setItem('logCurrentPage', '1');
 };
@@ -75,7 +71,6 @@ onBeforeUnmount(() => {
           <span class="font-medium">{{ selectedPerPage.label }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
         </button>
-
         <div v-if="isOpen" class="manager-filter-menu w-[112px]">
           <ul>
             <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">

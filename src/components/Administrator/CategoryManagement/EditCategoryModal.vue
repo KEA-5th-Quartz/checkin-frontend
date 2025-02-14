@@ -1,12 +1,10 @@
 <template>
   <div v-if="isOpen" class="category-modal-overlay" @click="closeModal">
     <div class="category-modal-container" @click.stop>
-      <!-- 모달 헤더 -->
       <div class="category-modal-header">
         <h3 class="category-modal-title">카테고리 수정</h3>
         <button @click="closeModal" class="category-modal-close-button">✕</button>
       </div>
-      <!-- 모달 본문 -->
       <div class="category-modal-body">
         <label class="category-modal-input-label">카테고리 이름</label>
         <CommonInput
@@ -15,11 +13,8 @@
           class="category-modal-input"
           placeholder="카테고리 이름을 입력하세요"
         />
-        <!-- Alias 입력란 -->
         <label class="category-modal-input-label">카테고리 약어</label>
         <CommonInput type="text" v-model="updatedAlias" class="category-modal-input" :placeholder="aliasPlaceholder" />
-
-        <!-- Content Guide 입력란 -->
         <label v-if="isFirstCategoryComputed" class="category-modal-input-label">카테고리 요청 가이드</label>
         <CommonTextarea
           maxlength="255"
@@ -30,7 +25,6 @@
         ></CommonTextarea>
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
-      <!-- 모달 푸터 -->
       <div class="category-modal-footer">
         <button @click="closeModal" class="category-modal-cancel-button">취소</button>
         <button @click="submitEdit" class="category-modal-submit-button">확인</button>
@@ -74,7 +68,6 @@ const aliasPlaceholder = computed(() => {
   return isFirstCategoryComputed.value ? '영문 2~4글자 대문자 ex) INFR' : '영문 3글자 대문자 ex) NFS';
 });
 
-// Emits 정의
 const emit = defineEmits(['close', 'updateCategories', 'showDialog']);
 
 const updatedName = ref('');
@@ -107,8 +100,8 @@ const { mutate: updateCategory } = useCustomMutation(
   },
   {
     onSuccess: () => {
-      resetState(); // 입력값 초기화
-      emit('updateCategories'); // 리스트 갱신 요청
+      resetState();
+      emit('updateCategories');
       emit('showDialog', {
         title: '카테고리 수정 완료',
         content: '카테고리가 성공적으로 수정되었습니다.',
@@ -117,7 +110,6 @@ const { mutate: updateCategory } = useCustomMutation(
       closeModal();
     },
     onError: (error: unknown) => {
-      console.error('카테고리 수정 실패:', error);
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
@@ -135,7 +127,6 @@ const { mutate: updateCategory } = useCustomMutation(
   },
 );
 
-// 모달이 열릴 때마다 updatedName을 업데이트
 watch(
   () => props.category,
   (newCategory) => {
@@ -143,18 +134,17 @@ watch(
 
     if (isFirstCategory(newCategory)) {
       updatedName.value = newCategory.firstCategoryName;
-      updatedAlias.value = newCategory.alias ?? ''; // alias가 없으면 빈 문자열
-      updatedContentGuide.value = newCategory.contentGuide ?? ''; // contentGuide도 없으면 빈 문자열
+      updatedAlias.value = newCategory.alias ?? '';
+      updatedContentGuide.value = newCategory.contentGuide ?? '';
     } else if (isSecondCategory(newCategory)) {
       updatedName.value = newCategory.name;
-      updatedAlias.value = newCategory.alias ?? ''; // alias 추가
-      updatedContentGuide.value = ''; // 2차 카테고리는 contentGuide 없음
+      updatedAlias.value = newCategory.alias ?? '';
+      updatedContentGuide.value = '';
     }
   },
   { immediate: true },
 );
 
-// 모달 닫기
 function closeModal() {
   emit('close');
 }
@@ -166,7 +156,6 @@ watch(
   },
 );
 
-// 입력 상태 초기화
 function resetState() {
   updatedName.value = '';
   updatedAlias.value = '';
@@ -174,12 +163,10 @@ function resetState() {
   errorMessage.value = '';
 }
 
-// 수정된 이름 제출
 function submitEdit() {
-  errorMessage.value = ''; // 이전 오류 메시지 초기화
+  errorMessage.value = '';
 
   if (!props.category) {
-    console.error('카테고리 정보가 없습니다.');
     return;
   }
 

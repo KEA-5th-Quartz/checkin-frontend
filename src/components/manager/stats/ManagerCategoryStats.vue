@@ -2,34 +2,18 @@
 import { ref, computed, watchEffect } from 'vue';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
-import { ChartOptions } from '@/types/adminChart';
-
-//  API 응답 데이터를 정의할 인터페이스
-interface CategoryState {
-  categoryName: string;
-  ticketCount: number;
-}
-
-interface UserData {
-  userName: string;
-  state: CategoryState[];
-}
-
-//  차트 데이터 타입 정의
-interface SeriesData {
-  name: string;
-  data: number[];
-}
+import { ChartOptions } from '@/types/Chart';
+import { CategoryStat, UserData, SeriesData } from '@/types/Chart';
 
 const series = ref<SeriesData[]>([]);
 const categories = ref<string[]>([]);
-const isLoading = ref(true); //  데이터 로딩 상태 추가
+const isLoading = ref(true);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -89,7 +73,6 @@ const chartOptions = ref<ChartOptions>({
   },
 });
 
-//  API 호출
 const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
   ['manager-category-stats'],
   async () => {
@@ -98,7 +81,6 @@ const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
       const response = await statsApi.getManagerCategoryStats();
       return response.data?.data || [];
     } catch (err) {
-      console.error('API 요청 실패:', err);
       return [];
     } finally {
       isLoading.value = false;
@@ -107,33 +89,27 @@ const { data: managerCategoryStats, error } = useCustomQuery<UserData[]>(
   { refetchInterval: 1000 * 60, keepPreviousData: true },
 );
 
-//  데이터 변경 시 업데이트
 watchEffect(() => {
   if (!managerCategoryStats.value || error.value) {
-    console.error('데이터 로드 중 오류 발생:', error.value);
     return;
   }
 
   if (!Array.isArray(managerCategoryStats.value) || managerCategoryStats.value.length === 0) {
-    console.warn('API 응답이 비어 있습니다.');
     return;
   }
 
-  //  담당자 리스트 (X축)
   categories.value = managerCategoryStats.value.map((user: UserData) => user.userName);
 
-  //  모든 카테고리 추출
   const allCategories = new Set<string>();
   managerCategoryStats.value.forEach((user: UserData) => {
-    user.state?.forEach((state: CategoryState) => allCategories.add(state.categoryName));
+    user.state?.forEach((state: CategoryStat) => allCategories.add(state.categoryName));
   });
 
-  //  시리즈 데이터 생성
   const seriesData: SeriesData[] = Array.from(allCategories).map((category) => {
     const data = categories.value.map((userName) => {
       const user = managerCategoryStats.value.find((u: UserData) => u.userName === userName);
       if (!user || !user.state) return 0;
-      const categoryState = user.state.find((s: CategoryState) => s.categoryName === category);
+      const categoryState = user.state.find((s: CategoryStat) => s.categoryName === category);
       return categoryState ? categoryState.ticketCount : 0;
     });
 
@@ -142,11 +118,9 @@ watchEffect(() => {
 
   series.value = seriesData;
 
-  //  차트 옵션 업데이트
   chartOptions.value = { ...chartOptions.value, xaxis: { categories: categories.value } };
 });
 
-//  테이블 데이터 계산 (자동 업데이트)
 const tableData = computed(() => {
   if (!series.value.length || !categories.value.length) return [];
 
@@ -168,36 +142,36 @@ const tableData = computed(() => {
 
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
 
-      <div class="mt-6 flex justify-center">
-        <table class="w-full max-w-4xl border border-gray-3 shadow-sm rounded-lg overflow-hidden bg-white text-sm">
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-3 text-gray-600 uppercase tracking-wide">
-              <th class="px-4 py-2 text-left whitespace-nowrap">담당자</th>
-              <th v-for="series in series" :key="series.name" class="px-4 py-2 text-center whitespace-nowrap text-sm">
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">담당자</th>
+              <th v-for="series in series" :key="series.name" class="manager-table-header-cell-center">
                 {{ series.name }}
               </th>
-              <th class="px-4 py-2 text-center">전체</th>
+              <th class="manager-table-header-cell-center">전체</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'">
-              <td class="px-4 py-2 text-gray-800 font-medium">{{ row.manager }}</td>
-              <td v-for="(val, i) in row.categoryData" :key="i" class="px-4 py-2 text-center text-gray-700">
+              <td class="manager-table-row">{{ row.manager }}</td>
+              <td v-for="(val, i) in row.categoryData" :key="i" class="manager-table-row-data">
                 {{ val }}
               </td>
-              <td class="px-4 py-2 text-center font-semibold text-gray-900">{{ row.total }}</td>
+              <td class="manager-table-row-total">{{ row.total }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr class="bg-gray-3 font-semibold">
-              <td class="px-4 py-2 text-black-2">합계</td>
-              <td v-for="series in series" :key="series.name" class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 font-semibold">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td v-for="series in series" :key="series.name" class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ series.data.reduce((sum, val) => sum + val, 0) }}
                 </span>
               </td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-semibold">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">
                   {{ series.reduce((sum, s) => sum + s.data.reduce((innerSum, val) => innerSum + val, 0), 0) }}
                 </span>
               </td>

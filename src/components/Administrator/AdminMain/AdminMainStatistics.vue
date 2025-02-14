@@ -1,7 +1,6 @@
 <template>
   <div class="w-full p-5">
     <div class="grid md:grid-cols-3 sm:grid-cols-2 gap-6 gap-y-0">
-      <!-- 담당자별 티켓 진행 현황 -->
       <div class="p-5 col-span-2">
         <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
         <div class="flex gap-3 mb-4">
@@ -19,8 +18,6 @@
         </div>
         <apexchart type="bar" height="300" :options="chartOptions" :series="series" />
       </div>
-
-      <!-- 작업 완성률 -->
       <div class="p-5">
         <h2 class="statistics-section-title">작업 완성률</h2>
         <div class="flex gap-3 mb-4">
@@ -38,12 +35,10 @@
         </div>
         <apexchart type="donut" height="300" :options="chartOptions3" :series="series3" />
       </div>
-      <!-- 전체 작업 상태 분포 -->
       <div class="p-5">
         <h2 class="statistics-section-title">작업 상태</h2>
         <apexchart type="donut" height="300" :options="chartOptions4" :series="series4" />
       </div>
-      <!-- 카테고리별 티켓 수 -->
       <div class="p-5 col-span-2">
         <h2 class="statistics-section-title">카테고리별 티켓 수</h2>
         <apexchart type="bar" height="300" :options="chartOptions2" :series="series2" />
@@ -61,7 +56,7 @@ import {
   CategoryStat,
   ClosedRateResponse,
   StatusRateResponse,
-} from '@/types/adminChart';
+} from '@/types/Chart';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ApexOptions } from 'apexcharts';
@@ -69,8 +64,8 @@ import { ApexOptions } from 'apexcharts';
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
 
-const managerCategories = ref<string[]>([]); // 담당자 X축 카테고리
-const categoryCategories = ref<string[]>([]); // 카테고리 X축 카테고리
+const managerCategories = ref<string[]>([]);
+const categoryCategories = ref<string[]>([]);
 
 const chartOptions = ref<ChartOptions>({
   chart: {
@@ -116,16 +111,14 @@ const { data: managerProgressData } = useCustomQuery(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동으로 데이터 다시 가져오기
-    keepPreviousData: true, // 데이터 변경 중에도 기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
-// `managerProgressData` 변경 시 `series`, `categories`, `chartOptions` 업데이트
 watchEffect(() => {
   if (!managerProgressData.value) return;
 
-  //  담당자 데이터를 별도의 변수에 저장
   managerCategories.value = managerProgressData.value.map((manager: ManagerStats) => manager.userName);
 
   const inProgressData = managerProgressData.value.map((manager: ManagerStats) => {
@@ -143,7 +136,6 @@ watchEffect(() => {
     { name: '완료', data: closedData },
   ];
 
-  //  X축 카테고리 업데이트
   chartOptions.value = {
     ...chartOptions.value,
     xaxis: {
@@ -209,21 +201,18 @@ const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동 갱신
-    keepPreviousData: true, // 이전 데이터 유지 (깜빡임 방지)
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
 watchEffect(() => {
   if (!categoryStatsData.value) return;
 
-  // 티켓 개수가 0 이상인 데이터만 필터링
   const filteredData = categoryStatsData.value.filter((item) => item.ticketCount > 0);
 
-  // X축 카테고리 업데이트
   categoryCategories.value = filteredData.map((item) => item.categoryName);
 
-  // 시리즈 데이터 업데이트
   series2.value = [
     {
       name: '티켓 수',
@@ -231,7 +220,6 @@ watchEffect(() => {
     },
   ];
 
-  // 차트 옵션 업데이트
   chartOptions2.value = {
     ...chartOptions2.value,
     xaxis: {
@@ -241,13 +229,10 @@ watchEffect(() => {
   };
 });
 
-// 필터링 값 (초기값: WEEK)
 const timeFilterCompletion = ref('WEEK');
 
-// 차트 데이터
 const series3 = ref<number[]>([]);
 
-// 차트 옵션
 const chartOptions3 = ref<ApexOptions>({
   chart: {
     type: 'donut',
@@ -260,7 +245,7 @@ const chartOptions3 = ref<ApexOptions>({
       if (!opts || !opts.w || !opts.w.config.series) return '';
       const index = opts.seriesIndex;
       const total = series3.value.reduce((sum, num) => sum + num, 0);
-      return `${((series3.value[index] / total) * 100).toFixed(1)}%`; // 퍼센트 계산
+      return `${((series3.value[index] / total) * 100).toFixed(1)}%`;
     },
   },
   legend: {
@@ -275,7 +260,7 @@ const chartOptions3 = ref<ApexOptions>({
           total: {
             show: true,
             label: '총 작업 수',
-            formatter: () => '0개', //  기본값, API 응답 후 업데이트됨
+            formatter: () => '0개',
           },
         },
       },
@@ -300,22 +285,20 @@ const { data: closedRateData } = useCustomQuery<ClosedRateResponse>(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, //  60초마다 자동 갱신
-    keepPreviousData: true, //  기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
-//  데이터 변경 시 `series3` 업데이트
 watchEffect(() => {
   if (!closedRateData.value) return;
 
-  const totalCount: number = closedRateData.value.totalCount; //  총 작업 개수
-  const closedCount: number = closedRateData.value.closedCount; //  완료된 작업 개수
-  const unclosedCount: number = closedRateData.value.unclosedCount; //  미완료 작업 개수
+  const totalCount: number = closedRateData.value.totalCount;
+  const closedCount: number = closedRateData.value.closedCount;
+  const unclosedCount: number = closedRateData.value.unclosedCount;
 
-  series3.value = [closedCount, unclosedCount]; //  개수 저장
+  series3.value = [closedCount, unclosedCount];
 
-  //  차트 옵션 업데이트 (중앙에 총 작업 수)
   chartOptions3.value = {
     ...chartOptions3.value,
     plotOptions: {
@@ -326,7 +309,7 @@ watchEffect(() => {
             total: {
               show: true,
               label: '총 작업 수',
-              formatter: () => String(totalCount) + '개', //  중앙에 총 작업 수 표시
+              formatter: () => String(totalCount) + '개',
             },
           },
         },
@@ -335,11 +318,9 @@ watchEffect(() => {
   };
 });
 
-// 전체 작업 상태 분포
-
 const series4 = ref<number[]>([]);
 const labels = ref<string[]>([]);
-const totalCount = ref<number>(0); //  총 작업 개수 저장
+const totalCount = ref<number>(0);
 
 const chartOptions4 = ref<ApexOptions>({
   chart: {
@@ -354,7 +335,7 @@ const chartOptions4 = ref<ApexOptions>({
 
       const index = opts.seriesIndex;
       const percentage = ((series4.value[index] / totalCount.value) * 100).toFixed(1);
-      return `${percentage}%`; //  퍼센트 계산
+      return `${percentage}%`;
     },
   },
   legend: {
@@ -387,16 +368,14 @@ const { data: statusRateData } = useCustomQuery<StatusRateResponse>(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, //  60초마다 자동 갱신
-    keepPreviousData: true, //  기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
-//  데이터 변경 시 `series4`, `totalCount`, `labels` 업데이트
 watchEffect(() => {
   if (!statusRateData.value) return;
 
-  //  상태명을 한글로 변환
   const statusMapping: Record<string, string> = {
     IN_PROGRESS: '진행 중',
     OPEN: '오픈',
@@ -406,7 +385,7 @@ watchEffect(() => {
 
   labels.value = statusRateData.value.result.map((item) => statusMapping[item.status] || item.status);
   series4.value = statusRateData.value.result.map((item) => item.ticketCount);
-  totalCount.value = statusRateData.value.totalCount; //  총 작업 개수 업데이트
+  totalCount.value = statusRateData.value.totalCount;
 
   chartOptions4.value = {
     ...chartOptions4.value,
@@ -419,7 +398,7 @@ watchEffect(() => {
             total: {
               show: true,
               label: '작업 상태',
-              formatter: () => `${totalCount.value}개`, //  중앙에 총 작업 수 표시
+              formatter: () => `${totalCount.value}개`,
             },
           },
         },

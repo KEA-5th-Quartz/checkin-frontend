@@ -1,14 +1,14 @@
 <template>
-  <div class="max-h-fit flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative">
+  <div class="deletedMember-container">
     <div class="flex justify-end w-full">
-      <button class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
-      <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
-        <li @click="openRestoreModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">복구</li>
-        <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">영구삭제</li>
+      <button class="deletedMember-menu-button" @click="toggleMenu">⋮</button>
+      <ul v-if="isMenuOpen" ref="menuRef" class="deletedMember-menu">
+        <li @click="openRestoreModal" class="deletedMember-menu-item">복구</li>
+        <li @click="openRemoveMemberModal" class="deletedMember-menu-item-danger">영구삭제</li>
       </ul>
     </div>
 
-    <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
+    <div class="deletedMember-profile">
       <img
         v-if="member.profilePic"
         :src="member.profilePic"
@@ -17,19 +17,17 @@
       />
     </div>
 
-    <div class="flex-stack items-center mt-4">
-      <p
-        class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
-        :title="member.username"
-      >
+    <div class="deletedMember-info">
+      <p class="deletedMember-text" :title="member.username">
         {{ member.username }}
       </p>
-      <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
+      <p class="deletedMember-subtext" :title="member.email">
         {{ member.email }}
       </p>
     </div>
-    <div class="mt-8">
-      <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
+
+    <div class="deletedMember-role">
+      <p>{{ roleLabels[member.role] }}</p>
     </div>
 
     <CommonDialog
@@ -80,7 +78,6 @@ const props = defineProps({
   },
 });
 
-// 회원 복구 뮤테이션
 const restoreMemberMutation = useCustomMutation(
   async (memberId: number) => {
     const response = await memberApi.patchRestoreMember(memberId);
@@ -99,9 +96,14 @@ const restoreMemberMutation = useCustomMutation(
           await queryClient.refetchQueries({ queryKey: ['members'] });
           queryClient.invalidateQueries();
         },
+        onCancelClick: async () => {
+          dialogState.value = { ...initialDialog };
+          await queryClient.refetchQueries({ queryKey: ['members'] });
+          queryClient.invalidateQueries();
+        },
       };
     },
-    onError: (error) => {
+    onError: () => {
       dialogState.value = {
         open: true,
         isOneBtn: true,
@@ -111,8 +113,10 @@ const restoreMemberMutation = useCustomMutation(
         onMainClick: () => {
           dialogState.value = { ...initialDialog };
         },
+        onCancelClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
       };
-      console.error('회원 복구 실패:', error);
     },
   },
 );
@@ -121,12 +125,10 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-// 드롭다운 외부 클릭 시 닫기
 onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// 복구 모달 열기
 const openRestoreModal = () => {
   dialogState.value = {
     open: true,
@@ -144,7 +146,6 @@ const openRestoreModal = () => {
   isMenuOpen.value = false;
 };
 
-// 멤버 영구 삭제 뮤테이션
 const deleteMemberMutation = useCustomMutation(
   async (memberId: number) => {
     await memberApi.deleteMemberDelete(memberId);
@@ -159,13 +160,15 @@ const deleteMemberMutation = useCustomMutation(
         mainText: '확인',
         onMainClick: async () => {
           dialogState.value = { ...initialDialog };
-
-          //  삭제된 회원 목록을 다시 불러오기
+          await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
+        },
+        onCancelClick: async () => {
+          dialogState.value = { ...initialDialog };
           await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
         },
       };
     },
-    onError: (error) => {
+    onError: () => {
       dialogState.value = {
         open: true,
         isOneBtn: true,
@@ -175,13 +178,14 @@ const deleteMemberMutation = useCustomMutation(
         onMainClick: () => {
           dialogState.value = { ...initialDialog };
         },
+        onCancelClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
       };
-      console.error('회원 삭제 실패:', error);
     },
   },
 );
 
-// 멤버 탈퇴 모달 열기
 const openRemoveMemberModal = () => {
   dialogState.value = {
     open: true,
