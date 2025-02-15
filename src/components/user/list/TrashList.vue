@@ -14,6 +14,7 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import TrashDetail from './TrashDetail.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
+import { handleError } from '@/utils/handleError';
 
 const trashStore = useUserTrashListStore();
 const queryClient = useQueryClient();
@@ -55,7 +56,7 @@ const { data: trashData } = useCustomQuery(['trash-list', queryParams], async ()
     });
     return response.data.data;
   } catch (err) {
-    console.error('휴지통 목록 조회 실패:', err);
+    handleError(dialogState, '휴지통 목록 조회 실패');
     throw err;
   }
 });
@@ -161,7 +162,7 @@ onBeforeUnmount(() => {
       <div>
         <p class="pl-12 text-xl font-semibold">삭제된 항목은 30일간 휴지통에 보관됩니다.</p>
       </div>
-      <div class="flex gap-8">
+      <div v-if="trashData?.tickets?.length !== 0 || !trashData" class="flex gap-8">
         <div ref="dropdownRef" class="relative">
           <button @click="isOpen = !isOpen" class="manager-filter-btn">
             <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -182,7 +183,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="flex items-center gap-4 pr-10">
+        <div v-if="trashData?.tickets?.length !== 0 || !trashData" class="flex items-center gap-4 pr-10">
           <button @click="handleRestore" class="btn-cancel py-2">복구</button>
           <button @click="handleDelete" class="btn-main py-2">삭제</button>
         </div>
@@ -215,6 +216,9 @@ onBeforeUnmount(() => {
           </thead>
 
           <tbody class="whitespace-nowrap">
+            <tr v-if="trashData?.tickets?.length === 0 || !trashData">
+              <td colspan="8" class="text-center py-6 text-gray-500">휴지통에 항목이 존재하지 않습니다.</td>
+            </tr>
             <tr
               v-for="ticket in trashData?.tickets"
               :key="ticket.ticketId"
@@ -275,6 +279,7 @@ onBeforeUnmount(() => {
     </section>
 
     <CustomPagination
+      v-if="trashData?.tickets?.length !== 0 || !trashData"
       :items-per-page="pageSize"
       :current-page="currentPage"
       :total-pages="trashData?.totalPages || 1"

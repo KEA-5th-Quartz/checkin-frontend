@@ -1,4 +1,3 @@
-// types/category.ts
 export interface SecondCategory {
   secondCategoryId: number;
   firstCategoryId: number;

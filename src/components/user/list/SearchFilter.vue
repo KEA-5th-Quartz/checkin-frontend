@@ -61,7 +61,7 @@ const handleDelete = () => {
   <header v-if="!ticketStore.isDeleteMode" class="board-header">
     <!-- 검색 -->
     <div class="manager-search-div">
-      <CommonInput maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
+      <CommonInput type="text" maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
       <SvgIcon :icon="SearchIcon" />
     </div>
 
@@ -99,7 +99,7 @@ const handleDelete = () => {
   </header>
 
   <section v-else class="board-header">
-    <div class="flex items-center gap-4 ml-auto">
+    <div class="header-cancel-delete-div">
       <button @click="handleCancel" class="btn-cancel py-2">취소</button>
       <button @click="handleDelete" class="btn-main py-2">삭제</button>
     </div>

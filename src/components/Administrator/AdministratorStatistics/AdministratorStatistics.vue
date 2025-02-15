@@ -1,6 +1,5 @@
 <template>
   <div class="w-full p-5">
-    <!-- 담당자별 티켓 진행 상황 -->
     <div class="statistics-section">
       <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
       <div class="statistics-flex-gap">
@@ -19,13 +18,11 @@
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
     </div>
 
-    <!-- 카테고리별 티켓 수-->
     <div class="statistics-section">
       <h2 class="statistics-section-title">카테고리별 티켓 수</h2>
       <apexchart type="bar" height="380" :options="chartOptions2" :series="series2" />
     </div>
 
-    <!-- 작업 완성률 -->
     <div class="statistics-section">
       <h2 class="statistics-section-title">작업 완성률</h2>
       <div class="statistics-flex-gap mb-5">
@@ -44,9 +41,8 @@
       <apexchart type="donut" height="380" :options="chartOptions3" :series="series3" />
     </div>
 
-    <!-- 전체 작업상태 분포-->
     <div class="statistics-section">
-      <h2 class="statistics-section-title">전체 작업 상태 분포</h2>
+      <h2 class="statistics-section-title">작업 상태 현황</h2>
       <apexchart type="donut" height="380" :options="chartOptions4" :series="series4" />
     </div>
   </div>
@@ -58,24 +54,25 @@ import {
   ChartSeries,
   ManagerStats,
   ChartOptions,
-  StatusRate,
   CategoryStat,
   ClosedRateResponse,
-} from '@/types/adminChart';
+  StatusRateResponse,
+} from '@/types/Chart';
 import { statsApi } from '@/services/statsService/statsService';
 import { useCustomQuery } from '@/composables/useCustomQuery';
+import { ApexOptions } from 'apexcharts';
 
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
 
-const managerCategories = ref<string[]>([]); // 담당자 X축 카테고리
-const categoryCategories = ref<string[]>([]); // 카테고리 X축 카테고리
+const managerCategories = ref<string[]>([]);
+const categoryCategories = ref<string[]>([]);
 
 const commonChartOptions = {
   toolbar: {
     show: true,
     tools: {
-      download: true, // Export 버튼 활성화
+      download: true,
       selection: false,
       zoom: false,
       zoomin: false,
@@ -110,8 +107,12 @@ const chartOptions = ref<ChartOptions>({
     bar: {
       horizontal: false,
       columnWidth: '30%',
-      borderRadius: 5,
+      borderRadius: 3,
+      distributed: false,
     },
+  },
+  grid: {
+    show: true,
   },
   dataLabels: {
     enabled: true,
@@ -140,25 +141,23 @@ const { data: managerProgressData } = useCustomQuery(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동으로 데이터 다시 가져오기
-    keepPreviousData: true, // 데이터 변경 중에도 기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
-// `managerProgressData` 변경 시 `series`, `categories`, `chartOptions` 업데이트
 watchEffect(() => {
   if (!managerProgressData.value) return;
 
-  //  담당자 데이터를 별도의 변수에 저장
   managerCategories.value = managerProgressData.value.map((manager: ManagerStats) => manager.userName);
 
   const inProgressData = managerProgressData.value.map((manager: ManagerStats) => {
-    const inProgress = manager.state.find((s) => s.status === 'IN_PROGRESS');
+    const inProgress = manager.state.find((s) => s.categoryName === 'IN_PROGRESS');
     return inProgress ? inProgress.ticketCount : 0;
   });
 
   const closedData = managerProgressData.value.map((manager: ManagerStats) => {
-    const closed = manager.state.find((s) => s.status === 'CLOSED');
+    const closed = manager.state.find((s) => s.categoryName === 'CLOSED');
     return closed ? closed.ticketCount : 0;
   });
 
@@ -167,7 +166,6 @@ watchEffect(() => {
     { name: '완료', data: closedData },
   ];
 
-  //  X축 카테고리 업데이트
   chartOptions.value = {
     ...chartOptions.value,
     xaxis: {
@@ -202,8 +200,12 @@ const chartOptions2 = ref<ChartOptions>({
     bar: {
       horizontal: false,
       columnWidth: '30%',
-      borderRadius: 5,
+      borderRadius: 3,
+      distributed: true,
     },
+  },
+  grid: {
+    show: true,
   },
   dataLabels: {
     enabled: true,
@@ -216,12 +218,9 @@ const chartOptions2 = ref<ChartOptions>({
   colors: customColors,
   legend: {
     position: 'top',
-    horizontalAlign: 'right',
+    horizontalAlign: 'left',
     offsetY: 10,
-    markers: {
-      radius: 12,
-      shape: 'circle',
-    },
+    markers: { radius: 12, shape: 'circle' },
   },
 });
 
@@ -232,21 +231,18 @@ const { data: categoryStatsData } = useCustomQuery<CategoryStat[]>(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동 갱신
-    keepPreviousData: true, // 이전 데이터 유지 (깜빡임 방지)
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
 watchEffect(() => {
   if (!categoryStatsData.value) return;
 
-  // 티켓 개수가 0 이상인 데이터만 필터링
   const filteredData = categoryStatsData.value.filter((item) => item.ticketCount > 0);
 
-  // X축 카테고리 업데이트
   categoryCategories.value = filteredData.map((item) => item.categoryName);
 
-  // 시리즈 데이터 업데이트
   series2.value = [
     {
       name: '티켓 수',
@@ -254,7 +250,6 @@ watchEffect(() => {
     },
   ];
 
-  // 차트 옵션 업데이트
   chartOptions2.value = {
     ...chartOptions2.value,
     xaxis: {
@@ -264,33 +259,51 @@ watchEffect(() => {
   };
 });
 
-// 필터링 값 (초기값: WEEK)
 const timeFilterCompletion = ref('WEEK');
 
-// 차트 데이터 (완료율, 미완료율)
-const series3 = ref<number[]>([50, 50]);
+const series3 = ref<number[]>([]);
 
-//  차트 옵션 정의
-const chartOptions3 = ref({
+const chartOptions3 = ref<ApexOptions>({
   chart: {
     type: 'donut',
     ...commonChartOptions,
   },
   labels: ['완료된 작업', '미완료 작업'],
-  colors: ['#3570FF', '#D1D5DB'], // 완료/미완료 색상
+  colors: ['#3B82F6', '#D1D5DB'],
   dataLabels: {
     enabled: true,
-    formatter: (val: number) => `${val.toFixed(1)}%`,
+    formatter: (val: number, opts) => {
+      if (!opts || !opts.w || !opts.w.config.series) return '';
+      const index = opts.seriesIndex;
+      const total = series3.value.reduce((sum, num) => sum + num, 0);
+      return `${((series3.value[index] / total) * 100).toFixed(1)}%`;
+    },
   },
   legend: {
     position: 'top',
     horizontalAlign: 'center',
   },
+  plotOptions: {
+    pie: {
+      donut: {
+        labels: {
+          show: true,
+          total: {
+            show: true,
+            label: '총 작업 수',
+            formatter: () => '0개',
+          },
+        },
+      },
+    },
+  },
+  tooltip: {
+    enabled: true,
+  },
   states: {
     hover: {
       filter: {
         type: 'dark',
-        value: 0.15,
       },
     },
   },
@@ -303,67 +316,99 @@ const { data: closedRateData } = useCustomQuery<ClosedRateResponse>(
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동 갱신
-    keepPreviousData: true, // 기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
-//  데이터 변경 시 `series3` 업데이트
 watchEffect(() => {
   if (!closedRateData.value) return;
 
-  const closedRate = closedRateData.value.closedRate;
-  const openRate = 100 - closedRate;
+  const totalCount: number = closedRateData.value.totalCount;
+  const closedCount: number = closedRateData.value.closedCount;
+  const unclosedCount: number = closedRateData.value.unclosedCount;
 
-  series3.value = [closedRate, openRate];
+  series3.value = [closedCount, unclosedCount];
+
+  chartOptions3.value = {
+    ...chartOptions3.value,
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: '총 작업 수',
+              formatter: () => String(totalCount) + '개',
+            },
+          },
+        },
+      },
+    },
+  };
 });
-
-// 전체 작업 상태 분포
 
 const series4 = ref<number[]>([]);
 const labels = ref<string[]>([]);
+const totalCount = ref<number>(0);
 
-const chartOptions4 = ref({
+const chartOptions4 = ref<ApexOptions>({
   chart: {
     type: 'donut',
     ...commonChartOptions,
   },
-  labels: [] as string[],
-  colors: ['#3570FF', '#10B981', '#9CA3AF', '#EF4444'], // 진행 중, 오픈, 완료, 연체
+  labels: [],
+  colors: ['#74B3E2', '#5FCB92', '#B0B8C4', '#F28C8C'],
   dataLabels: {
     enabled: true,
-    formatter: (val: number) => `${val.toFixed(1)}%`,
+    formatter: (_val: number, opts) => {
+      if (!opts || !opts.w || !opts.w.config.series) return '';
+
+      const index = opts.seriesIndex;
+      const percentage = ((series4.value[index] / totalCount.value) * 100).toFixed(1);
+      return `${percentage}%`;
+    },
   },
   legend: {
     position: 'top',
     horizontalAlign: 'center',
   },
-  states: {
-    hover: {
-      filter: {
-        type: 'dark',
-        value: 0.15,
+
+  plotOptions: {
+    pie: {
+      donut: {
+        labels: {
+          show: true,
+          total: {
+            show: true,
+            label: '작업 상태',
+            formatter: () => `0개`,
+          },
+        },
       },
     },
   },
+  tooltip: {
+    enabled: true,
+  },
 });
 
-const { data: statusRateData } = useCustomQuery<StatusRate[]>(
+const { data: statusRateData } = useCustomQuery<StatusRateResponse>(
   ['status-rate-stats'],
   async () => {
     const response = await statsApi.getStatusRateStats();
     return response.data.data;
   },
   {
-    refetchInterval: 1000 * 60, // 60초마다 자동 갱신
-    keepPreviousData: true, // 기존 데이터 유지
+    refetchInterval: 1000 * 60,
+    keepPreviousData: true,
   },
 );
 
 watchEffect(() => {
   if (!statusRateData.value) return;
 
-  // 상태명을 한글로 변환
   const statusMapping: Record<string, string> = {
     IN_PROGRESS: '진행 중',
     OPEN: '오픈',
@@ -371,12 +416,27 @@ watchEffect(() => {
     OVERDUE: '연체',
   };
 
-  labels.value = statusRateData.value.map((item) => statusMapping[item.status] || item.status);
-  series4.value = statusRateData.value.map((item) => item.ticketCount);
+  labels.value = statusRateData.value.result.map((item) => statusMapping[item.status] || item.status);
+  series4.value = statusRateData.value.result.map((item) => item.ticketCount);
+  totalCount.value = statusRateData.value.totalCount;
 
   chartOptions4.value = {
     ...chartOptions4.value,
     labels: [...labels.value],
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: '작업 상태',
+              formatter: () => `${totalCount.value}개`,
+            },
+          },
+        },
+      },
+    },
   };
 });
 </script>

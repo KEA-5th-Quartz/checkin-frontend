@@ -2,7 +2,7 @@
 import { useMemberStore } from '@/stores/memberStore';
 import { MemberType } from '@/types/member';
 import { useForm, useField } from 'vee-validate';
-import { schema } from '@/utils/passwordSchema';
+import { firstLoginSchema } from '@/utils/firstLoginSchema';
 import SvgIcon from '../common/SvgIcon.vue';
 import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
@@ -16,7 +16,7 @@ const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // Form 설정
 const { handleSubmit, errors, meta } = useForm({
-  validationSchema: schema,
+  validationSchema: firstLoginSchema,
 });
 
 // Field 설정
@@ -30,11 +30,6 @@ const getRedirectPath = (role: string | MemberType): string => {
     USER: '/user/ticketlist',
   };
   return roleRedirectMap[role as MemberType] || '/'; // 기본값으로 홈으로 리다이렉트
-};
-
-const resetForm = () => {
-  newPwd.value = '';
-  checkPwd.value = '';
 };
 
 const onSubmit = handleSubmit(async (values) => {
@@ -68,8 +63,6 @@ const onSubmit = handleSubmit(async (values) => {
         window.location.replace(redirectPath);
       },
     };
-
-    resetForm();
   } catch (error) {
     dialogState.value = {
       open: true,

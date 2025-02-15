@@ -1,7 +1,6 @@
 import * as yup from 'yup';
 
-export const schema = yup.object({
-  originalPwd: yup.string().required('현재 비밀번호를 입력해주세요.'),
+export const firstLoginSchema = yup.object({
   newPwd: yup
     .string()
     .required('비밀번호를 입력해주세요.')

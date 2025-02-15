@@ -5,6 +5,9 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { ref } from 'vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { handleError } from '@/utils/handleError';
 
 const props = defineProps<{
   ticketId: number;
@@ -21,6 +24,7 @@ const handleClose = () => {
     emit('close');
   }, 300);
 };
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
@@ -28,7 +32,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
     const response = await ticketApi.getTicketDetail(props.ticketId);
     return response.data.data;
   } catch (err) {
-    console.error('티켓 상세 조회 실패:', err);
+    handleError(dialogState, '티켓 상세 조회 실패');
     throw err;
   }
 });
@@ -43,7 +47,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
         <header class="ticket-header">
           <div>
             <p>{{ detailData.title }}</p>
-            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+            <p class="sm-gray-1">{{ detailData.customId }}</p>
           </div>
           <div class="flex items-center gap-8 self-start">
             <SvgIcon :icon="XIcon" class="cursor-pointer" @click="handleClose" />
@@ -74,7 +78,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <p class="text-sm text-gray-1">{{ detailData.username }}</p>
+                  <p class="sm-gray-1">{{ detailData.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
@@ -124,4 +128,12 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
       </div>
     </div>
   </Teleport>
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

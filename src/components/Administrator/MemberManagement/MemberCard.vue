@@ -1,15 +1,14 @@
 <template>
-  <div class="flex-stack items-center bg-white-0 p-5 rounded-md shadow-sm border border-gray-2 relative h-[250px]">
+  <div class="member-card-container">
     <div class="flex justify-end w-full">
-      <button v-if="!isCurrentUser" class="text-gray-0 hover:text-black-0" @click="toggleMenu">⋮</button>
+      <button v-if="!isCurrentUser" class="member-card-menu-button" @click="toggleMenu">⋮</button>
       <span v-else class="invisible">⋮</span>
-      <ul v-if="isMenuOpen" ref="menuRef" class="absolute right-0 card-base mt-2 border border-gray-2 w-28 z-50">
+      <ul v-if="isMenuOpen" ref="menuRef" class="member-card-menu">
         <li @click="openRoleChangeModal" class="px-4 py-2 cursor-pointer hover:bg-gray-2">권한 변경</li>
         <li @click="openRemoveMemberModal" class="px-4 py-2 cursor-pointer text-red-1 hover:bg-gray-2">탈퇴</li>
       </ul>
     </div>
-
-    <div class="w-[70px] h-[70px] rounded-full bg-gray-3 flex-center overflow-hidden border border-gray-1">
+    <div class="member-card-profile">
       <img
         v-if="member.profilePic"
         :src="member.profilePic"
@@ -17,23 +16,20 @@
         class="w-full h-full object-cover rounded-full"
       />
     </div>
-
-    <div class="flex-stack items-center mt-4">
-      <p
-        class="font-bold text-black-0 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis"
-        :title="member.username"
-      >
+    <div class="member-card-info">
+      <p class="member-card-username" :title="member.username">
         {{ member.username }}
       </p>
-      <p class="text-gray-1 max-w-[180px] overflow-hidden whitespace-nowrap text-ellipsis" :title="member.email">
+      <p class="member-card-email" :title="member.email">
         {{ member.email }}
       </p>
-      <div v-if="isCurrentUser" class="text-blue-3 text-sm"><p>(본인)</p></div>
+      <div v-if="isCurrentUser" class="member-card-self">
+        <p>(본인)</p>
+      </div>
     </div>
-    <div class="mt-auto">
-      <p class="text-gray-1">{{ roleLabels[member.role] }}</p>
+    <div class="member-card-role">
+      <p>{{ roleLabels[member.role] }}</p>
     </div>
-
     <CommonDialog
       v-if="isRoleChangeModalOpen"
       :title="'권한 변경'"
@@ -44,14 +40,11 @@
       :onCancelClick="closeRoleChangeModal"
     >
       <div ref="dropdownRef" class="relative mt-4">
-        <!-- 드롭다운 버튼 -->
-        <button @click="toggleDropdown" class="manager-filter-btn w-full flex items-center justify-between">
+        <button @click="toggleDropdown" class="member-card-role-change-btn">
           <span class="font-medium">{{ selectedRole ? roleLabels[selectedRole] : '권한 선택' }}</span>
-          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isDropdownOpen ? 'rotate-180' : '']" />
+          <SvgIcon :icon="ArrowDownIcon" :class="['member-card-dropdown-icon', isDropdownOpen ? 'rotate-180' : '']" />
         </button>
-
-        <!-- 드롭다운 옵션 리스트 -->
-        <div v-if="isDropdownOpen" class="manager-filter-menu w-full">
+        <div v-if="isDropdownOpen" class="member-card-role-menu">
           <ul>
             <li v-for="option in roleOptions" :key="option" @click="selectRole(option)" class="board-size-menu">
               {{ roleLabels[option] }}
@@ -90,14 +83,14 @@ import { useMemberStore } from '@/stores/memberStore';
 const queryClient = useQueryClient();
 const memberStore = useMemberStore();
 const isMenuOpen = ref(false);
-const isRoleChangeModalOpen = ref(false); // 권한 변경 모달
-const dialogState = ref<DialogProps>({ ...initialDialog }); // 공통 모달
+const isRoleChangeModalOpen = ref(false);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 const menuRef = ref<HTMLElement | null>(null);
 const isDropdownOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 const roleOptions = computed(() => {
   const allRoles: Array<'ADMIN' | 'MANAGER' | 'USER'> = ['ADMIN', 'MANAGER', 'USER'];
-  return allRoles.filter((role) => role !== props.member.role); // 본인 현재 권한 빼고
+  return allRoles.filter((role) => role !== props.member.role);
 });
 const roleLabels: Record<'ADMIN' | 'MANAGER' | 'USER', string> = {
   ADMIN: '관리자',
@@ -110,7 +103,6 @@ const isCurrentUser = computed(() => props.member.memberId === currentUserId.val
 
 const selectedRole = ref<'ADMIN' | 'MANAGER' | 'USER' | null>(null);
 
-// 멤버 데이터 (props로 전달받음)
 const props = defineProps({
   member: {
     type: Object as () => {
@@ -124,7 +116,6 @@ const props = defineProps({
   },
 });
 
-// 권한 변경 뮤테이션
 const updateRoleMutation = useCustomMutation(
   async ({ memberId, role }: { memberId: number; role: string }) => {
     const response = await memberApi.putMemberRole(memberId, { role });
@@ -142,6 +133,10 @@ const updateRoleMutation = useCustomMutation(
           closeRoleChangeModal();
           queryClient.invalidateQueries();
         },
+        onCancelClick: () => {
+          closeRoleChangeModal();
+          queryClient.invalidateQueries();
+        },
       };
     },
   },
@@ -155,7 +150,19 @@ const handleUpdateRole = async () => {
       role: selectedRole.value,
     });
   } catch (err) {
-    console.error('권한 변경 실패:', err);
+    dialogState.value = {
+      open: true,
+      isOneBtn: true,
+      title: '권한 변경 실패',
+      content: '권한 변경중 문제가 발생했습니다. 다시 시도해주세요.',
+      mainText: '확인',
+      onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+      onCancelClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+    };
   }
 };
 
@@ -163,23 +170,20 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value;
 };
 
-// 드롭다운 외부 클릭 시 닫기
 onClickOutside(menuRef, () => {
   isMenuOpen.value = false;
 });
 
-// 권한 변경 모달 열기/닫기
 const openRoleChangeModal = () => {
   isRoleChangeModalOpen.value = true;
   isMenuOpen.value = false;
-  selectedRole.value = null; // 초기화
+  selectedRole.value = null;
 };
 const closeRoleChangeModal = () => {
   isRoleChangeModalOpen.value = false;
   dialogState.value = { ...initialDialog };
 };
 
-// 드롭다운 열기/닫기
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
@@ -187,15 +191,12 @@ onClickOutside(dropdownRef, () => {
   isDropdownOpen.value = false;
 });
 
-// 선택된 권한 변경
 const selectRole = (role: 'ADMIN' | 'MANAGER' | 'USER') => {
   selectedRole.value = role;
   isDropdownOpen.value = false;
 };
 
-// 멤버 탈퇴 모달 열기/닫기
 const openRemoveMemberModal = () => {
-  // isRemoveMemberModalOpen.value = true;
   dialogState.value = {
     open: true,
     isWarn: true,
@@ -211,14 +212,11 @@ const openRemoveMemberModal = () => {
   isMenuOpen.value = false;
 };
 
-// 멤버 탈퇴 함수
 const removeMember = async () => {
   try {
     await memberApi.deleteMember(props.member.memberId);
-    // 멤버 탈퇴 시 삭제된 멤버 서버 동기화
     await queryClient.refetchQueries({ queryKey: ['deleted-members'] });
 
-    //  탈퇴 성공 시 다이얼로그 표시
     dialogState.value = {
       open: true,
       isOneBtn: true,
@@ -229,11 +227,12 @@ const removeMember = async () => {
         dialogState.value = { ...initialDialog };
         queryClient.invalidateQueries();
       },
+      onCancelClick: () => {
+        dialogState.value = { ...initialDialog };
+        queryClient.invalidateQueries();
+      },
     };
-  } catch (error) {
-    console.error('회원 탈퇴 실패:', error);
-
-    //  탈퇴 실패 시 오류 다이얼로그 띄우기
+  } catch (err) {
     dialogState.value = {
       open: true,
       isOneBtn: true,
@@ -241,6 +240,9 @@ const removeMember = async () => {
       content: '회원 탈퇴 중 문제가 발생했습니다. 다시 시도해주세요.',
       mainText: '확인',
       onMainClick: () => {
+        dialogState.value = { ...initialDialog };
+      },
+      onCancelClick: () => {
         dialogState.value = { ...initialDialog };
       },
     };
