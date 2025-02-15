@@ -229,7 +229,6 @@ onBeforeUnmount(() => {
           :isMyTicket="isMyTicket"
           @applyFilters="handleApplyFilters"
           @closeFilter="isFilterOpen = false"
-          class="board-filter-modal"
         />
       </div>
     </div>
