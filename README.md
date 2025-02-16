@@ -40,14 +40,22 @@
 
 #### 라이브러리
 
-- Pinia (클라이언트 상태 관리)
-- vueRouter (라우팅 라이브러리)
-- TanStack Query(VueQuery) (강력한 서버 상태 관리 및 데이터 동기화 라이브러리)
-- VeeValidate (폼 유효성 검사)
-- VueUse (Vue Composition API 유틸리티 컬렉션)
-- apex-chart (차트 UI) 
-- yup (스키마 기반 유효성 검증)
-- date-fns (Date 라이브러리)
+- **Pinia** (로컬 상태 관리)
+
+- **vueRouter** (라우팅 라이브러리)
+
+- **TanStack Query(VueQuery)** (강력한 서버 상태 관리 및 데이터 동기화 라이브러리)
+
+- **VeeValidate** (폼 유효성 검사)
+
+- **VueUse** (Vue Composition API 유틸리티 컬렉션)
+
+- **apex-chart** (차트 UI)
+
+- **yup** (스키마 기반 유효성 검증)
+
+- **date-fns** (날짜 관리 유틸리티 라이브러리)
+
 
 ### 데이터 프로세싱
 
