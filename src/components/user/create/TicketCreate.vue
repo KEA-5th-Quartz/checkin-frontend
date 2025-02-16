@@ -238,7 +238,7 @@ watch(
 );
 
 // 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
-const fetchTemplates = useCustomQuery(['templates', memberId], async () => {
+const fetchTemplates = useCustomQuery(['templat-list', memberId], async () => {
   try {
     const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
     return response.data.data.templates.map((template: any) => ({
@@ -348,10 +348,16 @@ const fetchCategories = useCustomQuery(['category'], async () => {
   try {
     const response = await categoryApi.getCategories();
     return response.data.data.map(
-      (category: { firstCategoryId: string; firstCategoryName: string; secondCategories: any[] }) => ({
-        id: category.firstCategoryId, // ✅ 변경: firstCategory → firstCategoryId
+      (category: {
+        firstCategoryId: number;
+        firstCategoryName: string;
+        contentGuide: string;
+        secondCategories: any[];
+      }) => ({
+        id: category.firstCategoryId,
         value: category.firstCategoryName,
         label: category.firstCategoryName,
+        contentGuide: category.contentGuide,
         secondCategories: category.secondCategories.map((subCategory) => ({
           id: subCategory.secondCategoryId,
           value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
@@ -368,6 +374,20 @@ const fetchCategories = useCustomQuery(['category'], async () => {
 // 카테고리 옵션 리스트
 const firstCategoryList = ref<BaseTicketOption[]>([]);
 const secondCategoryList = ref<BaseTicketOption[]>([]);
+const contentPlaceholder = ref(''); // 요청사항 placeholder 추가
+
+watch(selectedFirstCategory, (newCategory) => {
+  if (newCategory) {
+    const matchedCategory = firstCategoryList.value.find((category) => category.id === newCategory.id);
+    if (matchedCategory) {
+      contentPlaceholder.value = matchedCategory.contentGuide || '';
+    }
+    secondCategoryList.value = matchedCategory?.secondCategories || [];
+  } else {
+    contentPlaceholder.value = '';
+    secondCategoryList.value = [];
+  }
+});
 
 // ✅ 1차 카테고리 선택 시, 해당 2차 카테고리 리스트 변경
 const updateSecondCategoryList = () => {
@@ -453,6 +473,7 @@ const createTicketMutation = useCustomMutation(
   {
     onSuccess: () => {
       queryClient.invalidateQueries(['user-tickets']); // 티켓 생성목록 데이터 자동 리패칭
+      queryClient.refetchQueries(['user-tickets']); // 즉시 API 재요청
     },
   },
 );
@@ -597,6 +618,7 @@ const removeFile = (index: number) => {
           name="content"
           class="ticket-desc-textarea min-h-80 bg-[#fafafa]"
           maxLength="256"
+          :placeholder="contentPlaceholder"
         />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
