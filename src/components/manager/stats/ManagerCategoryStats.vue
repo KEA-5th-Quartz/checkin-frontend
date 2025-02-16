@@ -136,7 +136,7 @@ const tableData = computed(() => {
 </script>
 
 <template>
-  <div class="mt-5 w-full p-5">
+  <div class="mt-5 w-full p-5 scale-95">
     <div class="statistics-section">
       <h2 class="statistics-section-title">담당자별 카테고리 티켓 수</h2>
 

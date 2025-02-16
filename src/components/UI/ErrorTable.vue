@@ -1,10 +1,7 @@
 <script setup lang="ts">
-interface Props {
-  message?: string;
-  error?: unknown;
-}
+import { ErrorTableProps } from '@/types/common/error';
 
-withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<ErrorTableProps>(), {
   message: '데이터를 불러오는 중 오류가 발생했습니다',
   error: undefined,
 });

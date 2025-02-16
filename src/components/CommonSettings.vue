@@ -7,7 +7,6 @@ import { ref } from 'vue';
 import PasswordInput from './common/PasswordInput.vue';
 import CommonDialog from './common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import { ApiError } from '@/types/common/error';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { AxiosError } from 'axios';
 
@@ -28,12 +27,6 @@ const { value: originalPwd } = useField<string>('originalPwd');
 const { value: newPwd } = useField<string>('newPwd');
 const { value: checkPwd } = useField<string>('checkPwd');
 
-const resetForm = () => {
-  originalPwd.value = '';
-  newPwd.value = '';
-  checkPwd.value = '';
-};
-
 const onSubmit = handleSubmit(async (values) => {
   try {
     await userApi.changePassword(memberStore.memberId, {
@@ -51,8 +44,6 @@ const onSubmit = handleSubmit(async (values) => {
         window.location.reload();
       },
     };
-
-    resetForm();
   } catch (error) {
     const err = error as AxiosError;
 
@@ -107,7 +98,7 @@ const onSubmit = handleSubmit(async (values) => {
 });
 
 const handleImageChange = async (event: Event) => {
-  const target = event.target as HTMLInputElement; // 이벤트 객체에서 input 가져옴
+  const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
 
   if (file) {
@@ -126,10 +117,8 @@ const handleImageChange = async (event: Event) => {
 
     const sanitizedFileName = file.name.replace(/[^\w\s.-]/g, '');
 
-    // 허용된 이미지 타입 정의
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
-    // 이미지 타입 체크
     if (!allowedTypes.includes(file.type)) {
       dialogState.value = {
         open: true,
@@ -168,10 +157,10 @@ const handleImageChange = async (event: Event) => {
       return;
     }
 
-    const reader = new FileReader(); // FileReader 객체 생성
+    const reader = new FileReader();
     reader.onload = (e) => {
-      previewImage.value = e.target?.result as string; // 읽은 결과를 미리보기 이미지 소스로 설정
-    }; // 파일을 Base64 인코딩된 문자열로 읽기
+      previewImage.value = e.target?.result as string;
+    };
     reader.readAsDataURL(file);
 
     try {
@@ -219,7 +208,6 @@ const handleImageChange = async (event: Event) => {
         placeholder="현재 비밀번호를 입력해주세요"
         :error="errors.originalPwd"
       />
-
       <PasswordInput
         v-model="newPwd"
         label="새 비밀번호"
@@ -229,7 +217,6 @@ const handleImageChange = async (event: Event) => {
         :error="errors.newPwd ? errors.newPwd : ''"
         :success-message="newPwd && !errors.newPwd ? '사용 가능한 비밀번호입니다.' : ''"
       />
-
       <PasswordInput
         v-model="checkPwd"
         label="새 비밀번호 확인"
@@ -238,7 +225,6 @@ const handleImageChange = async (event: Event) => {
         :error="errors.checkPwd"
         :success-message="checkPwd && !errors.checkPwd ? '비밀번호가 일치합니다.' : ''"
       />
-
       <button type="submit" class="btn-main max-w-fit self-end">저장</button>
     </form>
   </div>

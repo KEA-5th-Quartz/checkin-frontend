@@ -174,14 +174,32 @@ const hasActiveFilters = computed(() => {
   );
 });
 
+const statusMapping: { [key: string]: string } = {
+  OPEN: '생성',
+  IN_PROGRESS: '진행중',
+  CLOSED: '완료',
+};
+
+const getActiveFilters = computed(() => {
+  const filters = [
+    ...ManagerfilterState.value.statuses.map((status) => statusMapping[status] || status),
+    ...ManagerfilterState.value.categories,
+    ...ManagerfilterState.value.usernames,
+    ManagerfilterState.value.dueToday ? '오늘 마감' : '',
+    ManagerfilterState.value.dueThisWeek ? '이번 주 마감' : '',
+  ].filter(Boolean);
+
+  return filters.join(' · ');
+});
+
 onBeforeUnmount(() => {
   sessionStorage.setItem('managerCurrentPage', currentPage.value.toString());
 });
 </script>
 
 <template>
-  <header class="board-header">
-    <div class="flex w-1/4">
+  <header class="board-header max-w-full">
+    <div class="flex items-center w-1/4">
       <div v-if="!hasActiveFilters" class="manager-search-div">
         <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
         <CommonInput
@@ -195,6 +213,13 @@ onBeforeUnmount(() => {
         <div class="flex items-center gap-2">
           <SvgIcon :icon="SearchIcon" class="cursor-pointer pl-1" @click="handleSearch" />
         </div>
+      </div>
+      <div
+        v-else
+        class="max-w-[600px] sm-gray-1 truncate text-sm text-gray-500"
+        :title="'필터링 중인 항목 : ' + getActiveFilters"
+      >
+        필터링 : {{ getActiveFilters }}
       </div>
     </div>
 
@@ -229,7 +254,6 @@ onBeforeUnmount(() => {
           :isMyTicket="isMyTicket"
           @applyFilters="handleApplyFilters"
           @closeFilter="isFilterOpen = false"
-          class="board-filter-modal"
         />
       </div>
     </div>
