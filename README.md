@@ -6,7 +6,7 @@
 - 
 
 #### 서비스 배포 주소
-- kc.quartz-checkin.xyz
+- [kc.quartz-checkin.xyz](https://kc.quartz-checkin.xyz/)
 
 #### 개발 기간
 - 팀 구성 및 기획
