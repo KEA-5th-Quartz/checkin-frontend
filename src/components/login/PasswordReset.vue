@@ -14,16 +14,13 @@ const router = useRouter();
 const route = useRoute();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// URL에서 memberId와 passwordResetToken 가져오기
 const memberId = route.query.memberId as string;
 const passwordResetToken = route.query.passwordResetToken as string;
 
-// Form 설정
 const { handleSubmit, errors, meta } = useForm({
   validationSchema: firstLoginSchema,
 });
 
-// Field 설정
 const { value: newPwd } = useField<string>('newPwd');
 const { value: checkPwd } = useField<string>('checkPwd');
 
@@ -36,11 +33,6 @@ const confirmPassword = computed({
   get: () => checkPwd.value,
   set: (val: string) => (checkPwd.value = val),
 });
-
-const resetForm = () => {
-  newPwd.value = '';
-  checkPwd.value = '';
-};
 
 const onSubmit = handleSubmit(async (values) => {
   try {
@@ -59,8 +51,6 @@ const onSubmit = handleSubmit(async (values) => {
         router.replace('/');
       },
     };
-
-    resetForm();
   } catch (error) {
     dialogState.value = {
       open: true,
@@ -75,13 +65,11 @@ const onSubmit = handleSubmit(async (values) => {
   }
 });
 
-// 비밀번호 표시 여부
 const showPwd = ref({
   new: false,
   check: false,
 });
 
-// 비밀번호 표시/숨김 토글 함수
 const togglePwdVisibility = (field: 'new' | 'check') => {
   showPwd.value[field] = !showPwd.value[field];
 };
