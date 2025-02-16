@@ -4,6 +4,9 @@ export interface BaseTicketOption {
   label: string;
   profilePic?: string;
   secondCategories?: BaseTicketOption[];
+  firstCategory?: string;
+  secondCategory?: string;
+  content?: string;
 }
 
 export interface StatusTicketOption extends BaseTicketOption {
