@@ -7,6 +7,7 @@ export interface BaseTicketOption {
   firstCategory?: string;
   secondCategory?: string;
   content?: string;
+  contentGuide?: string;
 }
 
 export interface StatusTicketOption extends BaseTicketOption {
