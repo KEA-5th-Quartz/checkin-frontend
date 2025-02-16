@@ -116,7 +116,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="mt-5 w-full p-5">
+  <div class="mt-5 w-full p-5 scale-95">
     <div class="statistics-section">
       <h2 class="statistics-section-title">카테고리별 티켓 진행 현황</h2>
       <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
