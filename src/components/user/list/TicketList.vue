@@ -101,10 +101,7 @@ const selectOption = (
 const handleApplyFilters = (filters: UserFilterPayload) => {
   console.log('🚀 Received filters:', filters);
   UserfilterState.value = {
-    statuses: filters.statuses.map((id: string) => {
-      const statusItem = status.find((s) => String(s.id) === id);
-      return statusItem ? statusItem.label : id; // id를 fallback 값으로 두기
-    }),
+    statuses: filters.statuses,
     categories: filters.categories,
   };
   console.log('🟢 Updated UserfilterState:', UserfilterState.value);

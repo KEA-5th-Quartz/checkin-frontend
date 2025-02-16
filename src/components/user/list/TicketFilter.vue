@@ -61,11 +61,11 @@ const categoryOptions = computed(() => {
 });
 
 // 필터 토글 함수들
-const toggleStatus = (status: string) => {
-  if (selectedStatuses.value.includes(status)) {
-    selectedStatuses.value = selectedStatuses.value.filter((s) => s !== status);
+const toggleStatus = (statusValue: string) => {
+  if (selectedStatuses.value.includes(statusValue)) {
+    selectedStatuses.value = selectedStatuses.value.filter((s) => s !== statusValue);
   } else {
-    selectedStatuses.value.push(status);
+    selectedStatuses.value.push(statusValue);
   }
 };
 
@@ -147,8 +147,8 @@ onClickOutside(modalRef, () => {
           :status="sta.label"
           size="lg"
           class="cursor-pointer"
-          :class="selectedStatuses.includes(sta.id as unknown as string) ? 'opacity-100' : 'opacity-30 hover:opacity-50'"
-          @click="toggleStatus(sta.id as unknown as string)"
+          :class="selectedStatuses.includes(sta.label) ? 'opacity-100' : 'opacity-30 hover:opacity-50'"
+          @click="toggleStatus(sta.label)"
         />
       </div>
     </section>
