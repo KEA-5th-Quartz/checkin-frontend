@@ -26,7 +26,6 @@ export interface DropdownProps {
   isManager?: boolean;
 }
 
-// 티켓 타입
 export interface Ticket {
   ticketId: number;
   title: string;
@@ -45,7 +44,6 @@ export interface CommentMember {
   profilePic: string;
 }
 
-// 파일 첨부
 export interface AttachedFile {
   commentId: number;
   attachmentUrl: string;
@@ -56,7 +54,6 @@ export interface AttachmentResponse {
   data: AttachedFile;
 }
 
-// 티켓 생성 파일첨부 응답
 export interface AttachedResponse {
   attachmentid: string;
   id: number;

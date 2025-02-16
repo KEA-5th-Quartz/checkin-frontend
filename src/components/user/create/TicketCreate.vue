@@ -602,7 +602,11 @@ const removeFile = (index: number) => {
         <div class="flex justify-end cursor-pointer">
           <!-- 숨겨진 파일 선택 input -->
           <input type="file" ref="fileInput" @change="handleFileChange" multiple class="hidden" />
-          <SvgIcon :icon="ClipIcon" class="text-gray-1" @click="triggerFileInput" />
+          <SvgIcon
+            :icon="ClipIcon"
+            class="text-gray-1 hover:bg-primary-5 h-6 w-6 rounded-md"
+            @click="triggerFileInput"
+          />
         </div>
       </section>
       <section class="w-full mt-4">

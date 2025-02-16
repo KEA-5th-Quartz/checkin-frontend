@@ -20,14 +20,14 @@ const defaultTicket: Ticket = {
 export const useTicketStore = defineStore('ticket', {
   state: () => ({
     ticket: defaultTicket as Ticket,
-    originalTicket: null as Ticket | null, // 원본 데이터 저장용
+    originalTicket: null as Ticket | null,
     isEditMode: false,
   }),
 
   actions: {
     setTicket(ticket: Ticket) {
       this.ticket = { ...ticket };
-      this.originalTicket = { ...ticket }; // 원본 데이터 저장
+      this.originalTicket = { ...ticket };
     },
 
     updateTicket(updatedTicket: Ticket) {
@@ -40,7 +40,7 @@ export const useTicketStore = defineStore('ticket', {
 
     resetToOriginal() {
       if (this.originalTicket) {
-        this.ticket = { ...this.originalTicket }; // 원본 데이터로 복원
+        this.ticket = { ...this.originalTicket };
       }
     },
   },

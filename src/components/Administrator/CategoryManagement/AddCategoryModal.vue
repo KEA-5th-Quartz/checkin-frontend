@@ -1,49 +1,48 @@
 <template>
   <div v-if="isOpen" class="category-modal-overlay" @click="close">
     <div class="category-modal-container" @click.stop>
-      <!-- 모달 헤더 -->
       <div class="category-modal-header">
         <h3 class="category-modal-title">{{ modalTitle }}</h3>
         <button @click="close" class="category-modal-close-button">✕</button>
       </div>
-
-      <!-- 모달 본문 -->
       <div class="category-modal-body">
         <p v-if="parentCategory" class="text-sm text-gray-0 mb-4">
           상위 카테고리: <span class="font-semibold">{{ parentCategory.firstCategoryName }}</span>
         </p>
         <label class="category-modal-input-label">카테고리 이름</label>
-        <CommonInput v-model="categoryName" class="category-modal-input" placeholder="카테고리 이름을 입력하세요" />
-        <!-- Alias 입력란 -->
+        <CommonInput
+          type="text"
+          v-model="categoryName"
+          class="category-modal-input"
+          placeholder="카테고리 이름을 입력하세요"
+        />
         <label v-if="isFirstCategory" class="category-modal-input-label"> 카테고리 약어 </label>
         <CommonInput
+          type="text"
           v-if="isFirstCategory"
           v-model="alias"
+          maxLength="4"
           class="category-modal-input"
-          placeholder="영문 2~4글자 대문자 ex> INFR"
+          placeholder="영문 2~4글자 대문자 ex) INFR"
         />
-
         <label v-if="isSecondaryCategory" class="category-modal-input-label"> 카테고리 약어 </label>
         <CommonInput
+          type="text"
           v-if="isSecondaryCategory"
           v-model="alias"
           class="category-modal-input"
-          placeholder="영문 3글자 대문자 ex> NFS"
+          placeholder="영문 3글자 대문자 ex) CRT"
         />
-
-        <!-- Content Guide 입력란 -->
         <label v-if="!isSecondaryCategory" class="category-modal-input-label">카테고리 요청 가이드</label>
         <CommonTextarea
           maxlength="255"
           v-if="!isSecondaryCategory"
           v-model="contentGuide"
           class="category-modal-input category-modal-textarea"
-          placeholder="ex> 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
-        ></CommonTextarea>
-        <!-- 경고 메시지 -->
+          placeholder="ex) 인프라 관련 요청 시 점검 대상, 주요 증상 등을 포함해 주세요."
+        />
         <p v-if="errorMessage" class="category-modal-error-message">{{ errorMessage }}</p>
       </div>
-      <!-- 모달 푸터 -->
       <div class="category-modal-footer">
         <button @click="close" class="category-modal-cancel-button">취소</button>
         <button @click="submit" class="category-modal-submit-button">확인</button>
@@ -91,17 +90,16 @@ const { mutate: createCategory } = useCustomMutation(
   },
   {
     onSuccess: () => {
-      resetState(); // 성공 시 입력값 초기화
-      emit('updateCategories'); // 리스트 갱신 요청
+      resetState();
+      emit('updateCategories');
       emit('showDialog', {
         title: '카테고리 추가 완료',
         content: '새로운 카테고리가 추가되었습니다.',
         mainText: '확인',
-      }); // 다이얼로그 표시 요청
+      });
       close();
     },
     onError: (error: unknown) => {
-      console.error('카테고리 추가 실패:', error);
       if (isApiError(error)) {
         if (error.code === 'CATEGORY_4090') {
           errorMessage.value = '동일한 이름의 카테고리가 존재합니다.';
@@ -126,7 +124,6 @@ watch(
   },
 );
 
-// 입력 상태 초기화
 function resetState() {
   categoryName.value = '';
   alias.value = '';
@@ -134,12 +131,10 @@ function resetState() {
   errorMessage.value = '';
 }
 
-// 모달 닫기
 function close() {
   emit('close');
 }
 
-// 카테고리 추가 제출
 function submit() {
   errorMessage.value = '';
 
@@ -147,8 +142,6 @@ function submit() {
   if (!categoryName.value.trim()) missingFields.push('카테고리 이름');
   if (!alias.value.trim()) missingFields.push('Alias');
   if (isFirstCategory.value && !contentGuide.value?.trim()) missingFields.push('Content Guide');
-
-  //  누락된 필드가 있으면 메시지 표시
   if (missingFields.length > 0) {
     errorMessage.value = `다음 필드를 입력해주세요: ${missingFields.join(', ')}`;
     return;

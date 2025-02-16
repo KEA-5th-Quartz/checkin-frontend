@@ -10,7 +10,6 @@ import '@/assets/slideAnimation.css';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { formatMinusDate } from '@/utils/dateFormat';
-import UserComment from '../UserComment.vue';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useQueryClient } from '@tanstack/vue-query';
 import { categoryApi } from '@/services/categoryService/categoryService';
@@ -21,7 +20,9 @@ import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
-import { ApiError } from '@/types/common/error';
+import { AxiosError } from 'axios';
+import { handleError } from '@/utils/handleError';
+import TicketComment from '@/components/TicketComment.vue';
 
 const queryClient = useQueryClient();
 const firstCategorySelected = ref();
@@ -51,7 +52,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
     const response = await ticketApi.getTicketDetail(props.ticketId);
     return response.data.data;
   } catch (err) {
-    console.error('티켓 상세 조회 실패:', err);
+    handleError(dialogState, '티켓 상세 조회 실패');
     throw err;
   }
 });
@@ -61,7 +62,7 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
     const response = await categoryApi.getCategories();
     return response;
   } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
+    handleError(dialogState, '카테고리 목록 조회 실패');
     throw err;
   }
 });
@@ -251,18 +252,18 @@ const updateMutation = useCustomMutation(
       ticketStore.isEditMode = false;
     },
     onError: (error) => {
-      const err = error as unknown as ApiError;
-      if (err.code === 'CATEGORY_4041') {
-        dialogState.value = {
-          open: true,
-          isOneBtn: true,
-          title: error.message,
-          mainText: '확인',
-          onMainClick: () => {
-            dialogState.value = { ...initialDialog };
-          },
-        };
-      }
+      const err = error as unknown as AxiosError;
+      const apiError = err.message as string;
+
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: apiError || '오류가 발생했습니다.',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     },
   },
 );
@@ -316,7 +317,7 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       });
     }
   } catch (err) {
-    console.error('1차 카테고리 변경 실패:', err);
+    handleError(dialogState, '1차 카테고리 변경 실패');
   }
 };
 
@@ -331,7 +332,7 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
       secondCategory: option.label,
     });
   } catch (err) {
-    console.error('2차 카테고리 변경 실패:', err);
+    handleError(dialogState, '2차 카테고리 변경 실패');
   }
 };
 
@@ -385,7 +386,7 @@ const handleFileDownload = async (fileUrl: string) => {
       window.URL.revokeObjectURL(downloadUrl);
     }, 100);
   } catch (err) {
-    console.error('파일 다운로드 실패:', err);
+    handleError(dialogState, '파일 다운로드 실패');
   }
 };
 
@@ -403,11 +404,12 @@ const canEdit = computed(() => {
         <header class="ticket-header">
           <div v-if="!ticketStore.isEditMode">
             <p>{{ ticketStore.ticket.title }}</p>
-            <p class="text-sm text-gray-1">{{ detailData.customId }}</p>
+            <p class="sm-gray-1">{{ detailData.customId }}</p>
           </div>
           <CommonInput
             v-else
             v-model="ticketStore.ticket.title"
+            type="text"
             class="ticket-edit-input"
             :class="{ 'border-red-1': errors.title }"
           />
@@ -462,7 +464,7 @@ const canEdit = computed(() => {
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
-                  <p class="text-sm text-gray-1">{{ detailData?.username }}</p>
+                  <p class="sm-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
               <!-- 요청 일자 블록 -->
@@ -520,7 +522,7 @@ const canEdit = computed(() => {
                   :class="{ 'border-red-1': errors.dueDate }"
                   v-model="formattedDueDate"
                 />
-                <span v-if="errors.due_date" class="text-xs text-red-1 mt-1 block">{{ errors.due_date }}</span>
+                <span v-if="errors.due_date" class="ticket-error-p">{{ errors.due_date }}</span>
               </div>
             </section>
           </div>
@@ -537,7 +539,7 @@ const canEdit = computed(() => {
                 class="ticket-desc-textarea"
                 :class="{ 'border-red-1': errors.content }"
               />
-              <span v-if="errors.content" class="text-xs text-red-1 mt-1 block">{{ errors.content }}</span>
+              <span v-if="errors.content" class="ticket-error-p">{{ errors.content }}</span>
             </div>
           </div>
 
@@ -549,7 +551,7 @@ const canEdit = computed(() => {
                 v-for="(fileUrl, index) in detailData.ticketAttachmentUrls"
                 :key="index"
                 @click="handleFileDownload(fileUrl)"
-                class="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-0 bg-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
+                class="ticket-attachment-btn"
               >
                 <SvgIcon :icon="DownloadIcon" class="w-4 h-4" />
                 <span>{{ getFileType(fileUrl) }} 다운</span>
@@ -557,7 +559,7 @@ const canEdit = computed(() => {
             </div>
           </div>
 
-          <UserComment :ticket-id="ticketId" />
+          <TicketComment :ticket-id="ticketId" />
         </div>
       </div>
     </div>

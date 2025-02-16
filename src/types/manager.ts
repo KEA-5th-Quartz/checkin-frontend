@@ -1,11 +1,9 @@
-// 개수 필터링
 export interface PageOption {
   id: number;
   value: number | string;
   label: string;
 }
 
-// 대시보드 테이블 데이터
 export interface TableData {
   id: number;
   title: string;

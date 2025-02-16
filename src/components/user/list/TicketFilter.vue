@@ -3,18 +3,38 @@ import { ArrowDownIcon } from '@/assets/icons/path';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 import { onClickOutside } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, watch, ref } from 'vue';
 import { status } from '@/components/manager/ticketOptionTest';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { categoryApi } from '@/services/categoryService/categoryService';
 
+const props = defineProps({
+  initialStatuses: Array,
+  initialCategories: Array,
+});
+
+// 필터 선택 상태 관리
+const selectedStatuses = ref<string[]>(props.initialStatuses || []);
+const selectedCategories = ref<string[]>(props.initialCategories || []);
+
+// watch를 사용해 props 값이 바뀌면 selectedStatuses와 selectedCategories 업데이트
+watch(
+  () => props.initialStatuses,
+  (newStatuses) => {
+    selectedStatuses.value = newStatuses || [];
+  },
+);
+
+watch(
+  () => props.initialCategories,
+  (newCategories) => {
+    selectedCategories.value = newCategories || [];
+  },
+);
+
 const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
-
-// 필터 선택 상태 관리
-const selectedStatuses = ref<string[]>([]);
-const selectedCategories = ref<string[]>([]);
 
 // 드롭다운 상태 관리
 const isCategoryDropdownOpen = ref(false);
@@ -49,6 +69,7 @@ const toggleStatus = (status: string) => {
   }
 };
 
+// 필터 카테고리 함수들
 const toggleCategory = (category: string) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== category);
@@ -57,6 +78,7 @@ const toggleCategory = (category: string) => {
   }
 };
 
+// 초기화 버튼 클릭 핸들러
 const handleReset = () => {
   emit('applyFilters', {
     quickFilters: '',

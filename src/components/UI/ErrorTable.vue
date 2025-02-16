@@ -1,7 +1,7 @@
 <script setup lang="ts">
 interface Props {
   message?: string;
-  error?: unknown; // unknown으로 변경
+  error?: unknown;
 }
 
 withDefaults(defineProps<Props>(), {

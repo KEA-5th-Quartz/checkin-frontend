@@ -1,6 +1,5 @@
 <template>
   <div class="flex justify-between">
-    <!-- 1차 카테고리 -->
     <div class="category-container">
       <h3 class="category-header">1차 카테고리</h3>
       <div class="category-divider"></div>
@@ -29,11 +28,7 @@
         <p>해당 1차 카테고리가 없습니다.</p>
       </div>
     </div>
-
-    <!-- 구분 선 -->
     <div class="border-r border-gray-2 mx-4"></div>
-
-    <!-- 2차 카테고리 -->
     <div class="category-container">
       <h3 class="category-header">2차 카테고리</h3>
       <div class="category-divider"></div>
@@ -76,6 +71,7 @@
       :content="dialogContent.content"
       :mainText="dialogContent.mainText"
       :onMainClick="closeDialog"
+      :onCancelClick="closeDialog"
       isOneBtn
     />
     <CommonDialog
@@ -113,7 +109,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { isApiError } from '@/types/common/error';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 
-// 카테고리 데이터 불러오기
 const {
   data: categoryData,
   isLoading,
@@ -134,19 +129,14 @@ function refreshCategories() {
   queryClient.refetchQueries({ queryKey: ['category-list'] });
 }
 
-// 1차 카테고리 리스트
 const primaryCategories = computed(() => categoryData.value?.data ?? []);
 
-// 선택된 카테고리 상태
 const selectedPrimaryCategory = ref<FirstCategory | null>(null);
 const selectedCategory = ref<FirstCategory | SecondCategory | null>(null);
-
-// 1차 카테고리 선택 핸들러
 function selectPrimaryCategory(category: FirstCategory) {
   selectedPrimaryCategory.value = category;
 }
 
-// 2차 카테고리 필터링
 const filteredSecondaryCategories = computed(() => {
   const selected = primaryCategories.value.find(
     (category: FirstCategory) => category.firstCategoryId === selectedPrimaryCategory.value?.firstCategoryId,
@@ -160,7 +150,6 @@ const filteredSecondaryCategories = computed(() => {
     : [];
 });
 
-// 수정 모달 열기
 function handleEditPrimaryCategory(category: FirstCategory) {
   if (isRemoveCategoryModalOpen.value) return;
   selectedCategory.value = category;
@@ -171,31 +160,24 @@ function handleEditSecondaryCategory(category: SecondCategory) {
   selectedCategory.value = category;
 }
 
-// 수정 모달 닫기
 function closeEditModal() {
   selectedCategory.value = null;
 }
 
-// 다이얼 로그 상태
 const isDialogOpen = ref(false);
 const dialogContent = ref({ title: '', content: '', mainText: '확인' });
-
-// 다이얼로그 표시 함수
 function openDialog(dialogData: { title: string; content: string; mainText: string }) {
   dialogContent.value = dialogData;
   isDialogOpen.value = true;
 }
 
-// 다이얼 닫기
 function closeDialog() {
   isDialogOpen.value = false;
 }
 
-// AddCategoryModal 관련 상태
 const isAddModalOpen = ref(false);
 const addModalTitle = ref('');
 
-// 1차 카테고리 생성 모달 열기
 function handleAddPrimaryCategory() {
   addModalTitle.value = '1차 카테고리 추가';
   selectedPrimaryCategory.value = null;
@@ -214,15 +196,13 @@ function handleAddSecondaryCategory() {
   addModalTitle.value = '2차 카테고리 추가';
   isAddModalOpen.value = true;
 }
-// 카테고리 생성 모달 닫기
+
 function closeAddModal() {
   isAddModalOpen.value = false;
 }
 
-// 삭제 전용 상태
 const selectedCategoryForDelete = ref<FirstCategory | SecondCategory | null>(null);
 
-// 카테고리 삭제 다이얼 상태
 const isRemoveCategoryModalOpen = ref(false);
 
 function closeRemoveCategoryModal() {
@@ -230,7 +210,6 @@ function closeRemoveCategoryModal() {
   selectedCategoryForDelete.value = null;
 }
 
-// 1차 카테고리 삭제 여부
 const isPrimaryDelete = ref(false);
 
 function isFirstCategory(category: FirstCategory | SecondCategory): category is FirstCategory {
@@ -241,17 +220,12 @@ function isSecondCategory(category: FirstCategory | SecondCategory): category is
   return 'secondCategoryId' in category;
 }
 
-// 카테고리 삭제 mutation
 const { mutate: removeCategory } = useCustomMutation(
   async (category: FirstCategory | SecondCategory) => {
     if (!category) throw new Error('삭제할 카테고리가 선택되지 않았습니다.');
-
-    // 1차 카테고리 삭제
     if (isFirstCategory(category)) {
       return await categoryApi.deleteFirstCategory(category.firstCategoryId);
     }
-
-    // 2차 카테고리 삭제
     if (isSecondCategory(category) && selectedPrimaryCategory.value) {
       return await categoryApi.deleteSecondCategory(
         selectedPrimaryCategory.value.firstCategoryId,
@@ -274,7 +248,6 @@ const { mutate: removeCategory } = useCustomMutation(
       isDialogOpen.value = true;
     },
     onError: (error: unknown) => {
-      console.error('카테고리 삭제 실패:', error);
       if (isApiError(error) && error.code === 'CATEGORY_4092') {
         dialogContent.value = {
           title: '삭제 불가',
@@ -296,14 +269,13 @@ const { mutate: removeCategory } = useCustomMutation(
   },
 );
 
-// 1차 카테고리 삭제 핸들러
 function handleDeletePrimaryCategory(category: FirstCategory) {
   if (isRemoveCategoryModalOpen.value) return;
   selectedCategoryForDelete.value = category;
   isPrimaryDelete.value = true;
   isRemoveCategoryModalOpen.value = true;
 }
-// 2차 카테고리 삭제 핸들러
+
 function handleDeleteSecondaryCategory(category: SecondCategory) {
   if (isRemoveCategoryModalOpen.value) return;
   selectedCategoryForDelete.value = category;

@@ -1,15 +1,12 @@
 <template>
   <div v-if="isOpen" class="member-modal-overlay">
     <div ref="modalRef" class="member-modal-container">
-      <!-- 모달 헤더 -->
       <div class="member-modal-header">
         <h3 class="text-lg font-semibold text-black-0">인원 등록</h3>
         <button @click="closeModal" class="text-gray-0 hover:text-black-0">
           <SvgIcon :icon="XIcon" />
         </button>
       </div>
-
-      <!-- 모달 본문 -->
       <div>
         <label class="block text-sm font-medium text-gray-0 mb-2">역할 선택</label>
         <select class="member-modal-input mb-7" v-model="formData.role">
@@ -31,7 +28,6 @@
         </div>
         <p v-if="emailError" class="member-modal-error">{{ emailError }}</p>
         <p v-if="isEmailValid" class="member-modal-success">사용 가능한 이메일입니다.</p>
-
         <label class="block text-sm font-medium text-gray-0 mb-2">아이디</label>
         <div class="flex items-center gap-2 mb-2">
           <CommonInput
@@ -47,8 +43,6 @@
         <p v-if="usernameError" class="member-modal-error">{{ usernameError }}</p>
         <p v-if="isUsernameValid" class="member-modal-success">사용 가능한 아이디입니다.</p>
       </div>
-
-      <!-- 모달 푸터 -->
       <div class="flex justify-center mt-6">
         <button @click="closeModal" class="member-modal-button bg-gray-2 text-black-0 mr-5 hover:opacity-80">
           취소
@@ -77,15 +71,13 @@ import CommonInput from '@/components/common/CommonInput.vue';
 
 const modalRef = ref(null);
 
-// Props 및 Emits
 const props = defineProps({
   isOpen: Boolean,
 });
 const emit = defineEmits(['close', 'submit']);
 
-// 폼 데이터
 const formData = ref({
-  username: '', // 서버에서 요구하는 `username` 키로 변경
+  username: '',
   email: '',
   role: '',
 });
@@ -95,7 +87,6 @@ const emailError = ref('');
 const isUsernameValid = ref(false);
 const isEmailValid = ref(false);
 
-// 아이디 중복 검사
 async function validateUsername() {
   if (!formData.value.username.trim()) {
     usernameError.value = '아이디를 입력해주세요.';
@@ -122,7 +113,6 @@ async function validateUsername() {
   }
 }
 
-// 이메일 중복 검사
 async function validateEmail() {
   if (!formData.value.email.trim()) {
     emailError.value = '이메일을 입력해주세요.';
@@ -167,7 +157,6 @@ watch(
   },
 );
 
-// 상태 초기화
 function resetForm() {
   formData.value = { username: '', email: '', role: '' };
   usernameError.value = '';
@@ -176,7 +165,6 @@ function resetForm() {
   isEmailValid.value = false;
 }
 
-// 모달 닫기
 function closeModal() {
   resetForm();
   emit('close');
@@ -186,7 +174,6 @@ onClickOutside(modalRef, () => {
   closeModal();
 });
 
-// 입력 변경 시 valid 상태 초기화
 function resetUsernameValidation() {
   isUsernameValid.value = false;
   usernameError.value = '';
@@ -197,10 +184,8 @@ function resetEmailValidation() {
   emailError.value = '';
 }
 
-// 모든 조건 충족 시 "등록" 버튼 활성화
 const isFormValid = computed(() => isUsernameValid.value && isEmailValid.value && formData.value.role);
 
-// 폼 제출 핸들러 (회원 등록)
 function handleSubmit() {
   if (!isFormValid.value) {
     return;

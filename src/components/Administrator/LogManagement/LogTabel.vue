@@ -8,8 +8,10 @@ import { memberApi } from '@/services/memberService/memberService';
 import { formatDateTime } from '@/utils/dateFormat';
 import { ArrowDownIcon } from '@/assets/icons/path';
 import SvgIcon from '@/components/common/SvgIcon.vue';
+import CommonDialog from '@/components/common/CommonDialog.vue';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { handleError } from '@/utils/handleError';
 
-// 페이지 상태 관리
 const currentPage = ref(parseInt(sessionStorage.getItem('logCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const order = ref('DESC');
@@ -17,6 +19,7 @@ const order = ref('DESC');
 const selectedPerPage = ref(perPageOptions[0]);
 const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 onClickOutside(dropdownRef, () => (isOpen.value = false));
 
@@ -28,7 +31,6 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isOpen.value = false;
 };
 
-// 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -44,12 +46,11 @@ const { data: logData } = useCustomQuery(['log-list', queryParams], async () => 
     );
     return response.data.data;
   } catch (err) {
-    console.error('로그 목록 조회 실패:', err);
+    handleError(dialogState, '로그 목록 조회 실패');
     throw err;
   }
 });
 
-// 페이지 변경 핸들러
 const handlePageChange = (page: number) => {
   currentPage.value = page;
   sessionStorage.setItem('logCurrentPage', page.toString());
@@ -57,7 +58,6 @@ const handlePageChange = (page: number) => {
 
 const toggleOrder = () => {
   order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-  // 정렬이 변경될 때 첫 페이지로 이동
   currentPage.value = 1;
   sessionStorage.setItem('logCurrentPage', '1');
 };
@@ -75,7 +75,6 @@ onBeforeUnmount(() => {
           <span class="font-medium">{{ selectedPerPage.label }}</span>
           <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isOpen ? 'rotate-180' : '']" />
         </button>
-
         <div v-if="isOpen" class="manager-filter-menu w-[112px]">
           <ul>
             <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
@@ -95,7 +94,7 @@ onBeforeUnmount(() => {
                   시간
                   <SvgIcon
                     :icon="ArrowDownIcon"
-                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                    :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                   />
                 </div>
               </th>
@@ -146,4 +145,12 @@ onBeforeUnmount(() => {
       @page-change="handlePageChange"
     />
   </article>
+  <CommonDialog
+    v-if="dialogState.open"
+    :isOneBtn="dialogState.isOneBtn"
+    :title="dialogState.title"
+    :mainText="dialogState.mainText"
+    :onCancelClick="dialogState.onMainClick"
+    :onMainClick="dialogState.onMainClick"
+  />
 </template>

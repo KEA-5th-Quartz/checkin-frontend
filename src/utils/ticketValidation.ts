@@ -14,7 +14,7 @@ export const ticketValidationSchema = yup.object({
   firstCategory: yup
     .object()
     .shape({
-      id: yup.number().required(), // 실제 API 요청에 필요
+      id: yup.number().required(),
       value: yup.string().required('* 1차 카테고리를 선택하세요'),
       label: yup.string().required(),
     })
@@ -52,9 +52,9 @@ export const ticketValidationSchema = yup.object({
   attachments: yup
     .mixed()
     .test('fileSize', '* 첨부파일 크기는 개당 10MB 이하여야 합니다.', (value) => {
-      if (!value) return true; // 파일이 없으면 검사 통과
+      if (!value) return true;
       const files = Array.isArray(value) ? value : [value];
-      return files.every((file) => (file as File).size <= 10 * 1024 * 1024); // 10MB 이하
+      return files.every((file) => (file as File).size <= 10 * 1024 * 1024);
     })
     .test('fileType', '* 허용되지 않는 파일 형식입니다.', (value) => {
       if (!value) return true;

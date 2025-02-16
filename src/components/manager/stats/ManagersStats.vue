@@ -1,74 +1,111 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-
+import { ref, computed, watchEffect } from 'vue';
 import { statsApi } from '@/services/statsService/statsService';
-import { computed } from 'vue';
+import { useCustomQuery } from '@/composables/useCustomQuery';
+import { ChartOptions, ManagerStats } from '@/types/Chart';
+
 const timeFilterTickets = ref('WEEK');
 const series = ref<{ name: string; data: number[] }[]>([]);
 const categories = ref<string[]>([]);
-const chartOptions = ref({
-  chart: {
-    type: 'bar',
-    stacked: true,
-    toolbar: { show: false },
+const isLoading = ref(true);
+
+const commonChartOptions = {
+  toolbar: {
+    show: true,
+    tools: {
+      download: true,
+      selection: false,
+      zoom: false,
+      zoomin: false,
+      zoomout: false,
+      pan: false,
+      reset: false,
+    },
+    export: {
+      csv: {
+        filename: 'chart_data',
+        columnDelimiter: ',',
+        headerCategory: 'Category',
+        headerValue: 'Value',
+      },
+      svg: {
+        filename: 'chart_data',
+      },
+      png: {
+        filename: 'chart_data',
+      },
+    },
   },
+};
+
+const chartOptions = ref<ChartOptions>({
+  chart: { type: 'bar', stacked: true, ...commonChartOptions },
   plotOptions: {
     bar: {
       horizontal: false,
       columnWidth: '30%',
-      borderRadius: 5,
+      borderRadius: 3,
+      distributed: false,
     },
   },
-  dataLabels: {
-    enabled: true,
-    style: { fontSize: '13px' },
+  grid: {
+    show: true,
   },
-  xaxis: {
-    categories: [],
-  },
+  dataLabels: { enabled: true, style: { fontSize: '13px' } },
+  xaxis: { categories: [], labels: { maxHeight: 80, trim: true } },
   colors: ['#3570FF', '#828DCA'],
   legend: {
     position: 'top',
-    horizontalAlign: 'right',
-    markers: {
-      radius: 12,
-      shape: 'circle',
-    },
+    horizontalAlign: 'left',
+    offsetY: 10,
+    markers: { radius: 12, shape: 'circle' },
   },
 });
-//  API 호출 함수 (필터값 변경 시 재호출)
-const loadManagerStats = async () => {
-  try {
-    const response = await statsApi.getManagersStats(timeFilterTickets.value);
 
-    // API 응답 데이터 타입 적용
-    const data = response.data.data;
-    //  담당자 목록 (X축)
-    categories.value = data.map((manager) => manager.userName);
+const { data: managerProgressData, error } = useCustomQuery<ManagerStats[]>(
+  ['manager-progress', timeFilterTickets],
+  async () => {
+    try {
+      isLoading.value = true;
+      const response = await statsApi.getManagersStats(timeFilterTickets.value);
+      return response.data?.data || [];
+    } catch (err) {
+      return [];
+    } finally {
+      isLoading.value = false;
+    }
+  },
+  { refetchInterval: 1000 * 60, keepPreviousData: true },
+);
 
-    //  진행 중 / 완료 티켓 개수 추출
-    const inProgressData = data.map((manager) => {
-      const inProgress = manager.state.find((s) => s.status === 'IN_PROGRESS');
-      return inProgress ? inProgress.ticketCount : 0;
-    });
-    const closedData = data.map((manager) => {
-      const closed = manager.state.find((s) => s.status === 'CLOSED');
-      return closed ? closed.ticketCount : 0;
-    });
-    series.value = [
-      { name: '진행중', data: inProgressData },
-      { name: '완료', data: closedData },
-    ];
-    // X축 카테고리 반영
-    chartOptions.value = {
-      ...chartOptions.value,
-      xaxis: { categories: categories.value },
-    };
-  } catch (error) {
-    console.error('Error fetching manager stats:', error);
+watchEffect(() => {
+  if (!managerProgressData.value || error.value) {
+    return;
   }
-};
-watch(timeFilterTickets, loadManagerStats);
+
+  if (!Array.isArray(managerProgressData.value) || managerProgressData.value.length === 0) {
+    return;
+  }
+
+  categories.value = managerProgressData.value.map((manager) => manager.userName);
+
+  const inProgressData = managerProgressData.value.map((manager) => {
+    const inProgress = manager.state?.find((s) => s.categoryName === 'IN_PROGRESS');
+    return inProgress ? inProgress.ticketCount : 0;
+  });
+
+  const closedData = managerProgressData.value.map((manager) => {
+    const closed = manager.state?.find((s) => s.categoryName === 'CLOSED');
+    return closed ? closed.ticketCount : 0;
+  });
+
+  series.value = [
+    { name: '진행 중', data: inProgressData },
+    { name: '완료', data: closedData },
+  ];
+
+  chartOptions.value = { ...chartOptions.value, xaxis: { categories: categories.value } };
+});
 
 const tableData = computed(() => {
   if (!series.value.length || !categories.value.length) return [];
@@ -80,66 +117,61 @@ const tableData = computed(() => {
     total: series.value[0].data[index] + series.value[1].data[index],
   }));
 });
-
-// 컴포넌트 마운트 시 데이터 불러오기
-onMounted(loadManagerStats);
 </script>
 
 <template>
-  <section class="overflow-x-auto mt-5">
-    <!-- 담당자별 티켓 진행 상황 -->
-    <div class="flex-center gap-4">
-      <div class="statistics-section w-full">
-        <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
-        <div class="statistics-flex-gap">
-          <button
-            v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
-            :key="filter"
-            :class="[
-              'statistics-button',
-              timeFilterTickets === filter ? 'statistics-button-active' : 'statistics-button-inactive',
-            ]"
-            @click="timeFilterTickets = filter"
-          >
-            {{ filter }}
-          </button>
-        </div>
-        <apexchart type="bar" height="400" :options="chartOptions" :series="series" />
+  <div class="mt-5 w-full p-5">
+    <div class="statistics-section">
+      <h2 class="statistics-section-title">담당자별 티켓 진행 현황</h2>
+      <div class="statistics-flex-gap">
+        <button
+          v-for="filter in ['WEEK', 'MONTH', 'QUARTER']"
+          :key="filter"
+          :class="[
+            'statistics-button',
+            timeFilterTickets === filter ? 'statistics-button-active' : 'statistics-button-inactive',
+          ]"
+          @click="timeFilterTickets = filter"
+        >
+          {{ filter }}
+        </button>
       </div>
 
-      <div class="mt-8 flex-center h-fit bg-white-0">
-        <table class="w-fit table-auto">
+      <apexchart type="bar" height="380" :options="chartOptions" :series="series" />
+
+      <div class="manager-table-chart">
+        <table class="manager-table-wrapper">
           <thead>
-            <tr class="bg-gray-100">
-              <th class="table-header min-w-[120px]">담당자</th>
-              <th class="table-header min-w-[100px] text-center">진행중</th>
-              <th class="table-header min-w-[100px] text-center">완료</th>
-              <th class="table-header min-w-[100px] text-center">전체</th>
+            <tr class="manager-table-header">
+              <th class="manager-table-header-cell">담당자</th>
+              <th class="manager-table-header-cell-center">진행 중</th>
+              <th class="manager-table-header-cell-center">완료</th>
+              <th class="manager-table-header-cell-center">전체</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'">
-              <td class="table-cell font-medium">{{ row.manager }}</td>
-              <td class="table-cell text-center">{{ row.inProgress }}</td>
-              <td class="table-cell text-center">{{ row.closed }}</td>
-              <td class="table-cell text-center">{{ row.total }}</td>
+            <tr v-for="(row, index) in tableData" :key="index" :class="index % 2 === 0 ? 'bg-white-0' : 'bg-white-1'">
+              <td class="manager-table-row">{{ row.manager }}</td>
+              <td class="manager-table-row-data">{{ row.inProgress }}</td>
+              <td class="manager-table-row-data">{{ row.closed }}</td>
+              <td class="manager-table-row-total">{{ row.total }}</td>
             </tr>
           </tbody>
           <tfoot>
-            <tr>
-              <td class="table-footer font-bold bg-blue-50">합계</td>
-              <td class="table-footer font-bold text-center bg-blue-50">
-                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+            <tr class="manager-table-footer">
+              <td class="manager-table-footer-cell">합계</td>
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-blue">
                   {{ tableData.reduce((sum, row) => sum + row.inProgress, 0) }}
                 </span>
               </td>
-              <td class="table-footer font-bold text-center bg-blue-50">
-                <span class="px-3 py-1 rounded-full bg-green-100 text-green-800">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-green">
                   {{ tableData.reduce((sum, row) => sum + row.closed, 0) }}
                 </span>
               </td>
-              <td class="table-footer font-bold text-center bg-blue-50">
-                <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-800">
+              <td class="manager-table-footer-data">
+                <span class="manager-table-badge manager-table-badge-gray">
                   {{ tableData.reduce((sum, row) => sum + row.total, 0) }}
                 </span>
               </td>
@@ -148,20 +180,5 @@ onMounted(loadManagerStats);
         </table>
       </div>
     </div>
-  </section>
+  </div>
 </template>
-
-<style scoped>
-.statistics-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
-
-.statistics-section-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-</style>

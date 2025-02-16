@@ -1,29 +1,19 @@
 <template>
-  <div class="mx-auto w-[83%] mt-10">
+  <div class="deletedMemberManagement-container">
     <div class="flex flex-wrap overflow-y-auto hide-scrollbar">
-      <!-- 로딩 중 -->
-      <div
-        v-if="isLoading"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
-      >
+      <div v-if="isLoading" class="deletedMemberManagement-loading">
         <SkeletonCard v-for="n in 8" :key="n" class="w-[80%]" />
       </div>
-
-      <!-- 멤버 카드 목록 -->
-      <div
-        v-else-if="members.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-11 gap-y-6 mx-auto h-[calc(100vh-350px)] w-[80%]"
-      >
+      <div v-else-if="members.length > 0" class="deletedMemberManagement-grid">
         <DeletedMemberManagement v-for="member in members" :key="member.memberId" :member="member" />
       </div>
-
-      <!-- 조회된 멤버가 없는 경우 -->
-      <div v-else class="text-center text-gray-0 py-10 w-full">
+      <div v-else class="deletedMemberManagement-empty">
         <p>조회된 멤버가 없습니다.</p>
       </div>
     </div>
 
     <CustomPagination
+      v-if="members.length > 0"
       :itemsPerPage="10"
       :currentPage="currentPage"
       :totalPages="totalPages"
@@ -42,25 +32,21 @@ import DeletedMemberManagement from './DeletedMemberManagement.vue';
 import { useDeletedMemberListStore } from '@/stores/useDeletedMemberListStore';
 
 const store = useDeletedMemberListStore();
-
 const currentPage = ref(parseInt(sessionStorage.getItem('deletedMembersPage') || '1'));
 store.setCurrentPage(currentPage.value);
 const totalPages = computed(() => store.totalPages);
 
-// 멤버 목록 API 요청
 const { data, isLoading } = useCustomQuery(
   ['deleted-members', currentPage],
   async () => {
     const response = await memberApi.getDeletedMember(currentPage.value, 10);
-    return response.data.data; // API 응답에서 data.data를 반환
+    return response.data.data;
   },
   { keepPreviousData: true },
 );
 
-// computed 속성 수정
 const members = computed(() => data.value?.members || []);
 
-// watch 수정
 watch(data, (newData) => {
   if (newData) {
     store.setMembers(newData.members, newData.totalPages);

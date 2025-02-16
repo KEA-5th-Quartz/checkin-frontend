@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import TicketDetail from './TicketDetail.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
@@ -18,6 +18,7 @@ import { UserFilterPayload, UserFilterState } from '@/types/user';
 import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey, useQueryClient } from '@tanstack/vue-query';
 import { useCustomMutation } from '@/composables/useCustomMutation';
+import { useDebounce } from '@vueuse/core';
 
 const ticketStore = useUserTicketListStore();
 const queryClient = useQueryClient();
@@ -30,11 +31,21 @@ const isFilterOpen = ref(false);
 const currentPage = ref(parseInt(sessionStorage.getItem('userCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
+const debouncedKeyword = useDebounce(keyword, 1000); // 500ms 동안 추가 입력이 없으면 반응형 상태변경
+const searchQueryKey = ref<QueryKey>(['user-tickets']); // 초기 쿼리 키
 const isSearch = ref(false);
+const isFiltering = computed(() => {
+  return (
+    (UserfilterState.value.statuses && UserfilterState.value.statuses.length > 0) ||
+    (UserfilterState.value.categories && UserfilterState.value.categories.length > 0)
+  );
+});
+
 const order = ref('DESC');
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
+// 필터 선택 항목
 const UserfilterState = ref<UserFilterState>({
   statuses: [],
   categories: [],
@@ -58,6 +69,15 @@ const handleSearch = () => {
   }
 };
 
+// debounce 설정
+// watch(debouncedKeyword, (newKeyword) => {
+//   if (newKeyword.trim()) {
+//     searchQueryKey.value = ['search-user-tickets', newKeyword, currentPage.value, pageSize.value, order.value];
+//   } else {
+//     searchQueryKey.value = ['user-tickets', queryParams.value.page, queryParams.value.size, queryParams.value.order];
+//   }
+// });
+
 // 검색 초기화 함수
 const resetSearch = () => {
   keyword.value = '';
@@ -78,15 +98,16 @@ const selectOption = (
   isSizeOpen.value = false;
 };
 
-// 필터 적용 핸들러
 const handleApplyFilters = (filters: UserFilterPayload) => {
+  console.log('🚀 Received filters:', filters);
   UserfilterState.value = {
     statuses: filters.statuses.map((id: string) => {
-      const statusItem = status.find((s) => s.id === (id as unknown as number));
-      return statusItem?.label || '';
+      const statusItem = status.find((s) => String(s.id) === id);
+      return statusItem ? statusItem.label : id; // id를 fallback 값으로 두기
     }),
     categories: filters.categories,
   };
+  console.log('🟢 Updated UserfilterState:', UserfilterState.value);
   currentPage.value = 1;
   sessionStorage.setItem('userCurrentPage', '1');
 };
@@ -100,12 +121,21 @@ const queryParams = computed(() => ({
   categories: Array.isArray(UserfilterState.value.categories) ? UserfilterState.value.categories : [],
 }));
 
-// 검색 쿼리 키 computed
-const queryKey = computed<QueryKey>(() => {
-  if (isSearch.value) {
-    return ['search-user-tickets', keyword.value, currentPage.value, pageSize.value, order.value] as const;
+watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
+  console.log('🔄 Query params updated:', newQueryParams);
+  if (newKeyword.trim()) {
+    searchQueryKey.value = ['search-user-tickets', newKeyword, currentPage.value, pageSize.value, order.value];
+  } else {
+    searchQueryKey.value = [
+      'user-tickets',
+      newQueryParams.page,
+      newQueryParams.size,
+      newQueryParams.order,
+      newQueryParams.statuses.length > 0 ? newQueryParams.statuses : [], // undefined 방지
+      newQueryParams.categories.length > 0 ? newQueryParams.categories : [], // undefined 방지
+    ];
   }
-  return ['user-tickets', queryParams.value] as const;
+  console.log('🟢 Updated searchQueryKey:', searchQueryKey.value);
 });
 
 // 데이터 페칭
@@ -113,10 +143,10 @@ const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(queryKey as unknown as QueryKey, () => {
+} = useCustomQuery(searchQueryKey as unknown as QueryKey, () => {
   if (isSearch.value) {
     return ticketApi
-      .getSearchUserTickets(keyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
+      .getSearchUserTickets(debouncedKeyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
       .then((response) => response.data.data);
   }
   return ticketApi
@@ -208,17 +238,17 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="ticketData?.tickets?.length !== 0">
+  <section>
     <!-- 티켓 헤더 -->
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
       <!-- 검색 -->
       <div class="flex w-1/4">
         <div class="manager-search-div">
-          <button v-if="isSearch" class="text-sm btn-cancel px-2 ml-2 py-0" @click="resetSearch">초기화</button>
+          <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
           <input
             v-model="keyword"
             maxlength="20"
-            placeholder="티켓 검색..."
+            placeholder="제목 또는 내용 입력"
             class="manager-search-input"
             @keyup.enter="handleSearch"
           />
@@ -261,6 +291,8 @@ onBeforeUnmount(() => {
             <!-- 필터 모달 -->
             <TicketFilter
               v-if="isFilterOpen"
+              :initialStatuses="UserfilterState.statuses"
+              :initialCategories="UserfilterState.categories"
               @applyFilters="handleApplyFilters"
               @closeFilter="isFilterOpen = false"
               class="board-filter-modal"
@@ -272,7 +304,7 @@ onBeforeUnmount(() => {
     </header>
     <!-- 티켓 삭제모드 헤더 -->
     <header v-else class="board-header">
-      <div class="flex items-center gap-4 ml-auto">
+      <div class="header-cancel-delete-div">
         <button @click="handleCancel" class="btn-cancel py-2">취소</button>
         <button @click="handleDelete" class="btn-main py-2">삭제</button>
       </div>
@@ -308,7 +340,7 @@ onBeforeUnmount(() => {
                   번호
                   <SvgIcon
                     :icon="ArrowDownIcon"
-                    :class="['w-4 h-4 transition-transform duration-200', order === 'ASC' ? 'rotate-180' : '']"
+                    :class="['arrow-down-transition', order === 'ASC' ? 'rotate-180' : '']"
                   />
                 </div>
               </th>
@@ -316,13 +348,18 @@ onBeforeUnmount(() => {
               <th class="manager-th w-[15%]">1차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">2차 <span class="hidden lg:inline-block">카테고리</span></th>
               <th class="manager-th w-[7.5%]">진행 상태</th>
-              <th class="manager-th w-[15%] text-start pl-6">담당자</th>
+              <th class="manager-th w-[15%]">담당자</th>
               <th class="manager-th w-[10%]">마감일</th>
             </tr>
           </thead>
 
-          <tbody class="whitespace-nowrap">
+          <tbody class="overflow-hidden text-ellipsis">
+            <tr v-if="(isSearch || isFiltering) && (ticketData?.tickets?.length === 0 || !ticketData)">
+              <td colspan="8" class="text-center py-6 text-gray-500">일치하는 티켓이 존재하지 않습니다.</td>
+            </tr>
+
             <tr
+              v-else
               v-for="item in ticketData?.tickets"
               :key="item.ticketId"
               class="hover:bg-white-1 relative"
@@ -362,7 +399,7 @@ onBeforeUnmount(() => {
                 <StatusBadge :status="item.status" size="md" />
               </td>
               <td class="manager-td">
-                <div class="flex items-center gap-2 ml-4">
+                <div class="flex items-center justify-center gap-2">
                   <img
                     v-if="item.manager !== null"
                     :src="item.managerProfilePic"
@@ -394,7 +431,7 @@ onBeforeUnmount(() => {
       @page-change="handlePageChange"
     />
   </section>
-  <section v-else class="w-full flex-stack items-center pb-40">
+  <!-- <section v-else class="w-full flex-stack items-center pb-40">
     <div class="flex-stack items-center gap-8 mt-32">
       <img src="@/assets/no-ticket.png" />
       <div class="flex-stack items-center gap-2">
@@ -408,5 +445,5 @@ onBeforeUnmount(() => {
 
       티켓 생성
     </button>
-  </section>
+  </section> -->
 </template>

@@ -1,5 +1,4 @@
 import { useMutation, MutationFunction } from '@tanstack/vue-query';
-// import type { MaybeRef } from 'vue';
 
 export interface APIError {
   message: string;

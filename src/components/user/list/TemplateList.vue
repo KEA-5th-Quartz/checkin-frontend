@@ -149,31 +149,38 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section v-if="templateData?.data.templates !== 0" class="pb-10 mt-12">
-    <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-8 gap-10 mr-10">
-      <div ref="dropdownRef" class="relative mt-1 flex items-center gap-10">
-        <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
-          <span class="font-medium">{{ selectedPerPage.label }}</span>
-          <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isSizeOpen ? 'rotate-180' : '']" />
-        </button>
+  <section v-if="templateData?.data?.templates.length !== 0" class="pb-10 mt-12">
+    <div class="mt-8">
+      <header v-if="!templateStore.isDeleteMode" class="flex justify-end items-center mt-8 gap-10 mr-10">
+        <div ref="dropdownRef" class="relative mt-1 flex items-center gap-10">
+          <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
+            <span class="font-medium">{{ selectedPerPage.label }}</span>
+            <SvgIcon :icon="ArrowDownIcon" :class="['transition-02s', isSizeOpen ? 'rotate-180' : '']" />
+          </button>
 
-        <div v-if="isSizeOpen" class="manager-filter-menu mt-44 w-[112px]">
-          <ul>
-            <li v-for="option in perPageOptions" :key="option.id" @click="selectOption(option)" class="board-size-menu">
-              {{ option.label }}
-            </li>
-          </ul>
+          <div v-if="isSizeOpen" class="manager-filter-menu mt-44 w-[112px]">
+            <ul>
+              <li
+                v-for="option in perPageOptions"
+                :key="option.id"
+                @click="selectOption(option)"
+                class="board-size-menu"
+              >
+                {{ option.label }}
+              </li>
+            </ul>
+          </div>
+          <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="templateStore.toggleDeleteMode" />
         </div>
-        <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="templateStore.toggleDeleteMode" />
-      </div>
-    </header>
+      </header>
 
-    <header v-else class="board-header">
-      <div class="flex items-center gap-4 ml-auto">
-        <button @click="handleCancel" class="btn-cancel py-2">취소</button>
-        <button @click="handleDelete" class="btn-main py-2">삭제</button>
-      </div>
-    </header>
+      <header v-else class="board-header">
+        <div class="header-cancel-delete-div">
+          <button @click="handleCancel" class="btn-cancel py-2">취소</button>
+          <button @click="handleDelete" class="btn-main py-2">삭제</button>
+        </div>
+      </header>
+    </div>
 
     <article class="overflow-x-auto mt-5 px-5 pb-20 hide-scrollbar">
       <div class="h-[calc(100vh-300px)]">
@@ -240,6 +247,7 @@ onBeforeUnmount(() => {
     </article>
 
     <CustomPagination
+      v-if="templateData?.data?.templates.length !== 0 || !templateData"
       :items-per-page="pageSize"
       :current-page="currentPage"
       :total-pages="templateData?.data.totalPages || 1"
@@ -269,7 +277,7 @@ onBeforeUnmount(() => {
 
     <button
       @click="router.push('/user/templatecreate')"
-      class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
+      class="flex items-center bg-primary-0 hover:bg-opacity-80 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
     >
       <SvgIcon :icon="CreateTicketIcon" />
       템플릿 생성
