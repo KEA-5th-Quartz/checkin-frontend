@@ -238,7 +238,7 @@ watch(
 );
 
 // 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
-const fetchTemplates = useCustomQuery(['templates', memberId], async () => {
+const fetchTemplates = useCustomQuery(['templat-list', memberId], async () => {
   try {
     const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
     return response.data.data.templates.map((template: any) => ({
@@ -453,6 +453,7 @@ const createTicketMutation = useCustomMutation(
   {
     onSuccess: () => {
       queryClient.invalidateQueries(['user-tickets']); // 티켓 생성목록 데이터 자동 리패칭
+      queryClient.refetchQueries(['user-tickets']); // 즉시 API 재요청
     },
   },
 );
