@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
-import { schema } from '@/utils/passwordSchema';
 import SvgIcon from '../common/SvgIcon.vue';
 import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
@@ -9,6 +8,7 @@ import { userApi } from '@/services/userService/userService';
 import CommonDialog from '../common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonInput from '../common/CommonInput.vue';
+import { firstLoginSchema } from '@/utils/firstLoginSchema';
 
 const router = useRouter();
 const route = useRoute();
@@ -20,7 +20,7 @@ const passwordResetToken = route.query.passwordResetToken as string;
 
 // Form 설정
 const { handleSubmit, errors, meta } = useForm({
-  validationSchema: schema,
+  validationSchema: firstLoginSchema,
 });
 
 // Field 설정
