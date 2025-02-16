@@ -146,7 +146,7 @@ onClickOutside(modalRef, () => {
 </script>
 
 <template>
-  <div ref="modalRef" class="filter-container">
+  <div ref="modalRef" class="filter-container board-filter-modal">
     <div class="filter-title">필터</div>
 
     <section class="filter-section pt-5 text-sm">

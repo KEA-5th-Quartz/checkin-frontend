@@ -202,7 +202,7 @@ body {
     @apply text-gray-0 flex items-center gap-2 whitespace-nowrap;
   }
   .board-filter-modal {
-    @apply absolute top-12 right-0;
+    @apply absolute top-10 right-0;
   }
 
   /* 필터 */
