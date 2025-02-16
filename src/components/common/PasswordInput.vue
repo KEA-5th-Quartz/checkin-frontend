@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import SvgIcon from './SvgIcon.vue';
 import { EyeIcon, EyeSlashIcon } from '@/assets/icons/path';
-import { PasswordInputProps } from '@/types/common/passwordInput';
 import CommonInput from './CommonInput.vue';
+import { PasswordInputProps } from '@/types/common/input';
 
 withDefaults(defineProps<PasswordInputProps>(), {
   placeholder: '',

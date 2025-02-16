@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { StatusBadgeProps } from '@/types/common/badges';
+import { StatusBadgeProps, StatusType } from '@/types/common/badges';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<StatusBadgeProps>(), {
   size: 'sm',
   class: '',
 });
-
-type StatusType = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
 
 const statusMap: Record<StatusType, string> = {
   OPEN: '생성',

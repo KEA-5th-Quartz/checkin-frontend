@@ -17,3 +17,5 @@ export interface LogStatusBadgeProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
   class?: string;
 }
+
+export type StatusType = 'OPEN' | 'IN_PROGRESS' | 'CLOSED';

@@ -1,12 +1,6 @@
 <script setup lang="ts">
+import { PaginationProps } from '@/types/common/pagination';
 import { computed } from 'vue';
-
-interface PaginationProps {
-  itemsPerPage: number;
-  currentPage: number;
-  totalPages: number;
-  visiblePages?: number;
-}
 
 const props = withDefaults(defineProps<PaginationProps>(), {
   visiblePages: 5,
