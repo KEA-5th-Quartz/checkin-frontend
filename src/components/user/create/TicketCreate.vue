@@ -25,7 +25,14 @@ const router = useRouter();
 const memberStore = useMemberStore();
 
 const templateOptions = ref<
-  { id: number; value: string; label: string; content: string; firstCategory: string; secondCategory: string }[]
+  {
+    id: number | string;
+    value: string;
+    label: string;
+    content: string;
+    firstCategory: string;
+    secondCategory: string;
+  }[]
 >([]);
 
 // 알림창 상태 체크
@@ -33,7 +40,9 @@ const showDialog = ref<boolean>(false);
 const showTemplateDialog = ref<boolean>(false);
 
 // 템플릿 목록을 불러올때 map함수 두번 돌리기 위해 잠시 저장할 객체
-const response = ref<any>(null);
+const response = ref<
+  { templateId: string; title: string; firstCategory: string; secondCategory: string; content: string }[]
+>([]);
 
 // 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
@@ -66,8 +75,11 @@ const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCatego
 const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
 const { value: content, handleChange: contentChange } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
-const { value: selectedTitle } = useField<BaseTicketOption>('title');
+let { value: selectedTitleform } = useField<string>('title');
 const { value: attachments, errorMessage: attachmentsError } = useField<File[]>('attachments');
+
+const selectedTitle = ref<BaseTicketOption | undefined>(undefined);
+const selectedTemplateError = ref<string | null>(null);
 
 const handleTitleInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLInputElement).value
@@ -90,7 +102,17 @@ const handleContentInput = (event: Event) => {
 };
 
 // 선택된 템플릿을 저장하는 객체
-const selectedTemplate = ref<{ title: string; firstCategory: any; secondCategory: any; content: string } | null>(null);
+const selectedTemplate = ref<{
+  title: string;
+  firstCategory: string;
+  secondCategory: string;
+  content: string;
+}>({
+  title: '',
+  firstCategory: '',
+  secondCategory: '',
+  content: '',
+});
 
 // 첨부파일 ID 요청을 위해 파일이름을 담을 값 생성 O
 const attachment = ref<FormData | null>(null);
@@ -234,25 +256,21 @@ const fetchTemplates = useCustomQuery(['templates', memberId], async () => {
 // 템플릿 목록 조회 api 받아서 title에[ {id: value: label:} ]배열로 값 저장하는 로직
 const handleTemplateClick = async (event: Event) => {
   event.preventDefault();
-  console.log('📌 TicketTemplateButton 클릭됨!');
-
   try {
-    response.value = fetchTemplates.data.value ?? [];
-    console.log(fetchTemplates.data.value);
+    response.value = fetchTemplates.data.value; // response.value에는 [{templateId, title,  firstCategory, seconde: content: }... ] 저장
     if (Array.isArray(response.value)) {
-      templateOptions.value = response.value.map((template: any) => ({
+      templateOptions.value = response.value.map((template) => ({
         id: template.templateId,
-        value: template.title, // ✅ 제목
+        value: template.title,
         label: template.title,
-        firstCategory: template.firstCategory, // ✅ 1차 카테고리 추가
-        secondCategory: template.secondCategory, // ✅ 2차 카테고리 추가
-        content: template.content, // ✅ 요청 사항 추가
+        firstCategory: template.firstCategory,
+        secondCategory: template.secondCategory,
+        content: template.content,
       }));
     } else {
       templateOptions.value = [];
     }
 
-    console.log('📌 templateOptions 업데이트됨:', templateOptions.value);
     showTemplateDialog.value = true;
   } catch (error) {
     console.error('📌 템플릿 목록 불러오기 실패!', error);
@@ -263,8 +281,17 @@ const handleTemplateClick = async (event: Event) => {
 // ✅ 요청 중복 방지 플래그
 const isSubmitting = ref(false);
 
-// ✅ 티켓 생성 버튼 (무한 요청 방지)
+const preventSubmit = ref(false); // 기본 폼 제출을 방지할 변수
+
 const onSubmit = handleSubmit(async () => {
+  await nextTick();
+  console.log('🚀 onSubmit 실행됨, preventSubmit:', preventSubmit.value);
+
+  if (preventSubmit.value) {
+    console.warn('🚨 템플릿 선택이 완료되지 않아 폼 제출을 차단했습니다.');
+    return; // 🚨 폼 제출 차단
+  }
+
   if (isSubmitting.value) {
     console.warn('🚨 이미 요청 중입니다. 중복 요청 방지!');
     return;
@@ -278,7 +305,7 @@ const onSubmit = handleSubmit(async () => {
       title: title.value,
       firstCategory: selectedFirstCategory.value?.label || '',
       secondCategory: selectedSecondCategory.value?.label || '',
-      content: content.value,
+      content: content.value, // ✅ 사용자가 입력한 값 그대로 보냄
       dueDate: dueDate.value,
       attachmentIds: attachmentIds.value,
     });
@@ -289,6 +316,10 @@ const onSubmit = handleSubmit(async () => {
     console.error('❌ 티켓 생성 실패:', error);
     isSubmitting.value = false; // 요청 실패 시 즉시 상태 초기화
   }
+});
+
+watchEffect(() => {
+  console.log('🔍 watchEffect: preventSubmit 상태:', preventSubmit.value);
 });
 
 // ✅ 티켓 생성 완료 후 정상적인 이동 처리
@@ -349,14 +380,18 @@ const updateSecondCategoryList = () => {
   }
 };
 
-const handleTitleSelect = (option: any) => {
+const handleTitleSelect = (option: BaseTicketOption) => {
   selectedTitle.value = option;
+  selectedTitleform.value = selectedTitle.value.label;
   selectedTemplate.value = {
-    title: option.value,
-    firstCategory: option.firstCategory,
-    secondCategory: option.secondCategory,
-    content: option.content,
+    title: option.label,
+    firstCategory: option.firstCategory || '', // undefined 방지
+    secondCategory: option.secondCategory || '',
+    content: option.content || '',
   };
+
+  // ✅ 템플릿 선택 시 에러 메시지 초기화
+  selectedTemplateError.value = null;
 };
 
 // ✅ 1차 카테고리 선택 및 2차 카테고리 초기화
@@ -437,7 +472,24 @@ const handleCancel = () => {
   showTemplateDialog.value = false;
 };
 
-const handleConfirm = async () => {
+const handleConfirm = async (event?: Event) => {
+  event?.preventDefault();
+
+  console.log('📌 handleConfirm 실행됨');
+
+  // ✅ 템플릿을 선택하지 않은 경우
+  if (!selectedTitle.value) {
+    console.warn('🚨 템플릿을 선택하지 않음');
+    selectedTemplateError.value = '템플릿을 선택하세요.';
+    preventSubmit.value = true; // 🚨 폼 제출 차단
+    console.log('🛠 preventSubmit 값 변경됨:', preventSubmit.value);
+    return; // 🚨 함수 즉시 종료
+  }
+
+  console.log('✅ 템플릿 선택됨:', selectedTitle.value);
+  selectedTemplateError.value = null; // ✅ 오류 메시지 초기화
+  preventSubmit.value = false; // ✅ 폼 제출 가능
+
   if (selectedTemplate.value) {
     console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
 
@@ -456,14 +508,13 @@ const handleConfirm = async () => {
       });
     }
 
-    // ✅ 기존 템플릿 유지하면서 새 요청 사항 추가
+    // ✅ 사용자가 선택한 템플릿의 content를 그대로 content.value에 반영
     if (selectedTemplate.value.content) {
-      await nextTick(); // Vue가 UI 업데이트할 시간을 줌
-      content.value = `${template.value}\n\n${selectedTemplate.value.content}`; // ✅ 기존 템플릿 + 새 내용 추가
-      console.log('📌 최종 요청 사항:', content.value);
+      content.value = selectedTemplate.value.content;
     }
   }
 
+  await nextTick();
   showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
 };
 
@@ -606,6 +657,9 @@ const removeFile = (index: number) => {
           @select="handleTitleSelect"
           isEdit
         />
+        <div class="text-red-1 text-sm mt-2" v-if="selectedTemplateError">
+          {{ selectedTemplateError }}
+        </div>
       </CommonDialog>
     </form>
   </main>
