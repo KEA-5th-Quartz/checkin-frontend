@@ -3,23 +3,13 @@ import { addMonths } from 'date-fns';
 
 export const ticketValidationSchema = yup.object({
   title: yup
-    .mixed()
-    .test('is-string-or-object', '* 제목은 문자열 또는 객체여야 합니다', (value) => {
-      return typeof value === 'string' || (typeof value === 'object' && value !== null);
-    })
-    .when([], (value) => {
-      if (typeof value === 'string') {
-        return yup
-          .string()
-          .required('* 제목을 입력하세요')
-          .trim()
-          .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0)
-          .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
-          .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
-          .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다');
-      }
-      return yup.mixed();
-    }),
+    .string()
+    .required('* 제목을 입력하세요')
+    .trim()
+    .test('no-only-whitespace', '* 공백만 입력할 수 없습니다', (val) => val?.trim().length !== 0)
+    .max(25, '* 제목은 최대 25자까지 입력 가능합니다')
+    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
+    .matches(/^[\p{L}\p{N}\p{P}\p{Z}]+$/u, '* 특수문자는 사용할 수 없습니다'),
 
   firstCategory: yup
     .object()
@@ -44,8 +34,9 @@ export const ticketValidationSchema = yup.object({
     .trim()
     .required('* 요청사항을 입력하세요')
     .min(10, '* 요청사항은 최소 10자 이상이어야 합니다')
-    .max(100, '* 요청사항은 최대 100자까지 입력 가능합니다')
-    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다'),
+    .max(100, '* 요청사항은 최대 256자까지 입력 가능합니다')
+    .matches(/^[^\s]+(\s+[^\s]+)*$/, '* 공백만 입력할 수 없습니다')
+    .matches(/^(?!.*<script>).*$/, '* HTML 태그를 포함할 수 없습니다'),
 
   dueDate: yup
     .string()
@@ -88,5 +79,19 @@ export const ticketValidationSchema = yup.object({
 
       const files = Array.isArray(value) ? value : [value];
       return files.every((file) => allowedTypes.includes((file as File).type));
+    })
+    .test('maxFiles', '* 최대 3개까지 첨부 가능합니다.', (value) => {
+      if (!value) return true; // 파일이 없으면 검사 통과
+      const files = Array.isArray(value) ? value : [value];
+      return files.length <= 3; // ✅ 3개 이하만 허용
+    })
+    .test('duplicateFiles', '* 이미 업로드한 첨부파일입니다.', (value) => {
+      if (!value) return true;
+
+      const files = Array.isArray(value) ? value : [value];
+      const fileNames = files.map((file) => (file as File).name);
+      const uniqueFileNames = new Set(fileNames);
+
+      return fileNames.length === uniqueFileNames.size; // ✅ 중복 파일 검사
     }),
 });
