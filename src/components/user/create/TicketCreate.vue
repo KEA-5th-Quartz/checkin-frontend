@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, computed, watchEffect } from 'vue';
+import { ref, watch, nextTick, watchEffect } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import { ticketValidationSchema } from '@/utils/ticketValidation';
 import CustomDropdown from '@/components/common/CustomDropdown.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { ClipIcon, PencilIcon } from '@/assets/icons/path';
+import { ClipIcon } from '@/assets/icons/path';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import TicketCreateButton from '@/components/user/create/TicketCreateButton.vue';
 import TicketTemplateButton from './TicketTemplateButton.vue';
@@ -19,11 +19,10 @@ import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
-import { handleError } from '@/utils/handleError';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
+import { handleError } from '@/utils/handleError';
 
 const router = useRouter();
-
 const memberStore = useMemberStore();
 
 const templateOptions = ref<
@@ -37,29 +36,22 @@ const templateOptions = ref<
   }[]
 >([]);
 
-// 알림창 상태 체크
 const showDialog = ref<boolean>(false);
 const showTemplateDialog = ref<boolean>(false);
 const attachmentError = ref<string | null>(null);
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 템플릿 목록을 불러올때 map함수 두번 돌리기 위해 잠시 저장할 객체
 const response = ref<
   { templateId: string; title: string; firstCategory: string; secondCategory: string; content: string }[]
 >([]);
 
-// 캐시 무효화를 위한 queryClient
 const queryClient = useQueryClient();
-
-// 무한요청 방지 객체
 const isUploading = ref<boolean>(false);
 
-// 티켓 템플릿 하드코딩
 const template = ref<string>(
   '  이 기능이 어떻게 동작해야 하나요  상세한 요청 사항을 입력해주세요.  관련 정보를 포함해주세요.',
 );
 
-// Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
 const { handleSubmit, errors, validate } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
@@ -73,7 +65,6 @@ const { handleSubmit, errors, validate } = useForm({
   },
 });
 
-// useField로 각 필드 생성
 const { value: title, handleChange: titleChange } = useField<string>('title');
 const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCategory');
 const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
@@ -87,9 +78,9 @@ const selectedTemplateError = ref<string | null>(null);
 
 const handleTitleInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLInputElement).value
-    .replace(/<[^>]*>/g, '') // HTML 태그 제거
-    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
-    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
     .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
 
   titleChange(sanitizedValue);
@@ -97,15 +88,14 @@ const handleTitleInput = (event: Event) => {
 
 const handleContentInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLTextAreaElement).value
-    .replace(/<[^>]*>/g, '') // HTML 태그 제거
-    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
-    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
     .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
 
   contentChange(sanitizedValue);
 };
 
-// 선택된 템플릿을 저장하는 객체
 const selectedTemplate = ref<{
   title: string;
   firstCategory: string;
@@ -118,17 +108,13 @@ const selectedTemplate = ref<{
   content: '',
 });
 
-// 첨부파일 ID 요청을 위해 파일이름을 담을 값 생성 O
 const attachment = ref<FormData | null>(null);
 
-// 티켓생성 API 요청 및 프리뷰 정보를 저장할 객체 생성 O
 const attachmentIds = ref<number[]>([]);
 const previewUrl = ref<string[]>([]);
 
-// 클릭시 파일 첨부 수행하기 위한 ref O
 const fileInput = ref<HTMLInputElement | null>(null);
 
-// 파일 첨부요청 뮤테이션
 const attachmentMutation = useCustomMutation(
   async ({ attachment }: { attachment: FormData }) => {
     const response = await ticketApi.postAttachment(attachment);
@@ -136,20 +122,12 @@ const attachmentMutation = useCustomMutation(
   },
   {
     onSuccess: (response) => {
-      console.log('📌 파일 업로드 응답 데이터:', response.data);
-
-      // ✅ attachmentId를 올바르게 추출하여 기존 배열과 병합 (중복 제거)
       const uploadedAttachmentIds = response.data
         .map((file: { attachmentId: number }) => file.attachmentId)
-        .filter((id) => Number.isInteger(id)); // 숫자 값만 남기기
+        .filter((id) => Number.isInteger(id));
 
-      console.log('📌 올바르게 추출된 attachmentIds:', uploadedAttachmentIds);
-
-      // ✅ 기존 배열을 직접 변경하지 않고 새로운 배열을 할당 (불필요한 중첩 방지)
       attachmentIds.value = [...new Set([...attachmentIds.value, ...uploadedAttachmentIds])];
-      console.log('📌 최종 attachmentIds:', attachmentIds.value);
 
-      // ✅ 업로드된 파일 URL 저장
       const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
       previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
     },
@@ -168,20 +146,10 @@ const attachmentMutation = useCustomMutation(
   },
 );
 
-/*
-  1. 사용자가 클립 아이콘 클릭 시 파일 탐색기 열기 O
-  2. 사용자가 첨부한 파일 데이터 받아와서 attachement 객체(FormData)에 저장 O
-  3. attachment(useField로 선언) 유효성 검사 진행 후 통과되면 프리뷰 렌더링, 아니면 에러 메시지 렌더링 X
-  4. 프리뷰 렌더링되면 첨부파일 뮤테이션 불러와서 attachement를 인자로 넘기는 함수 실행
-  5. 성공하면 응답 데이터(attachmentRes[])중 attachmentIds 배열(number[])에 push, url은 previewUrl(string[] | null)에 push O
-  */
-
-// 1. 파일 선택 트리거 함수
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
 
-// 2. 숨겨진 input 클릭 시 나타나는 파일탐색기
 const handleFileChange = async (event: Event) => {
   if (isUploading.value) {
     attachmentError.value = '* 이미 파일 업로드 중입니다.';
@@ -228,7 +196,7 @@ const handleFileChange = async (event: Event) => {
   if (invalidFiles.length > 0) {
     attachmentError.value = '* 허용되지 않는 파일 형식입니다.';
     target.value = '';
-    return; // 추가 진행 중단
+    return;
   }
 
   const existingFileNames = previewUrl.value.map((url) => url.split('/').pop()); // 기존 파일명 추출
@@ -238,7 +206,7 @@ const handleFileChange = async (event: Event) => {
   if (hasDuplicate) {
     attachmentError.value = '* 이미 업로드한 첨부파일입니다.';
     target.value = '';
-    return; // 추가 진행 중단
+    return;
   }
 
   attachments.value = files;
@@ -266,14 +234,11 @@ const handleFileChange = async (event: Event) => {
   }
 };
 
-// 템플릿 불러오기 api 재사용을 위한 요청값 하드코딩
 const pages = 1;
 const size = 100;
 
-// 템플릿 불러오기 api을 위한 사용자 id값 불러오기
 const memberId = ref<number | null>(null);
 
-// memberStore의 memberId가 변경될 때마다 memberId 값 업데이트
 watch(
   () => memberStore.memberId,
   (newMemberId) => {
@@ -281,7 +246,6 @@ watch(
   },
 );
 
-// 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
 const fetchTemplates = useCustomQuery(['template-list', memberId], async () => {
   try {
     const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
@@ -291,17 +255,16 @@ const fetchTemplates = useCustomQuery(['template-list', memberId], async () => {
       firstCategory: template.firstCategory,
       secondCategory: template.secondCategory,
       content: template.content,
-    })); // 뮤테이션 호출시 [ {제목, 1차 카테고리, 2차 카테고리, 요청 사항}, ... , ] 객체들의 배열이 반환됨
+    }));
   } catch (error) {
-    console.error('템플릿 불러오기 API 에러:', error);
+    handleError(dialogState, '템플릿 불러오기 실패');
   }
 });
 
-// 템플릿 목록 조회 api 받아서 title에[ {id: value: label:} ]배열로 값 저장하는 로직
 const handleTemplateClick = async (event: Event) => {
   event.preventDefault();
   try {
-    response.value = fetchTemplates.data.value; // response.value에는 [{templateId, title,  firstCategory, seconde: content: }... ] 저장
+    response.value = fetchTemplates.data.value;
     if (Array.isArray(response.value)) {
       templateOptions.value = response.value.map((template) => ({
         id: template.templateId,
@@ -317,77 +280,48 @@ const handleTemplateClick = async (event: Event) => {
 
     showTemplateDialog.value = true;
   } catch (error) {
-    console.error('📌 템플릿 목록 불러오기 실패!', error);
+    handleError(dialogState, '템플릿 목록 불러오기 실패');
   }
 };
 
-// 티켓 생성 버튼
-// ✅ 요청 중복 방지 플래그
 const isSubmitting = ref(false);
-
-const preventSubmit = ref(false); // 기본 폼 제출을 방지할 변수
+const preventSubmit = ref(false);
 
 const onSubmit = handleSubmit(async () => {
   await nextTick();
-  console.log('🚀 onSubmit 실행됨, preventSubmit:', preventSubmit.value);
 
-  if (preventSubmit.value) {
-    console.warn('🚨 템플릿 선택이 완료되지 않아 폼 제출을 차단했습니다.');
-    return; // 🚨 폼 제출 차단
-  }
+  if (preventSubmit.value) return;
 
-  if (isSubmitting.value) {
-    console.warn('🚨 이미 요청 중입니다. 중복 요청 방지!');
-    return;
-  }
+  if (isSubmitting.value) return;
 
-  isSubmitting.value = true; // ✅ 요청 시작
-  console.log('🚀 티켓 생성 요청 실행');
+  isSubmitting.value = true;
 
   try {
     await createTicketMutation.mutateAsync({
       title: title.value,
       firstCategory: selectedFirstCategory.value?.label || '',
       secondCategory: selectedSecondCategory.value?.label || '',
-      content: content.value, // ✅ 사용자가 입력한 값 그대로 보냄
+      content: content.value,
       dueDate: dueDate.value,
       attachmentIds: attachmentIds.value,
     });
 
-    console.log('✅ 티켓 생성 성공');
-    showDialog.value = true; // ✅ 요청 성공 후 다이얼로그 표시
+    showDialog.value = true;
   } catch (error) {
-    console.error('❌ 티켓 생성 실패:', error);
-    isSubmitting.value = false; // 요청 실패 시 즉시 상태 초기화
+    isSubmitting.value = false;
   }
 });
 
-watchEffect(() => {
-  console.log('🔍 watchEffect: preventSubmit 상태:', preventSubmit.value);
-});
-
-// ✅ 티켓 생성 완료 후 정상적인 이동 처리
 const handleMain = async () => {
   if (!showDialog.value) return;
 
-  console.log('🔄 티켓 리스트로 이동');
-  showDialog.value = false; // ✅ 다이얼로그 닫기
-  isSubmitting.value = false; // ✅ 상태 초기화
+  showDialog.value = false;
+  isSubmitting.value = false;
 
-  await nextTick(); // ✅ UI 업데이트 이후 실행
-  router.push('/user/ticketlist'); // ✅ 정상적으로 페이지 이동
+  await nextTick();
+  router.push('/user/ticketlist');
 };
 
-// ✅ 다이얼로그 상태 변경을 감지하여 불필요한 onSubmit 재실행 방지
-watch(showDialog, (newValue) => {
-  if (newValue) {
-    console.log('📌 티켓 생성 완료 다이얼로그가 열림');
-  } else {
-    console.log('📌 티켓 생성 완료 다이얼로그가 닫힘');
-  }
-});
-
-// 카테고리 데이터 가져오는 커스텀 쿼리
 const fetchCategories = useCustomQuery(['category'], async () => {
   try {
     const response = await categoryApi.getCategories();
@@ -404,21 +338,20 @@ const fetchCategories = useCustomQuery(['category'], async () => {
         contentGuide: category.contentGuide,
         secondCategories: category.secondCategories.map((subCategory) => ({
           id: subCategory.secondCategoryId,
-          value: subCategory.name, // ✅ 변경: subCategory.Name → subCategory.name
+          value: subCategory.name,
           label: subCategory.name,
         })),
       }),
     );
   } catch (error) {
-    console.error('에러 처리:', error);
+    handleError(dialogState, '카테고리 목록 불러오기 실패');
     throw error;
   }
 });
 
-// 카테고리 옵션 리스트
 const firstCategoryList = ref<BaseTicketOption[]>([]);
 const secondCategoryList = ref<BaseTicketOption[]>([]);
-const contentPlaceholder = ref(''); // 요청사항 placeholder 추가
+const contentPlaceholder = ref('');
 
 watch(selectedFirstCategory, (newCategory) => {
   if (newCategory) {
@@ -433,7 +366,6 @@ watch(selectedFirstCategory, (newCategory) => {
   }
 });
 
-// ✅ 1차 카테고리 선택 시, 해당 2차 카테고리 리스트 변경
 const updateSecondCategoryList = () => {
   if (selectedFirstCategory.value) {
     secondCategoryList.value =
@@ -449,19 +381,16 @@ const handleTitleSelect = (option: BaseTicketOption) => {
   selectedTitleform.value = selectedTitle.value.label;
   selectedTemplate.value = {
     title: option.label,
-    firstCategory: option.firstCategory || '', // undefined 방지
+    firstCategory: option.firstCategory || '',
     secondCategory: option.secondCategory || '',
     content: option.content || '',
   };
 
-  // ✅ 템플릿 선택 시 에러 메시지 초기화
   selectedTemplateError.value = null;
 };
 
-// ✅ 1차 카테고리 선택 및 2차 카테고리 초기화
 const handleFirstCategorySelect = (option: BaseTicketOption) => {
   selectedFirstCategory.value = option;
-  // selectedSecondCategory.value = null;
   updateSecondCategoryList();
 
   validate();
@@ -469,33 +398,28 @@ const handleFirstCategorySelect = (option: BaseTicketOption) => {
 
 const firstCategoryError = ref<string | null>(null);
 
-// ✅ 2차 카테고리 선택 시, 1차 카테고리가 없으면 에러 메시지 표시
 const handleSecondCategorySelect = (option: BaseTicketOption) => {
   if (!selectedFirstCategory.value) {
     firstCategoryError.value = '1차 카테고리를 먼저 선택하세요.';
-    return; // 선택 방지
+    return;
   }
 
-  // 정상적으로 선택되면 에러 메시지 제거
   firstCategoryError.value = null;
   selectedSecondCategory.value = option;
 };
 
-// watch를 사용하여 fetchCategories에 데이터가 들어오면 firstCategoryList 업데이트
 watch(
   () => fetchCategories.data.value,
   (newData) => {
     if (newData) {
       firstCategoryList.value = newData;
 
-      // ✅ 1차 카테고리 업데이트 후 2차 카테고리 업데이트 실행
       updateSecondCategoryList();
     }
   },
   { immediate: true },
 );
 
-// 티켓 생성 뮤테이션
 const createTicketMutation = useCustomMutation(
   async ({
     title,
@@ -516,22 +440,11 @@ const createTicketMutation = useCustomMutation(
   },
   {
     onSuccess: () => {
-      queryClient.invalidateQueries(['user-tickets']); // 티켓 생성목록 데이터 자동 리패칭
-      queryClient.refetchQueries(['user-tickets']); // 즉시 API 재요청
+      queryClient.invalidateQueries(['user-tickets']);
+      queryClient.refetchQueries(['user-tickets']);
     },
   },
 );
-
-// 취소, 확인 버튼 클릭
-const computedContent = computed(() => content.value);
-
-const styledContent = computed(() => {
-  return `<span style="color: gray;">${template.value}</span><br><br><span style="color: black;">${
-    selectedTemplate.value?.content || ''
-  }</span>`;
-});
-
-const tempContent = ref(''); // ✅ 임시 content 변수
 
 const handleCancel = () => {
   showTemplateDialog.value = false;
@@ -540,25 +453,16 @@ const handleCancel = () => {
 const handleConfirm = async (event?: Event) => {
   event?.preventDefault();
 
-  console.log('📌 handleConfirm 실행됨');
-
-  // ✅ 템플릿을 선택하지 않은 경우
   if (!selectedTitle.value) {
-    console.warn('🚨 템플릿을 선택하지 않음');
     selectedTemplateError.value = '템플릿을 선택하세요.';
-    preventSubmit.value = true; // 🚨 폼 제출 차단
-    console.log('🛠 preventSubmit 값 변경됨:', preventSubmit.value);
-    return; // 🚨 함수 즉시 종료
+    preventSubmit.value = true;
+    return;
   }
 
-  console.log('✅ 템플릿 선택됨:', selectedTitle.value);
-  selectedTemplateError.value = null; // ✅ 오류 메시지 초기화
-  preventSubmit.value = false; // ✅ 폼 제출 가능
+  selectedTemplateError.value = null;
+  preventSubmit.value = false;
 
   if (selectedTemplate.value) {
-    console.log('📌 선택된 템플릿:', JSON.stringify(selectedTemplate.value, null, 2));
-
-    // ✅ 제목, 카테고리 반영
     title.value = selectedTemplate.value.title;
 
     selectedFirstCategory.value =
@@ -573,23 +477,22 @@ const handleConfirm = async (event?: Event) => {
       });
     }
 
-    // ✅ 사용자가 선택한 템플릿의 content를 그대로 content.value에 반영
     if (selectedTemplate.value.content) {
       content.value = selectedTemplate.value.content;
     }
   }
 
   await nextTick();
-  showTemplateDialog.value = false; // ✅ 다이얼로그 닫기
+  showTemplateDialog.value = false;
 };
 
 const isImage = (url: string) => /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
 
 const getFileExtensionLabel = (url: string) => {
   try {
-    const decodedUrl = decodeURIComponent(url); // URL 디코딩
-    const filename = decodedUrl.split('/').pop(); // 파일명 추출
-    const extension = filename?.split('.').pop()?.toLowerCase(); // 확장자 소문자로 변환
+    const decodedUrl = decodeURIComponent(url);
+    const filename = decodedUrl.split('/').pop();
+    const extension = filename?.split('.').pop()?.toLowerCase();
 
     return extension ? `${extension.toUpperCase()} 파일` : '알 수 없는 파일';
   } catch (error) {
