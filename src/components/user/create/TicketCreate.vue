@@ -201,12 +201,22 @@ const handleFileChange = async (event: Event) => {
     return;
   }
 
-  const existingFileNames = previewUrl.value.map((url) => url.split('/').pop());
-  const newFileNames = files.map((file) => file.name);
-  const hasDuplicate = newFileNames.some((name) => existingFileNames.includes(name));
+  const existingFileNames = previewUrl.value
+    .map((url) => {
+      try {
+        return decodeURIComponent(url).split('/').pop()?.toLowerCase();
+      } catch {
+        return url.split('/').pop()?.toLowerCase();
+      }
+    })
+    .filter(Boolean);
 
-  if (hasDuplicate) {
-    attachmentError.value = '* 이미 업로드한 첨부파일입니다.';
+  const newFileNames = files.map((file) => file.name.toLowerCase());
+
+  const duplicateFiles = newFileNames.filter((name) => existingFileNames.includes(name));
+
+  if (duplicateFiles.length > 0) {
+    attachmentError.value = `* 중복된 파일이 있습니다: ${duplicateFiles.join(', ')}`;
     target.value = '';
     return;
   }
