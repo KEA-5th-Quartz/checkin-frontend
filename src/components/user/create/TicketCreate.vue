@@ -239,7 +239,7 @@ watch(
 );
 
 // 템플릿 목록 불러오기 쿼리
-const fetchTemplates = useCustomQuery(['templat-list', memberId], async () => {
+const fetchTemplates = useCustomQuery(['template-list', memberId], async () => {
   try {
     const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
     return response.data.data.templates.map((template: any) => ({
