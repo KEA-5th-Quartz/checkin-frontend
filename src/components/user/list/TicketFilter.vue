@@ -37,13 +37,8 @@ const categoryRef = ref<HTMLElement | null>(null);
 const isCategoryDropdownOpen = ref(false);
 
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
-  try {
-    const response = await categoryApi.getCategories();
-    return response;
-  } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
-    throw err;
-  }
+  const response = await categoryApi.getCategories();
+  return response;
 });
 
 const categoryOptions = computed(() => {

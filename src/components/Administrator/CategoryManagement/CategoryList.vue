@@ -114,13 +114,8 @@ const {
   isLoading,
   isError,
 } = useCustomQuery(['category-list'], async () => {
-  try {
-    const response = await categoryApi.getCategories();
-    return response.data;
-  } catch (err) {
-    console.error('카테고리 목록 조회 실패:', err);
-    throw err;
-  }
+  const response = await categoryApi.getCategories();
+  return response.data;
 });
 
 const queryClient = useQueryClient();
