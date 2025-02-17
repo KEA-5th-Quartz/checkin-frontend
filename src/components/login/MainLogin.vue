@@ -51,7 +51,6 @@ const startBlockTimer = (initialTime: string) => {
 
   let totalSeconds = parseInt(matches[1]) * 60 + parseInt(matches[2]);
 
-  // 이전 타이머가 있다면 제거
   if (timerInterval) {
     clearInterval(timerInterval);
   }
@@ -106,11 +105,9 @@ const handleLogin = async () => {
       passwordResetToken: memberData.passwordResetToken,
     });
 
-    // 로그인 성공 시 isLoggedOut 플래그를 false로 설정
     memberStore.isLoggedOut = false;
     queryClient.clear();
 
-    // 최초로그인인지 검사
     if (memberData.passwordResetToken !== null) {
       router.push('/first-login');
     } else {

@@ -11,7 +11,7 @@ import TicketTemplateButton from './TicketTemplateButton.vue';
 import { BaseTicketOption } from '@/types/tickets';
 import { categoryApi } from '@/services/categoryService/categoryService';
 import { templateApi } from '@/services/templateService/templateService';
-import { useCustomMutation } from '@/composables/useCustomMutation'; // 뮤테이션에 api 생성 -> 함수생성 -> 버튼연결
+import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useCustomQuery } from '@/composables/useCustomQuery';
 import { ticketApi } from '@/services/ticketService/ticketService';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -195,7 +195,7 @@ const handleFileChange = async (event: Event) => {
     return;
   }
 
-  const existingFileNames = previewUrl.value.map((url) => url.split('/').pop()); // 기존 파일명 추출
+  const existingFileNames = previewUrl.value.map((url) => url.split('/').pop());
   const newFileNames = files.map((file) => file.name);
   const hasDuplicate = newFileNames.some((name) => existingFileNames.includes(name));
 

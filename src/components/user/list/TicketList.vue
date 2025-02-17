@@ -111,8 +111,8 @@ watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
       newQueryParams.page,
       newQueryParams.size,
       newQueryParams.order,
-      newQueryParams.statuses.length > 0 ? newQueryParams.statuses : [], // undefined 방지
-      newQueryParams.categories.length > 0 ? newQueryParams.categories : [], // undefined 방지
+      newQueryParams.statuses.length > 0 ? newQueryParams.statuses : [],
+      newQueryParams.categories.length > 0 ? newQueryParams.categories : [],
     ];
   }
 });

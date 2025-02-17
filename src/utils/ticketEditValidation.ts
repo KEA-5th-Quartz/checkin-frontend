@@ -27,7 +27,7 @@ export const ticketEditValidationSchema = yup.object({
     .required('* 날짜를 입력해주세요')
     .test('is-future-date', '* 과거 날짜는 선택할 수 없습니다', (value) => {
       if (!value) return false;
-      // '/' 또는 '-' 형식 모두 처리
+
       const formattedDate = value.replace(/\//g, '-');
       return new Date(formattedDate) >= new Date(new Date().toISOString().split('T')[0]);
     })
@@ -40,22 +40,21 @@ export const ticketEditValidationSchema = yup.object({
   attachments: yup
     .mixed()
     .test('fileSize', '* 첨부파일 크기는 개당 10MB 이하여야 합니다.', (value) => {
-      if (!value) return true; // 파일이 없으면 검사 통과
+      if (!value) return true;
       const files = Array.isArray(value) ? value : [value];
-      return files.every((file) => (file as File).size <= 10 * 1024 * 1024); // 10MB 이하
+      return files.every((file) => (file as File).size <= 10 * 1024 * 1024);
     })
     .test('fileType', '* 허용되지 않는 파일 형식입니다.', (value) => {
       if (!value) return true;
 
-      //  허용할 파일 확장자 목록 (이미지, 문서, 압축 파일 포함)
       const allowedTypes = [
         'image/png',
         'image/jpeg',
         'image/jpg',
         'image/gif',
-        'image/webp', // 이미지 파일
+        'image/webp',
         'application/pdf',
-        'application/msword', // PDF, Word 문서
+        'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xls, .xlsx
