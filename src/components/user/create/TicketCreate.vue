@@ -19,6 +19,8 @@ import { useMemberStore } from '@/stores/memberStore';
 import { useRouter } from 'vue-router';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
+import { handleError } from '@/utils/handleError';
+import { DialogProps, initialDialog } from '@/types/common/dialog';
 
 const router = useRouter();
 
@@ -38,6 +40,8 @@ const templateOptions = ref<
 // 알림창 상태 체크
 const showDialog = ref<boolean>(false);
 const showTemplateDialog = ref<boolean>(false);
+const attachmentError = ref<string | null>(null);
+const dialogState = ref<DialogProps>({ ...initialDialog });
 
 // 템플릿 목록을 불러올때 map함수 두번 돌리기 위해 잠시 저장할 객체
 const response = ref<
@@ -56,7 +60,7 @@ const template = ref<string>(
 );
 
 // Vee-validate의 useForm으로 폼 초기화 및 유효성 검증 스키마 적용
-const { handleSubmit, errors, validate, validateField } = useForm({
+const { handleSubmit, errors, validate } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
     title: '',
@@ -149,8 +153,17 @@ const attachmentMutation = useCustomMutation(
       const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
       previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
     },
-    onError: (error) => {
-      console.error('파일 첨부 실패:', error);
+    onError: () => {
+      dialogState.value = {
+        open: true,
+        isOneBtn: true,
+        title: '오류',
+        content: '파일 업로드에 실패했습니다..',
+        mainText: '확인',
+        onMainClick: () => {
+          dialogState.value = { ...initialDialog };
+        },
+      };
     },
   },
 );
@@ -171,54 +184,85 @@ const triggerFileInput = () => {
 // 2. 숨겨진 input 클릭 시 나타나는 파일탐색기
 const handleFileChange = async (event: Event) => {
   if (isUploading.value) {
-    console.warn('📌 이미 파일 업로드 중입니다. 중복 요청 방지.');
+    attachmentError.value = '* 이미 파일 업로드 중입니다.';
     return;
   }
 
   const target = event.target as HTMLInputElement;
-
-  if (!target.files || target.files.length === 0) {
-    console.error('📌 파일이 선택되지 않았습니다.');
-    return;
-  }
+  if (!target.files || target.files.length === 0) return;
 
   const files = Array.from(target.files);
 
-  attachments.value = files; // ✅ `attachments` 필드 업데이트
-
-  // ✅ 유효성 검사 실행
-  const isValid = await validateField('attachments');
-
-  if (!isValid) {
-    console.warn('📌 파일 유효성 검사 실패:', attachmentsError.value);
-    attachments.value = []; // 🚨 오류 발생 시 파일 목록 초기화
-    target.value = ''; // 파일 선택 초기화
+  if (previewUrl.value.length + files.length > 3) {
+    attachmentError.value = '* 첨부 파일은 총 3개를 초과할 수 없습니다.';
+    target.value = '';
     return;
   }
 
-  // ✅ 파일 업로드 로직 시작 (유효한 경우)
-  isUploading.value = true;
+  const oversizedFiles = files.filter((file) => file.size > 10 * 1024 * 1024);
+  if (oversizedFiles.length > 0) {
+    attachmentError.value = '* 첨부파일 크기는 개당 10MB 이하여야 합니다.';
+    target.value = '';
+    return;
+  }
 
-  const formData = new FormData();
-  files.forEach((file) => formData.append('files', file));
+  const allowedTypes = [
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/gif',
+    'image/webp',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/zip',
+    'application/x-rar-compressed',
+    'application/x-7z-compressed',
+  ];
 
-  attachment.value = formData; // `FormData` 객체로 상태 업데이트
+  const invalidFiles = files.filter((file) => !allowedTypes.includes(file.type));
+  if (invalidFiles.length > 0) {
+    attachmentError.value = '* 허용되지 않는 파일 형식입니다.';
+    target.value = '';
+    return; // 추가 진행 중단
+  }
+
+  const existingFileNames = previewUrl.value.map((url) => url.split('/').pop()); // 기존 파일명 추출
+  const newFileNames = files.map((file) => file.name);
+  const hasDuplicate = newFileNames.some((name) => existingFileNames.includes(name));
+
+  if (hasDuplicate) {
+    attachmentError.value = '* 이미 업로드한 첨부파일입니다.';
+    target.value = '';
+    return; // 추가 진행 중단
+  }
+
+  attachments.value = files;
 
   try {
+    isUploading.value = true;
+    attachmentError.value = null;
+
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    attachment.value = formData;
+
     const response = await attachmentMutation.mutateAsync({ attachment: attachment.value });
 
-    // ✅ 백엔드에서 받은 `attachmentId` 업데이트
     const uploadedAttachmentIds = response.data.map((file: { attachmentId: number }) => file.attachmentId);
     attachmentIds.value = Array.from(new Set([...attachmentIds.value, ...uploadedAttachmentIds]));
 
-    // ✅ 프리뷰 URL 저장
     const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
     previewUrl.value = Array.from(new Set([...previewUrl.value, ...uploadedAttachmentUrls]));
   } catch (error) {
-    console.error('파일 업로드 실패:', error);
+    attachmentError.value = '* 파일 업로드에 실패했습니다.';
   } finally {
     isUploading.value = false;
-    target.value = ''; // ✅ 업로드 후 초기화
+    target.value = '';
   }
 };
 
@@ -238,7 +282,7 @@ watch(
 );
 
 // 템플릿 목록 불러오기 뮤테이션 생성 => 캐싱O 리패칭x => 받아온 값에서 title,category,content만 따로 저장
-const fetchTemplates = useCustomQuery(['templat-list', memberId], async () => {
+const fetchTemplates = useCustomQuery(['template-list', memberId], async () => {
   try {
     const response = await templateApi.getTemplateList(memberStore.memberId, pages, size);
     return response.data.data.templates.map((template: any) => ({
@@ -662,6 +706,17 @@ const removeFile = (index: number) => {
         mainText="확인"
         :onMainClick="handleMain"
       />
+
+      <CommonDialog
+        v-if="dialogState.open"
+        :isOneBtn="dialogState.isOneBtn"
+        :title="dialogState.title"
+        :content="dialogState.content"
+        :mainText="dialogState.mainText"
+        :onCancelClick="dialogState.onMainClick"
+        :onMainClick="dialogState.onMainClick"
+      />
+
       <CommonDialog
         v-if="showTemplateDialog"
         title="템플릿 선택"
