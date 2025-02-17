@@ -26,7 +26,6 @@ const handleClose = () => {
 };
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
@@ -43,7 +42,6 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
     <div v-if="props.ticketId && detailData" class="ticket-overlay">
       <div class="ticket-click-outside" @click="handleClose" />
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
-        <!-- 헤더 -->
         <header class="ticket-header">
           <div>
             <p>{{ detailData.title }}</p>
@@ -54,18 +52,14 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
           </div>
         </header>
 
-        <!-- 컨텐츠 -->
         <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
-            <!-- 왼쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 진행상태 블록 -->
               <div class="flex-stack items-start">
                 <label class="ticket-label">진행상태</label>
                 <StatusBadge :status="detailData.status" size="xl" />
               </div>
 
-              <!-- 1차 카테고리 블록 -->
               <div>
                 <label class="ticket-label">1차 카테고리</label>
                 <div
@@ -74,30 +68,28 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
                   {{ detailData.firstCategory }}
                 </div>
               </div>
-              <!-- 요청자 블록 -->
+
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <p class="sm-gray-1">{{ detailData.username }}</p>
                 </div>
               </div>
-              <!-- 요청 일자 블록 -->
+
               <div>
                 <label class="ticket-label">요청 일자</label>
                 <p class="ticket-date">{{ detailData.createdAt }}</p>
               </div>
             </section>
 
-            <!-- 오른쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 2차 카테고리 블록 -->
               <div class="mt-[76px]">
                 <label class="ticket-label">2차 카테고리</label>
                 <div class="border border-gray-2 rounded-xl py-2 px-4 text-gray-1 text-sm">
                   {{ detailData.secondCategory }}
                 </div>
               </div>
-              <!-- 담당자 블록 -->
+
               <div>
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
@@ -109,7 +101,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
                   <p class="text-xs text-gray-1">{{ detailData.manager || '━' }}</p>
                 </div>
               </div>
-              <!-- 마감 기한 블록 -->
+
               <div>
                 <label class="ticket-label">마감 기한</label>
                 <p class="ticket-date">{{ detailData.dueDate }}</p>
@@ -117,7 +109,6 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
             </section>
           </div>
 
-          <!-- 요청사항 -->
           <div class="mt-11">
             <label class="ticket-desc-label">요청사항</label>
             <div class="ticket-desc-area">

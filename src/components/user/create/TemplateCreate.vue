@@ -195,9 +195,9 @@ const createTemplateMutation = useCustomMutation(
 
 const handleTitleInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLInputElement).value
-    .replace(/<[^>]*>/g, '') // HTML 태그 제거
-    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
-    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
     .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
 
   titleChange(sanitizedValue);
@@ -205,9 +205,9 @@ const handleTitleInput = (event: Event) => {
 
 const handleContentInput = (event: Event) => {
   const sanitizedValue = (event.target as HTMLTextAreaElement).value
-    .replace(/<[^>]*>/g, '') // HTML 태그 제거
-    .replace(/javascript:/gi, '') // javascript: 프로토콜 제거
-    .replace(/on\w+\s*=/gi, '') // 이벤트 핸들러 제거
+    .replace(/<[^>]*>/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
     .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
 
   contentChange(sanitizedValue);

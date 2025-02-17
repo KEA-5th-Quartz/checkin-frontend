@@ -14,7 +14,6 @@ import { useCustomMutation } from '@/composables/useCustomMutation';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { templateEditValidationSchema } from '@/utils/templateEditValidation';
 import { ValidationError } from 'yup';
-import { ApiError } from '@/types/common/error';
 import CommonInput from '@/components/common/CommonInput.vue';
 import CommonTextarea from '@/components/common/commonTextarea.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
@@ -69,7 +68,6 @@ const getValidationData = (ticket: any) => {
   };
 };
 
-// 개별 필드 검증 함수
 const validateField = async (field: string, value: unknown) => {
   try {
     const validationData = getValidationData({
@@ -88,7 +86,6 @@ const validateField = async (field: string, value: unknown) => {
   }
 };
 
-// 전체 폼 검증 함수
 const validateForm = async () => {
   try {
     const validationData = getValidationData(templateStore.template);
@@ -113,7 +110,6 @@ watch(
   },
 );
 
-// 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['template-detail', props.templateId], async () => {
   try {
     const response = await templateApi.getTemplateDetail(props.templateId);
@@ -124,7 +120,6 @@ const { data: detailData } = useCustomQuery(['template-detail', props.templateId
   }
 });
 
-// 카테고리 목록 페치
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
   try {
     const response = await categoryApi.getCategories();
@@ -135,22 +130,20 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
   }
 });
 
-// 1차 카테고리 옵션 동적 생성
 const firstCategoryOptions = computed(() => {
   if (!categoryData.value?.data?.data) return [];
-  // categoryData에서 1차 카테고리 목록을 변환하여 반환
+
   return categoryData.value.data.data.map((category: { firstCategoryId: number; firstCategoryName: string }) => ({
     id: category.firstCategoryId,
     value: category.firstCategoryName,
     label: category.firstCategoryName,
   }));
 });
-// 2차 카테고리 옵션 동적 생성
+
 const secondCategoryOptions = computed(() => {
   if (!categoryData.value?.data?.data || !firstCategorySelected.value) return [];
-  // 선택된 1차 카테고리에 해당하는 객체를 찾음
+
   const selectedFirstCategory = categoryData.value.data.data.find(
-    // 현재 선택된 1차 카테고리의 ID와 일치하는 카테고리를 찾음
     (category: { firstCategoryId: number }) => category.firstCategoryId === firstCategorySelected.value.id,
   );
 
@@ -269,25 +262,21 @@ const startEdit = () => {
   templateStore.toggleEditMode();
 };
 
-// 1차 카테고리 변경
 const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   try {
     firstCategorySelected.value = option;
     await validateField('firstCategory', option);
 
-    // 선택된 1차 카테고리의 contentGuide 찾기
     const selectedFirstCategory = categoryData.value?.data?.data.find(
       (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
     );
 
-    // templateStore 업데이트 - contentGuide를 content에 설정
     templateStore.updateTemplate({
       ...templateStore.template,
       firstCategory: option.label,
-      content: selectedFirstCategory?.contentGuide || '', // contentGuide를 content에 설정
+      content: selectedFirstCategory?.contentGuide || '',
     });
 
-    // 2차 카테고리 설정 (기존 코드)
     if (selectedFirstCategory?.secondCategories?.length > 0) {
       const firstSecondCategoryOption = {
         id: selectedFirstCategory.secondCategories[0].secondCategoryId,
@@ -310,7 +299,6 @@ const handleSecondCategorySelect = async (option: BaseTicketOption) => {
   try {
     secondCategorySelected.value = option;
 
-    // ticketStore 업데이트
     templateStore.updateTemplate({
       ...templateStore.template,
       secondCategory: option.label,
@@ -330,7 +318,6 @@ const canEdit = computed(() => {
     <div v-if="templateId && templateStore.template && detailData" class="ticket-overlay">
       <div class="ticket-click-outside" @click="handleClose" />
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
-        <!-- 헤더 -->
         <header class="ticket-header">
           <p v-if="!templateStore.isEditMode">{{ templateStore.template.title }}</p>
           <CommonInput
@@ -356,12 +343,9 @@ const canEdit = computed(() => {
           </div>
         </header>
 
-        <!-- 컨텐츠 -->
         <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
-            <!-- 왼쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 1차 카테고리 블록 -->
               <div>
                 <label class="ticket-label">1차 카테고리</label>
                 <div
@@ -382,9 +366,7 @@ const canEdit = computed(() => {
               </div>
             </section>
 
-            <!-- 오른쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 2차 카테고리 블록 -->
               <div>
                 <label class="ticket-label">2차 카테고리</label>
                 <div
@@ -405,7 +387,6 @@ const canEdit = computed(() => {
             </section>
           </div>
 
-          <!-- 요청사항 -->
           <div class="mt-11">
             <label class="ticket-desc-label">요청사항</label>
             <div v-if="!templateStore.isEditMode" class="ticket-desc-area">

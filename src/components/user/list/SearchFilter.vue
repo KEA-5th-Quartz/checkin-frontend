@@ -35,7 +35,6 @@ const handleCancel = () => {
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
 const handleDelete = () => {
-  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
   const selectedTicketIds = Array.from(ticketStore.selectedTickets);
   const ticketCount = selectedTicketIds.length;
 
@@ -49,9 +48,9 @@ const handleDelete = () => {
     },
     mainText: '삭제',
     onMainClick: () => {
-      ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
-      ticketStore.toggleDeleteMode(); // 삭제 모드 종료
-      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+      ticketStore.clearSelectedTickets();
+      ticketStore.toggleDeleteMode();
+      dialogState.value = { ...initialDialog };
     },
   };
 };
@@ -59,15 +58,12 @@ const handleDelete = () => {
 
 <template>
   <header v-if="!ticketStore.isDeleteMode" class="board-header">
-    <!-- 검색 -->
     <div class="manager-search-div">
       <CommonInput type="text" maxlength="20" placeholder="티켓 검색..." class="manager-search-input" />
       <SvgIcon :icon="SearchIcon" />
     </div>
 
-    <!-- 개수 & 필터 -->
     <div class="flex items-center gap-10">
-      <!-- 개수 -->
       <div ref="dropdownRef" class="relative mt-1">
         <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
           <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -84,13 +80,12 @@ const handleDelete = () => {
       </div>
 
       <div class="flex items-center">
-        <!-- 필터링 아이콘 -->
         <div class="relative flex items-center">
           <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
             <SvgIcon :icon="FilterIcon" />
             필터
           </button>
-          <!-- 필터 모달 -->
+
           <FilterModal v-if="isFilterOpen" @closeFilter="isFilterOpen = false" class="board-filter-modal" />
         </div>
       </div>

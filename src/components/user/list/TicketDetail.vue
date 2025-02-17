@@ -46,7 +46,6 @@ const handleClose = () => {
   }, 300);
 };
 
-// 티켓 상세 페치
 const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], async () => {
   try {
     const response = await ticketApi.getTicketDetail(props.ticketId);
@@ -56,7 +55,7 @@ const { data: detailData } = useCustomQuery(['ticket-detail', props.ticketId], a
     throw err;
   }
 });
-// 카테고리 목록 페치
+
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
   try {
     const response = await categoryApi.getCategories();
@@ -70,7 +69,7 @@ const { data: categoryData } = useCustomQuery(['category-list'], async () => {
 const ticketStore = useTicketStore();
 
 type ErrorFields = {
-  [key: string]: string; // 인덱스 시그니처 추가
+  [key: string]: string;
   title: string;
   firstCategory: string;
   secondCategory: string;
@@ -79,7 +78,6 @@ type ErrorFields = {
   attachments: string;
 };
 
-// errors ref 선언
 const errors = ref<ErrorFields>({
   title: '',
   firstCategory: '',
@@ -96,7 +94,6 @@ const getValidationData = (ticket: any) => {
   };
 };
 
-// 개별 필드 검증 함수
 const validateField = async (field: string, value: unknown) => {
   try {
     const validationData = getValidationData({
@@ -115,7 +112,6 @@ const validateField = async (field: string, value: unknown) => {
   }
 };
 
-// 전체 폼 검증 함수
 const validateForm = async () => {
   try {
     const validationData = getValidationData(ticketStore.ticket);
@@ -140,26 +136,23 @@ watch(
   },
 );
 
-// 1차 카테고리 옵션 동적 생성
 const firstCategoryOptions = computed(() => {
   if (!categoryData.value?.data?.data) return [];
-  // categoryData에서 1차 카테고리 목록을 변환하여 반환
+
   return categoryData.value.data.data.map((category: { firstCategoryId: number; firstCategoryName: string }) => ({
-    id: category.firstCategoryId, // 드롭다운에서 사용할 고유 ID, 값, 이름
+    id: category.firstCategoryId,
     value: category.firstCategoryName,
     label: category.firstCategoryName,
   }));
 });
-// 2차 카테고리 옵션 동적 생성
+
 const secondCategoryOptions = computed(() => {
   if (!categoryData.value?.data?.data || !firstCategorySelected.value) return [];
-  // 선택된 1차 카테고리에 해당하는 카테고리 객체를 찾음
+
   const selectedFirstCategory = categoryData.value.data.data.find(
-    // 현재 선택된 1차 카테고리의 ID와 일치하는 카테고리를 찾음
     (category: { firstCategoryId: number }) => category.firstCategoryId === firstCategorySelected.value.id,
   );
 
-  // 선택된 1차 카테고리의 2차 카테고리 목록을 변환하여 반환
   return (
     selectedFirstCategory?.secondCategories.map((category: { secondCategoryId: number; name: string }) => ({
       id: category.secondCategoryId,
@@ -169,16 +162,12 @@ const secondCategoryOptions = computed(() => {
   );
 });
 
-// API 데이터로 초기값 설정
 watch(
-  // 감시할 대상 데이터들을 배열로 지정
   [detailData, categoryData],
-  // 새로운 값들을 배열 구조분해로 받아서 처리하는 콜백 함수
+
   ([newDetailData, newCategoryData]) => {
     if (newDetailData && newCategoryData?.data?.data) {
-      // 1차 카테고리 설정
       const firstCategory = newCategoryData.data.data.find(
-        // 티켓의 현재 1차 카테고리와 일치하는 카테고리 찾기
         (category: { firstCategoryName: string }) => category.firstCategoryName === newDetailData.firstCategory,
       );
       if (firstCategory) {
@@ -187,9 +176,8 @@ watch(
           value: firstCategory.firstCategoryName,
           label: firstCategory.firstCategoryName,
         };
-        // 2차 카테고리 설정
+
         const secondCategory = firstCategory.secondCategories.find(
-          // 티켓의 현재 2차 카테고리와 일치하는 카테고리 찾기
           (category: { name: string }) => category.name === newDetailData.secondCategory,
         );
         if (secondCategory) {
@@ -202,7 +190,7 @@ watch(
       }
     }
   },
-  { immediate: true }, // 컴포넌트 마운트 시 즉시 실행
+  { immediate: true },
 );
 
 watch(
@@ -235,8 +223,8 @@ const updateMutation = useCustomMutation(
 
     const updateData = {
       title: ticketStore.ticket.title,
-      firstCategory: firstCategorySelected.value.label, // 선택된 1차 카테고리
-      secondCategory: secondCategorySelected.value.label, // 선택된 2차 카테고리
+      firstCategory: firstCategorySelected.value.label,
+      secondCategory: secondCategorySelected.value.label,
       content: ticketStore.ticket.content,
       dueDate: formatMinusDate(ticketStore.ticket.due_date),
       attachmentIds: [],
@@ -284,24 +272,20 @@ const startEdit = () => {
   ticketStore.toggleEditMode();
 };
 
-// 1차 카테고리 변경
 const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   try {
     firstCategorySelected.value = option;
     await validateField('firstCategory', option);
 
-    // ticketStore 업데이트
     ticketStore.updateTicket({
       ...ticketStore.ticket,
       firstCategory: option.label,
     });
 
-    // 선택된 1차 카테고리에 해당하는 2차 카테고리들 찾기
     const selectedFirstCategory = categoryData.value?.data?.data.find(
       (category: { firstCategoryId: number }) => category.firstCategoryId === option.id,
     );
 
-    // 2차 카테고리를 첫 번째 요소로 설정
     if (selectedFirstCategory?.secondCategories?.length > 0) {
       const firstSecondCategoryOption = {
         id: selectedFirstCategory.secondCategories[0].secondCategoryId,
@@ -310,7 +294,6 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
       };
       secondCategorySelected.value = firstSecondCategoryOption;
 
-      // 2차 카테고리도 ticketStore에 업데이트
       ticketStore.updateTicket({
         ...ticketStore.ticket,
         secondCategory: firstSecondCategoryOption.label,
@@ -321,12 +304,10 @@ const handleFirstCategorySelect = async (option: BaseTicketOption) => {
   }
 };
 
-// 2차 카테고리 변경
 const handleSecondCategorySelect = async (option: BaseTicketOption) => {
   try {
     secondCategorySelected.value = option;
 
-    // ticketStore 업데이트
     ticketStore.updateTicket({
       ...ticketStore.ticket,
       secondCategory: option.label,
@@ -341,7 +322,6 @@ const formattedDueDate = computed({
     return formatMinusDate(ticketStore.ticket.due_date);
   },
   set: (newValue: string) => {
-    // '-' 형식을 '/' 형식으로 변환하여 저장
     const formattedValue = newValue.replace(/-/g, '/');
     ticketStore.updateTicket({
       ...ticketStore.ticket,
@@ -352,19 +332,15 @@ const formattedDueDate = computed({
 
 const handleFileDownload = async (fileUrl: string) => {
   try {
-    // 파일명 추출
     const fileName = fileUrl.split('/').pop() || 'download';
 
-    // 이미지 파일인 경우
     if (isImageFile(fileName)) {
       window.open(fileUrl, '_blank');
       return;
     }
 
-    // 일반 파일인 경우 API 호출
     const response = await ticketApi.getTicketAttachment(String(props.ticketId), fileUrl);
 
-    // response 타입에 따른 처리
     const blob =
       response.data instanceof Blob
         ? response.data
@@ -372,7 +348,6 @@ const handleFileDownload = async (fileUrl: string) => {
             type: response.headers['content-type'] || 'application/octet-stream',
           });
 
-    // 다운로드 링크 생성 및 클릭
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = downloadUrl;
@@ -380,7 +355,6 @@ const handleFileDownload = async (fileUrl: string) => {
     document.body.appendChild(link);
     link.click();
 
-    // cleanup
     setTimeout(() => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(downloadUrl);
@@ -400,7 +374,6 @@ const canEdit = computed(() => {
     <div v-if="ticketId && ticketStore.ticket && detailData" class="ticket-overlay">
       <div class="ticket-click-outside" @click="handleClose" />
       <div class="ticket-container" :class="{ 'drawer-enter': show, 'drawer-leave': !show }">
-        <!-- 헤더 -->
         <header class="ticket-header">
           <div v-if="!ticketStore.isEditMode">
             <p>{{ ticketStore.ticket.title }}</p>
@@ -430,18 +403,14 @@ const canEdit = computed(() => {
           </div>
         </header>
 
-        <!-- 컨텐츠 -->
         <div class="ticket-contents-div">
           <div class="flex gap-2.5 w-full">
-            <!-- 왼쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 진행상태 블록 -->
               <div class="flex-stack items-start">
                 <label class="ticket-label">진행상태</label>
                 <StatusBadge :status="detailData?.status" size="xl" />
               </div>
 
-              <!-- 1차 카테고리 블록 -->
               <div>
                 <label class="ticket-label">1차 카테고리</label>
                 <div
@@ -460,23 +429,21 @@ const canEdit = computed(() => {
                   isEdit
                 />
               </div>
-              <!-- 요청자 블록 -->
+
               <div>
                 <label class="ticket-label">요청자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
                   <p class="sm-gray-1">{{ detailData?.username }}</p>
                 </div>
               </div>
-              <!-- 요청 일자 블록 -->
+
               <div>
                 <label class="ticket-label">요청 일자</label>
                 <p class="ticket-date">{{ detailData?.createdAt }}</p>
               </div>
             </section>
 
-            <!-- 오른쪽 섹션 -->
             <section class="ticket-section">
-              <!-- 2차 카테고리 블록 -->
               <div class="mt-[76px]">
                 <label class="ticket-label">2차 카테고리</label>
                 <div
@@ -494,7 +461,7 @@ const canEdit = computed(() => {
                   isEdit
                 />
               </div>
-              <!-- 담당자 블록 -->
+
               <div>
                 <label class="ticket-label">담당자</label>
                 <div class="manager-filter-btn w-full rounded-xl border-gray-2 justify-start gap-2">
@@ -508,7 +475,7 @@ const canEdit = computed(() => {
                   <p class="text-xs text-gray-1">{{ detailData?.manager || '━' }}</p>
                 </div>
               </div>
-              <!-- 마감 기한 블록 -->
+
               <div>
                 <label class="ticket-label">마감 기한</label>
                 <p v-if="!ticketStore.isEditMode" class="ticket-date">
@@ -527,7 +494,6 @@ const canEdit = computed(() => {
             </section>
           </div>
 
-          <!-- 요청사항 -->
           <div class="mt-11">
             <label class="ticket-desc-label">요청사항</label>
             <div v-if="!ticketStore.isEditMode" class="ticket-desc-area">
@@ -543,7 +509,6 @@ const canEdit = computed(() => {
             </div>
           </div>
 
-          <!-- 첨부 파일 -->
           <div v-if="detailData.ticketAttachmentUrls?.length > 0" class="mt-4 space-y-2">
             <label class="ticket-label">첨부파일</label>
             <div class="space-y-2">

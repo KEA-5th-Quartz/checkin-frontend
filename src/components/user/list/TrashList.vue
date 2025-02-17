@@ -61,7 +61,6 @@ const { data: trashData } = useCustomQuery(['trash-list', queryParams], async ()
   }
 });
 
-// 복구 뮤테이션
 const restoreMutation = useCustomMutation(
   async ({ ticketIds }: { ticketIds: number[] }) => {
     const response = await ticketApi.patchTrashTicket({ ticketIds });
@@ -75,7 +74,6 @@ const restoreMutation = useCustomMutation(
 );
 
 const handleRestore = () => {
-  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
   const selectedTicketIds = Array.from(trashStore.selectedTickets);
   const ticketCount = selectedTicketIds.length;
 
@@ -90,13 +88,12 @@ const handleRestore = () => {
     onMainClick: () => {
       restoreMutation.mutate({ ticketIds: selectedTicketIds });
 
-      trashStore.clearSelectedTickets(); // 선택된 티켓 초기화
-      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+      trashStore.clearSelectedTickets();
+      dialogState.value = { ...initialDialog };
     },
   };
 };
 
-// 영구 삭제 뮤테이션
 const deleteMutation = useCustomMutation(
   async ({ ticketIds }: { ticketIds: number[] }) => {
     const response = await ticketApi.deleteTrashTickets({ ticketIds });
@@ -110,7 +107,6 @@ const deleteMutation = useCustomMutation(
 );
 
 const handleDelete = () => {
-  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
   const selectedTicketIds = Array.from(trashStore.selectedTickets);
   const ticketCount = selectedTicketIds.length;
 
@@ -127,14 +123,13 @@ const handleDelete = () => {
     onMainClick: () => {
       deleteMutation.mutate({ ticketIds: selectedTicketIds });
 
-      trashStore.clearSelectedTickets(); // 선택된 티켓 초기화
-      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+      trashStore.clearSelectedTickets();
+      dialogState.value = { ...initialDialog };
     },
   };
 };
 
 const handleCheckboxClick = (event: Event, id: number) => {
-  // 체크박스 클릭 시 이벤트 전파 중지 (행 클릭 이벤트 방지)
   event.stopPropagation();
 
   if (trashStore.selectedTickets.has(id)) {

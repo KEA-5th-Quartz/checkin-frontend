@@ -4,8 +4,8 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import TicketDetail from './TicketDetail.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { ArrowDownIcon, CreateTicketIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
-import { perPageOptions, status } from '@/components/manager/ticketOptionTest';
+import { ArrowDownIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
+import { perPageOptions } from '@/components/manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import CommonDialog from '@/components/common/CommonDialog.vue';
@@ -31,8 +31,8 @@ const isFilterOpen = ref(false);
 const currentPage = ref(parseInt(sessionStorage.getItem('userCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
-const debouncedKeyword = useDebounce(keyword, 1000); // 500ms 동안 추가 입력이 없으면 반응형 상태변경
-const searchQueryKey = ref<QueryKey>(['user-tickets']); // 초기 쿼리 키
+const debouncedKeyword = useDebounce(keyword, 1000);
+const searchQueryKey = ref<QueryKey>(['user-tickets']);
 const isSearch = ref(false);
 const isFiltering = computed(() => {
   return (
@@ -45,40 +45,27 @@ const order = ref('DESC');
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 필터 선택 항목
 const UserfilterState = ref<UserFilterState>({
   statuses: [],
   categories: [],
 });
 
-// 검색 쿼리 파라미터
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
   order: order.value,
 }));
 
-// 검색 함수
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
-    currentPage.value = 1; // 검색 시 첫 페이지로 초기화
+    currentPage.value = 1;
     sessionStorage.setItem('userCurrentPage', '1');
   } else {
-    resetSearch(); // 검색어가 비어있을 때 초기화 함수 호출
+    resetSearch();
   }
 };
 
-// debounce 설정
-// watch(debouncedKeyword, (newKeyword) => {
-//   if (newKeyword.trim()) {
-//     searchQueryKey.value = ['search-user-tickets', newKeyword, currentPage.value, pageSize.value, order.value];
-//   } else {
-//     searchQueryKey.value = ['user-tickets', queryParams.value.page, queryParams.value.size, queryParams.value.order];
-//   }
-// });
-
-// 검색 초기화 함수
 const resetSearch = () => {
   keyword.value = '';
   isSearch.value = false;
@@ -99,17 +86,14 @@ const selectOption = (
 };
 
 const handleApplyFilters = (filters: UserFilterPayload) => {
-  console.log('🚀 Received filters:', filters);
   UserfilterState.value = {
     statuses: filters.statuses,
     categories: filters.categories,
   };
-  console.log('🟢 Updated UserfilterState:', UserfilterState.value);
   currentPage.value = 1;
   sessionStorage.setItem('userCurrentPage', '1');
 };
 
-// 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -119,7 +103,6 @@ const queryParams = computed(() => ({
 }));
 
 watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
-  console.log('🔄 Query params updated:', newQueryParams);
   if (newKeyword.trim()) {
     searchQueryKey.value = ['search-user-tickets', newKeyword, currentPage.value, pageSize.value, order.value];
   } else {
@@ -132,10 +115,8 @@ watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
       newQueryParams.categories.length > 0 ? newQueryParams.categories : [], // undefined 방지
     ];
   }
-  console.log('🟢 Updated searchQueryKey:', searchQueryKey.value);
 });
 
-// 데이터 페칭
 const {
   data: ticketData,
   isLoading,
@@ -157,7 +138,6 @@ const {
     .then((response) => response.data.data);
 });
 
-// 티켓 삭제 뮤테이션
 const deleteMutation = useCustomMutation(
   async ({ ticketIds }: { ticketIds: number[] }) => {
     const response = await ticketApi.patchTickets({ ticketIds });
@@ -171,7 +151,6 @@ const deleteMutation = useCustomMutation(
 );
 
 const handleDelete = () => {
-  // Set을 배열로 변환하여 선택된 티켓 ID들을 가져옴
   const selectedTicketIds = Array.from(ticketStore.selectedTickets);
   const ticketCount = selectedTicketIds.length;
 
@@ -187,9 +166,9 @@ const handleDelete = () => {
     onMainClick: () => {
       deleteMutation.mutate({ ticketIds: selectedTicketIds });
 
-      ticketStore.clearSelectedTickets(); // 선택된 티켓 초기화
-      ticketStore.toggleDeleteMode(); // 삭제 모드 종료
-      dialogState.value = { ...initialDialog }; // 다이얼로그 닫기
+      ticketStore.clearSelectedTickets();
+      ticketStore.toggleDeleteMode();
+      dialogState.value = { ...initialDialog };
     },
   };
 };
@@ -207,7 +186,6 @@ const handleCloseModal = () => {
 };
 
 const handleCheckboxClick = (event: Event, id: number) => {
-  // 체크박스 클릭 시 이벤트 전파 중지 (행 클릭 이벤트 방지)
   event.stopPropagation();
 
   if (ticketStore.selectedTickets.has(id)) {
@@ -224,7 +202,7 @@ const handlePageChange = (page: number) => {
 
 const toggleOrder = () => {
   order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-  // 정렬이 변경될 때 첫 페이지로 이동
+
   currentPage.value = 1;
   sessionStorage.setItem('logCurrentPage', '1');
 };
@@ -236,9 +214,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section>
-    <!-- 티켓 헤더 -->
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
-      <!-- 검색 -->
       <div class="flex w-1/4">
         <div class="manager-search-div">
           <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
@@ -255,9 +231,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 개수 & 필터 -->
       <div class="flex items-center gap-10">
-        <!-- 개수 -->
         <div ref="dropdownRef" class="relative mt-1">
           <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
             <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -279,13 +253,12 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex items-center">
-          <!-- 필터링 아이콘 -->
           <div class="relative flex items-center">
             <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
               <SvgIcon :icon="FilterIcon" />
               필터
             </button>
-            <!-- 필터 모달 -->
+
             <TicketFilter
               v-if="isFilterOpen"
               :initialStatuses="UserfilterState.statuses"
@@ -299,7 +272,7 @@ onBeforeUnmount(() => {
         <SvgIcon :icon="TrashcanIcon" class="cursor-pointer" @click="ticketStore.toggleDeleteMode" />
       </div>
     </header>
-    <!-- 티켓 삭제모드 헤더 -->
+
     <header v-else class="board-header">
       <div class="header-cancel-delete-div">
         <button @click="handleCancel" class="btn-cancel py-2">취소</button>
@@ -428,19 +401,4 @@ onBeforeUnmount(() => {
       @page-change="handlePageChange"
     />
   </section>
-  <!-- <section v-else class="w-full flex-stack items-center pb-40">
-    <div class="flex-stack items-center gap-8 mt-32">
-      <img src="@/assets/no-ticket.png" />
-      <div class="flex-stack items-center gap-2">
-        <h1 class="text-xl">아직 요청한 티켓이 없어요</h1>
-        <p>티켓 생성을 눌러 새로운 티켓을 생성하세요</p>
-      </div>
-    </div>
-
-    <button class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20">
-      <SvgIcon :icon="CreateTicketIcon" />
-
-      티켓 생성
-    </button>
-  </section> -->
 </template>
