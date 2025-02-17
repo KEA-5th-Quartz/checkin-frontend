@@ -48,10 +48,6 @@ const response = ref<
 const queryClient = useQueryClient();
 const isUploading = ref<boolean>(false);
 
-const template = ref<string>(
-  '  이 기능이 어떻게 동작해야 하나요  상세한 요청 사항을 입력해주세요.  관련 정보를 포함해주세요.',
-);
-
 const { handleSubmit, errors, validate } = useForm({
   validationSchema: ticketValidationSchema,
   initialValues: {
@@ -66,8 +62,8 @@ const { handleSubmit, errors, validate } = useForm({
 });
 
 const { value: title, handleChange: titleChange } = useField<string>('title');
-const { value: selectedFirstCategory } = useField<BaseTicketOption>('firstCategory');
-const { value: selectedSecondCategory } = useField<BaseTicketOption>('secondCategory');
+const { value: selectedFirstCategory } = useField<BaseTicketOption | null>('firstCategory');
+const { value: selectedSecondCategory } = useField<BaseTicketOption | null>('secondCategory');
 const { value: content, handleChange: contentChange } = useField<string>('content');
 const { value: dueDate } = useField<string>('dueDate');
 let { value: selectedTitleform } = useField<string>('title');
@@ -124,7 +120,7 @@ const attachmentMutation = useCustomMutation(
     onSuccess: (response) => {
       const uploadedAttachmentIds = response.data
         .map((file: { attachmentId: number }) => file.attachmentId)
-        .filter((id) => Number.isInteger(id));
+        .filter((id: unknown) => Number.isInteger(id));
 
       attachmentIds.value = [...new Set([...attachmentIds.value, ...uploadedAttachmentIds])];
 
@@ -450,9 +446,7 @@ const handleCancel = () => {
   showTemplateDialog.value = false;
 };
 
-const handleConfirm = async (event?: Event) => {
-  event?.preventDefault();
-
+const handleConfirm = async () => {
   if (!selectedTitle.value) {
     selectedTemplateError.value = '템플릿을 선택하세요.';
     preventSubmit.value = true;
@@ -527,7 +521,7 @@ const removeFile = (index: number) => {
           <CustomDropdown
             class="h-12 py-1 text-black-2 max-w-full"
             :options="firstCategoryList"
-            :selectedOption="selectedFirstCategory"
+            :selectedOption="selectedFirstCategory as BaseTicketOption"
             label=""
             @select="handleFirstCategorySelect"
             isEdit
@@ -543,7 +537,7 @@ const removeFile = (index: number) => {
             v-if="fetchCategories.data?.value"
             class="h-12 py-1 text-black-2 max-w-full"
             :options="secondCategoryList"
-            :selectedOption="selectedSecondCategory"
+            :selectedOption="selectedSecondCategory as BaseTicketOption"
             label=""
             @select="handleSecondCategorySelect"
             isEdit
@@ -569,7 +563,6 @@ const removeFile = (index: number) => {
         />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
         <div class="flex justify-end cursor-pointer">
-          <!-- 숨겨진 파일 선택 input -->
           <input type="file" ref="fileInput" @change="handleFileChange" multiple class="hidden" />
           <SvgIcon
             :icon="ClipIcon"
