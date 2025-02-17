@@ -34,7 +34,11 @@ const handleMainClick = () => {
         <button v-if="!isOneBtn" @click="onCancelClick" class="dialog-btn bg-gray-2">
           {{ cancelText }}
         </button>
-        <button @click="handleMainClick" :class="['dialog-btn text-white-0', isWarn ? ' bg-red-1' : 'bg-primary-0']">
+        <button
+          type="button"
+          @click="handleMainClick"
+          :class="['dialog-btn text-white-0', isWarn ? ' bg-red-1' : 'bg-primary-0']"
+        >
           {{ mainText }}
         </button>
       </div>
