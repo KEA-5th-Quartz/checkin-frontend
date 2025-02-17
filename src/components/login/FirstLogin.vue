@@ -14,12 +14,10 @@ import CommonInput from '../common/CommonInput.vue';
 const memberStore = useMemberStore();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// Form 설정
 const { handleSubmit, errors, meta } = useForm({
   validationSchema: firstLoginSchema,
 });
 
-// Field 설정
 const { value: newPwd } = useField<string>('newPwd');
 const { value: checkPwd } = useField<string>('checkPwd');
 
@@ -29,7 +27,7 @@ const getRedirectPath = (role: string | MemberType): string => {
     MANAGER: '/manager/dashboard',
     USER: '/user/ticketlist',
   };
-  return roleRedirectMap[role as MemberType] || '/'; // 기본값으로 홈으로 리다이렉트
+  return roleRedirectMap[role as MemberType] || '/';
 };
 
 const onSubmit = handleSubmit(async (values) => {
@@ -87,13 +85,11 @@ const confirmPassword = computed({
   set: (val: string) => (checkPwd.value = val),
 });
 
-// 비밀번호 표시 여부
 const showPwd = ref({
   new: false,
   check: false,
 });
 
-// 비밀번호 표시/숨김 토글 함수
 const togglePwdVisibility = (field: 'new' | 'check') => {
   showPwd.value[field] = !showPwd.value[field];
 };

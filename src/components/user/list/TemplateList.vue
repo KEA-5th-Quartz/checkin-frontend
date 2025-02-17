@@ -56,7 +56,6 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// 데이터 페칭
 const { data: templateData } = useCustomQuery(
   ['template-list', queryParams],
   async () => {
@@ -74,7 +73,6 @@ const { data: templateData } = useCustomQuery(
   },
 );
 
-// 템플릿 삭제 뮤테이션
 const deleteMutation = useCustomMutation(
   async ({ templateIds }: { templateIds: number[] }) => {
     const response = await templateApi.deleteTemplates({ templateIds });

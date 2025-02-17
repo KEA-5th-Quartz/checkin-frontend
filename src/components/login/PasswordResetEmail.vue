@@ -10,12 +10,10 @@ import CommonInput from '../common/CommonInput.vue';
 const router = useRouter();
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// Form 설정
 const { handleSubmit } = useForm();
-// Field 설정
+
 const { value: username } = useField<string>('username');
 
-// username이 비어있는지 확인하는 computed 속성
 const isDisabled = computed(() => {
   return !username.value || username.value.trim() === '';
 });

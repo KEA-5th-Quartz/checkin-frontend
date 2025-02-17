@@ -34,11 +34,10 @@ const isFilterOpen = ref(false);
 const currentPage = ref(parseInt(sessionStorage.getItem('userCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
 const keyword = ref('');
-const debouncedKeyword = useDebounce(keyword, 1000); // 1초 동안 추가 입력이 없으면 반응
-const searchQueryKey = ref<QueryKey>(['user-tickets']); // 초기 쿼리 키
+const debouncedKeyword = useDebounce(keyword, 1000);
+const searchQueryKey = ref<QueryKey>(['user-tickets']);
 const isSearch = ref(false);
 
-// 필터링 상태
 const UserfilterState = ref<UserFilterState>({
   statuses: [],
   categories: [],
@@ -50,48 +49,39 @@ const isFiltering = computed(() => {
   );
 });
 
-// 정렬
 const order = ref('DESC');
 
-// 다이얼로그 상태
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-// ------------------ 핵심: "검색 결과가 없는지" 판별 (inline 사용도 가능하지만, computed로 더 깔끔하게)
 const noSearchResults = computed(() => {
-  // (검색 중 또는 필터 중) 이면서, 티켓이 없거나 length가 0이면 true
   return (isSearch.value || isFiltering.value) && (!ticketData.value || ticketData.value.tickets.length === 0);
 });
 
-// 검색 파라미터
 const searchQueryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
   order: order.value,
 }));
 
-// 검색 함수
 const handleSearch = () => {
   if (keyword.value.trim()) {
     isSearch.value = true;
-    currentPage.value = 1; // 검색 시 첫 페이지로
+    currentPage.value = 1;
     sessionStorage.setItem('userCurrentPage', '1');
   } else {
     resetSearch();
   }
 };
 
-// 검색 초기화
 const resetSearch = () => {
   keyword.value = '';
   isSearch.value = false;
   currentPage.value = parseInt(sessionStorage.getItem('userCurrentPage') || '1');
 };
 
-// 드롭다운(ref) 관련
 const dropdownRef = ref<HTMLElement | null>(null);
 onClickOutside(dropdownRef, () => (isSizeOpen.value = false));
 
-// 페이지 사이즈 선택
 const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
@@ -100,7 +90,6 @@ const selectOption = (option: { id: number; value: number; label: string }) => {
   isSizeOpen.value = false;
 };
 
-// 필터 적용
 const handleApplyFilters = (filters: UserFilterPayload) => {
   UserfilterState.value = {
     statuses: filters.statuses,
@@ -110,7 +99,6 @@ const handleApplyFilters = (filters: UserFilterPayload) => {
   sessionStorage.setItem('userCurrentPage', '1');
 };
 
-// 전체 쿼리 파라미터
 const queryParams = computed(() => ({
   page: currentPage.value,
   size: pageSize.value,
@@ -119,7 +107,6 @@ const queryParams = computed(() => ({
   categories: Array.isArray(UserfilterState.value.categories) ? UserfilterState.value.categories : [],
 }));
 
-// 검색/필터 파라미터 변경 감지
 watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
   if (newKeyword.trim()) {
     searchQueryKey.value = ['search-user-tickets', newKeyword, currentPage.value, pageSize.value, order.value];
@@ -135,19 +122,17 @@ watch([debouncedKeyword, queryParams], ([newKeyword, newQueryParams]) => {
   }
 });
 
-// 티켓 조회
 const {
   data: ticketData,
   isLoading,
   error,
 } = useCustomQuery(searchQueryKey as unknown as QueryKey, () => {
-  // 검색 중이면 검색 API
   if (isSearch.value) {
     return ticketApi
       .getSearchUserTickets(debouncedKeyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
       .then((res) => res.data.data);
   }
-  // 필터링(또는 기본 조회) API
+
   return ticketApi
     .getUserTickets(
       queryParams.value.statuses,
@@ -159,7 +144,6 @@ const {
     .then((res) => res.data.data);
 });
 
-// 티켓 삭제 뮤테이션
 const deleteMutation = useCustomMutation(
   async ({ ticketIds }: { ticketIds: number[] }) => {
     const response = await ticketApi.patchTickets({ ticketIds });
@@ -172,7 +156,6 @@ const deleteMutation = useCustomMutation(
   },
 );
 
-// 삭제 버튼
 const handleDelete = () => {
   const selectedTicketIds = Array.from(ticketStore.selectedTickets);
   const ticketCount = selectedTicketIds.length;
@@ -195,13 +178,11 @@ const handleDelete = () => {
   };
 };
 
-// 삭제 취소
 const handleCancel = () => {
   ticketStore.toggleDeleteMode();
   ticketStore.clearSelectedTickets();
 };
 
-// 테이블 행 클릭 → 티켓 상세
 const handleRowClick = (id: number) => {
   selectedTicketId.value = id;
 };
@@ -209,7 +190,6 @@ const handleCloseModal = () => {
   selectedTicketId.value = null;
 };
 
-// 체크박스 클릭
 const handleCheckboxClick = (event: Event, id: number) => {
   event.stopPropagation();
   if (ticketStore.selectedTickets.has(id)) {
@@ -219,31 +199,25 @@ const handleCheckboxClick = (event: Event, id: number) => {
   }
 };
 
-// 페이지 변경
 const handlePageChange = (page: number) => {
   currentPage.value = page;
   sessionStorage.setItem('userCurrentPage', page.toString());
 };
 
-// 정렬 변경
 const toggleOrder = () => {
   order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
   currentPage.value = 1;
   sessionStorage.setItem('logCurrentPage', '1');
 };
 
-// 페이지 떠날 때 현재 페이지 저장
 onBeforeUnmount(() => {
   sessionStorage.setItem('userCurrentPage', currentPage.value.toString());
 });
 </script>
 
 <template>
-  <!-- 1. 티켓이 있거나, 검색/필터 중이라면 -->
   <section v-if="ticketData?.tickets?.length > 0 || isSearch || isFiltering">
-    <!-- (삭제 모드 X) -->
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
-      <!-- 검색 -->
       <div class="flex w-1/4">
         <div class="manager-search-div">
           <button v-if="isSearch" class="search-reset-btn" @click="resetSearch">초기화</button>
@@ -260,9 +234,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- 개수 & 필터 -->
       <div class="flex items-center gap-10">
-        <!-- 개수 -->
         <div ref="dropdownRef" class="relative mt-1">
           <button @click="isSizeOpen = !isSizeOpen" class="manager-filter-btn">
             <span class="font-medium">{{ selectedPerPage.label }}</span>
@@ -284,13 +256,12 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex items-center">
-          <!-- 필터 아이콘 -->
           <div class="relative flex items-center">
             <button @click.stop="isFilterOpen = !isFilterOpen" class="board-filter-icon">
               <SvgIcon :icon="FilterIcon" />
               필터
             </button>
-            <!-- 필터 모달 -->
+
             <TicketFilter
               v-if="isFilterOpen"
               :initialStatuses="UserfilterState.statuses"
@@ -305,7 +276,6 @@ onBeforeUnmount(() => {
       </div>
     </header>
 
-    <!-- (삭제 모드 O) -->
     <header v-else class="board-header">
       <div class="header-cancel-delete-div">
         <button @click="handleCancel" class="btn-cancel py-2">취소</button>
@@ -324,11 +294,10 @@ onBeforeUnmount(() => {
     />
 
     <article class="overflow-x-auto mt-5 px-5 mb-10 hide-scrollbar">
-      <!-- 로딩 상태 -->
       <SkeletonTable v-if="isLoading" />
-      <!-- 에러 상태 -->
+
       <ErrorTable v-else-if="error" :error="error" />
-      <!-- 테이블 -->
+
       <div v-else class="h-[calc(100vh-220px)]">
         <table class="min-w-full">
           <thead class="manager-thead">
@@ -359,12 +328,10 @@ onBeforeUnmount(() => {
           </thead>
 
           <tbody class="overflow-hidden text-ellipsis">
-            <!-- 검색 or 필터 중이고 결과가 없으면 -->
             <tr v-if="(isSearch || isFiltering) && (ticketData?.tickets?.length === 0 || !ticketData)">
               <td colspan="8" class="text-center py-6 text-gray-500">일치하는 티켓이 존재하지 않습니다.</td>
             </tr>
 
-            <!-- 티켓 목록 렌더링 -->
             <tr
               v-else
               v-for="item in ticketData?.tickets"
@@ -421,11 +388,9 @@ onBeforeUnmount(() => {
         </table>
       </div>
 
-      <!-- 티켓 상세 -->
       <TicketDetail v-if="selectedTicketId" :ticket-id="selectedTicketId" @close="handleCloseModal" />
     </article>
 
-    <!-- (검색/필터 결과 없으면) 페이지네이션 숨기기 -->
     <CustomPagination
       v-if="!noSearchResults"
       :items-per-page="pageSize"
@@ -436,7 +401,6 @@ onBeforeUnmount(() => {
     />
   </section>
 
-  <!-- 2. 최초 진입 시 티켓 없고, 검색/필터도 안 한 경우 -->
   <section v-else class="w-full flex-stack items-center pb-40">
     <div class="flex-stack items-center gap-8 mt-32">
       <img src="@/assets/no-ticket.png" />

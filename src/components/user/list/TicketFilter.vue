@@ -13,11 +13,9 @@ const props = defineProps({
   initialCategories: Array,
 });
 
-// 필터 선택 상태 관리
-const selectedStatuses = ref<string[]>(props.initialStatuses || []);
-const selectedCategories = ref<string[]>(props.initialCategories || []);
+const selectedStatuses = ref(props.initialStatuses || []);
+const selectedCategories = ref(props.initialCategories || []);
 
-// watch를 사용해 props 값이 바뀌면 selectedStatuses와 selectedCategories 업데이트
 watch(
   () => props.initialStatuses,
   (newStatuses) => {
@@ -36,10 +34,8 @@ const emit = defineEmits(['closeFilter', 'applyFilters']);
 const modalRef = ref<HTMLElement | null>(null);
 const categoryRef = ref<HTMLElement | null>(null);
 
-// 드롭다운 상태 관리
 const isCategoryDropdownOpen = ref(false);
 
-// 카테고리 목록 페치
 const { data: categoryData } = useCustomQuery(['category-list'], async () => {
   try {
     const response = await categoryApi.getCategories();
@@ -60,7 +56,6 @@ const categoryOptions = computed(() => {
   }));
 });
 
-// 필터 토글 함수들
 const toggleStatus = (statusValue: string) => {
   if (selectedStatuses.value.includes(statusValue)) {
     selectedStatuses.value = selectedStatuses.value.filter((s) => s !== statusValue);
@@ -69,7 +64,6 @@ const toggleStatus = (statusValue: string) => {
   }
 };
 
-// 필터 카테고리 함수들
 const toggleCategory = (category: string) => {
   if (selectedCategories.value.includes(category)) {
     selectedCategories.value = selectedCategories.value.filter((c) => c !== category);
@@ -78,7 +72,6 @@ const toggleCategory = (category: string) => {
   }
 };
 
-// 초기화 버튼 클릭 핸들러
 const handleReset = () => {
   emit('applyFilters', {
     quickFilters: '',
@@ -89,7 +82,6 @@ const handleReset = () => {
   emit('closeFilter');
 };
 
-// 저장 버튼 클릭 핸들러
 const handleSave = () => {
   emit('applyFilters', {
     statuses: selectedStatuses.value,
@@ -111,7 +103,6 @@ onClickOutside(modalRef, () => {
   <div ref="modalRef" class="filter-container z-20">
     <div class="filter-title">필터</div>
 
-    <!-- 카테고리 -->
     <section class="filter-section pt-5">
       <p class="filter-label">카테고리</p>
       <div class="relative" ref="categoryRef">
@@ -137,7 +128,7 @@ onClickOutside(modalRef, () => {
         </ul>
       </div>
     </section>
-    <!-- 상태 -->
+
     <section class="filter-section">
       <p class="filter-label">상태</p>
       <div class="flex gap-2">
@@ -153,7 +144,6 @@ onClickOutside(modalRef, () => {
       </div>
     </section>
 
-    <!-- 초기화 저장 버튼 -->
     <section class="flex justify-center w-full gap-4 pt-2">
       <button @click="handleReset" class="btn-cancel">초기화</button>
       <button @click="handleSave" class="btn-main">저장</button>
