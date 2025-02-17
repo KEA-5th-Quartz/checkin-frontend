@@ -13,8 +13,8 @@ const props = defineProps({
   initialCategories: Array,
 });
 
-const selectedStatuses = ref<string[]>(props.initialStatuses || []);
-const selectedCategories = ref<string[]>(props.initialCategories || []);
+const selectedStatuses = ref(props.initialStatuses || []);
+const selectedCategories = ref(props.initialCategories || []);
 
 watch(
   () => props.initialStatuses,
