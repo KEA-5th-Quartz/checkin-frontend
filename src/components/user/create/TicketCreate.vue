@@ -25,12 +25,6 @@ import { handleError } from '@/utils/handleError';
 const router = useRouter();
 const memberStore = useMemberStore();
 
-/*
-  === 새로 추가된 부분 1) ===
-  첨부파일 (attachmentId, url) 매핑을 저장하는 배열.
-  - 업로드 응답을 받아서 id와 url 쌍으로 저장하고,
-  - X 버튼 누를 때 해당 ID를 찾아서 서버에서도 삭제할 수 있게 함.
-*/
 const attachmentsMap = ref<{ id: number; url: string }[]>([]);
 
 const templateOptions = ref<
@@ -135,11 +129,6 @@ const attachmentMutation = useCustomMutation(
       const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
       previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
 
-      /*
-        === 새로 추가된 부분 2) ===
-        서버 응답에 담긴 (attachmentId, url)을 attachmentsMap에 저장,
-        이후 removeFile() 시 여기서 id 찾아 서버 삭제.
-      */
       response.data.forEach((file: { attachmentId: number; url: string }) => {
         attachmentsMap.value.push({ id: file.attachmentId, url: file.url });
       });
@@ -592,11 +581,10 @@ const getFileExtensionLabel = (url: string) => {
 
       <section class="w-full mt-4">
         <label class="ticket-label">첨부된 파일</label>
-        <div class="text-red-1 text-sm mt-1" v-if="attachmentsError">
+        <div class="text-red-1 text-sm mt-1" v-if="attachmentsError || attachmentError">
           {{ attachmentsError || attachmentError }}
         </div>
 
-        <!-- 프리뷰 목록 -->
         <div class="flex flex-wrap gap-2 mt-2">
           <div
             v-for="(url, index) in previewUrl"
@@ -620,7 +608,6 @@ const getFileExtensionLabel = (url: string) => {
         <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
 
-      <!-- 티켓 생성 완료 다이얼로그 -->
       <CommonDialog
         v-if="showDialog"
         title="티켓 요청 완료"
