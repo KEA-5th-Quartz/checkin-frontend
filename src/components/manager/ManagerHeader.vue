@@ -27,7 +27,6 @@ const progress = computed(() => ({
 
 <template>
   <section class="manager-header-section">
-    <!-- 오늘 마감 -->
     <div class="manager-header-card">
       <div class="manager-header-card-icon">
         <SvgIcon :icon="WarningIcon" />
@@ -41,7 +40,6 @@ const progress = computed(() => ({
       </div>
     </div>
 
-    <!-- 생성 -->
     <div class="manager-header-card">
       <div class="manager-header-card-icon">
         <SvgIcon :icon="PencilIcon" />
@@ -55,7 +53,6 @@ const progress = computed(() => ({
       </div>
     </div>
 
-    <!-- 진행중 -->
     <div class="manager-header-card">
       <div class="manager-header-card-icon">
         <SvgIcon :icon="ProgressIcon" />
@@ -69,7 +66,6 @@ const progress = computed(() => ({
       </div>
     </div>
 
-    <!-- 완료 -->
     <div class="manager-header-card">
       <div class="manager-header-card-icon">
         <SvgIcon :icon="MedalIcon" />
@@ -83,7 +79,6 @@ const progress = computed(() => ({
       </div>
     </div>
 
-    <!-- 나의 티켓 수 -->
     <div class="manager-header-card pr-0 border-none">
       <div class="manager-header-card-icon">
         <SvgIcon :icon="BookmarkIcon" />

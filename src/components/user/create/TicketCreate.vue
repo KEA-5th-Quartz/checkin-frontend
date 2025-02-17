@@ -605,7 +605,7 @@ const getFileExtensionLabel = (url: string) => {
             <div v-else class="text-xs text-gray-700 text-center px-2">
               {{ getFileExtensionLabel(url) }}
             </div>
-            <!-- X 버튼 클릭 시 removeFile 함수 실행 -->
+
             <button @click="removeFile(index)" class="absolute top-1 right-1 w-5 h-5 flex-center rounded-full text-xs">
               ❌
             </button>
