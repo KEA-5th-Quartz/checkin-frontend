@@ -593,7 +593,7 @@ const getFileExtensionLabel = (url: string) => {
       <section class="w-full mt-4">
         <label class="ticket-label">첨부된 파일</label>
         <div class="text-red-1 text-sm mt-1" v-if="attachmentsError">
-          {{ attachmentsError }}
+          {{ attachmentsError || attachmentError }}
         </div>
 
         <!-- 프리뷰 목록 -->
