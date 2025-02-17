@@ -4,7 +4,7 @@ import StatusBadge from '@/components/common/Badges/StatusBadge.vue';
 import TicketDetail from './TicketDetail.vue';
 import { useUserTicketListStore } from '@/stores/userTicketListStore';
 import SvgIcon from '@/components/common/SvgIcon.vue';
-import { ArrowDownIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
+import { ArrowDownIcon, CreateTicketIcon, FilterIcon, SearchIcon, TrashcanIcon } from '@/assets/icons/path';
 import { perPageOptions } from '@/components/manager/ticketOptionTest';
 import { onClickOutside } from '@vueuse/core';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
@@ -19,6 +19,9 @@ import ErrorTable from '@/components/UI/ErrorTable.vue';
 import { QueryKey, useQueryClient } from '@tanstack/vue-query';
 import { useCustomMutation } from '@/composables/useCustomMutation';
 import { useDebounce } from '@vueuse/core';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const ticketStore = useUserTicketListStore();
 const queryClient = useQueryClient();
@@ -34,6 +37,11 @@ const keyword = ref('');
 const debouncedKeyword = useDebounce(keyword, 1000);
 const searchQueryKey = ref<QueryKey>(['user-tickets']);
 const isSearch = ref(false);
+
+const UserfilterState = ref<UserFilterState>({
+  statuses: [],
+  categories: [],
+});
 const isFiltering = computed(() => {
   return (
     (UserfilterState.value.statuses && UserfilterState.value.statuses.length > 0) ||
@@ -45,9 +53,8 @@ const order = ref('DESC');
 
 const dialogState = ref<DialogProps>({ ...initialDialog });
 
-const UserfilterState = ref<UserFilterState>({
-  statuses: [],
-  categories: [],
+const noSearchResults = computed(() => {
+  return (isSearch.value || isFiltering.value) && (!ticketData.value || ticketData.value.tickets.length === 0);
 });
 
 const searchQueryParams = computed(() => ({
@@ -75,9 +82,7 @@ const resetSearch = () => {
 const dropdownRef = ref<HTMLElement | null>(null);
 onClickOutside(dropdownRef, () => (isSizeOpen.value = false));
 
-const selectOption = (
-  option: { id: number; value: number; label: string } | { id: number; value: number; label: string },
-) => {
+const selectOption = (option: { id: number; value: number; label: string }) => {
   selectedPerPage.value = option;
   pageSize.value = option.value;
   currentPage.value = 1;
@@ -125,8 +130,9 @@ const {
   if (isSearch.value) {
     return ticketApi
       .getSearchUserTickets(debouncedKeyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
-      .then((response) => response.data.data);
+      .then((res) => res.data.data);
   }
+
   return ticketApi
     .getUserTickets(
       queryParams.value.statuses,
@@ -135,7 +141,7 @@ const {
       queryParams.value.size,
       queryParams.value.order,
     )
-    .then((response) => response.data.data);
+    .then((res) => res.data.data);
 });
 
 const deleteMutation = useCustomMutation(
@@ -165,7 +171,6 @@ const handleDelete = () => {
     mainText: '삭제',
     onMainClick: () => {
       deleteMutation.mutate({ ticketIds: selectedTicketIds });
-
       ticketStore.clearSelectedTickets();
       ticketStore.toggleDeleteMode();
       dialogState.value = { ...initialDialog };
@@ -187,7 +192,6 @@ const handleCloseModal = () => {
 
 const handleCheckboxClick = (event: Event, id: number) => {
   event.stopPropagation();
-
   if (ticketStore.selectedTickets.has(id)) {
     ticketStore.removeSelectedTicket(id);
   } else {
@@ -202,7 +206,6 @@ const handlePageChange = (page: number) => {
 
 const toggleOrder = () => {
   order.value = order.value === 'DESC' ? 'ASC' : 'DESC';
-
   currentPage.value = 1;
   sessionStorage.setItem('logCurrentPage', '1');
 };
@@ -213,7 +216,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section>
+  <section v-if="ticketData?.tickets?.length > 0 || isSearch || isFiltering">
     <header v-if="!ticketStore.isDeleteMode" class="board-header">
       <div class="flex w-1/4">
         <div class="manager-search-div">
@@ -292,6 +295,7 @@ onBeforeUnmount(() => {
 
     <article class="overflow-x-auto mt-5 px-5 mb-10 hide-scrollbar">
       <SkeletonTable v-if="isLoading" />
+
       <ErrorTable v-else-if="error" :error="error" />
 
       <div v-else class="h-[calc(100vh-220px)]">
@@ -356,14 +360,10 @@ onBeforeUnmount(() => {
                 </p>
               </td>
               <td class="manager-td max-w-0">
-                <p class="truncate">
-                  {{ item.firstCategory }}
-                </p>
+                <p class="truncate">{{ item.firstCategory }}</p>
               </td>
               <td class="manager-td max-w-0">
-                <p class="truncate">
-                  {{ item.secondCategory }}
-                </p>
+                <p class="truncate">{{ item.secondCategory }}</p>
               </td>
               <td class="manager-td text-center">
                 <StatusBadge :status="item.status" size="md" />
@@ -381,9 +381,7 @@ onBeforeUnmount(() => {
                 </div>
               </td>
               <td class="manager-td">
-                <p class="truncate">
-                  {{ item.dueDate }}
-                </p>
+                <p class="truncate">{{ item.dueDate }}</p>
               </td>
             </tr>
           </tbody>
@@ -394,11 +392,30 @@ onBeforeUnmount(() => {
     </article>
 
     <CustomPagination
+      v-if="!noSearchResults"
       :items-per-page="pageSize"
       :current-page="currentPage"
       :total-pages="ticketData?.totalPages || 1"
       :visible-pages="5"
       @page-change="handlePageChange"
     />
+  </section>
+
+  <section v-else class="w-full flex-stack items-center pb-40">
+    <div class="flex-stack items-center gap-8 mt-32">
+      <img src="@/assets/no-ticket.png" />
+      <div class="flex-stack items-center gap-2">
+        <h1 class="text-xl">아직 요청한 티켓이 없어요</h1>
+        <p>티켓 생성을 눌러 새로운 티켓을 생성하세요</p>
+      </div>
+    </div>
+
+    <button
+      class="flex items-center bg-primary-0 py-2.5 px-8 rounded text-white-0 gap-2.5 text-sm font-semibold mt-20"
+      @click="router.push({ name: 'user-ticketcreate' })"
+    >
+      <SvgIcon :icon="CreateTicketIcon" />
+      티켓 생성
+    </button>
   </section>
 </template>

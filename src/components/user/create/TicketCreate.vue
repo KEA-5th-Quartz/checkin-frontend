@@ -25,6 +25,14 @@ import { handleError } from '@/utils/handleError';
 const router = useRouter();
 const memberStore = useMemberStore();
 
+/*
+  === 새로 추가된 부분 1) ===
+  첨부파일 (attachmentId, url) 매핑을 저장하는 배열.
+  - 업로드 응답을 받아서 id와 url 쌍으로 저장하고,
+  - X 버튼 누를 때 해당 ID를 찾아서 서버에서도 삭제할 수 있게 함.
+*/
+const attachmentsMap = ref<{ id: number; url: string }[]>([]);
+
 const templateOptions = ref<
   {
     id: number | string;
@@ -126,6 +134,15 @@ const attachmentMutation = useCustomMutation(
 
       const uploadedAttachmentUrls = response.data.map((file: { url: string }) => file.url);
       previewUrl.value = [...new Set([...previewUrl.value, ...uploadedAttachmentUrls])];
+
+      /*
+        === 새로 추가된 부분 2) ===
+        서버 응답에 담긴 (attachmentId, url)을 attachmentsMap에 저장,
+        이후 removeFile() 시 여기서 id 찾아 서버 삭제.
+      */
+      response.data.forEach((file: { attachmentId: number; url: string }) => {
+        attachmentsMap.value.push({ id: file.attachmentId, url: file.url });
+      });
     },
     onError: () => {
       dialogState.value = {
@@ -273,7 +290,6 @@ const handleTemplateClick = async (event: Event) => {
     } else {
       templateOptions.value = [];
     }
-
     showTemplateDialog.value = true;
   } catch (error) {
     handleError(dialogState, '템플릿 목록 불러오기 실패');
@@ -351,7 +367,7 @@ const contentPlaceholder = ref('');
 
 watch(selectedFirstCategory, (newCategory) => {
   if (newCategory) {
-    const matchedCategory = firstCategoryList.value.find((category) => category.id === newCategory.id);
+    const matchedCategory = firstCategoryList.value.find((cat) => cat.id === newCategory.id);
     if (matchedCategory) {
       contentPlaceholder.value = matchedCategory.contentGuide || '';
     }
@@ -365,8 +381,7 @@ watch(selectedFirstCategory, (newCategory) => {
 const updateSecondCategoryList = () => {
   if (selectedFirstCategory.value) {
     secondCategoryList.value =
-      firstCategoryList.value.find((category) => category.id === selectedFirstCategory.value?.id)?.secondCategories ||
-      [];
+      firstCategoryList.value.find((cat) => cat.id === selectedFirstCategory.value?.id)?.secondCategories || [];
   } else {
     secondCategoryList.value = [];
   }
@@ -388,7 +403,6 @@ const handleTitleSelect = (option: BaseTicketOption) => {
 const handleFirstCategorySelect = (option: BaseTicketOption) => {
   selectedFirstCategory.value = option;
   updateSecondCategoryList();
-
   validate();
 };
 
@@ -399,7 +413,6 @@ const handleSecondCategorySelect = (option: BaseTicketOption) => {
     firstCategoryError.value = '1차 카테고리를 먼저 선택하세요.';
     return;
   }
-
   firstCategoryError.value = null;
   selectedSecondCategory.value = option;
 };
@@ -409,7 +422,6 @@ watch(
   (newData) => {
     if (newData) {
       firstCategoryList.value = newData;
-
       updateSecondCategoryList();
     }
   },
@@ -466,8 +478,7 @@ const handleConfirm = async () => {
       updateSecondCategoryList();
       watchEffect(() => {
         selectedSecondCategory.value =
-          secondCategoryList.value.find((category) => category.value === selectedTemplate.value?.secondCategory) ||
-          null;
+          secondCategoryList.value.find((cat) => cat.value === selectedTemplate.value?.secondCategory) || null;
       });
     }
 
@@ -475,9 +486,20 @@ const handleConfirm = async () => {
       content.value = selectedTemplate.value.content;
     }
   }
-
   await nextTick();
   showTemplateDialog.value = false;
+};
+
+const removeFile = async (index: number) => {
+  const removedUrl = previewUrl.value[index];
+  previewUrl.value.splice(index, 1);
+
+  const removedItem = attachmentsMap.value.find((item) => item.url === removedUrl);
+
+  if (removedItem) {
+    attachmentsMap.value = attachmentsMap.value.filter((item) => item.url !== removedUrl);
+    attachmentIds.value = attachmentIds.value.filter((id) => id !== removedItem.id);
+  }
 };
 
 const isImage = (url: string) => /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url);
@@ -487,15 +509,10 @@ const getFileExtensionLabel = (url: string) => {
     const decodedUrl = decodeURIComponent(url);
     const filename = decodedUrl.split('/').pop();
     const extension = filename?.split('.').pop()?.toLowerCase();
-
     return extension ? `${extension.toUpperCase()} 파일` : '알 수 없는 파일';
   } catch (error) {
     return '알 수 없는 파일';
   }
-};
-
-const removeFile = (index: number) => {
-  previewUrl.value.splice(index, 1);
 };
 </script>
 
@@ -562,6 +579,7 @@ const removeFile = (index: number) => {
           :placeholder="contentPlaceholder"
         />
         <div class="text-red-2 text-sm" v-if="errors.content">{{ errors.content }}</div>
+
         <div class="flex justify-end cursor-pointer">
           <input type="file" ref="fileInput" @change="handleFileChange" multiple class="hidden" />
           <SvgIcon
@@ -571,11 +589,14 @@ const removeFile = (index: number) => {
           />
         </div>
       </section>
+
       <section class="w-full mt-4">
         <label class="ticket-label">첨부된 파일</label>
         <div class="text-red-1 text-sm mt-1" v-if="attachmentsError">
           {{ attachmentsError }}
         </div>
+
+        <!-- 프리뷰 목록 -->
         <div class="flex flex-wrap gap-2 mt-2">
           <div
             v-for="(url, index) in previewUrl"
@@ -583,17 +604,23 @@ const removeFile = (index: number) => {
             class="relative w-24 h-24 border border-gray-2 rounded-lg overflow-hidden flex-center bg-gray-100"
           >
             <img v-if="isImage(url)" :src="url" alt="첨부된 이미지" class="w-full h-full object-cover" />
-            <div v-else class="text-xs text-gray-700 text-center px-2">{{ getFileExtensionLabel(url) }}</div>
+            <div v-else class="text-xs text-gray-700 text-center px-2">
+              {{ getFileExtensionLabel(url) }}
+            </div>
+            <!-- X 버튼 클릭 시 removeFile 함수 실행 -->
             <button @click="removeFile(index)" class="absolute top-1 right-1 w-5 h-5 flex-center rounded-full text-xs">
               ❌
             </button>
           </div>
         </div>
       </section>
+
       <section class="flex justify-center">
         <TicketTemplateButton type="button" @click="handleTemplateClick" />
         <TicketCreateButton type="onSubmit" class="ml-6" />
       </section>
+
+      <!-- 티켓 생성 완료 다이얼로그 -->
       <CommonDialog
         v-if="showDialog"
         title="티켓 요청 완료"
