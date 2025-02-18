@@ -49,7 +49,7 @@ const adminMemberItems = [
 
 const userTicketItems = [
   { name: '티켓 목록', icon: CategoryIcon, path: '/user/ticketlist' },
-  { name: '새 요청 티켓', icon: TemplateIcon, path: '/user/ticketcreate' },
+  { name: '티켓 생성', icon: TemplateIcon, path: '/user/ticketcreate' },
 ];
 
 const userTemplateItems = [
