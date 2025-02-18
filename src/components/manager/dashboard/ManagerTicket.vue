@@ -422,14 +422,16 @@ const handleFileDownload = async (fileUrl: string) => {
           <div class="ticket-contents-div">
             <div class="flex gap-2.5 w-full">
               <section class="ticket-section">
-                <CustomDropdown
-                  label="중요도"
-                  :options="priority"
-                  :selected-option="prioritySelected"
-                  @select="handlePrioritySelect"
-                  has-color
-                  :disabled="!isMe"
-                />
+                <div :class="{ invisible: statusSelected.value === 'OPEN' }">
+                  <CustomDropdown
+                    label="중요도"
+                    :options="priority"
+                    :selected-option="prioritySelected"
+                    @select="handlePrioritySelect"
+                    has-color
+                    :disabled="!isMe"
+                  />
+                </div>
 
                 <CustomDropdown
                   label="1차 카테고리"
