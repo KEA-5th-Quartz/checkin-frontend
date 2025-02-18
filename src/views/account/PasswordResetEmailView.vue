@@ -9,7 +9,7 @@ import PasswordResetEmail from '@/components/login/PasswordResetEmail.vue';
         <h1 class="px-16 text-center max-w-fit text-2xl font-semibold border-b-4 border-primary-0 pb-5">
           비밀번호 재설정
         </h1>
-        <h2 class="text-xl text-gray-0 pt-5">가입 아이디를 입력해주세요.</h2>
+        <h2 class="text-xl text-gray-0 pt-5">가입 Username을 입력해주세요.</h2>
       </div>
       <PasswordResetEmail />
     </div>

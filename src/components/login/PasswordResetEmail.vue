@@ -54,13 +54,13 @@ const onSubmit = handleSubmit(async () => {
 <template>
   <form class="login-form" @submit="onSubmit">
     <div class="relative">
-      <label>아이디</label>
+      <label>Username</label>
       <CommonInput
         v-model="username"
         maxlength="14"
         name="username"
         type="text"
-        placeholder="아이디를 입력해주세요"
+        placeholder="Username을 입력해주세요"
         class="login-input border-b-2 border-gray-0"
       />
 
