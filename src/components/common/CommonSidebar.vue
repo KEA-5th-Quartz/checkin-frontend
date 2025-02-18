@@ -53,8 +53,8 @@ const userTicketItems = [
 ];
 
 const userTemplateItems = [
-  { name: '티켓 템플릿', path: '/user/templatelist' },
-  { name: '새 티켓 템플릿', path: '/user/templatecreate' },
+  { name: '템플릿 목록', path: '/user/templatelist' },
+  { name: '템플릿 생성', path: '/user/templatecreate' },
 ];
 
 const checkCurrentPath = () => {
