@@ -126,23 +126,27 @@ const {
   data: ticketData,
   isLoading,
   error,
-} = useCustomQuery(searchQueryKey as unknown as QueryKey, () => {
-  if (isSearch.value) {
-    return ticketApi
-      .getSearchUserTickets(debouncedKeyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
-      .then((res) => res.data.data);
-  }
+} = useCustomQuery(
+  searchQueryKey as unknown as QueryKey,
+  () => {
+    if (isSearch.value) {
+      return ticketApi
+        .getSearchUserTickets(debouncedKeyword.value, searchQueryParams.value.page, searchQueryParams.value.size)
+        .then((res) => res.data.data);
+    }
 
-  return ticketApi
-    .getUserTickets(
-      queryParams.value.statuses,
-      queryParams.value.categories,
-      queryParams.value.page,
-      queryParams.value.size,
-      queryParams.value.order,
-    )
-    .then((res) => res.data.data);
-});
+    return ticketApi
+      .getUserTickets(
+        queryParams.value.statuses,
+        queryParams.value.categories,
+        queryParams.value.page,
+        queryParams.value.size,
+        queryParams.value.order,
+      )
+      .then((res) => res.data.data);
+  },
+  { keepPreviousData: true },
+);
 
 const deleteMutation = useCustomMutation(
   async ({ ticketIds }: { ticketIds: number[] }) => {
