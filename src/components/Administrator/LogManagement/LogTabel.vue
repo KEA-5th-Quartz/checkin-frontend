@@ -11,6 +11,7 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 import CommonDialog from '@/components/common/CommonDialog.vue';
 import { DialogProps, initialDialog } from '@/types/common/dialog';
 import { handleError } from '@/utils/handleError';
+import { roleInKorean } from '@/utils/mapping';
 
 const currentPage = ref(parseInt(sessionStorage.getItem('logCurrentPage') || '1'));
 const pageSize = ref(perPageOptions[0].value);
@@ -127,7 +128,7 @@ onBeforeUnmount(() => {
                 </div>
               </td>
               <td class="administrator-td max-w-0">
-                <p class="truncate">{{ item.role }}</p>
+                <p class="truncate">{{ roleInKorean(item.role) }}</p>
               </td>
               <td class="administrator-td max-w-0">
                 <p class="truncate">{{ item.ip }}</p>
