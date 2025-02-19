@@ -30,7 +30,7 @@
 - 패키지 매니저: npm
 
 ### 🔐 환경 변수
-프로젝트 실행을 위해 루트 디렉토리에 `.env` 파일을 생성하고 다음 환경 변수들을 설정해주세요:
+프로젝트 실행을 위해 루트 디렉토리에 `.env` 파일을 생성하고 다음 환경 변수를 설정해주세요:
 
 `VUE_APP_BASE_URL='https://api.quartz-checkin.xyz'`
 
@@ -80,18 +80,44 @@
 <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white"> <img src="https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white"> <img src="https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white">
 
 ## 💻 주요 기능
-1. **대시보드**
-   - 내용
+**1. 대시보드**
 
-2. **티켓 생성 및 관리**
-   - 내용
+https://github.com/user-attachments/assets/097ac564-9bcc-4182-a7ab-5a880594aa84
 
-3. **템플릿 저장 및 사용**
-   - 내용
+- 헤더를 통해 현재 티켓 상황 파악 가능
+- 검색, 정렬, 개수 조절, 다양한 필터링, 페이지네이션 기능 제공
+- 티켓 선택 시 상세로 연결
+
+**2. 티켓 생성 및 관리**
+
+https://github.com/user-attachments/assets/8b0e6a98-10ef-4b32-9d3e-904045622e84
+
+- 저장된 템플릿 불러오기 가능
+- 각 카테고리 별 요청사항 가이드 추가
+- 생성된 티켓은 모든 담당자 목록에 표시됨
+
+**3. 템플릿 생성 및 사용**
+
+https://github.com/user-attachments/assets/26747fa4-70c6-4ce3-a20b-379b7e1d72e6
+
+ - 템플릿 생성 및 수정 가능
+ - 템플릿 목록에서 템플릿 상세 조회 가능
+ - 티켓 생성 화면에서 작성한 템플릿 불러오기 가능
   
-4. **티켓 내부 채팅**
-    - 내용
+**4. 티켓 내부 채팅**
 
-5. **통계 조회**
-   - 내용
+https://github.com/user-attachments/assets/fd725d5b-ed54-46b3-9ae7-6afff438d464
+
+ - 사용자와 담당자의 실시간 채팅 기능
+ - 각 말풍선에 좋아요 버튼을 누를 수 있고, 좋아요를 누른 사용자 조회 가능
+ - 채팅창에서 업데이트 로그 확인 가능능
+
+**5. 통계 조회**
+
+https://github.com/user-attachments/assets/d241a0c1-9f39-4454-8ebd-fabdbfe62c90
+
+ - 각종 통계를 차트 및 표를 통해 확인 가능
+ - 차트를 이미지 혹은 .csv 파일로 다운로드 가능
+
+
      
