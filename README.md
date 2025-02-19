@@ -3,7 +3,6 @@
 ## 프로젝트 소개
 - 카카오엔터프라이즈 5기 기업 실무 프로젝트에서 진행하는 협업 프로젝트입니다.
 - TMS(Ticket Management System)을 개발합니다.
-- 
 
 #### 서비스 배포 주소
 - [kc.quartz-checkin.xyz](https://kc.quartz-checkin.xyz/)
@@ -14,7 +13,7 @@
 - 프로젝트 개발
   2025.01.20 ~ 2025.02.07
 - QA
-  2025.02.08 ~ 
+  2025.02.08 ~ 2025.02.18
 
   
 ## 🧑‍💻 개발자 소개
@@ -23,6 +22,17 @@
 |**김현중(PL)**|**박석종**|**박준한**|
 |Frontend Developer|Frontend Developer|Frontend Developer|
 |[GitHub](https://github.com/kimgorok) | [GitHub](https://github.com/PSeokJong) | [GitHub](https://github.com/viola30th)|
+
+## 🤖 개발 환경 설정
+
+### ⚙️ Node 버전과 패키지 매니저
+- Node.js: v22.13.1
+- 패키지 매니저: npm
+
+### 🔐 환경 변수
+프로젝트 실행을 위해 루트 디렉토리에 `.env` 파일을 생성하고 다음 환경 변수들을 설정해주세요:
+
+`VUE_APP_BASE_URL='https://api.quartz-checkin.xyz'`
 
 ## 🛠️ 기술 스택
 
@@ -78,9 +88,10 @@
 
 3. **템플릿 저장 및 사용**
    - 내용
+  
+4. **티켓 내부 채팅**
+    - 내용
 
-4. **통계 조회**
+5. **통계 조회**
    - 내용
      
-
-
